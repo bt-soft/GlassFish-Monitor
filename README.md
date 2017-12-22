@@ -1,2 +1,2 @@
 # GlassFish-Monitor
-GlassFish &amp; Deployed Appications REST monitor
+GlassFish &amp; Deployed Appications monitor across REST API
