@@ -6,6 +6,7 @@
     <artifactId>gfmon-parent</artifactId>
     <version>0.0.1</version>
     <packaging>pom</packaging>
+
     <name>@gfmon-parent</name>
     <description>GlassFish Monitor - Glassfish Monitor across REST API</description>
     <url>./index.html</url>
