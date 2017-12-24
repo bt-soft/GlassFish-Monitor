@@ -142,7 +142,6 @@ public class GFMonController {
     /**
      * A monitorozandó GF példányok MonitoringServeice (module-monitoring-levels) ellenőrzése
      * Amely szervernek nincs engedélyezve a monitorozhatósága, azt jól inaktívvá tesszük
-     * http://localhost:4848/management/domain/configs/config/server-config/monitoring-service/module-monitoring-levels
      */
     private void chechkServersMonitorServiceStatus() {
         //Csak azokat nézzük át, amelyek jelenleg nézegetnénk
@@ -165,7 +164,8 @@ public class GFMonController {
             if (!monitorEnabled) {
                 server.setActive(false);
                 server.setComment("A szerver MonitoringService szolgáltatása nincs engedélyezve, emiatt a monitorozása tiltva lett");
-                log.warn("A(z) {} szervernek nincs engedélyezett monitorozható komponense, emiatt a monitorozása letiltva!", server.getUrl());
+                server.setModUser("GFMonController");
+                log.warn("{}: {}", server.getUrl(), server.getComment());
 
                 //Le is mentjük az adatbázisba az állapotot
                 serverService.save(server);

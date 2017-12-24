@@ -70,6 +70,10 @@ public class RequestCollector extends CollectorBase {
         Response response = collector.getMonitorResponse(URI);
         JsonObject entities = collector.getJsonEntities(response);
 
+        if (entities == null) {
+            return null;
+        }
+
         for (String entityName : ENTITY_NAMES) {
             JsonObject entity = entities.getJsonObject(entityName);
             QuantityValueDto dto = super.getQuantityValues(entity);

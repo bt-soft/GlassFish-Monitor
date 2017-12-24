@@ -39,64 +39,67 @@ public class Elapsed {
      * Eltelt idő sztringesen
      *
      * @param startNano a kezdő idő
+     *
      * @return szövegesen az eltelt idő
      */
     public static String getNanoStr(long startNano) {
 
         StringBuilder sb = new StringBuilder();
 
+        long elapsednano = nowNano() - startNano;
+
         //Hetek
-        int cnt = (int) (startNano / WEEK_NANO);
+        int cnt = (int) (elapsednano / WEEK_NANO);
         if (cnt > 0L) {
             sb.append(cnt).append("w");
         }
 
         //Napok
-        startNano = startNano % WEEK_NANO;
-        cnt = (int) (startNano / DAY_NANO);
+        elapsednano = elapsednano % WEEK_NANO;
+        cnt = (int) (elapsednano / DAY_NANO);
         if (cnt > 0) {
             sb.append(" ").append(cnt).append("d");
         }
 
         //Órák
-        startNano = startNano % DAY_NANO;
-        cnt = (int) (startNano / HOUR_NANO);
+        elapsednano = elapsednano % DAY_NANO;
+        cnt = (int) (elapsednano / HOUR_NANO);
         if (cnt > 0) {
             sb.append(" ").append(cnt).append("h");
         }
 
         //Percek
-        startNano = startNano % HOUR_NANO;
-        cnt = (int) (startNano / MIN_NANO);
+        elapsednano = elapsednano % HOUR_NANO;
+        cnt = (int) (elapsednano / MIN_NANO);
         if (cnt > 0) {
             sb.append(" ").append(cnt).append("m");
         }
 
         //Másodpercek
-        startNano = startNano % MIN_NANO;
-        cnt = (int) (startNano / SEC_NANO);
+        elapsednano = elapsednano % MIN_NANO;
+        cnt = (int) (elapsednano / SEC_NANO);
         if (cnt > 0) {
             sb.append(" ").append(cnt).append("s");
         }
 
         //Ezred másodpercek
-        startNano = startNano % SEC_NANO;
-        cnt = (int) (startNano / MILISEC_NANO);
+        elapsednano = elapsednano % SEC_NANO;
+        cnt = (int) (elapsednano / MILISEC_NANO);
         if (cnt > 0) {
             sb.append(" ").append(cnt).append("ms");
         }
 
         //Mikro
-        startNano = startNano % MILISEC_NANO;
-        cnt = (int) (startNano / MICROSEC_NANO);
+        elapsednano = elapsednano % MILISEC_NANO;
+        cnt = (int) (elapsednano / MICROSEC_NANO);
         if (cnt > 0) {
             sb.append(" ").append(cnt).append("us");
         }
 
         //Nano
-        startNano = startNano % MICROSEC_NANO;
-        if (startNano > 0) {
-            sb.append(" ").append(startNano).append("ns");
+        elapsednano = elapsednano % MICROSEC_NANO;
+        if (elapsednano > 0) {
+            sb.append(" ").append(elapsednano).append("ns");
         }
 
         return sb.toString();

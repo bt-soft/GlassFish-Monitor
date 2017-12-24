@@ -181,7 +181,7 @@ public class RestDataCollector {
      * @return http/https
      */
     private String getProtocol() {
-        return !StringUtils.isEmpty(sessionToken) ? IGFMonEngineConstants.PROTOCOL_HTTPS : IGFMonEngineConstants.PROTOCOL_HTTP;
+        return StringUtils.isEmpty(sessionToken) ? IGFMonEngineConstants.PROTOCOL_HTTPS : IGFMonEngineConstants.PROTOCOL_HTTP;
     }
 
     /**
