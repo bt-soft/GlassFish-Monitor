@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://java.sun.com/jsf/facelets">
+
+    <p:separator style="color: #ccc; margin: 0; padding: 0" />
+
+    <h:panelGrid columns="3"  style="margin: 0; padding: 0; width: 100%; text-align: center">
+        <h:outputText value="#{request.servletContext.serverInfo}" style="color: blue; font-size: 0.6em !important;" rendered="#{isDeveloperMode}"/>
+    </h:panelGrid>
+
+</ui:composition>
