@@ -59,6 +59,9 @@ public class GFMonController {
     @Inject
     private SnapshotProvider snapshotProvider;
 
+    @Inject
+    private CheckServerMonitorServiceState checkServerMonitorServiceState;
+
     /**
      * GFMon engine indítása
      */
@@ -145,7 +148,29 @@ public class GFMonController {
         //Csak azokat nézzük át, amelyek jelenleg nézegetnénk
         serverService.findAll().stream().filter((server) -> (server.isActive())).forEachOrdered((server) -> {
 
-        }
+            String url = server.getUrl();
+            String userName = server.getUserName();
+            String plainPassword = server.getPlainPassword();
+
+            log.trace("Ellenőrzés indul: {}", url);
+
+            //ha még nincs SessionToken, akkor csinálunk egyet
+            if (StringUtils.isEmpty(server.getSessionToken())) {
+                String sessionToken = sessionTokenAcquirer.getSessionToken(url, userName, plainPassword);
+                server.setSessionToken(sessionToken);
+            }
+
+            boolean monitorEnabled = checkServerMonitorServiceState.checkMonitorStatus(server.getSimpleUrl(), server.getSessionToken());
+
+            if (!monitorEnabled) {
+                server.setActive(false);
+                server.setComment("A szerver MonitoringService szolgáltatása nincs engedélyezve, emiatt a monitorozása tiltva lett");
+                log.warn("A(z) {} szervernek nincs engedélyezett monitorozható komponense, emiatt a monitorozása letiltva!", server.getUrl());
+
+                //Le is mentjük az adatbázisba az állapotot
+                serverService.save(server);
+            }
+        });
     }
 
     /**

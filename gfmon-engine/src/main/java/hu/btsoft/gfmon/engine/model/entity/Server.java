@@ -103,6 +103,14 @@ public class Server extends ModifiableEntityBase {
     private boolean active;
 
     /**
+     * Kiegészítő információk
+     * (pl.: miért lett tiltva a szerver monitorozása, stb...)
+     */
+    @Column(name = "comment")
+    @XmlElement(required = false)
+    private String comment;
+
+    /**
      * A kódolatlan jelszó
      * Csak runtime változó, nem tároljuk az adatbázisban
      */

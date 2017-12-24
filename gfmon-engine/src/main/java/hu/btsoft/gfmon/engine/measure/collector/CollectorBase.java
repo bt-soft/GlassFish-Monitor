@@ -32,7 +32,7 @@ public abstract class CollectorBase implements Function<RestDataCollector, HashM
      *
      * @param value dátum timestamp formátumban
      *
-     * @return
+     * @return java Date objektum vagy null
      */
     private Date long2Date(long value) {
 

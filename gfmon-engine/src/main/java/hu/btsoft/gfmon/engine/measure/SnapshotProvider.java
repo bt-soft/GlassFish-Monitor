@@ -81,7 +81,7 @@ public class SnapshotProvider {
         DataCollectionBehaviour dataCollectionBehaviour = new DataCollectionBehaviour(jsonEntityNameToSnapshotMapper, snapshot);
 
         StreamSupport.stream(this.dataCollectors.spliterator(), false /* no/paralel */)
-                .map(coll -> coll.apply(restDataCollector))
+                .map(collector -> collector.apply(restDataCollector)) //meghívjuk az adott collector apply metódusát
                 .map(valuesMap -> (HashMap<String/*entityName*/, ValueBaseDto>) valuesMap)
                 //.forEach(valuesMapConsumer);
                 .forEach(dataCollectionBehaviour::perform);

@@ -51,7 +51,7 @@ public class RestDataCollector {
     }
 
     public long getLong(String uri, String name, String key) {
-        Response result = getResponse(uri);
+        Response result = getMonitorResponse(uri);
         JsonObject jsonObject = getJsonObject(result, name);
         if (jsonObject == null) {
             return 0L;
@@ -60,7 +60,7 @@ public class RestDataCollector {
     }
 
     public int getInt(String uri, String name, String key) {
-        Response result = getResponse(uri);
+        Response result = getMonitorResponse(uri);
         JsonObject jsonObject = getJsonObject(result, name);
         if (jsonObject == null) {
             return 0;
@@ -69,7 +69,7 @@ public class RestDataCollector {
     }
 
     public String getString(String uri, String name, String key) {
-        Response result = getResponse(uri);
+        Response result = getMonitorResponse(uri);
         JsonObject jsonObject = getJsonObject(result, name);
         if (jsonObject == null) {
             return null;
@@ -79,7 +79,7 @@ public class RestDataCollector {
 
     public String[] getStringArray(String name, String key) {
         String[] empty = new String[0];
-        Response result = getResponse(name);
+        Response result = getMonitorResponse(name);
 
         JsonObject response = result.readEntity(JsonObject.class);
         if (response == null) {
@@ -181,7 +181,7 @@ public class RestDataCollector {
      * @return http/https
      */
     private String getProtocol() {
-        return (!StringUtils.isEmpty(sessionToken)) ? IGFMonEngineConstants.PROTOCOL_HTTPS : IGFMonEngineConstants.PROTOCOL_HTTP;
+        return !StringUtils.isEmpty(sessionToken) ? IGFMonEngineConstants.PROTOCOL_HTTPS : IGFMonEngineConstants.PROTOCOL_HTTP;
     }
 
     /**
@@ -189,7 +189,7 @@ public class RestDataCollector {
      *
      * @return
      */
-    private String getBaseURI() {
+    private String getMonitorBaseURI() {
         return getProtocol() + simpleUrl + "/monitoring/domain/server/";
     }
 
@@ -200,9 +200,9 @@ public class RestDataCollector {
      *
      * @return
      */
-    public Response getResponse(String uri) {
+    public Response getMonitorResponse(String uri) {
 
-        String fullUrl = this.getBaseURI() + uri;
+        String fullUrl = this.getMonitorBaseURI() + uri;
         WebTarget resource = client.target(fullUrl);
         Invocation.Builder builder = resource.request(MediaType.APPLICATION_JSON);
 

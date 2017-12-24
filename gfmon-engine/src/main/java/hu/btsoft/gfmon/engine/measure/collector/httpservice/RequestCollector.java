@@ -67,7 +67,7 @@ public class RequestCollector extends CollectorBase {
 
         HashMap<String, ValueBaseDto> result = new LinkedHashMap<>();
 
-        Response response = collector.getResponse(URI);
+        Response response = collector.getMonitorResponse(URI);
         JsonObject entities = collector.getJsonEntities(response);
 
         for (String entityName : ENTITY_NAMES) {
