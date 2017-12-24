@@ -32,6 +32,8 @@ import org.apache.commons.lang3.StringUtils;
 @Slf4j
 public class CheckServerMonitorServiceState {
 
+    private static final String MONITORING_SERVICE_URI = "/management/domain/configs/config/server-config/monitoring-service/module-monitoring-levels";
+
     @Inject
     private Client client;
 
@@ -48,7 +50,7 @@ public class CheckServerMonitorServiceState {
 
         String protocol = StringUtils.isEmpty(sessionToken) ? IGFMonEngineConstants.PROTOCOL_HTTPS : IGFMonEngineConstants.PROTOCOL_HTTP;
 
-        String fullUrl = protocol + simpleUrl + "/management/domain/configs/config/server-config/monitoring-service/module-monitoring-levels";
+        String fullUrl = protocol + simpleUrl + MONITORING_SERVICE_URI;
 
         WebTarget resource = client.target(fullUrl);
         Invocation.Builder builder = resource.request(MediaType.APPLICATION_JSON);
