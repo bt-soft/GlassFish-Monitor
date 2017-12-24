@@ -67,6 +67,7 @@ public class CheckServerMonitorServiceState {
             return false;
         }
 
+        //extraProperties leszedése
         JsonObject extraProperties = jsonObject.getJsonObject("extraProperties");
         if (extraProperties == null) {
             return false;
@@ -74,8 +75,10 @@ public class CheckServerMonitorServiceState {
 
         boolean result = false;
 
-        //Keresünk egy olyan beállítást, ami nem "OFF"
+        //entity leszedése
         JsonObject entities = extraProperties.getJsonObject("entity");
+
+        //Keresünk egy olyan beállítást, ami nem "OFF" -> van mit monitorozni
         for (String key : entities.keySet()) {
             String value = entities.getJsonString(key).getString();
             if (!"OFF".equalsIgnoreCase(value)) {

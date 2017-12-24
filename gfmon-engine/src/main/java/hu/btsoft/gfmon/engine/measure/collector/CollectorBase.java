@@ -15,16 +15,20 @@ import hu.btsoft.gfmon.engine.measure.collector.dto.CurrentCountValueDto;
 import hu.btsoft.gfmon.engine.measure.collector.dto.CurrentObjectValueDto;
 import hu.btsoft.gfmon.engine.measure.collector.dto.QuantityValueDto;
 import hu.btsoft.gfmon.engine.measure.collector.dto.ValueBaseDto;
+import static hu.btsoft.gfmon.engine.measure.collector.httpservice.RequestCollector.URI;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.function.Function;
 import javax.json.JsonObject;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * A GF REST interfészén kereztül adatokat gyűjtő kollektorok ős osztálya
  *
  * @author BT
  */
+@Slf4j
 public abstract class CollectorBase implements Function<RestDataCollector, HashMap<String/*entityName*/, ValueBaseDto>> {
 
     /**
@@ -85,7 +89,7 @@ public abstract class CollectorBase implements Function<RestDataCollector, HashM
      *
      * @return dto
      */
-    protected QuantityValueDto getQuantityValues(JsonObject entity) {
+    private QuantityValueDto getQuantityValues(JsonObject entity) {
         QuantityValueDto dto = new QuantityValueDto();
 
         dto.setUnit(entity.getJsonString("unit").getString());
@@ -105,7 +109,7 @@ public abstract class CollectorBase implements Function<RestDataCollector, HashM
      *
      * @return dto
      */
-    protected CurrentCountValueDto getCurrentCountValues(JsonObject entity) {
+    private CurrentCountValueDto getCurrentCountValues(JsonObject entity) {
         CurrentCountValueDto dto = new CurrentCountValueDto();
         dto.setUnit(entity.getJsonString("unit").getString());
         dto.setCurrent(entity.getJsonNumber("current").longValue());
@@ -126,7 +130,7 @@ public abstract class CollectorBase implements Function<RestDataCollector, HashM
      *
      * @return dto
      */
-    protected CurrentObjectValueDto getCurrentObjectValues(JsonObject entity) {
+    private CurrentObjectValueDto getCurrentObjectValues(JsonObject entity) {
         CurrentObjectValueDto dto = new CurrentObjectValueDto();
         dto.setUnit(entity.getJsonString("unit").getString());
         dto.setCurrent(this.getCurrentObjectValue(entity));
@@ -134,7 +138,59 @@ public abstract class CollectorBase implements Function<RestDataCollector, HashM
         dto.setName(entity.getJsonString("name").getString());
         dto.setDescription(entity.getJsonString("description").getString());
         dto.setStartTime(long2Date(entity.getJsonNumber("starttime").longValue()));
+
         return dto;
+    }
+
+    /**
+     * A REST válaszokból kinyeri az értékeket
+     *
+     * @param entities JSon entitás
+     * @param uri      honnan származik?
+     *
+     * @return értékek map
+     */
+    protected HashMap<String, ValueBaseDto> fetchValues(JsonObject entities, String uri) {
+
+        if (entities == null) {
+            return null;
+        }
+
+        HashMap<String, ValueBaseDto> result = new LinkedHashMap<>();
+
+        //Végigmegyünk az entitásokon
+        for (String entityName : entities.keySet()) {
+            JsonObject valueEntity = entities.getJsonObject(entityName);
+            String unit = valueEntity.getJsonString("unit").getString();
+
+            if (unit == null) {
+                log.error("A(z) '{}' JSon entitásnak nincs 'unit' értéke!", entityName);
+                continue;
+            }
+
+            switch (unit) {
+
+                case "count": {
+                    QuantityValueDto dto = getQuantityValues(valueEntity);
+                    dto.setUri(uri);
+                    result.put(entityName, dto);
+                    break;
+                }
+
+                case "string": {
+                    CurrentObjectValueDto dto = getCurrentObjectValues(valueEntity);
+                    dto.setUri(URI);
+                    result.put(entityName, dto);
+                    break;
+                }
+
+                default:
+                    log.warn("Nincs lekezelve a JSon entitás, név: '{}', unit: '{}' !", entityName, unit);
+                    break;
+            }
+        }
+
+        return result;
     }
 
 }
