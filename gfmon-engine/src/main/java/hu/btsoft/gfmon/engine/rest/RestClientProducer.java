@@ -9,7 +9,7 @@
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine;
+package hu.btsoft.gfmon.engine.rest;
 
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;

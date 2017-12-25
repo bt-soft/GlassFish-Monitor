@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * A REST API-n keresztül érkező JSon entitások neveit megfelelteti az adatbázisba is lementett Snapshot entitás adatneveinek
+ * Itt szűrjük ki, hogy mit szeretnénk menteni a sok összegyűjtött értékből az adatbázisba
  *
  * @author BT
  */

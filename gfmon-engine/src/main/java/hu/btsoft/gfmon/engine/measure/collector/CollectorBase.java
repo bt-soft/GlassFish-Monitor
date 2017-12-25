@@ -16,6 +16,7 @@ import hu.btsoft.gfmon.engine.measure.collector.dto.CurrentObjectValueDto;
 import hu.btsoft.gfmon.engine.measure.collector.dto.QuantityValueDto;
 import hu.btsoft.gfmon.engine.measure.collector.dto.ValueBaseDto;
 import static hu.btsoft.gfmon.engine.measure.collector.httpservice.RequestCollector.URI;
+import hu.btsoft.gfmon.engine.measure.collector.types.ValueUnitType;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -40,14 +41,16 @@ public abstract class CollectorBase implements Function<RestDataCollector, HashM
      */
     private Date long2Date(long value) {
 
-        Date result = null;
-
-        try {
-            result = new Date(value);
-        } catch (Exception ignored) {
-            //
+        if (value == -1) {
+            return null;
         }
 
+        Date result = null;
+        try {
+            result = new Date(value);
+        } catch (Exception e) {
+            log.warn("Dátum konverziós hiba: {}", value, e);
+        }
         return result;
     }
 
@@ -59,27 +62,26 @@ public abstract class CollectorBase implements Function<RestDataCollector, HashM
      * @return
      */
     private Object getCurrentObjectValue(JsonObject entity) {
-        String unit = entity.getJsonString("unit").getString();
+        String unitName = entity.getJsonString("unit").getString();
 
         Object value;
-        switch (unit) {
-
-            case "String":
+        switch (ValueUnitType.fromValue(unitName)) {
+            case LIST:
+            case STRING:
                 value = entity.getJsonString("current").getString();
                 break;
 
-            case "millisecond":
-            case "count":
-            case "bytes":
+            case MILLISECONDS:
+            case COUNT:
+            case BYTES:
                 value = entity.getJsonNumber("current").longValue();
                 break;
 
             default:
-                value = "*unknown*";
+                value = "***unknown unit name: " + unitName;
         }
 
         return value;
-
     }
 
     /**
@@ -92,7 +94,7 @@ public abstract class CollectorBase implements Function<RestDataCollector, HashM
     private QuantityValueDto getQuantityValues(JsonObject entity) {
         QuantityValueDto dto = new QuantityValueDto();
 
-        dto.setUnit(entity.getJsonString("unit").getString());
+        dto.setUnit(ValueUnitType.fromValue(entity.getJsonString("unit").getString()));
         dto.setLastSampleTime(long2Date(entity.getJsonNumber("lastsampletime").longValue()));
         dto.setName(entity.getJsonString("name").getString());
         dto.setCount(entity.getJsonNumber("count").longValue());
@@ -111,7 +113,7 @@ public abstract class CollectorBase implements Function<RestDataCollector, HashM
      */
     private CurrentCountValueDto getCurrentCountValues(JsonObject entity) {
         CurrentCountValueDto dto = new CurrentCountValueDto();
-        dto.setUnit(entity.getJsonString("unit").getString());
+        dto.setUnit(ValueUnitType.fromValue(entity.getJsonString("unit").getString()));
         dto.setCurrent(entity.getJsonNumber("current").longValue());
         dto.setLastSampleTime(long2Date(entity.getJsonNumber("lastsampletime").longValue()));
         dto.setLowWatermark(entity.getJsonNumber("lowwatermark").longValue());
@@ -132,7 +134,7 @@ public abstract class CollectorBase implements Function<RestDataCollector, HashM
      */
     private CurrentObjectValueDto getCurrentObjectValues(JsonObject entity) {
         CurrentObjectValueDto dto = new CurrentObjectValueDto();
-        dto.setUnit(entity.getJsonString("unit").getString());
+        dto.setUnit(ValueUnitType.fromValue(entity.getJsonString("unit").getString()));
         dto.setCurrent(this.getCurrentObjectValue(entity));
         dto.setLastSampleTime(long2Date(entity.getJsonNumber("lastsampletime").longValue()));
         dto.setName(entity.getJsonString("name").getString());
@@ -161,31 +163,36 @@ public abstract class CollectorBase implements Function<RestDataCollector, HashM
         //Végigmegyünk az entitásokon
         for (String entityName : entities.keySet()) {
             JsonObject valueEntity = entities.getJsonObject(entityName);
-            String unit = valueEntity.getJsonString("unit").getString();
+            String unitName = valueEntity.getJsonString("unit").getString();
 
-            if (unit == null) {
+            if (unitName == null) {
                 log.error("A(z) '{}' JSon entitásnak nincs 'unit' értéke!", entityName);
                 continue;
             }
 
-            switch (unit) {
+            switch (ValueUnitType.fromValue(unitName)) {
 
-                case "count": {
+                case MILLISECONDS:
+                case COUNT:
+                case BYTES: {
                     QuantityValueDto dto = getQuantityValues(valueEntity);
                     dto.setUri(uri);
                     result.put(entityName, dto);
                     break;
                 }
 
-                case "string": {
+                case STRING: {
                     CurrentObjectValueDto dto = getCurrentObjectValues(valueEntity);
                     dto.setUri(URI);
                     result.put(entityName, dto);
                     break;
                 }
 
+                case LIST:
+                    break;
+
                 default:
-                    log.warn("Nincs lekezelve a JSon entitás, név: '{}', unit: '{}' !", entityName, unit);
+                    log.warn("Nincs lekezelve a JSon entitás, név: '{}', unit: '{}' !", entityName, unitName);
                     break;
             }
         }

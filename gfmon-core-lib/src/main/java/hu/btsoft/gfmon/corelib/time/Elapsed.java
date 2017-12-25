@@ -104,4 +104,60 @@ public class Elapsed {
 
         return sb.toString();
     }
+
+    /**
+     * Eltelt idő sztringesen
+     *
+     * @param elapsedMillisec az eltelt idő ezredmásodpercben
+     *
+     * @return szövegesen az eltelt idő
+     */
+    public static String getMilliStr(long elapsedMillisec) {
+
+        StringBuilder sb = new StringBuilder();
+
+        //Hetek
+        int cnt = (int) (elapsedMillisec / WEEK_NANO);
+        if (cnt > 0L) {
+            sb.append(cnt).append("w");
+        }
+
+        //Napok
+        elapsedMillisec = elapsedMillisec % WEEK_NANO;
+        cnt = (int) (elapsedMillisec / DAY_NANO);
+        if (cnt > 0) {
+            sb.append(" ").append(cnt).append("d");
+        }
+
+        //Órák
+        elapsedMillisec = elapsedMillisec % DAY_NANO;
+        cnt = (int) (elapsedMillisec / HOUR_NANO);
+        if (cnt > 0) {
+            sb.append(" ").append(cnt).append("h");
+        }
+
+        //Percek
+        elapsedMillisec = elapsedMillisec % HOUR_NANO;
+        cnt = (int) (elapsedMillisec / MIN_NANO);
+        if (cnt > 0) {
+            sb.append(" ").append(cnt).append("m");
+        }
+
+        //Másodpercek
+        elapsedMillisec = elapsedMillisec % MIN_NANO;
+        cnt = (int) (elapsedMillisec / SEC_NANO);
+        if (cnt > 0) {
+            sb.append(" ").append(cnt).append("s");
+        }
+
+        //Ezred másodpercek
+        elapsedMillisec = elapsedMillisec % SEC_NANO;
+        if (elapsedMillisec > 0) {
+            sb.append(" ").append(elapsedMillisec).append("ms");
+        }
+
+        return sb.toString();
+
+    }
+
 }
