@@ -46,6 +46,10 @@ public class EntityBase implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * A rekord ID-je
+     * (automatikusan index képződik rá)
+     */
     @Id
     @Basic(optional = false)
     @NotNull(message = "Az ID nem lehet null")

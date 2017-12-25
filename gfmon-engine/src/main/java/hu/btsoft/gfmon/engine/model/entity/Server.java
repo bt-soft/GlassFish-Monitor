@@ -18,6 +18,7 @@ import java.util.Set;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.PostUpdate;
@@ -43,9 +44,12 @@ import org.apache.commons.lang3.StringUtils;
  */
 @Entity
 @Cacheable(false)
-@Table(name = "SERVER", catalog = "", schema = IGFMonEngineConstants.DATABASE_SCHEMAN_NAME)
+@Table(name = "SERVER", catalog = "", schema = IGFMonEngineConstants.DATABASE_SCHEMAN_NAME,
+        indexes = {
+            @Index(name = "I_SRV_HNAM_PONR", columnList = "HOST_NAME,PORT_NUM", unique = true)
+        })
 @Data
-@ToString(callSuper = true, of = {"hostName", "ipAddress", "portNumber", "active"})
+@ToString(callSuper = false, of = {"hostName", "ipAddress", "portNumber", "active"})
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @Slf4j
@@ -56,14 +60,14 @@ public class Server extends ModifiableEntityBase {
      */
     @NotNull(message = "A hostName nem lehet null")
     @Size(min = 5, max = 255, message = "A hostName mező hossza {min} és {max} között lehet")
-    @Column(name = "HOST_NAME", length = 255, nullable = false, unique = true)
+    @Column(name = "HOST_NAME", length = 255, nullable = false)
     private String hostName;
 
     /**
      * A szerver IP címe, ezt programmatikusan töljük majd ki
      */
     @Size(min = 5, max = 255, message = "A ipAddress mező hossza {min} és {max} között lehet")
-    @Column(name = "IP_ADDRESS", length = 255, nullable = true, unique = true)
+    @Column(name = "IP_ADDRESS", length = 255, nullable = true)
     private String ipAddress;
 
     /**

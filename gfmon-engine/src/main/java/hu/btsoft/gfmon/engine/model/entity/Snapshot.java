@@ -16,7 +16,6 @@ import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -32,10 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Entity
 @Cacheable(false)
-@Table(name = "SNAPSHOT", catalog = "", schema = IGFMonEngineConstants.DATABASE_SCHEMAN_NAME,
-        indexes = {
-            //@Index(name = "I_SNOT_TIME", columnList = "CREATE_DAT", unique = true), //index a mérési időre
-            @Index(name = "I_SNOT_SRVID", columnList = "SERVER_ID"),}) //index a szerver ID-re
+@Table(name = "SNAPSHOT", catalog = "", schema = IGFMonEngineConstants.DATABASE_SCHEMAN_NAME)
 @Data
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
@@ -44,6 +40,7 @@ public class Snapshot extends EntityBase {
 
     /**
      * A mérés melyik szerverhez tartozik?
+     * (automatikusan index képződik rá)
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SERVER_ID")
