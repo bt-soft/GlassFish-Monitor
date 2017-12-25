@@ -25,10 +25,38 @@ import lombok.ToString;
 @ToString(of = {"unit", "lastSampleTime", "startTime", "name", "description"})
 public abstract class ValueBaseDto {
 
+    /**
+     * Melyik modulból származik?
+     */
+    private String monitoringServiceModuleName;
+
+    /**
+     * Milyen uri-n mértük?
+     */
     private String uri;
+
+    /**
+     * Mértékegység
+     */
     private ValueUnitType unit;
+
+    /**
+     * A mintavétel dátuma
+     */
     private Date lastSampleTime;
+
+    /**
+     * Indítás dátuma
+     */
     private Date startTime;
+
+    /**
+     * A mért érték neve
+     */
     private String name;
+
+    /**
+     * A mért érték leírása
+     */
     private String description;
 }

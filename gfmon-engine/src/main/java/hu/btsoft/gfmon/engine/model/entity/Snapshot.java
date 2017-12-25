@@ -54,7 +54,7 @@ public class Snapshot extends EntityBase {
      * The number of open connections
      */
     @Column(name = "httpreq_opconns")
-    private Long httpreq_countopenconnections;
+    private Long httpreqCountOpenConnections;
 
     /**
      * Cumulative value of the error count,
@@ -62,6 +62,13 @@ public class Snapshot extends EntityBase {
      * was greater than or equal to 400
      */
     @Column(name = "httpreq_errcnts")
-    private Long httpreq_errorcount;
+    private Long httpreqErrorCount;
+
+//--- REST PATH:  server/network/connection-queue
+    /**
+     * The number of open/active connections
+     */
+    @Column(name = "network_openconns")
+    private Long networkCountOpenConnections;
 
 }

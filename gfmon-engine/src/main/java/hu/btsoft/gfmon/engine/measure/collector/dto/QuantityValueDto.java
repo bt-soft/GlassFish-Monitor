@@ -26,5 +26,8 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class QuantityValueDto extends ValueBaseDto {
 
+    /**
+     * A mért érték darabszáma
+     */
     private long count;
 }

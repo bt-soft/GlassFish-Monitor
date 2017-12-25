@@ -26,8 +26,19 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class CurrentCountValueDto extends ValueBaseDto {
 
+    /**
+     * A mérté érték aktuális értéke
+     */
     private long current;
+
+    /**
+     * A mért érték legkisebb értéke
+     */
     private long lowWatermark;
+
+    /**
+     * A mért érték legnagyobb értéke
+     */
     private long highWatermark;
 
 }

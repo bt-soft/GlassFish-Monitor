@@ -17,8 +17,6 @@ import hu.btsoft.gfmon.engine.measure.collector.dto.ValueBaseDto;
 import hu.btsoft.gfmon.engine.model.entity.Server;
 import hu.btsoft.gfmon.engine.model.entity.Snapshot;
 import java.util.HashMap;
-import java.util.function.Function;
-import java.util.stream.StreamSupport;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -36,79 +34,93 @@ import lombok.extern.slf4j.Slf4j;
 public class SnapshotProvider {
 
     @Inject
-    private Instance<Function<RestDataCollector, HashMap<String/*entityName*/, ValueBaseDto>>> dataCollectors;
+    private Instance<ICollectMonitoredData> dataCollectors;
 
     @Inject
     private RestDataCollector restDataCollector;
 
     @Inject
-    private JsonEntityNameToSnapshotMapper jsonEntityNameToSnapshotMapper;
+    private JSonEntityToSnapsotModelMapper jsonEntityToSnapsotModelMapper;
 
     /**
+     * Az összes kollentor adatait összegyűjti, majd egy új Snapshot entitásba rakja az eredményeket
      *
-     * @param server Server entitás
+     * @param server a monitorozandó Server entitása
      *
-     * @return Snapshot példány
+     * @return Snapshot példány, az adatgyűjtés eredménye (új entitás)
      */
     public Snapshot fetchSnapshot(Server server) {
 
         long start = Elapsed.nowNano();
 
-        restDataCollector.setSimpleUrl(server.getSimpleUrl());
-        restDataCollector.setSessionToken(server.getSessionToken());
+        Snapshot snapshot = new Snapshot();
 
-        Snapshot snapshot = collectData();
+        //Végigmegyünk az összes adatgyűjtőn
+        for (ICollectMonitoredData collector : dataCollectors) {
+
+            //Megvizsgáljuk, hogy az adott szervernél be van-e kapcsolva az a MonitorServices modul, amit a kollektor nézegetne
+            //Ha nem, akkor nem indítjuk a kollektort
+            if (!server.getMonitorableModules().contains(collector.getMonitoringServiceModuleName())) {
+                continue;
+            }
+
+            //Az adott kollektor adatainak lekérése
+            HashMap<String/*JSon entityName*/, ValueBaseDto> valuesMap = collector.execute(restDataCollector, server.getSimpleUrl(), server.getSessionToken());
+
+            //Betoljuk az eredményeket a snapshot entitásba
+            jsonEntityToSnapsotModelMapper.map(valuesMap, snapshot);
+        }
 
         log.trace("server url: {}, elapsed: {}", server.getUrl(), Elapsed.getNanoStr(start));
 
         return snapshot;
     }
 
-    private Snapshot collectData() {
-
-        Snapshot snapshot = new Snapshot();
-
-//        Consumer<HashMap<String, ValueDTOBase>> valuesMapConsumer = (HashMap<String, ValueDTOBase> valuesMap) -> {
+//    private Snapshot collectData() {
+//
+//        Snapshot snapshot = new Snapshot();
+//
+////        Consumer<HashMap<String, ValueDTOBase>> valuesMapConsumer = (HashMap<String, ValueDTOBase> valuesMap) -> {
+////            if (valuesMap != null) {
+////                for (String entityName : valuesMap.keySet()) {
+////
+////                    ValueDTOBase dto = valuesMap.get(entityName);
+////                    log.trace(String.format("\nEntityName: %s, values: %s", entityName, dto.toString()));
+////                }
+////            }
+////        };
+////
+//        DataCollectionBehaviour dataCollectionBehaviour = new DataCollectionBehaviour(jsonEntityNameToSnapshotMapper, snapshot);
+//
+//        StreamSupport.stream(this.dataCollectors.spliterator(), false /* no/paralel */)
+//                .map(collector -> collector.apply(restDataCollector)) //meghívjuk az adott collector apply metódusát
+//                .map(valuesMap -> (HashMap<String/*entityName*/, ValueBaseDto>) valuesMap)
+//                //.forEach(valuesMapConsumer);
+//                .forEach(dataCollectionBehaviour::perform);
+//
+//        return snapshot;
+//    }
+//
+//    private class DataCollectionBehaviour {
+//
+//        private final JsonEntityNameToSnapshotMapper entityName2SnapshotMapper;
+//        private final Snapshot snapshot;
+//
+//        /**
+//         * Konstruktor
+//         *
+//         * @param entityName2SnapshotMapper
+//         * @param snapshot
+//         */
+//        public DataCollectionBehaviour(JsonEntityNameToSnapshotMapper entityName2SnapshotMapper, Snapshot snapshot) {
+//            this.entityName2SnapshotMapper = entityName2SnapshotMapper;
+//            this.snapshot = snapshot;
+//        }
+//
+//        public void perform(HashMap<String, ValueBaseDto> valuesMap) {
 //            if (valuesMap != null) {
-//                for (String entityName : valuesMap.keySet()) {
-//
-//                    ValueDTOBase dto = valuesMap.get(entityName);
-//                    log.trace(String.format("\nEntityName: %s, values: %s", entityName, dto.toString()));
-//                }
+//                entityName2SnapshotMapper.map(valuesMap, snapshot);
 //            }
-//        };
-//
-        DataCollectionBehaviour dataCollectionBehaviour = new DataCollectionBehaviour(jsonEntityNameToSnapshotMapper, snapshot);
-
-        StreamSupport.stream(this.dataCollectors.spliterator(), false /* no/paralel */)
-                .map(collector -> collector.apply(restDataCollector)) //meghívjuk az adott collector apply metódusát
-                .map(valuesMap -> (HashMap<String/*entityName*/, ValueBaseDto>) valuesMap)
-                //.forEach(valuesMapConsumer);
-                .forEach(dataCollectionBehaviour::perform);
-
-        return snapshot;
-    }
-
-    private class DataCollectionBehaviour {
-
-        private final JsonEntityNameToSnapshotMapper entityName2SnapshotMapper;
-        private final Snapshot snapshot;
-
-        /**
-         * Konstruktor
-         *
-         * @param entityName2SnapshotMapper
-         * @param snapshot
-         */
-        public DataCollectionBehaviour(JsonEntityNameToSnapshotMapper entityName2SnapshotMapper, Snapshot snapshot) {
-            this.entityName2SnapshotMapper = entityName2SnapshotMapper;
-            this.snapshot = snapshot;
-        }
-
-        public void perform(HashMap<String, ValueBaseDto> valuesMap) {
-            if (valuesMap != null) {
-                entityName2SnapshotMapper.map(valuesMap, snapshot);
-            }
-        }
-    }
+//        }
+//    }
 }

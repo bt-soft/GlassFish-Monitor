@@ -4,14 +4,16 @@
  *  GF Monitor project
  *
  *  Module:  gfmon-engine (gfmon-engine)
- *  File:    CheckServerMonitorServiceState.java
+ *  File:    CollectMonitorServiceModules.java
  *  Created: 2017.12.24. 18:31:11
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.measure;
+package hu.btsoft.gfmon.engine.rest;
 
 import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
+import java.util.HashSet;
+import java.util.Set;
 import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.ws.rs.client.Client;
@@ -30,7 +32,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author BT
  */
 @Slf4j
-public class CheckServerMonitorServiceState {
+public class CollectMonitorServiceModules {
 
     private static final String MONITORING_SERVICE_URI = "/management/domain/configs/config/server-config/monitoring-service/module-monitoring-levels";
 
@@ -38,15 +40,14 @@ public class CheckServerMonitorServiceState {
     private Client client;
 
     /**
-     * GF module-monitoring-levels Attributes ellenőrzése
+     * GF module-monitoring-levels Attributes kigyűjtése
      *
      * @param simpleUrl    a GF szerver URL-je
      * @param sessionToken session token
      *
-     * @return true -> legyalább egy monitorozható GF attributum van
-     *         false -> minden attributum off :(
+     * @return A GF példány monitorozható GF moduljainak halmaza, vagy null, ha nincs egy sem
      */
-    public boolean checkMonitorStatus(String simpleUrl, String sessionToken) {
+    public Set<String/*GF MoitoringService module name*/> checkMonitorStatus(String simpleUrl, String sessionToken) {
 
         String protocol = StringUtils.isEmpty(sessionToken) ? IGFMonEngineConstants.PROTOCOL_HTTPS : IGFMonEngineConstants.PROTOCOL_HTTP;
 
@@ -64,16 +65,16 @@ public class CheckServerMonitorServiceState {
 
         JsonObject jsonObject = restResponse.readEntity(JsonObject.class);
         if (jsonObject == null) {
-            return false;
+            return null;
         }
 
         //extraProperties leszedése
         JsonObject extraProperties = jsonObject.getJsonObject("extraProperties");
         if (extraProperties == null) {
-            return false;
+            return null;
         }
 
-        boolean result = false;
+        Set<String/*GF MoitoringService module name*/> result = null;
 
         //entity leszedése
         JsonObject entities = extraProperties.getJsonObject("entity");
@@ -82,8 +83,10 @@ public class CheckServerMonitorServiceState {
         for (String key : entities.keySet()) {
             String value = entities.getJsonString(key).getString();
             if (!"OFF".equalsIgnoreCase(value)) {
-                result = true;
-                break;
+                if (result == null) {
+                    result = new HashSet<>();
+                }
+                result.add(key);
             }
         }
 

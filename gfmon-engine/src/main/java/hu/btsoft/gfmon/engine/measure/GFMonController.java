@@ -11,10 +11,13 @@
  */
 package hu.btsoft.gfmon.engine.measure;
 
+import hu.btsoft.gfmon.engine.model.entity.Server;
 import hu.btsoft.gfmon.engine.model.entity.Snapshot;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
 import hu.btsoft.gfmon.engine.model.service.ServerService;
+import hu.btsoft.gfmon.engine.rest.CollectMonitorServiceModules;
 import hu.btsoft.gfmon.engine.security.SessionTokenAcquirer;
+import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
@@ -60,7 +63,7 @@ public class GFMonController {
     private SnapshotProvider snapshotProvider;
 
     @Inject
-    private CheckServerMonitorServiceState checkServerMonitorServiceState;
+    private CollectMonitorServiceModules checkServerMonitorServiceState;
 
     /**
      * GFMon engine indítása
@@ -86,9 +89,6 @@ public class GFMonController {
             log.warn("A Timer ({}) már fut", timer);
             return;
         }
-
-        //Ellenőrizzük, hogy a monitorozandó szervereknek egyáltalán be engedélyezve van, hogy nézegessük őket
-        this.chechkServersMonitorServiceStatus();
 
         int sampleIntervalSec = configService.getSampleInterval();
 
@@ -140,57 +140,54 @@ public class GFMonController {
     }
 
     /**
-     * A monitorozandó GF példányok MonitoringServeice (module-monitoring-levels) ellenőrzése
-     * Amely szervernek nincs engedélyezve a monitorozhatósága, azt jól inaktívvá tesszük
-     */
-    private void chechkServersMonitorServiceStatus() {
-        //Csak azokat nézzük át, amelyek jelenleg nézegetnénk
-        serverService.findAll().stream().filter((server) -> (server.isActive())).forEachOrdered((server) -> {
-
-            String url = server.getUrl();
-            String userName = server.getUserName();
-            String plainPassword = server.getPlainPassword();
-
-            log.trace("Ellenőrzés indul: {}", url);
-
-            //ha még nincs SessionToken, akkor csinálunk egyet
-            if (StringUtils.isEmpty(server.getSessionToken())) {
-                String sessionToken = sessionTokenAcquirer.getSessionToken(url, userName, plainPassword);
-                server.setSessionToken(sessionToken);
-            }
-
-            boolean monitorEnabled = checkServerMonitorServiceState.checkMonitorStatus(server.getSimpleUrl(), server.getSessionToken());
-
-            if (!monitorEnabled) {
-                server.setActive(false);
-                server.setComment("A szerver MonitoringService szolgáltatása nincs engedélyezve, emiatt a monitorozása tiltva lett");
-                server.setModUser("GFMonController");
-                log.warn("{}: {}", server.getUrl(), server.getComment());
-
-                //Le is mentjük az adatbázisba az állapotot
-                serverService.save(server);
-            }
-        });
-    }
-
-    /**
      * A monitorozási mintavétel indítása
      */
     @Timeout
     protected void timeOut() {
 
-        serverService.findAll().stream().filter((server) -> (server.isActive())).forEachOrdered((server) -> {
+        for (Server server : serverService.findAll()) {
+
+            //Az inaktív szerverekkel nem foglalkozunk
+            if (!server.isActive()) {
+                continue;
+            }
+
             String url = server.getUrl();
             String userName = server.getUserName();
             String plainPassword = server.getPlainPassword();
-
-            log.trace("Mérés indul: {}", url);
 
             //ha még nincs SessionToken, akkor csinálunk egyet
             if (StringUtils.isEmpty(server.getSessionToken())) {
                 String sessionToken = sessionTokenAcquirer.getSessionToken(url, userName, plainPassword);
                 server.setSessionToken(sessionToken);
             }
+
+            //Ha még nem tudjuk, hogy az adott szerveren mit lehet monitorozni., akkor azt most kigyűjtjük
+            if (server.getMonitorableModules() == null) {
+
+                // A monitorozandó GF példányok MonitoringService (module-monitoring-levels) ellenőrzése
+                Set<String/*GF MoitoringService module name*/> monitorableModules = checkServerMonitorServiceState.checkMonitorStatus(server.getSimpleUrl(), server.getSessionToken());
+
+                // Amely szervernek nincs engedélyezve egyetlen monitorozható modulja sem, azt jól inaktívvá tesszük
+                if (monitorableModules == null) {
+                    server.setActive(false);
+                    server.setComment("A szerver MonitoringService szolgáltatása nincs engedélyezve, emiatt a monitorozása tiltva lett");
+                    server.setModUser("GFMonController");
+                    log.warn("{}: {}", server.getUrl(), server.getComment());
+
+                    //Le is mentjük az adatbázisba az állapotot
+                    serverService.save(server);
+
+                    //Ezzel a szerverrel már nem foglalkozunk tovább, majd visszabillenthető a UI felületről a státusza
+                    continue;
+                }
+
+                //Eltároljuk a monitorozható modulokat a memóriában
+                server.setMonitorableModules(monitorableModules);
+                log.trace("A(z) {} szerver monitorozható moduljai: {}", url, monitorableModules);
+            }
+
+            log.trace("Adatgyűjtés indul: {}", url);
 
             Snapshot snapshot = snapshotProvider.fetchSnapshot(server);
             log.trace("Snapshot: {}", snapshot);
@@ -201,6 +198,6 @@ public class GFMonController {
 //em.flush();
 //em.detach(snapshot);
 ///eventBus.publish(IGFMonitorConstants.SOCKET_CHANNEL_NAME, "Kéx!");
-        });
+        }
     }
 }

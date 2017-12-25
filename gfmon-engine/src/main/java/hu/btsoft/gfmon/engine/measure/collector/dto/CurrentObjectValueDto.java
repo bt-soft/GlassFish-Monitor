@@ -26,5 +26,9 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class CurrentObjectValueDto extends ValueBaseDto {
 
+    /**
+     * A mért érték értéke
+     */
     private Object current;
+
 }

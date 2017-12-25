@@ -21,7 +21,6 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -32,13 +31,20 @@ import org.apache.commons.lang3.StringUtils;
 @Slf4j
 public class RestDataCollector {
 
+    /**
+     * REST kliens
+     */
     @Inject
     private Client client;
 
-    @Setter
+    /**
+     * A GF szerver url-je
+     */
     private String simpleUrl;
 
-    @Setter
+    /**
+     * GF session token
+     */
     private String sessionToken;
 
     // <editor-fold defaultstate="collapsed" desc="Típusos getterek">
@@ -196,11 +202,20 @@ public class RestDataCollector {
     /**
      * REST válasz olvasása
      *
-     * @param uri monitorozott rest erőforrás URI
+     * @param uri          monitorozott rest erőforrás URI
+     * @param simpleUrl
+     * @param sessionToken
      *
      * @return
      */
-    public Response getMonitorResponse(String uri) {
+    /**
+     * REST válasz olvasása
+     *
+     * @param uri monitorozott rest erőforrás URI
+     *
+     * @return REST válasz
+     */
+    private Response getMonitorResponse(String uri) {
 
         String fullUrl = this.getMonitorBaseURI() + uri;
         WebTarget resource = client.target(fullUrl);
@@ -212,6 +227,23 @@ public class RestDataCollector {
         }
         return builder.get(Response.class);
 
+    }
+
+    /**
+     * REST válasz olvasása
+     *
+     * @param uri          monitorozott rest erőforrás URI
+     * @param simpleUrl    a GF szerver url-je
+     * @param sessionToken a GF session token-je
+     *
+     * @return REST válasz
+     */
+    public Response getMonitorResponse(String uri, String simpleUrl, String sessionToken) {
+
+        this.simpleUrl = simpleUrl;
+        this.sessionToken = sessionToken;
+
+        return getMonitorResponse(uri);
     }
 
 }

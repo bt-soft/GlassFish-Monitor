@@ -11,17 +11,17 @@
  */
 package hu.btsoft.gfmon.engine.measure.collector;
 
+import hu.btsoft.gfmon.engine.measure.ICollectMonitoredData;
 import hu.btsoft.gfmon.engine.measure.collector.dto.CurrentCountValueDto;
 import hu.btsoft.gfmon.engine.measure.collector.dto.CurrentObjectValueDto;
 import hu.btsoft.gfmon.engine.measure.collector.dto.QuantityValueDto;
 import hu.btsoft.gfmon.engine.measure.collector.dto.ValueBaseDto;
-import static hu.btsoft.gfmon.engine.measure.collector.httpservice.RequestCollector.URI;
 import hu.btsoft.gfmon.engine.measure.collector.types.ValueUnitType;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.function.Function;
 import javax.json.JsonObject;
+import javax.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -30,7 +30,15 @@ import lombok.extern.slf4j.Slf4j;
  * @author BT
  */
 @Slf4j
-public abstract class CollectorBase implements Function<RestDataCollector, HashMap<String/*entityName*/, ValueBaseDto>> {
+public abstract class CollectorBase implements ICollectMonitoredData {
+
+    /**
+     * Az adatgyűjtést a szerver URL-jéhez képest melyik uri-n kell elvégezni?
+     * pl.: "server/http-service/server/request"
+     *
+     * @return uri
+     */
+    protected abstract String getUri();
 
     /**
      * Timestamp -> Date konverzió
@@ -148,11 +156,10 @@ public abstract class CollectorBase implements Function<RestDataCollector, HashM
      * A REST válaszokból kinyeri az értékeket
      *
      * @param entities JSon entitás
-     * @param uri      honnan származik?
      *
      * @return értékek map
      */
-    protected HashMap<String, ValueBaseDto> fetchValues(JsonObject entities, String uri) {
+    protected HashMap<String, ValueBaseDto> fetchValues(JsonObject entities) {
 
         if (entities == null) {
             return null;
@@ -170,34 +177,57 @@ public abstract class CollectorBase implements Function<RestDataCollector, HashM
                 continue;
             }
 
+            ValueBaseDto dto = null;
+
             switch (ValueUnitType.fromValue(unitName)) {
 
                 case MILLISECONDS:
                 case COUNT:
                 case BYTES: {
-                    QuantityValueDto dto = getQuantityValues(valueEntity);
-                    dto.setUri(uri);
-                    result.put(entityName, dto);
+                    dto = getQuantityValues(valueEntity);
                     break;
                 }
 
                 case STRING: {
-                    CurrentObjectValueDto dto = getCurrentObjectValues(valueEntity);
-                    dto.setUri(URI);
-                    result.put(entityName, dto);
+                    dto = getCurrentObjectValues(valueEntity);
                     break;
                 }
 
                 case LIST:
+                    log.warn("Nincs még a List típusra adatfelolvasás!");
                     break;
 
                 default:
                     log.warn("Nincs lekezelve a JSon entitás, név: '{}', unit: '{}' !", entityName, unitName);
                     break;
             }
+
+            if (dto != null) {
+                dto.setUri(getUri());
+                dto.setMonitoringServiceModuleName(getMonitoringServiceModuleName());
+                result.put(entityName, dto);
+            }
         }
 
         return result;
+    }
+
+    /**
+     * REST JSon monitor adatok összegyűjtése
+     *
+     * @param restDataCollector REST adatgyűjtó példány
+     * @param simpleUrl         a szerver url-je
+     * @param sessionToken      GF session token
+     *
+     * @return Json entitás - értékek Map
+     */
+    @Override
+    public HashMap<String/*JSon entityName*/, ValueBaseDto> execute(RestDataCollector restDataCollector, String simpleUrl, String sessionToken) {
+
+        Response response = restDataCollector.getMonitorResponse(getUri(), simpleUrl, sessionToken);
+        JsonObject entities = restDataCollector.getJsonEntities(response);
+
+        return this.fetchValues(entities);
     }
 
 }

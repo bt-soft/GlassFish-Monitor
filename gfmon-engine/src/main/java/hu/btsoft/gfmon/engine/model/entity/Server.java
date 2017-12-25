@@ -13,6 +13,7 @@ package hu.btsoft.gfmon.engine.model.entity;
 
 import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -27,8 +28,6 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -55,7 +54,6 @@ public class Server extends ModifiableEntityBase {
     @NotNull(message = "A hostName nem lehet null")
     @Size(min = 5, max = 255, message = "A hostName mező hossza {min} és {max} között lehet")
     @Column(name = "HOST_NAME", length = 255, nullable = false, unique = true)
-    @XmlElement(required = true)
     private String hostName;
 
     /**
@@ -63,7 +61,6 @@ public class Server extends ModifiableEntityBase {
      */
     @Size(min = 5, max = 255, message = "A ipAddress mező hossza {min} és {max} között lehet")
     @Column(name = "IP_ADDRESS", length = 255, nullable = true, unique = true)
-    @XmlElement(required = true)
     private String ipAddress;
 
     /**
@@ -85,21 +82,18 @@ public class Server extends ModifiableEntityBase {
      * UserName
      */
     @Column(length = 80, nullable = true)
-    @XmlElement(required = true)
     private String userName;
 
     /**
      * UserName
      */
     @Column(name = "PASSWD", length = 80, nullable = true)
-    @XmlElement(required = true)
     private String encPasswd;
 
     /**
      * A monitorozás aktív rá?
      */
     @Column(nullable = false)
-    @XmlElement(required = true)
     private boolean active;
 
     /**
@@ -107,15 +101,27 @@ public class Server extends ModifiableEntityBase {
      * (pl.: miért lett tiltva a szerver monitorozása, stb...)
      */
     @Column(name = "comment")
-    @XmlElement(required = false)
     private String comment;
+
+    /**
+     * A szerver mérési eredményei
+     */
+    @OneToMany(mappedBy = "server")
+    private List<Snapshot> snapshots;
+
+    /**
+     * A szerver monitorozható moduljainak halmaza
+     * Csak runtime változó, nem tároljuk az adatbázisban
+     */
+    //@ElementCollection
+    @Transient
+    private Set<String/*GF MoitoringService module name*/> monitorableModules;
 
     /**
      * A kódolatlan jelszó
      * Csak runtime változó, nem tároljuk az adatbázisban
      */
     @Transient
-    @XmlTransient
     private String plainPassword;
 
     /**
@@ -123,14 +129,7 @@ public class Server extends ModifiableEntityBase {
      * Csak runtime változó, nem tároljuk az adatbázisban
      */
     @Transient
-    @XmlTransient
     private String sessionToken;
-
-    /**
-     * A szerver mérési eredményei
-     */
-    @OneToMany(mappedBy = "server")
-    private List<Snapshot> snapshots;
 
     /**
      * Konstruktor - csak a sima jelszót lehet kezelni
