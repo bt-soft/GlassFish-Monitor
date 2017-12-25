@@ -70,5 +70,4 @@ public class Snapshot extends EntityBase {
      */
     @Column(name = "network_openconns")
     private Long networkCountOpenConnections;
-
 }

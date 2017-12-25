@@ -51,7 +51,7 @@ public class EntityBase implements Serializable {
     @NotNull(message = "Az ID nem lehet null")
     @Column(name = "ID", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
-//    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gfMonSeq")
+    //    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gfMonSeq")
     @SequenceGenerator(name = "gfMonSeq", sequenceName = "GFMON_SEQ")
     @XmlAttribute(required = true)
     private Long id;
@@ -75,7 +75,6 @@ public class EntityBase implements Serializable {
         if (createDat == null) {
             createDat = new Date();
         }
-
     }
 
 }

@@ -11,6 +11,7 @@
  */
 package hu.btsoft.gfmon.engine.model.entity;
 
+import hu.btsoft.gfmon.corelib.network.NetworkUtils;
 import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +32,7 @@ import javax.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -43,6 +45,7 @@ import org.apache.commons.lang3.StringUtils;
 @Cacheable(false)
 @Table(name = "SERVER", catalog = "", schema = IGFMonEngineConstants.DATABASE_SCHEMAN_NAME)
 @Data
+@ToString(callSuper = true, of = {"hostName", "ipAddress", "portNumber", "active"})
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @Slf4j
@@ -148,6 +151,8 @@ public class Server extends ModifiableEntityBase {
         this.userName = userName;
         this.plainPassword = plainPassword;
         this.active = active;
+
+        this.ipAddress = NetworkUtils.getIpAddressByHostName(hostName);
     }
 
     /**
