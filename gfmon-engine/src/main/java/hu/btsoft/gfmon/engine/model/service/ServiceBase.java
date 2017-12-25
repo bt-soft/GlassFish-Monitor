@@ -49,6 +49,18 @@ public abstract class ServiceBase<T extends EntityBase> {
         } else {
             getEntityManager().merge(entity);
         }
+
+        //kiíratjuk az adatbázisba az entitást
+        getEntityManager().flush();
+    }
+
+    /**
+     * Entitás leválasztása a PU-ról
+     *
+     * @param entity entitás
+     */
+    public void detach(T entity) {
+        getEntityManager().detach(entity);
     }
 
     /**

@@ -53,21 +53,30 @@ public class SnapshotProvider {
 
         long start = Elapsed.nowNano();
 
-        Snapshot snapshot = new Snapshot();
+        Snapshot snapshot = null;
 
         //Végigmegyünk az összes adatgyűjtőn
         for (ICollectMonitoredData collector : dataCollectors) {
 
-            //Megvizsgáljuk, hogy az adott szervernél be van-e kapcsolva az a MonitorServices modul, amit a kollektor nézegetne
-            //Ha nem, akkor nem indítjuk a kollektort
-            if (!server.getMonitorableModules().contains(collector.getMonitoringServiceModuleName())) {
-                continue;
-            }
-
+//            //Megvizsgáljuk, hogy az adott szervernél be van-e kapcsolva az a MonitorServices modul, amit a kollektor nézegetne
+//            //Ha nem, akkor nem indítjuk a kollektort
+//            if (!server.getMonitorableModules().contains(collector.getMonitoringServiceModuleName())) {
+//                continue;
+//            }
+//
             //Az adott kollektor adatainak lekérése
             HashMap<String/*JSon entityName*/, ValueBaseDto> valuesMap = collector.execute(restDataCollector, server.getSimpleUrl(), server.getSessionToken());
 
+            //Üres a mért eredmének Map-je
+            if (valuesMap == null || valuesMap.isEmpty()) {
+                log.warn("A(z) {} szerver {} moduljának mérési eredményei üresek!", server.getSimpleUrl(), collector.getMonitoringServiceModuleName());
+                continue;
+            }
+
             //Betoljuk az eredményeket a snapshot entitásba
+            if (snapshot == null) {
+                snapshot = new Snapshot();
+            }
             jsonEntityToSnapsotModelMapper.map(valuesMap, snapshot);
         }
 

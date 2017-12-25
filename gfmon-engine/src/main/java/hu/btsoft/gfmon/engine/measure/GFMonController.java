@@ -15,6 +15,7 @@ import hu.btsoft.gfmon.engine.model.entity.Server;
 import hu.btsoft.gfmon.engine.model.entity.Snapshot;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
 import hu.btsoft.gfmon.engine.model.service.ServerService;
+import hu.btsoft.gfmon.engine.model.service.SnapshotService;
 import hu.btsoft.gfmon.engine.rest.CollectMonitorServiceModules;
 import hu.btsoft.gfmon.engine.security.SessionTokenAcquirer;
 import java.util.Set;
@@ -50,6 +51,9 @@ public class GFMonController {
 
     @EJB
     private ServerService serverService;
+
+    @EJB
+    private SnapshotService snapshotService;
 
     @Resource
     private TimerService timerService;
@@ -190,13 +194,16 @@ public class GFMonController {
             log.trace("Adatgyűjtés indul: {}", url);
 
             Snapshot snapshot = snapshotProvider.fetchSnapshot(server);
+
+            //Beállítjuk, hogy melyik szerver mérési ereménye ez a pillanatfelvétel
+            snapshot.setServer(server);
+
+            //lementjük az adatbázisba
+            snapshotService.save(snapshot);
+            snapshotService.detach(snapshot);
+
             log.trace("Snapshot: {}", snapshot);
 
-            //snapshot.setServerId(server.getId());
-//
-//em.persist(snapshot);
-//em.flush();
-//em.detach(snapshot);
 ///eventBus.publish(IGFMonitorConstants.SOCKET_CHANNEL_NAME, "Kéx!");
         }
     }

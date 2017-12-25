@@ -103,7 +103,7 @@ public class JSonEntityToSnapsotModelMapper {
     }
 
     /**
-     * DTO -> Snapshot mapper - "http-service"
+     * DTO -> Snapshot mapper - "httpService"
      *
      * @param enityName entitás neve
      * @param dto       mérési eredmények
