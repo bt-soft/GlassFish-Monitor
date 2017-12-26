@@ -4,7 +4,7 @@
  *  GF Monitor project
  *
  *  Module:  gfmon-engine (gfmon-engine)
- *  File:    RequestCollector.java
+ *  File:    HttpServiceRequestCollector.java
  *  Created: 2017.12.24. 17:21:06
  *
  *  ------------------------------------------------------------------------------------
@@ -18,7 +18,7 @@ import hu.btsoft.gfmon.engine.monitor.collector.CollectorBase;
  *
  * @author BT
  */
-public class RequestCollector extends CollectorBase {
+public class HttpServiceRequestCollector extends CollectorBase {
 
     public static final String URI = "server/http-service/server/request";
 

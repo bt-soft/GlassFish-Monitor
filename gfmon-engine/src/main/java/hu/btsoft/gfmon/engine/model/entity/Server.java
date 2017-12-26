@@ -11,15 +11,13 @@
  */
 package hu.btsoft.gfmon.engine.model.entity;
 
+import hu.btsoft.gfmon.corelib.crypt.CryptUtil;
 import hu.btsoft.gfmon.corelib.network.NetworkUtils;
 import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
-import java.util.List;
 import java.util.Set;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
@@ -43,11 +41,8 @@ import org.apache.commons.lang3.StringUtils;
  * @author BT
  */
 @Entity
+@Table(name = "SERVER", catalog = "", schema = IGFMonEngineConstants.DATABASE_SCHEMAN_NAME)
 @Cacheable(false)
-@Table(name = "SERVER", catalog = "", schema = IGFMonEngineConstants.DATABASE_SCHEMAN_NAME,
-        indexes = {
-            @Index(name = "I_SRV_HNAM_PONR", columnList = "HOST_NAME,PORT_NUM", unique = true)
-        })
 @Data
 @ToString(callSuper = false, of = {"hostName", "ipAddress", "portNumber", "active"})
 @EqualsAndHashCode(callSuper = false)
@@ -110,19 +105,18 @@ public class Server extends ModifiableEntityBase {
     @Column(name = "comment")
     private String comment;
 
-    /**
-     * A szerver mérési eredményei
-     */
-    @OneToMany(mappedBy = "server")
-    private List<Snapshot> snapshots;
-
+//    /**
+//     * A szerver mérési eredményei
+//     */
+//    @OneToMany(mappedBy = "server")
+//    private List<SnapshotBase> snapshots;
+//
     /**
      * A szerver monitorozható moduljainak halmaza
      * Csak runtime változó, nem tároljuk az adatbázisban
      */
-    //@ElementCollection
     @Transient
-    private Set<String/*GF MoitoringService module name*/> monitorableModules;
+    private Set<String/*GF MonitoringService module name*/> monitorableModules;
 
     /**
      * A kódolatlan jelszó
@@ -166,7 +160,7 @@ public class Server extends ModifiableEntityBase {
     @PrePersist
     @PreUpdate
     protected void pre() {
-        this.encPasswd = plainPassword; //Crypter.cryptPasswd(plainPassword);
+        this.encPasswd = CryptUtil.encrypt(plainPassword);
     }
 
     /**
@@ -176,7 +170,7 @@ public class Server extends ModifiableEntityBase {
     @PostLoad
     @PostUpdate
     protected void post() {
-        plainPassword = encPasswd; //Crypter.deCryptPasswd(this.encPasswd);
+        plainPassword = CryptUtil.decrypt(this.encPasswd);
     }
 
     /**

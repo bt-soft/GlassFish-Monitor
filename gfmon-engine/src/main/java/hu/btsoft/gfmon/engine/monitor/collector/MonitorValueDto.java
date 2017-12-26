@@ -4,26 +4,24 @@
  *  GF Monitor project
  *
  *  Module:  gfmon-engine (gfmon-engine)
- *  File:    ValueBaseDto.java
+ *  File:    MonitorValueDto.java
  *  Created: 2017.12.24. 17:00:03
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.monitor.collector.dto;
+package hu.btsoft.gfmon.engine.monitor.collector;
 
 import hu.btsoft.gfmon.engine.monitor.collector.types.ValueUnitType;
 import java.util.Date;
 import lombok.Data;
-import lombok.ToString;
 
 /**
- * A GF REST interfészéről kigyűjtött adatok dto ős osztálya
+ * A GF REST interfészéről kigyűjtött adatok dto osztálya
  *
  * @author BT
  */
 @Data
-@ToString(of = {"unit", "lastSampleTime", "startTime", "name", "description"})
-public abstract class ValueBaseDto {
+public class MonitorValueDto {
 
     /**
      * Milyen uri-n mértük?
@@ -53,5 +51,26 @@ public abstract class ValueBaseDto {
     /**
      * A mért érték leírása
      */
-    private String description;
+//    private String description;
+//
+    /**
+     * A mért érték darabszáma
+     */
+    private Long count;
+
+    /**
+     * A mért érték értéke
+     */
+    private String current;
+
+    /**
+     * A mért érték legkisebb értéke
+     */
+    private Long lowWatermark;
+
+    /**
+     * A mért érték legnagyobb értéke
+     */
+    private Long highWatermark;
+
 }

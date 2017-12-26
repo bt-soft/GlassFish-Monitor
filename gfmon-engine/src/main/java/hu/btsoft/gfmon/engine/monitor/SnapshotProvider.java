@@ -13,10 +13,12 @@ package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.model.entity.Server;
-import hu.btsoft.gfmon.engine.model.entity.Snapshot;
+import hu.btsoft.gfmon.engine.model.entity.snapshot.SnapshotBase;
+import hu.btsoft.gfmon.engine.monitor.collector.MonitorValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
-import hu.btsoft.gfmon.engine.monitor.collector.dto.ValueBaseDto;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +42,7 @@ public class SnapshotProvider {
     private RestDataCollector restDataCollector;
 
     @Inject
-    private JSonEntityToSnapsotModelMapper jsonEntityToSnapsotModelMapper;
+    private JSonEntityToSnapsotEntityMapper jsonEntityToSnapsotModelMapper;
 
     /**
      * Az összes kollentor adatait összegyűjti, majd egy új Snapshot entitásba rakja az eredményeket
@@ -49,11 +51,11 @@ public class SnapshotProvider {
      *
      * @return Snapshot példány, az adatgyűjtés eredménye (új entitás)
      */
-    public Snapshot fetchSnapshot(Server server) {
+    public Set<SnapshotBase> fetchSnapshot(Server server) {
 
         long start = Elapsed.nowNano();
 
-        Snapshot snapshot = null;
+        Set<SnapshotBase> snapshots = null;
 
         //Végigmegyünk az összes adatgyűjtőn
         for (ICollectMonitoredData collector : dataCollectors) {
@@ -65,7 +67,7 @@ public class SnapshotProvider {
 //            }
 //
             //Az adott kollektor adatainak lekérése
-            HashMap<String/*JSon entityName*/, ValueBaseDto> valuesMap = collector.execute(restDataCollector, server.getSimpleUrl(), server.getSessionToken());
+            HashMap<String/*JSon entityName*/, MonitorValueDto> valuesMap = collector.execute(restDataCollector, server.getSimpleUrl(), server.getSessionToken());
 
             //Üres a mért eredmének Map-je
             if (valuesMap == null || valuesMap.isEmpty()) {
@@ -74,14 +76,14 @@ public class SnapshotProvider {
             }
 
             //Betoljuk az eredményeket a snapshot entitásba
-            if (snapshot == null) {
-                snapshot = new Snapshot();
+            if (snapshots == null) {
+                snapshots = new HashSet<>();
             }
-            jsonEntityToSnapsotModelMapper.map(valuesMap, snapshot);
+            jsonEntityToSnapsotModelMapper.map(valuesMap, snapshots);
         }
 
         log.trace("server url: {}, elapsed: {}", server.getUrl(), Elapsed.getNanoStr(start));
 
-        return snapshot;
+        return snapshots;
     }
 }

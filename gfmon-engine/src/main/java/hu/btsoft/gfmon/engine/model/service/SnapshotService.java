@@ -11,7 +11,7 @@
  */
 package hu.btsoft.gfmon.engine.model.service;
 
-import hu.btsoft.gfmon.engine.model.entity.Snapshot;
+import hu.btsoft.gfmon.engine.model.entity.snapshot.SnapshotBase;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Stateless
 @Slf4j
-public class SnapshotService extends ServiceBase<Snapshot> {
+public class SnapshotService extends ServiceBase<SnapshotBase> {
 
     @PersistenceContext
     private EntityManager em;
@@ -33,8 +33,7 @@ public class SnapshotService extends ServiceBase<Snapshot> {
      * Kontruktor
      */
     public SnapshotService() {
-        super(Snapshot.class
-        );
+        super(SnapshotBase.class);
     }
 
     /**

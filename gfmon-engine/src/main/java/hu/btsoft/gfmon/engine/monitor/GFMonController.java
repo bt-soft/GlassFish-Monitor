@@ -12,7 +12,7 @@
 package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.engine.model.entity.Server;
-import hu.btsoft.gfmon.engine.model.entity.Snapshot;
+import hu.btsoft.gfmon.engine.model.entity.snapshot.SnapshotBase;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
 import hu.btsoft.gfmon.engine.model.service.ServerService;
 import hu.btsoft.gfmon.engine.model.service.SnapshotService;
@@ -193,18 +193,27 @@ public class GFMonController {
 
             log.trace("Adatgyűjtés indul: {}", url);
 
-            Snapshot snapshot = snapshotProvider.fetchSnapshot(server);
+            Set<SnapshotBase> snapshots = snapshotProvider.fetchSnapshot(server);
 
-            //Beállítjuk, hogy melyik szerver mérési ereménye ez a pillanatfelvétel
-            snapshot.setServer(server);
+            if (snapshots == null || snapshots.isEmpty()) {
+                log.warn("Nincsenek menthető pillanatfelvételek!");
+                return;
+            }
 
-            //lementjük az adatbázisba
-            snapshotService.save(snapshot);
-            snapshotService.detach(snapshot);
+            //JPA mentés
+            for (SnapshotBase snapshot : snapshots) {
 
-            log.trace("Snapshot: {}", snapshot);
+                //Beállítjuk, hogy melyik szerver mérési ereménye ez a pillanatfelvétel
+                snapshot.setServer(server);
 
-///eventBus.publish(IGFMonitorConstants.SOCKET_CHANNEL_NAME, "Kéx!");
+                //lementjük az adatbázisba
+                snapshotService.save(snapshot);
+                snapshotService.detach(snapshot);
+
+                log.trace("Snapshot: {}", snapshot);
+            }
+
+            ///eventBus.publish(IGFMonitorConstants.SOCKET_CHANNEL_NAME, "Kéx!");
         }
     }
 }

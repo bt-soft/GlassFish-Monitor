@@ -70,6 +70,9 @@ public abstract class ServiceBase<T extends EntityBase> {
      */
     public void remove(T entity) {
         getEntityManager().remove(getEntityManager().merge(entity));
+
+        //kiíratjuk az adatbázisba az entitás törlését
+        getEntityManager().flush();
     }
 
     /**

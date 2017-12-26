@@ -11,8 +11,8 @@
  */
 package hu.btsoft.gfmon.engine.monitor;
 
+import hu.btsoft.gfmon.engine.monitor.collector.MonitorValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
-import hu.btsoft.gfmon.engine.monitor.collector.dto.ValueBaseDto;
 import java.util.HashMap;
 
 /**
@@ -31,6 +31,6 @@ public interface ICollectMonitoredData {
      *
      * @return adatgyűjtés eredménye (JSon entitás - értékek Map)
      */
-    HashMap<String/*Json entityName*/, ValueBaseDto> execute(RestDataCollector restDataCollector, String simpleUrl, String sessionToken);
+    HashMap<String/*Json entityName*/, MonitorValueDto> execute(RestDataCollector restDataCollector, String simpleUrl, String sessionToken);
 
 }
