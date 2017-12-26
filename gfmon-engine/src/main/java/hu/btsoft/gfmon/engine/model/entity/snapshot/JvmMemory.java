@@ -12,6 +12,7 @@
 package hu.btsoft.gfmon.engine.model.entity.snapshot;
 
 import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
+import hu.btsoft.gfmon.engine.model.entity.ColumnPosition;
 import javax.persistence.Cacheable;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
@@ -43,6 +44,7 @@ public class JvmMemory extends SnapshotBase {
      *
      * Amount of memory in bytes that is committed for the Java virtual machine to use
      */
+    @ColumnPosition(position = 20)
     private Long committedHeapSize;
 
     /**
@@ -50,6 +52,7 @@ public class JvmMemory extends SnapshotBase {
      *
      * Amount of memory in bytes that is committed for the Java virtual machine to use
      */
+    @ColumnPosition(position = 21)
     private Long committedNonHeapSize;
 
     /**
@@ -57,6 +60,7 @@ public class JvmMemory extends SnapshotBase {
      *
      * Amount of memory in bytes that the Java virtual machine initially requests from the operating system for memory management
      */
+    @ColumnPosition(position = 22)
     private Long initialHeapSize;
 
     /**
@@ -64,6 +68,7 @@ public class JvmMemory extends SnapshotBase {
      *
      * Amount of memory in bytes that the Java virtual machine initially requests from the operating system for memory management
      */
+    @ColumnPosition(position = 23)
     private Long initialNonHeapSize;
 
     /**
@@ -71,6 +76,7 @@ public class JvmMemory extends SnapshotBase {
      *
      * Maximum amount of memory in bytes that can be used for memory management
      */
+    @ColumnPosition(position = 24)
     private Long maxHeapSize;
 
     /**
@@ -78,6 +84,7 @@ public class JvmMemory extends SnapshotBase {
      *
      * Maximum amount of memory in bytes that can be used for memory management
      */
+    @ColumnPosition(position = 25)
     private Long maxNonHeapSize;
 
     /**
@@ -85,6 +92,7 @@ public class JvmMemory extends SnapshotBase {
      *
      * Approximate number of objects for which finalization is pending
      */
+    @ColumnPosition(position = 26)
     private Long objectsPendingFinalization;
 
     /**
@@ -92,6 +100,7 @@ public class JvmMemory extends SnapshotBase {
      *
      * Amount of used memory in bytes
      */
+    @ColumnPosition(position = 27)
     private Long usedHeapSize;
 
     /**
@@ -99,6 +108,6 @@ public class JvmMemory extends SnapshotBase {
      *
      * Amount of used memory in bytes
      */
+    @ColumnPosition(position = 28)
     private Long usedNonHeapSize;
-
 }

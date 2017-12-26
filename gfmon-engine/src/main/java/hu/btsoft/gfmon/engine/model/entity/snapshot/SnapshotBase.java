@@ -11,7 +11,9 @@
  */
 package hu.btsoft.gfmon.engine.model.entity.snapshot;
 
+import hu.btsoft.gfmon.engine.model.entity.ColumnPosition;
 import hu.btsoft.gfmon.engine.model.entity.EntityBase;
+import hu.btsoft.gfmon.engine.model.entity.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.Server;
 import java.util.Date;
 import javax.persistence.Column;
@@ -24,6 +26,7 @@ import javax.persistence.TemporalType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.eclipse.persistence.annotations.Customizer;
 
 /**
  *
@@ -33,6 +36,7 @@ import lombok.NoArgsConstructor;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
+@Customizer(EntityColumnPositionCustomizer.class)
 public abstract class SnapshotBase extends EntityBase {
 
     /**
@@ -41,6 +45,7 @@ public abstract class SnapshotBase extends EntityBase {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SERVER_ID")
+    @ColumnPosition(position = 10)
     private Server server;
 
     /**
@@ -50,6 +55,7 @@ public abstract class SnapshotBase extends EntityBase {
     @Temporal(TemporalType.TIMESTAMP)
     //@NotNull(message = "A lastSampleTime nem lehet null")
     @Column(name = "LAST_SAMPLE_TIME"/*, nullable = false*/)
+    @ColumnPosition(position = 11)
     private Date lastSampleTime;
 
 }

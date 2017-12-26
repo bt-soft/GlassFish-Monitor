@@ -12,6 +12,7 @@
 package hu.btsoft.gfmon.engine.model.entity.snapshot;
 
 import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
+import hu.btsoft.gfmon.engine.model.entity.ColumnPosition;
 import javax.persistence.Cacheable;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
@@ -44,6 +45,7 @@ public class HttpServiceRequest extends SnapshotBase {
      * Number of responses with a status code equal to 200
      *
      */
+    @ColumnPosition(position = 20)
     private Long count200;
 
     /**
@@ -51,6 +53,7 @@ public class HttpServiceRequest extends SnapshotBase {
      *
      * Number of responses with a status code in the 2xx range
      */
+    @ColumnPosition(position = 21)
     private Long count2xx;
 
     /**
@@ -58,6 +61,7 @@ public class HttpServiceRequest extends SnapshotBase {
      *
      * Number of responses with a status code equal to 302
      */
+    @ColumnPosition(position = 22)
     private Long count302;
 
     /**
@@ -65,6 +69,7 @@ public class HttpServiceRequest extends SnapshotBase {
      *
      * Number of responses with a status code equal to 304
      */
+    @ColumnPosition(position = 23)
     private Long count304;
 
     /**
@@ -72,6 +77,7 @@ public class HttpServiceRequest extends SnapshotBase {
      *
      * Number of responses with a status code in the 3xx range
      */
+    @ColumnPosition(position = 24)
     private Long count3xx;
 
     /**
@@ -79,6 +85,7 @@ public class HttpServiceRequest extends SnapshotBase {
      *
      * Number of responses with a status code equal to 400
      */
+    @ColumnPosition(position = 25)
     private Long count400;
 
     /**
@@ -86,6 +93,7 @@ public class HttpServiceRequest extends SnapshotBase {
      *
      * Number of responses with a status code equal to 401
      */
+    @ColumnPosition(position = 26)
     private Long count401;
 
     /**
@@ -93,6 +101,7 @@ public class HttpServiceRequest extends SnapshotBase {
      *
      * Number of responses with a status code equal to 403
      */
+    @ColumnPosition(position = 27)
     private Long count403;
 
     /**
@@ -100,6 +109,7 @@ public class HttpServiceRequest extends SnapshotBase {
      *
      * Number of responses with a status code equal to 404
      */
+    @ColumnPosition(position = 28)
     private Long count404;
 
     /**
@@ -107,6 +117,7 @@ public class HttpServiceRequest extends SnapshotBase {
      *
      * Number of responses with a status code in the 4xx range
      */
+    @ColumnPosition(position = 29)
     private Long count4xx;
 
     /**
@@ -114,6 +125,7 @@ public class HttpServiceRequest extends SnapshotBase {
      *
      * Number of responses with a status code equal to 503
      */
+    @ColumnPosition(position = 30)
     private Long count503;
 
     /**
@@ -121,6 +133,7 @@ public class HttpServiceRequest extends SnapshotBase {
      *
      * Number of responses with a status code in the 5xx range
      */
+    @ColumnPosition(position = 31)
     private Long count5xx;
 
     /**
@@ -128,6 +141,7 @@ public class HttpServiceRequest extends SnapshotBase {
      *
      * The number of bytes received
      */
+    @ColumnPosition(position = 32)
     private Long countBytesReceived;
 
     /**
@@ -135,6 +149,7 @@ public class HttpServiceRequest extends SnapshotBase {
      *
      * The number of bytes transmitted
      */
+    @ColumnPosition(position = 33)
     private Long countBytesTransmitted;
 
     /**
@@ -142,6 +157,7 @@ public class HttpServiceRequest extends SnapshotBase {
      *
      * The number of open connections
      */
+    @ColumnPosition(position = 34)
     private Long countOpenConnections;
 
     /**
@@ -149,6 +165,7 @@ public class HttpServiceRequest extends SnapshotBase {
      *
      * Number of responses with a status code outside the 2xx, 3xx, 4xx, and 5xx range
      */
+    @ColumnPosition(position = 35)
     private Long countOther;
 
     /**
@@ -156,6 +173,7 @@ public class HttpServiceRequest extends SnapshotBase {
      *
      * The number of requests received
      */
+    @ColumnPosition(position = 36)
     private Long countRequests;
 
     /**
@@ -163,6 +181,7 @@ public class HttpServiceRequest extends SnapshotBase {
      *
      * Cumulative value of the error count, with error count representing the number of cases where the response code was greater than or equal to 400
      */
+    @ColumnPosition(position = 37)
     private Long errorCount;
 
     /**
@@ -170,6 +189,7 @@ public class HttpServiceRequest extends SnapshotBase {
      *
      * The maximum number of open connections
      */
+    @ColumnPosition(position = 38)
     private Long maxOpenConnections;
 
     /**
@@ -177,6 +197,7 @@ public class HttpServiceRequest extends SnapshotBase {
      *
      * Longest response time for a request; not a cumulative value, but the largest response time from among the response times
      */
+    @ColumnPosition(position = 39)
     private Long maxTime;
 
     /**
@@ -184,6 +205,7 @@ public class HttpServiceRequest extends SnapshotBase {
      *
      * The method of the last request serviced
      */
+    @ColumnPosition(position = 40)
     private String method;
 
     /**
@@ -191,6 +213,7 @@ public class HttpServiceRequest extends SnapshotBase {
      *
      * Average request processing time
      */
+    @ColumnPosition(position = 41)
     private Long processingTime;
 
     /**
@@ -198,6 +221,7 @@ public class HttpServiceRequest extends SnapshotBase {
      *
      * The URI of the last request serviced
      */
+    @ColumnPosition(position = 42)
     private String uri;
 
 }
