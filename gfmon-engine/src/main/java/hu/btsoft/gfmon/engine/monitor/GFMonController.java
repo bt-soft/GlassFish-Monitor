@@ -215,9 +215,6 @@ public class GFMonController {
                 //lementjük az adatbázisba
                 snapshotService.save(snapshot);
 
-                //Nem kell már az az entitás, elengedjük
-                snapshotService.detach(snapshot);
-
                 log.trace("Snapshot: {}", snapshot);
             }
 
