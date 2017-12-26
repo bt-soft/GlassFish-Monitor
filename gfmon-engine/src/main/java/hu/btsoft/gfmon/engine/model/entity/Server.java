@@ -51,11 +51,19 @@ import org.apache.commons.lang3.StringUtils;
 public class Server extends ModifiableEntityBase {
 
     /**
+     * A monitorozás aktív rá?
+     */
+    @Column(nullable = false)
+    @ColumnPosition(position = 10)
+    private boolean active;
+
+    /**
      * Szerver host neve
      */
     @NotNull(message = "A hostName nem lehet null")
     @Size(min = 5, max = 255, message = "A hostName mező hossza {min} és {max} között lehet")
     @Column(name = "HOST_NAME", length = 255, nullable = false)
+    @ColumnPosition(position = 11)
     private String hostName;
 
     /**
@@ -63,6 +71,7 @@ public class Server extends ModifiableEntityBase {
      */
     @Size(min = 5, max = 255, message = "A ipAddress mező hossza {min} és {max} között lehet")
     @Column(name = "IP_ADDRESS", length = 255, nullable = true)
+    @ColumnPosition(position = 12)
     private String ipAddress;
 
     /**
@@ -72,37 +81,36 @@ public class Server extends ModifiableEntityBase {
     @Min(value = 1024, message = "A portNumber minimális értéke {value}")
     @Max(value = 65535, message = "A portNumber maximális értéke {value}")
     @Column(name = "PORT_NUM", nullable = false)
+    @ColumnPosition(position = 13)
     private int portNumber;
-
-    /**
-     * Leírás
-     */
-    @Size(max = 255, message = "A description mező hossza maximum {max} lehet")
-    private String description;
 
     /**
      * UserName
      */
     @Column(length = 80, nullable = true)
+    @ColumnPosition(position = 14)
     private String userName;
 
     /**
      * UserName
      */
     @Column(name = "PASSWD", length = 80, nullable = true)
+    @ColumnPosition(position = 15)
     private String encPasswd;
 
     /**
-     * A monitorozás aktív rá?
+     * Leírás
      */
-    @Column(nullable = false)
-    private boolean active;
+    @Size(max = 255, message = "A description mező hossza maximum {max} lehet")
+    @ColumnPosition(position = 16)
+    private String description;
 
     /**
      * Kiegészítő információk
      * (pl.: miért lett tiltva a szerver monitorozása, stb...)
      */
     @Column(name = "ADDITIONAL_INFO", nullable = true)
+    @ColumnPosition(position = 17)
     private String additionalInformation;
 
 //    /**

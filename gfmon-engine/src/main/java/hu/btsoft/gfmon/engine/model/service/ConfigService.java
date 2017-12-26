@@ -27,6 +27,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ConfigService extends ServiceBase<Config> {
 
+    public final static String KEYCLASS_NAME = "settings";
+    public final static String KEY_AUTOSTART = "autoStart";
+    public final static String KEY_SAMPLEINTERVAL = "sampleInterval";
+
     @PersistenceContext
     private EntityManager em;
 
@@ -50,14 +54,14 @@ public class ConfigService extends ServiceBase<Config> {
     /**
      * Konfigurációs érték lekérése
      *
-     * @param subKeyName alkulcs neve
+     * @param keyName a konfig kulcs neve
      *
      * @return Config entitás
      */
-    private Config getConfig(String subKeyName) {
+    private Config getConfig(String keyName) {
         Query query = em.createNamedQuery("Config.findByKeyNames");
-        query.setParameter("keyName", "settings");
-        query.setParameter("subKeyName", subKeyName);
+        query.setParameter("keyClassName", KEYCLASS_NAME);
+        query.setParameter("keyName", keyName);
 
         Config config = (Config) query.getSingleResult();
 

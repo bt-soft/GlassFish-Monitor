@@ -11,6 +11,7 @@
  */
 package hu.btsoft.gfmon.engine.monitor;
 
+import hu.btsoft.gfmon.corelib.reflection.ReflectionUtils;
 import hu.btsoft.gfmon.engine.model.entity.snapshot.HttpServiceRequest;
 import hu.btsoft.gfmon.engine.model.entity.snapshot.JvmMemory;
 import hu.btsoft.gfmon.engine.model.entity.snapshot.SnapshotBase;
@@ -18,7 +19,6 @@ import hu.btsoft.gfmon.engine.monitor.collector.MonitorValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.httpservice.HttpServiceRequestCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.jvm.MemoryColletor;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,27 +36,6 @@ import lombok.extern.slf4j.Slf4j;
 public class JSonEntityToSnapsotEntityMapper {
 
     /**
-     * Minde nmező leszedése, még az őseké is
-     *
-     * @param fields mezők listája
-     * @param clazz  osztály példány
-     *
-     * @return mezők listája
-     */
-    private Set<Field> getAllFields(Class<?> clazz, Set<Field> fields) {
-
-        //Leszedjük az összes mezőjét
-        fields.addAll(new HashSet<>(Arrays.asList(clazz.getDeclaredFields())));
-
-        //Ha van őse, akkor azt is (rekurzívan)
-        if (clazz.getSuperclass() != null) {
-            this.getAllFields(clazz.getSuperclass(), fields);
-        }
-
-        return fields;
-    }
-
-    /**
      * Mezők JPA és Serializable nélkül
      *
      * @param clazz osztály példány
@@ -64,9 +43,9 @@ public class JSonEntityToSnapsotEntityMapper {
      * @return
      */
     private Set<Field> getAllFields(Class<?> clazz) {
-        Set<Field> fields = new HashSet<>();
 
-        this.getAllFields(clazz, fields);
+        Set<Field> fields = new HashSet<>();
+        ReflectionUtils.getAllFields(clazz, fields);
 
         //A JPA és a Serializable dolgait kitöröljük a halmazból
         for (Iterator<Field> i = fields.iterator(); i.hasNext();) {

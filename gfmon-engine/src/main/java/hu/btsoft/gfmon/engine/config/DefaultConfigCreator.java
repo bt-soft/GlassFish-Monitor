@@ -61,12 +61,12 @@ public class DefaultConfigCreator {
     private void createDefaults() {
         log.trace("Default beállítások létrehozása");
         {//autostart
-            Config config = new Config("settings", "autoStart", ConfigValueType.B, "true");
+            Config config = new Config(ConfigService.KEYCLASS_NAME, ConfigService.KEY_AUTOSTART, ConfigValueType.B, "true");
             config.setCreatedBy(DEF_USERNAME);
             configService.save(config);
         }
         {//sampleInterval
-            Config config = new Config("settings", "sampleInterval", ConfigValueType.I, "60");
+            Config config = new Config(ConfigService.KEYCLASS_NAME, ConfigService.KEY_SAMPLEINTERVAL, ConfigValueType.I, "60");
             config.setCreatedBy(DEF_USERNAME);
             configService.save(config);
         }

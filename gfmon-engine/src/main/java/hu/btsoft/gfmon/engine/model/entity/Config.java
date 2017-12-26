@@ -11,6 +11,7 @@
  */
 package hu.btsoft.gfmon.engine.model.entity;
 
+import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
 import hu.btsoft.gfmon.engine.config.ConfigValueType;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
@@ -26,7 +27,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
 
 /**
  * Beéllítások entitás
@@ -41,25 +41,27 @@ import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
 @NoArgsConstructor
 @AllArgsConstructor
 @NamedQueries({
-    @NamedQuery(name = "Config.findByKeyNames", query = "SELECT c FROM Config c WHERE c.keyName = :keyName AND c.subKeyName = :subKeyName"),//
+    @NamedQuery(name = "Config.findByKeyNames", query = "SELECT c FROM Config c WHERE c.keyClassName = :keyClassName AND c.keyName = :keyName"),//
 })
 public class Config extends ModifiableEntityBase {
 
     /**
      * Konfig class
      */
-    @NotNull(message = "A keyName nem lehet null")
-    @Column(name = "KEY_NAME", length = 30, nullable = false)
+    @NotNull(message = "A keyClassName nem lehet null")
+    @Column(name = "KEYCLASS_NAME", length = 30, nullable = false)
     @XmlElement(required = true)
-    private String keyName;
+    @ColumnPosition(position = 10)
+    private String keyClassName;
 
     /**
      * Konfig neve
      */
-    @NotNull(message = "A subKeyName nem lehet null")
-    @Column(name = "SUBKEY_NAME", length = 30, nullable = false)
+    @NotNull(message = "A keyName nem lehet null")
+    @Column(name = "KEY_NAME", length = 30, nullable = false)
     @XmlElement(required = true)
-    private String subKeyName;
+    @ColumnPosition(position = 11)
+    private String keyName;
 
     /**
      * Konfig érték típusa
@@ -68,6 +70,7 @@ public class Config extends ModifiableEntityBase {
     @Column(name = "VALUE_TYPE", length = 2, nullable = false)
     @XmlElement(required = true)
     @Enumerated(EnumType.STRING)
+    @ColumnPosition(position = 12)
     private ConfigValueType valueType;
 
     /**
@@ -75,5 +78,6 @@ public class Config extends ModifiableEntityBase {
      */
     @Column(name = "KEY_VALUE", length = 1024, nullable = true)
     @XmlElement(required = false)
+    @ColumnPosition(position = 13)
     private String keyValue;
 }

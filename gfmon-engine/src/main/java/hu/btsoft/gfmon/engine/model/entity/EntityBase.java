@@ -24,6 +24,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
+import org.eclipse.persistence.annotations.Customizer;
 
 /**
  * JPA entitás ős osztály
@@ -32,6 +33,7 @@ import lombok.Data;
  */
 @MappedSuperclass
 @Data
+@Customizer(EntityColumnPositionCustomizer.class)
 public class EntityBase implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -46,11 +48,13 @@ public class EntityBase implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     //    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gfMonSeq")
     @SequenceGenerator(name = "gfMonSeq", sequenceName = "GFMON_SEQ")
+    @ColumnPosition(position = 0)
     private Long id;
 
     /**
      * A létrehozás dátuma és ideje
      */
+    @ColumnPosition(position = 100)
     @NotNull(message = "A createdDate nem lehet null")
     @Column(name = "CREATED_DATE", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)

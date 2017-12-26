@@ -23,6 +23,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.eclipse.persistence.annotations.Customizer;
 
 /**
  * Módosítható Entitás ős
@@ -32,6 +33,7 @@ import lombok.EqualsAndHashCode;
 @MappedSuperclass
 @Data
 @EqualsAndHashCode(callSuper = false)
+@Customizer(EntityColumnPositionCustomizer.class)
 public class ModifiableEntityBase extends EntityBase {
 
     /**
@@ -40,6 +42,7 @@ public class ModifiableEntityBase extends EntityBase {
     @Size(min = 1, max = 30, message = "A createdBy 1-30 hosszú lehet")
     @NotNull(message = "A createdBy nem lehet null")
     @Column(name = "CREATED_BY", nullable = false)
+    @ColumnPosition(position = 101)
     private String createdBy;
 
     /**
@@ -48,25 +51,28 @@ public class ModifiableEntityBase extends EntityBase {
     //A létrehozás ideje az EntityBase osztályban
 //
     /**
+     * A módosítás ideje
+     */
+    @Column(name = "MODIFIED_DATE", nullable = true)
+    @Temporal(TemporalType.TIMESTAMP)
+    @ColumnPosition(position = 102)
+    private Date modifiedDate;
+
+    /**
      * Módosító user
      */
     @Size(min = 1, max = 30, message = "A modifiedBy 1-30 hosszú lehet")
     //@NotNull(message = "A modifiedBy nem lehet null")
     @Column(name = "MODIFIED_BY", nullable = true)
+    @ColumnPosition(position = 103)
     private String modifiedBy;
-
-    /**
-     * A módosítás ideje
-     */
-    @Column(name = "MODIFIED_DATE", nullable = true)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modifiedDate;
 
     /**
      * JPA optimista lock
      */
     @Version
     @Column(name = "Version", columnDefinition = "Integer DEFAULT 0", nullable = false)
+    @ColumnPosition(position = 104)
     private Long optLockVersion;
 
     /**
