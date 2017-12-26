@@ -18,6 +18,8 @@ import hu.btsoft.gfmon.engine.model.service.ServerService;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -27,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Stateless
 @Slf4j
+@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW) //A BEAN-be záródik a tranzakció
 public class DefaultConfigCreator {
 
     private static final String DEF_USERNAME = "DefaultConfigCreator";
@@ -70,8 +73,10 @@ public class DefaultConfigCreator {
 
         {//Server 1
             Server server = new Server("localhost", 4848, "Lokális GlassFish Admin", null /*user*/, null /*passwd*/, true /*enabled*/);
+//            Server server = new Server("localhost", 4848, "Lokális GlassFish Admin", "admin" /*user*/, "admin" /*passwd*/, true /*enabled*/);
             server.setCreatedBy(DEF_USERNAME);
             serverService.save(server);
         }
+
     }
 }

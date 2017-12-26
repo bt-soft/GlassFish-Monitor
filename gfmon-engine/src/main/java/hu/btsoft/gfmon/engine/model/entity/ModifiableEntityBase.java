@@ -66,7 +66,7 @@ public class ModifiableEntityBase extends EntityBase {
      * JPA optimista lock
      */
     @Version
-    @Column(name = "OPT_LOCK", columnDefinition = "integer DEFAULT 0", nullable = false)
+    @Column(name = "Version", columnDefinition = "Integer DEFAULT 0", nullable = false)
     private Long optLockVersion;
 
     /**

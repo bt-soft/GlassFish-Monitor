@@ -16,6 +16,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Monitorozandó szerverek adatait kezelő JPA szolgáltató osztály
@@ -46,4 +47,43 @@ public class ServerService extends ServiceBase<Server> {
         return em;
     }
 
+    /**
+     * Kieginfó módosítása
+     *
+     * @param entity            Server entitás
+     * @param modifiedUser      módosító user
+     * @param additionalMessage az adatbázisba írandó kieginfo
+     */
+    public void updateAdditionalMessage(Server entity, String modifiedUser, String additionalMessage) {
+
+        //Módosító user
+        entity.setModifiedBy(modifiedUser);
+
+        //Kieginfo
+        entity.setAdditionalInformation(additionalMessage);
+
+        //Az esetleges optimisticLocking elkerülése végett a Version-t átmásoljuk az adatbzisból imént felolvasott értékre
+        Server lastVersion = super.find(entity.getId());
+        entity.setOptLockVersion(lastVersion.getOptLockVersion());
+
+        //Le is mentjük az adatbázisba az állapotot
+        super.save(entity);
+    }
+
+    /**
+     * Kieginfo törlése
+     *
+     * @param entity Server entitás
+     */
+    public void clearAdditionalMessage(Server entity, String modifiedUser) {
+
+        //Rákeresünk, hogy ne legyen optimisticLocking
+        Server lastVersion = super.find(entity.getId());
+
+        //Ha nme üres a kieginfo-ja, akkor most töröljük!
+        if (!StringUtils.isEmpty(lastVersion.getAdditionalInformation())) {
+            lastVersion.setAdditionalInformation(null);
+            super.save(lastVersion);
+        }
+    }
 }

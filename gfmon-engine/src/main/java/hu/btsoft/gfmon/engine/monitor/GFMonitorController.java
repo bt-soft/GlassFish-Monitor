@@ -4,7 +4,7 @@
  *  GF Monitor project
  *
  *  Module:  gfmon-engine (gfmon-engine)
- *  File:    GFMonController.java
+ *  File:    GFMonitorController.java
  *  Created: 2017.12.23. 11:55:43
  *
  *  ------------------------------------------------------------------------------------
@@ -33,7 +33,11 @@ import javax.ejb.Timeout;
 import javax.ejb.Timer;
 import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
+import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.ProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -46,7 +50,10 @@ import org.apache.commons.lang3.StringUtils;
 @Startup
 @DependsOn("Bootstrapper")
 @Slf4j
-public class GFMonController {
+@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW) //A BEAN-be záródik a tranzakció
+public class GFMonitorController {
+
+    private static final String DB_MODIFICATORY_USER = "GF-Monitor-Controller";
 
     @EJB
     private ConfigService configService;
@@ -155,7 +162,8 @@ public class GFMonController {
 
         List<Server> allServers = serverService.findAll();
 
-        for (Server server : serverService.findAll()) {
+        int checkedServerCnt = 0;
+        for (Server server : allServers) {
 
             //Az inaktív szerverekkel nem foglalkozunk
             if (!server.isActive()) {
@@ -168,8 +176,35 @@ public class GFMonController {
 
             //ha még nincs SessionToken, akkor csinálunk egyet
             if (StringUtils.isEmpty(server.getSessionToken())) {
-                String sessionToken = sessionTokenAcquirer.getSessionToken(url, userName, plainPassword);
-                server.setSessionToken(sessionToken);
+                try {
+
+                    String sessionToken = sessionTokenAcquirer.getSessionToken(url, userName, plainPassword);
+                    server.setSessionToken(sessionToken);
+                } catch (Exception e) {
+
+                    String logMsg;
+                    String dbMsg;
+                    if (e instanceof NotAuthorizedException) {
+                        logMsg = "A(z) '{}' szerverbe nem lehet bejelnetkezni!";
+                        dbMsg = "Nem lehet bejelentkezni!";
+
+                    } else if (e instanceof ProcessingException) {
+                        logMsg = "A(z) '{}' szerver nem érhető el!";
+                        dbMsg = "A szerver nem érhető el!";
+
+                    } else {
+                        logMsg = String.format("A(z) '{}' szerver monitorozása ismeretlen hibára futott: %s", e.getCause().getMessage());
+                        dbMsg = "Ismeretlen hiba: " + e.getCause().getMessage();
+                    }
+
+                    log.error(logMsg, server.getUrl());
+
+                    //Beírjuk az üzenetet az adatbázisba is
+                    serverService.updateAdditionalMessage(server, DB_MODIFICATORY_USER, dbMsg);
+
+                    //jöhet a következő szerver
+                    continue;
+                }
             }
 
             //Ha még nem tudjuk, hogy az adott szerveren mit lehet monitorozni., akkor azt most kigyűjtjük
@@ -180,14 +215,16 @@ public class GFMonController {
 
                 // Amely szervernek nincs engedélyezve egyetlen monitorozható modulja sem, azt jól inaktívvá tesszük
                 if (monitorableModules == null) {
+
+                    //letiltjuk
                     server.setActive(false);
-                    server.setAdditionalInformation("A szerver MonitoringService szolgáltatása nincs engedélyezve, emiatt a monitorozása tiltva lett");
-                    server.setModifiedBy("GFMonController");
 
-                    log.warn("{}: {}", server.getUrl(), server.getAdditionalInformation());
+                    //Beírjuk az üzenetet az adatbázisba is
+                    String kieginfo = "A szerver MonitoringService szolgáltatása nincs engedélyezve, emiatt a monitorozása le lett tiltva!";
+                    serverService.updateAdditionalMessage(server, DB_MODIFICATORY_USER, kieginfo);
 
-                    //Le is mentjük az adatbázisba az állapotot
-                    serverService.save(server);
+                    //logot is írunk
+                    log.warn("{}: {}", server.getUrl(), kieginfo);
 
                     //Ezzel a szerverrel már nem foglalkozunk tovább, majd visszabillenthető a UI felületről a státusza
                     continue;
@@ -201,6 +238,10 @@ public class GFMonController {
             log.trace("Adatgyűjtés indul: {}", url);
 
             Set<SnapshotBase> snapshots = snapshotProvider.fetchSnapshot(server);
+            checkedServerCnt++;
+
+            //Töröljük a kieginfót, ha van
+            serverService.clearAdditionalMessage(server, DB_MODIFICATORY_USER);
 
             if (snapshots == null || snapshots.isEmpty()) {
                 log.warn("Nincsenek menthető pillanatfelvételek!");
@@ -223,6 +264,6 @@ public class GFMonController {
             snapshotService.flush();
         }
 
-        log.trace("Monitor {} db szerverre, elapsed: {}", allServers.size(), Elapsed.getNanoStr(start));
+        log.trace("Monitor {} db szerverre, elapsed: {}", checkedServerCnt, Elapsed.getNanoStr(start));
     }
 }
