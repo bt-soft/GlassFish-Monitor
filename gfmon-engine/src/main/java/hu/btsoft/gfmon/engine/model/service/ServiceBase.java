@@ -38,6 +38,14 @@ public abstract class ServiceBase<T extends EntityBase> {
     protected abstract EntityManager getEntityManager();
 
     /**
+     * JPA cache -> adatbázis szinkronizálás
+     */
+    public void flush() {
+        //kiíratjuk az adatbázisba a változásokat
+        getEntityManager().flush();
+    }
+
+    /**
      * Új entitás létrehozása vagy létező entitás update
      *
      * @param entity entitás példány
@@ -49,9 +57,6 @@ public abstract class ServiceBase<T extends EntityBase> {
         } else {
             getEntityManager().merge(entity);
         }
-
-        //kiíratjuk az adatbázisba az entitást
-        getEntityManager().flush();
     }
 
     /**

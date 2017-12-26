@@ -11,6 +11,7 @@
  */
 package hu.btsoft.gfmon.engine.monitor;
 
+import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.model.entity.Server;
 import hu.btsoft.gfmon.engine.model.entity.snapshot.SnapshotBase;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
@@ -18,6 +19,7 @@ import hu.btsoft.gfmon.engine.model.service.ServerService;
 import hu.btsoft.gfmon.engine.model.service.SnapshotService;
 import hu.btsoft.gfmon.engine.rest.CollectMonitorServiceModules;
 import hu.btsoft.gfmon.engine.security.SessionTokenAcquirer;
+import java.util.List;
 import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -149,6 +151,10 @@ public class GFMonController {
     @Timeout
     protected void timeOut() {
 
+        long start = Elapsed.nowNano();
+
+        List<Server> allServers = serverService.findAll();
+
         for (Server server : serverService.findAll()) {
 
             //Az inaktív szerverekkel nem foglalkozunk
@@ -208,12 +214,17 @@ public class GFMonController {
 
                 //lementjük az adatbázisba
                 snapshotService.save(snapshot);
+
+                //Nem kell már az az entitás, elengedjük
                 snapshotService.detach(snapshot);
 
                 log.trace("Snapshot: {}", snapshot);
             }
 
-            ///eventBus.publish(IGFMonitorConstants.SOCKET_CHANNEL_NAME, "Kéx!");
+            //Kiíratjuk a változásokat az adatbázisba
+            snapshotService.flush();
         }
+
+        log.trace("Monitor {} db szerverre, elapsed: {}", allServers.size(), Elapsed.getNanoStr(start));
     }
 }
