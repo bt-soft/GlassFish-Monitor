@@ -181,9 +181,10 @@ public class GFMonController {
                 // Amely szervernek nincs engedélyezve egyetlen monitorozható modulja sem, azt jól inaktívvá tesszük
                 if (monitorableModules == null) {
                     server.setActive(false);
-                    server.setComment("A szerver MonitoringService szolgáltatása nincs engedélyezve, emiatt a monitorozása tiltva lett");
-                    server.setModUser("GFMonController");
-                    log.warn("{}: {}", server.getUrl(), server.getComment());
+                    server.setAdditionalInformation("A szerver MonitoringService szolgáltatása nincs engedélyezve, emiatt a monitorozása tiltva lett");
+                    server.setModifiedBy("GFMonController");
+
+                    log.warn("{}: {}", server.getUrl(), server.getAdditionalInformation());
 
                     //Le is mentjük az adatbázisba az állapotot
                     serverService.save(server);

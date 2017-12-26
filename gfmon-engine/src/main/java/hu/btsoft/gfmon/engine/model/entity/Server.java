@@ -102,8 +102,8 @@ public class Server extends ModifiableEntityBase {
      * Kiegészítő információk
      * (pl.: miért lett tiltva a szerver monitorozása, stb...)
      */
-    @Column(name = "comment")
-    private String comment;
+    @Column(name = "ADDITIONAL_INFO", nullable = true)
+    private String additionalInformation;
 
 //    /**
 //     * A szerver mérési eredményei

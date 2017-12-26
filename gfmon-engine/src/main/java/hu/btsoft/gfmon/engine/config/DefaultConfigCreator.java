@@ -59,18 +59,18 @@ public class DefaultConfigCreator {
         log.trace("Default beállítások létrehozása");
         {//autostart
             Config config = new Config("settings", "autoStart", ConfigValueType.B, "true");
-            config.setModUser(DEF_USERNAME);
+            config.setCreatedBy(DEF_USERNAME);
             configService.save(config);
         }
         {//sampleInterval
             Config config = new Config("settings", "sampleInterval", ConfigValueType.I, "60");
-            config.setModUser(DEF_USERNAME);
+            config.setCreatedBy(DEF_USERNAME);
             configService.save(config);
         }
 
         {//Server 1
-            Server server = new Server("localhost", 4848, "Lokális GlassFish Admin", null, null, true);
-            server.setModUser(DEF_USERNAME);
+            Server server = new Server("localhost", 4848, "Lokális GlassFish Admin", null /*user*/, null /*passwd*/, true /*enabled*/);
+            server.setCreatedBy(DEF_USERNAME);
             serverService.save(server);
         }
     }

@@ -14,6 +14,9 @@ package hu.btsoft.gfmon.engine.model.service;
 import hu.btsoft.gfmon.engine.model.entity.EntityBase;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
+import lombok.extern.slf4j.Slf4j;
+import org.eclipse.persistence.exceptions.DatabaseException;
 
 /**
  * JPA Service ős osztály
@@ -22,6 +25,7 @@ import javax.persistence.EntityManager;
  *
  * @author BT
  */
+@Slf4j
 public abstract class ServiceBase<T extends EntityBase> {
 
     private final Class<T> entityClass;
@@ -46,16 +50,29 @@ public abstract class ServiceBase<T extends EntityBase> {
     }
 
     /**
+     * Cache frissítés
+     */
+    public void evict() {
+        getEntityManager().getEntityManagerFactory().getCache().evict(entityClass);
+    }
+
+    /**
      * Új entitás létrehozása vagy létező entitás update
      *
      * @param entity entitás példány
      */
     public void save(T entity) {
-        //Új elntitás lesz?
-        if (entity.getId() == null) {
-            getEntityManager().persist(entity);
-        } else {
-            getEntityManager().merge(entity);
+        try {
+            //Új elntitás lesz?
+            if (entity.getId() == null) {
+                getEntityManager().persist(entity);
+            } else {
+                getEntityManager().merge(entity);
+            }
+        } catch (PersistenceException e) {
+            log.error("Entitás mentés/update hiba", e);
+        } catch (DatabaseException e) {
+            log.error("Entitás mentés/update adatbázis hiba", e);
         }
     }
 
@@ -74,10 +91,17 @@ public abstract class ServiceBase<T extends EntityBase> {
      * @param entity entitás példány
      */
     public void remove(T entity) {
-        getEntityManager().remove(getEntityManager().merge(entity));
+        try {
+            getEntityManager().remove(getEntityManager().merge(entity));
 
-        //kiíratjuk az adatbázisba az entitás törlését
-        getEntityManager().flush();
+            //kiíratjuk az adatbázisba az entitás törlését
+            getEntityManager().flush();
+        } catch (PersistenceException e) {
+            log.error("Entitás törlés hiba", e);
+        } catch (DatabaseException e) {
+            log.error("Entitás törlés adatbázis hiba", e);
+        }
+
     }
 
     /**
@@ -89,13 +113,6 @@ public abstract class ServiceBase<T extends EntityBase> {
      */
     public T find(Object id) {
         return getEntityManager().find(entityClass, id);
-    }
-
-    /**
-     * Cache frissítés
-     */
-    public void evict() {
-        getEntityManager().getEntityManagerFactory().getCache().evict(entityClass);
     }
 
     /**

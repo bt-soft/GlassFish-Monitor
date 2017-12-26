@@ -12,7 +12,6 @@
 package hu.btsoft.gfmon.engine.model.entity;
 
 import java.util.Date;
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
@@ -22,68 +21,83 @@ import javax.persistence.TemporalType;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
  * Módosítható Entitás ős
- * JAXB a JAX-WS szerializáció miatt a UI felület felé
  *
  * @author BT
  */
 @MappedSuperclass
 @Data
 @EqualsAndHashCode(callSuper = false)
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {"id", "modUser", "modDat", "optLockVersion"})
 public class ModifiableEntityBase extends EntityBase {
 
     /**
-     * Módosító user
+     * Létrehozó user
      */
-    @Size(min = 1, max = 30, message = "A modUser 1-30 hosszú lehet")
-    @NotNull(message = "A modUser nem lehet null")
-    @Column(name = "MOD_USER", nullable = false)
-    @XmlAttribute(required = true)
-    private String modUser;
+    @Size(min = 1, max = 30, message = "A createdBy 1-30 hosszú lehet")
+    @NotNull(message = "A createdBy nem lehet null")
+    @Column(name = "CREATED_BY", nullable = false)
+    private String createdBy;
 
     /**
-     * A módosítás dátuma és ideje
+     * A létrehozás ideje
      */
-    @Basic(optional = false)
-    @NotNull(message = "A modDat nem lehet null")
-    @Column(name = "MOD_DAT", nullable = false)
+    //A létrehozás ideje az EntityBase osztályban
+//
+    /**
+     * Módosító user
+     */
+    @Size(min = 1, max = 30, message = "A modifiedBy 1-30 hosszú lehet")
+    //@NotNull(message = "A modifiedBy nem lehet null")
+    @Column(name = "MODIFIED_BY", nullable = true)
+    private String modifiedBy;
+
+    /**
+     * A módosítás ideje
+     */
+    @Column(name = "MODIFIED_DATE", nullable = true)
     @Temporal(TemporalType.TIMESTAMP)
-    @XmlAttribute(required = true)
-    private Date modDat;
+    private Date modifiedDate;
 
     /**
      * JPA optimista lock
      */
     @Version
     @Column(name = "OPT_LOCK", columnDefinition = "integer DEFAULT 0", nullable = false)
-    @XmlAttribute(required = true)
     private Long optLockVersion;
 
     /**
-     * Technikai mezők karbantartása
+     * Technikai mezők karbantartása - új entitás mentése
+     */
+    @PrePersist
+    @Override
+    protected void prePersist() {
+
+        super.prePersist();
+
+        //createdBy kitöltése, ha üres
+        if (createdBy == null) {
+            createdBy = "!Unknown User!";
+        }
+
+    }
+
+    /**
+     * Technikai mezők karbantartása - entitás update
      */
     @PreUpdate
-    @PrePersist
-    protected void updateFileds() {
+    protected void preUpdate() {
         //ModUser kitöltése, ha üres
-        if (modUser == null) {
-            modUser = "!Unknown User!";
+        if (modifiedBy == null) {
+            modifiedBy = "!Unknown User!";
         }
+
         //ModDat kitöltése, ha üres
-        if (modDat == null) {
-            modDat = new Date();
+        if (modifiedDate == null) {
+            modifiedDate = new Date();
         }
     }
 }
