@@ -18,7 +18,10 @@ import hu.btsoft.gfmon.engine.monitor.collector.dto.QuantityValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.dto.ValueBaseDto;
 import hu.btsoft.gfmon.engine.monitor.collector.httpservice.RequestCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.jvm.MemoryColletor;
+import hu.btsoft.gfmon.engine.monitor.collector.jvm.ThreadSystemCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.network.ConnectionQueueCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.network.HttpListener1ConnectionQueueCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.network.HttpListener1KeepAliveCollector;
 import java.util.HashMap;
 import lombok.extern.slf4j.Slf4j;
 
@@ -128,23 +131,17 @@ public class JSonEntityToSnapsotModelMapper {
             case "errorcount":
                 snapshot.setHttpreqErrorCnt((Long) value);
                 break;
-        }
-    }
 
-    /**
-     * DTO -> Snapshot mapper - "network/connection-queue"
-     *
-     * @param enityName entitás neve
-     * @param dto       mérési eredmények
-     * @param snapshot  snapshot
-     */
-    private void networkMapper(String enityName, ValueBaseDto dto, Snapshot snapshot) {
+//            case "maxopenconnections":
+//                snapshot.setHttpreqMaxOpenConnectionsCnt((Long) value);
+//                break;
+//
+            case "maxtime":
+                snapshot.setHttpreqMaxTime((Long) value);
+                break;
 
-        Object value = this.getDtoTypedValue(dto);
-
-        switch (enityName) {
-            case "countopenconnections":
-                snapshot.setNetworkOpenConnectionsCnt((Long) value);
+            case "processingtime":
+                snapshot.setHttpreqProcTime((Long) value);
                 break;
         }
     }
@@ -176,6 +173,108 @@ public class JSonEntityToSnapsotModelMapper {
     }
 
     /**
+     * DTO -> Snapshot mapper - "jvm/thread-system"
+     *
+     * @param enityName entitás neve
+     * @param dto       mérési eredmények
+     * @param snapshot  snapshot
+     */
+    private void threadSystemMapper(String enityName, ValueBaseDto dto, Snapshot snapshot) {
+
+        Object value = this.getDtoTypedValue(dto);
+
+        switch (enityName) {
+            case "daemonthreadcount":
+                snapshot.setDeamonThreadCnt((Long) value);
+                break;
+
+            case "peakthreadcount":
+                snapshot.setDeamonThreadPeak((Long) value);
+                break;
+
+            case "threadcount":
+                snapshot.setThreadCount((Long) value);
+                break;
+
+            case "totalstartedthreadcount":
+                snapshot.setTotalStartedThreadCount((Long) value);
+                break;
+
+        }
+    }
+
+    /**
+     * DTO -> Snapshot mapper - "network/connection-queue"
+     *
+     * @param enityName entitás neve
+     * @param dto       mérési eredmények
+     * @param snapshot  snapshot
+     */
+    private void connQueMapper(String enityName, ValueBaseDto dto, Snapshot snapshot) {
+
+        Object value = this.getDtoTypedValue(dto);
+
+        switch (enityName) {
+            case "countopenconnections":
+                snapshot.setNetworkOpenConnectionsCnt((Long) value);
+                break;
+
+            case "countqueued":
+                snapshot.setNetworkQueuedConnectionsCnt((Long) value);
+                break;
+
+            case "peakqueued":
+                snapshot.setNetworkQueuedConnectionsCnt((Long) value);
+                break;
+        }
+    }
+
+    /**
+     * DTO -> Snapshot mapper - "network/http-listener-1/connection-queue"
+     *
+     * @param enityName entitás neve
+     * @param dto       mérési eredmények
+     * @param snapshot  snapshot
+     */
+    private void httpListener1ConnQueMapper(String enityName, ValueBaseDto dto, Snapshot snapshot) {
+
+        Object value = this.getDtoTypedValue(dto);
+
+        switch (enityName) {
+            case "countopenconnections":
+                snapshot.setHttpListener1OpenConnectionsCnt((Long) value);
+                break;
+
+            case "countqueued":
+                snapshot.setHttpListener1QueuedConnectionsCnt((Long) value);
+                break;
+
+            case "peakqueued":
+                snapshot.setHttpListener1QueuedConnectionsPeak((Long) value);
+                break;
+        }
+    }
+
+    /**
+     * DTO -> Snapshot mapper - "network/http-listener-1/keep-alive"
+     *
+     * @param enityName entitás neve
+     * @param dto       mérési eredmények
+     * @param snapshot  snapshot
+     */
+    private void httpListener1KeepAlive(String enityName, ValueBaseDto dto, Snapshot snapshot) {
+
+        Object value = this.getDtoTypedValue(dto);
+
+        switch (enityName) {
+            case "countconnections":
+                snapshot.setHttpListener1KeepAliveConnections((Long) value);
+                break;
+
+        }
+    }
+
+    /**
      * Map
      *
      * @param valuesMap mérési eredmények MAP
@@ -197,13 +296,26 @@ public class JSonEntityToSnapsotModelMapper {
                     httpServiceMapper(enityName, dto, snapshot);
                     break;
 
-                case ConnectionQueueCollector.URI:
-                    networkMapper(enityName, dto, snapshot);
-                    break;
-
                 case MemoryColletor.URI:
                     memoryMapper(enityName, dto, snapshot);
                     break;
+
+                case ThreadSystemCollector.URI:
+                    threadSystemMapper(enityName, dto, snapshot);
+                    break;
+
+                case ConnectionQueueCollector.URI:
+                    connQueMapper(enityName, dto, snapshot);
+                    break;
+
+                case HttpListener1ConnectionQueueCollector.URI:
+                    httpListener1ConnQueMapper(enityName, dto, snapshot);
+                    break;
+
+                case HttpListener1KeepAliveCollector.URI:
+                    httpListener1KeepAlive(enityName, dto, snapshot);
+                    break;
+
             }
         }
     }

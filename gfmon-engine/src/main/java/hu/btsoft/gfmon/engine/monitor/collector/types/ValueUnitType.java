@@ -19,7 +19,9 @@ package hu.btsoft.gfmon.engine.monitor.collector.types;
 public enum ValueUnitType {
 
     COUNT("count", ValueClass.NUMBER),
-    MILLISECONDS("millisecond", ValueClass.NUMBER),
+    NANOSECOND("nanosecond", ValueClass.NUMBER),
+    MILLISECOND("millisecond", ValueClass.NUMBER),
+    SECONDS("seconds", ValueClass.NUMBER),
     BYTES("bytes", ValueClass.NUMBER),
     STRING("String", ValueClass.STRING),
     LIST("List", ValueClass.STRING);

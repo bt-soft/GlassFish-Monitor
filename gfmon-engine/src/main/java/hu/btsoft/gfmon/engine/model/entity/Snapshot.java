@@ -46,14 +46,20 @@ public class Snapshot extends EntityBase {
     @JoinColumn(name = "SERVER_ID")
     private Server server;
 
-//--- REST PATH: server/http-service/server/request
+//
+//--- REST PATH: monitoring/domain/server/http-service/server
+//
     /**
+     * • countopenconnections
+     *
      * The number of open connections
      */
     @Column(name = "HREQ_OPCONNS")
     private Long httpreqOpenConnectionsCnt;
 
     /**
+     * • errorcount
+     *
      * Cumulative value of the error count,
      * with error count representing the number of cases where the response code
      * was greater than or equal to 400
@@ -61,30 +67,153 @@ public class Snapshot extends EntityBase {
     @Column(name = "HREQ_ERRCNTS")
     private Long httpreqErrorCnt;
 
-//--- REST PATH:  server/network/connection-queue
+//    /**
+//     * • maxopenconnections
+//     *
+//     * The maximum number of open connections
+//     */
+//    @Column(name = "HREQ_MAXOPENCONNS")
+//    private Long httpreqMaxOpenConnectionsCnt;
+//
     /**
-     * The number of open/active connections
+     * • maxtime
+     *
+     * Longest response time for a request; not a cumulative value, but the largest response time from among the response times
      */
-    @Column(name = "NET_OPENCONNS")
-    private Long networkOpenConnectionsCnt;
+    @Column(name = "HREQ_TIME_MAX")
+    private Long httpreqMaxTime;
 
-//--- REST PATH:  server/jvm/memory
     /**
+     * • processingtime
+     *
+     * Average request processing time
+     */
+    @Column(name = "HREQ_TIME_PROC")
+    private Long httpreqProcTime;
+
+//
+//--- REST PATH:  monitoring/domain/server/jvm/memory
+//
+    /**
+     * • initheapsize-count
+     *
      * Amount of memory in bytes that the Java virtual machine initially
      * requests from the operating system for memory management
      */
-    @Column(name = "MEM_INITHEAP")
+    @Column(name = "MEM_HEAP_INIT")
     private Long initHeapSizeCnt;
 
     /**
+     * • maxheapsize-count
+     *
      * Maximum amount of memory in bytes that can be used for memory management
      */
-    @Column(name = "MEM_MAXHEAP")
+    @Column(name = "MEM_HEAP_MAX")
     private Long maxHeapSizeCnt;
 
     /**
+     * • usedheapsize-count
+     *
      * Amount of used memory in bytes
      */
-    @Column(name = "MEM_USEDHEAP")
+    @Column(name = "MEM_HEAP_USED")
     private Long usedHeapSizeCnt;
+
+//--- REST PATH:  monitoring/domain/server/jvm/thread-system
+    /**
+     * • daemonthreadcount
+     *
+     * Amount of used memory in bytes
+     */
+    @Column(name = "THRD_DAEMTHRCNT")
+    private Long deamonThreadCnt;
+
+    /**
+     * • peakthreadcount
+     *
+     * Returns the peak live thread count since the Java virtual machine started or peak was reset
+     */
+    @Column(name = "THRD_DAEMTHRCNT_PEAK")
+    private Long deamonThreadPeak;
+
+    /**
+     * • threadcount
+     *
+     * Returns the current number of live threads including both daemon and non-daemon threads
+     */
+    @Column(name = "THRD_THRCNT")
+    private Long threadCount;
+
+    /**
+     * • totalstartedthreadcount
+     *
+     * Returns the total number of threads created and also started since the Java virtual machine started
+     */
+    @Column(name = "THRD_THRCNT_TOTAL_STRD")
+    private Long totalStartedThreadCount;
+
+//
+//--- REST PATH:  monitoring/domain/server/network/connection-queue
+//
+    /**
+     * • countopenconnections
+     *
+     * The number of open/active connections
+     */
+    @Column(name = "NCONQ_OPENCONNS")
+    private Long networkOpenConnectionsCnt;
+
+    /**
+     * • countqueued
+     *
+     * Number of connections currently in the queue
+     */
+    @Column(name = "NCONQ_QUEDCONNS")
+    private Long networkQueuedConnectionsCnt;
+
+    /**
+     * • peakqueued
+     *
+     * Largest number of connections that were in the queue simultaneously
+     */
+    @Column(name = "NCONQ_QUEDCONNS_PEAK")
+    private Long networkQueuedConnectionsPeak;
+
+//
+//--- REST PATH:  monitoring/domain/server/network/http-listener-1/connection-queue
+//
+    /**
+     * • countopenconnections
+     *
+     * The number of open/active connections
+     */
+    @Column(name = "NHL1CONQ_OPENCONNS")
+    private Long httpListener1OpenConnectionsCnt;
+
+    /**
+     * • countqueued
+     *
+     * Number of connections currently in the queue
+     */
+    @Column(name = "NHL1CONQ_QUEDCONNS")
+    private Long httpListener1QueuedConnectionsCnt;
+
+    /**
+     * • peakqueued
+     *
+     * Largest number of connections that were in the queue simultaneously
+     */
+    @Column(name = "NHL1CONQ_QUEDCONNS_PEAK")
+    private Long httpListener1QueuedConnectionsPeak;
+
+//
+//--- REST PATH:  monitoring/domain/server/network/http-listener-1/keep-alive
+//
+    /**
+     * • countconnections
+     *
+     * Number of connections in keep-alive mode
+     */
+    @Column(name = "NHL1KALIVE_COUNTCONNS")
+    private Long httpListener1KeepAliveConnections;
 }

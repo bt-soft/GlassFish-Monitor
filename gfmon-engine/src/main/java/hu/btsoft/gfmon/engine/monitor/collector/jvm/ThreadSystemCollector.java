@@ -4,8 +4,8 @@
  *  GF Monitor project
  *
  *  Module:  gfmon-engine (gfmon-engine)
- *  File:    MemoryColletor.java
- *  Created: 2017.12.26. 9:13:49
+ *  File:    ThreadSystemCollector.java
+ *  Created: 2017.12.26. 10:23:51
  *
  *  ------------------------------------------------------------------------------------
  */
@@ -14,13 +14,13 @@ package hu.btsoft.gfmon.engine.monitor.collector.jvm;
 import hu.btsoft.gfmon.engine.monitor.collector.CollectorBase;
 
 /**
- * JVM/Memory adatok gyűjtése
+ * JVM thread adatgyűjtő
  *
  * @author BT
  */
-public class MemoryColletor extends CollectorBase {
+public class ThreadSystemCollector extends CollectorBase {
 
-    public static final String URI = "jvm/memory";
+    public static final String URI = "jvm/thread-system";
 
     /**
      * Az adatgyűjtést a szerver URL-jéhez képest melyik uri-n kell elvégezni?

@@ -14,6 +14,7 @@ package hu.btsoft.gfmon.engine.monitor.collector.network;
 import hu.btsoft.gfmon.engine.monitor.collector.CollectorBase;
 
 /**
+ * Network Connection Queue adatok gyűjtése
  *
  * @author BT
  */

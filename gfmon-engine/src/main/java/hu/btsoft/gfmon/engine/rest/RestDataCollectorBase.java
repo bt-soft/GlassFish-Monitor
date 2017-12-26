@@ -142,8 +142,7 @@ public abstract class RestDataCollectorBase {
             log.trace("null a vett JSonObject!");
         }
 
-        log.trace("JsonObject Entities - retVal: {} (result: {})", retVal, result);
-
+        //log.trace("JsonObject Entities - retVal: {} (result: {})", retVal, result);
         return retVal;
     }
 

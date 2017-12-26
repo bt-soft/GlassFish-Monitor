@@ -79,7 +79,7 @@ public abstract class CollectorBase implements ICollectMonitoredData {
                 value = entity.getJsonString("current").getString();
                 break;
 
-            case MILLISECONDS:
+            case MILLISECOND:
             case COUNT:
             case BYTES:
                 value = entity.getJsonNumber("current").longValue();
@@ -181,7 +181,9 @@ public abstract class CollectorBase implements ICollectMonitoredData {
 
             switch (ValueUnitType.fromValue(unitName)) {
 
-                case MILLISECONDS:
+                case SECONDS:
+                case MILLISECOND:
+                case NANOSECOND:
                 case COUNT:
                 case BYTES: {
                     dto = getQuantityValues(valueEntity);
