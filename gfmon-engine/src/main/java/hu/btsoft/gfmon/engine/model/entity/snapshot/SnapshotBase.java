@@ -29,6 +29,7 @@ import lombok.NoArgsConstructor;
 import org.eclipse.persistence.annotations.Customizer;
 
 /**
+ * Mérési eredmények entitások ős osztálya
  *
  * @author BT
  */
