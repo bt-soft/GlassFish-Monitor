@@ -4,12 +4,12 @@
  *  GF Monitor project
  *
  *  Module:  gfmon-engine (gfmon-engine)
- *  File:    QuantityValueDto.java
- *  Created: 2017.12.24. 17:06:33
+ *  File:    CurrentCountValueDto.java
+ *  Created: 2017.12.24. 17:10:22
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.measure.collector.dto;
+package hu.btsoft.gfmon.engine.monitor.collector.dto;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,17 +17,28 @@ import lombok.ToString;
 
 /**
  * A GF REST interfészéről kigyűjtött adatok dto-ja
- * Számossági/darabszám adatok
+ * HighWatermark/LowWatermark/aktuális érték adatok
  *
  * @author BT
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @ToString(callSuper = true)
-public class QuantityValueDto extends ValueBaseDto {
+public class CurrentCountValueDto extends ValueBaseDto {
 
     /**
-     * A mért érték darabszáma
+     * A mérté érték aktuális értéke
      */
-    private long count;
+    private long current;
+
+    /**
+     * A mért érték legkisebb értéke
+     */
+    private long lowWatermark;
+
+    /**
+     * A mért érték legnagyobb értéke
+     */
+    private long highWatermark;
+
 }

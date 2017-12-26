@@ -50,21 +50,41 @@ public class Snapshot extends EntityBase {
     /**
      * The number of open connections
      */
-    @Column(name = "httpreq_opconns")
-    private Long httpreqCountOpenConnections;
+    @Column(name = "HREQ_OPCONNS")
+    private Long httpreqOpenConnectionsCnt;
 
     /**
      * Cumulative value of the error count,
      * with error count representing the number of cases where the response code
      * was greater than or equal to 400
      */
-    @Column(name = "httpreq_errcnts")
-    private Long httpreqErrorCount;
+    @Column(name = "HREQ_ERRCNTS")
+    private Long httpreqErrorCnt;
 
 //--- REST PATH:  server/network/connection-queue
     /**
      * The number of open/active connections
      */
-    @Column(name = "network_openconns")
-    private Long networkCountOpenConnections;
+    @Column(name = "NET_OPENCONNS")
+    private Long networkOpenConnectionsCnt;
+
+//--- REST PATH:  server/jvm/memory
+    /**
+     * Amount of memory in bytes that the Java virtual machine initially
+     * requests from the operating system for memory management
+     */
+    @Column(name = "MEM_INITHEAP")
+    private Long initHeapSizeCnt;
+
+    /**
+     * Maximum amount of memory in bytes that can be used for memory management
+     */
+    @Column(name = "MEM_MAXHEAP")
+    private Long maxHeapSizeCnt;
+
+    /**
+     * Amount of used memory in bytes
+     */
+    @Column(name = "MEM_USEDHEAP")
+    private Long usedHeapSizeCnt;
 }

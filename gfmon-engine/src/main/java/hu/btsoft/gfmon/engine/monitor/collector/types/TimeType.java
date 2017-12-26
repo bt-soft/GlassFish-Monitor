@@ -9,7 +9,7 @@
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.measure.collector.types;
+package hu.btsoft.gfmon.engine.monitor.collector.types;
 
 import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.IGFMonEngineConstants;

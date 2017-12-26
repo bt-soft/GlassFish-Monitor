@@ -9,7 +9,7 @@
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.measure.collector.types;
+package hu.btsoft.gfmon.engine.monitor.collector.types;
 
 /**
  * GF monitoradatok mértékegységei

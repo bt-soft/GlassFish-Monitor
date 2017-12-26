@@ -9,10 +9,10 @@
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.measure;
+package hu.btsoft.gfmon.engine.monitor;
 
-import hu.btsoft.gfmon.engine.measure.collector.RestDataCollector;
-import hu.btsoft.gfmon.engine.measure.collector.dto.ValueBaseDto;
+import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.dto.ValueBaseDto;
 import java.util.HashMap;
 
 /**
@@ -21,17 +21,6 @@ import java.util.HashMap;
  * @author BT
  */
 public interface ICollectMonitoredData {
-
-    /**
-     * Az adatgyűjtó melyik MonitordServices modul kategóriát figyeli?
-     * Ezzel azt vizsgáljuk, hogy az adott adatgyűjtőt kell-e futtatni egyáltalán. Ha a GF példányban a modul monitorozása nincs engedélyezve, akkor
-     * nem is futtatjuk rá az adatgyűjtést
-     *
-     * http://localhost:4848/management/domain/configs/config/server-config/monitoring-service/module-monitoring-levels
-     *
-     * @return modul neve
-     */
-    String getMonitoringServiceModuleName();
 
     /**
      * Adatgyűjtés végrahajtása

@@ -9,9 +9,9 @@
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.measure.collector.dto;
+package hu.btsoft.gfmon.engine.monitor.collector.dto;
 
-import hu.btsoft.gfmon.engine.measure.collector.types.ValueUnitType;
+import hu.btsoft.gfmon.engine.monitor.collector.types.ValueUnitType;
 import java.util.Date;
 import lombok.Data;
 import lombok.ToString;
@@ -24,11 +24,6 @@ import lombok.ToString;
 @Data
 @ToString(of = {"unit", "lastSampleTime", "startTime", "name", "description"})
 public abstract class ValueBaseDto {
-
-    /**
-     * Melyik modulból származik?
-     */
-    private String monitoringServiceModuleName;
 
     /**
      * Milyen uri-n mértük?

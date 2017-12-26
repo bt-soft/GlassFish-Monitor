@@ -9,18 +9,22 @@
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.measure;
+package hu.btsoft.gfmon.engine.monitor;
 
-import hu.btsoft.gfmon.engine.measure.collector.dto.CurrentCountValueDto;
-import hu.btsoft.gfmon.engine.measure.collector.dto.CurrentObjectValueDto;
-import hu.btsoft.gfmon.engine.measure.collector.dto.QuantityValueDto;
-import hu.btsoft.gfmon.engine.measure.collector.dto.ValueBaseDto;
 import hu.btsoft.gfmon.engine.model.entity.Snapshot;
+import hu.btsoft.gfmon.engine.monitor.collector.dto.CurrentCountValueDto;
+import hu.btsoft.gfmon.engine.monitor.collector.dto.CurrentObjectValueDto;
+import hu.btsoft.gfmon.engine.monitor.collector.dto.QuantityValueDto;
+import hu.btsoft.gfmon.engine.monitor.collector.dto.ValueBaseDto;
+import hu.btsoft.gfmon.engine.monitor.collector.httpservice.RequestCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.jvm.MemoryColletor;
+import hu.btsoft.gfmon.engine.monitor.collector.network.ConnectionQueueCollector;
 import java.util.HashMap;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * JsonEntitások+Eredmények -> Snapshot mapper
+ * Ebben az osztályban szűrjük ki, hogy a töménytelen mérési eredmények közül valójában melyek érdekelnek minket
  *
  * @author BT
  */
@@ -72,6 +76,8 @@ public class JSonEntityToSnapsotModelMapper {
 //        baseDtoTypeMap.addMappings(mapper -> mapper.when(isModuleHttpService).map(src -> this.getDtoNumericValue(src), (dest, v) -> dest.setHttpreqCountOpenConnections((Long) v)));
 //
 //    }
+//
+//
     /**
      * A DTO értékének típushelyes leszedése
      *
@@ -103,7 +109,7 @@ public class JSonEntityToSnapsotModelMapper {
     }
 
     /**
-     * DTO -> Snapshot mapper - "httpService"
+     * DTO -> Snapshot mapper - "server/http-service/server/request"
      *
      * @param enityName entitás neve
      * @param dto       mérési eredmények
@@ -116,17 +122,17 @@ public class JSonEntityToSnapsotModelMapper {
         switch (enityName) {
             //--- server/http-service/server/request
             case "countopenconnections":
-                snapshot.setHttpreqCountOpenConnections((Long) value);
+                snapshot.setHttpreqOpenConnectionsCnt((Long) value);
                 break;
 
             case "errorcount":
-                snapshot.setHttpreqErrorCount((Long) value);
+                snapshot.setHttpreqErrorCnt((Long) value);
                 break;
         }
     }
 
     /**
-     * DTO -> Snapshot mapper - "network"
+     * DTO -> Snapshot mapper - "network/connection-queue"
      *
      * @param enityName entitás neve
      * @param dto       mérési eredmények
@@ -138,7 +144,33 @@ public class JSonEntityToSnapsotModelMapper {
 
         switch (enityName) {
             case "countopenconnections":
-                snapshot.setNetworkCountOpenConnections((Long) value);
+                snapshot.setNetworkOpenConnectionsCnt((Long) value);
+                break;
+        }
+    }
+
+    /**
+     * DTO -> Snapshot mapper - "jvm/memory"
+     *
+     * @param enityName entitás neve
+     * @param dto       mérési eredmények
+     * @param snapshot  snapshot
+     */
+    private void memoryMapper(String enityName, ValueBaseDto dto, Snapshot snapshot) {
+
+        Object value = this.getDtoTypedValue(dto);
+
+        switch (enityName) {
+            case "initheapsize-count":
+                snapshot.setInitHeapSizeCnt((Long) value);
+                break;
+
+            case "maxheapsize-count":
+                snapshot.setMaxHeapSizeCnt((Long) value);
+                break;
+
+            case "usedheapsize-count":
+                snapshot.setUsedHeapSizeCnt((Long) value);
                 break;
         }
     }
@@ -151,19 +183,26 @@ public class JSonEntityToSnapsotModelMapper {
      */
     void map(HashMap<String /*Json entityName*/, ValueBaseDto> valuesMap, Snapshot snapshot) {
 
+        //Végigmegyünk az összes mért JSon intitáson
         for (String enityName : valuesMap.keySet()) {
 
+            //Leszedjük a mért értéket
             ValueBaseDto dto = valuesMap.get(enityName);
-            String monitoringServiceModuleName = dto.getMonitoringServiceModuleName();
+            String uri = dto.getUri();
 
-            switch (monitoringServiceModuleName) {
+            //Attól függően, hogy mely uri-ról származik, a mappereket külön-külön hívjuk meg
+            switch (uri) {
 
-                case "http-service":
+                case RequestCollector.URI:
                     httpServiceMapper(enityName, dto, snapshot);
                     break;
 
-                case "network":
+                case ConnectionQueueCollector.URI:
                     networkMapper(enityName, dto, snapshot);
+                    break;
+
+                case MemoryColletor.URI:
+                    memoryMapper(enityName, dto, snapshot);
                     break;
             }
         }

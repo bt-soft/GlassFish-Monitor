@@ -9,14 +9,14 @@
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.measure.collector;
+package hu.btsoft.gfmon.engine.monitor.collector;
 
-import hu.btsoft.gfmon.engine.measure.ICollectMonitoredData;
-import hu.btsoft.gfmon.engine.measure.collector.dto.CurrentCountValueDto;
-import hu.btsoft.gfmon.engine.measure.collector.dto.CurrentObjectValueDto;
-import hu.btsoft.gfmon.engine.measure.collector.dto.QuantityValueDto;
-import hu.btsoft.gfmon.engine.measure.collector.dto.ValueBaseDto;
-import hu.btsoft.gfmon.engine.measure.collector.types.ValueUnitType;
+import hu.btsoft.gfmon.engine.monitor.ICollectMonitoredData;
+import hu.btsoft.gfmon.engine.monitor.collector.dto.CurrentCountValueDto;
+import hu.btsoft.gfmon.engine.monitor.collector.dto.CurrentObjectValueDto;
+import hu.btsoft.gfmon.engine.monitor.collector.dto.QuantityValueDto;
+import hu.btsoft.gfmon.engine.monitor.collector.dto.ValueBaseDto;
+import hu.btsoft.gfmon.engine.monitor.collector.types.ValueUnitType;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -204,7 +204,6 @@ public abstract class CollectorBase implements ICollectMonitoredData {
 
             if (dto != null) {
                 dto.setUri(getUri());
-                dto.setMonitoringServiceModuleName(getMonitoringServiceModuleName());
                 result.put(entityName, dto);
             }
         }

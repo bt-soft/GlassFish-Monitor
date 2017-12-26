@@ -9,7 +9,7 @@
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.measure.collector.dto;
+package hu.btsoft.gfmon.engine.monitor.collector.dto;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

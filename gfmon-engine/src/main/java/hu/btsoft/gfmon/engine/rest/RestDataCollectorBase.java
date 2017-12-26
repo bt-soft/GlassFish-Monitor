@@ -4,12 +4,12 @@
  *  GF Monitor project
  *
  *  Module:  gfmon-engine (gfmon-engine)
- *  File:    RestDataCollector.java
+ *  File:    RestDataCollectorBase.java
  *  Created: 2017.12.24. 16:24:00
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.measure.collector;
+package hu.btsoft.gfmon.engine.rest;
 
 import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
 import java.util.Iterator;
@@ -29,7 +29,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author BT
  */
 @Slf4j
-public class RestDataCollector {
+public abstract class RestDataCollectorBase {
 
     /**
      * REST kliens
@@ -40,12 +40,12 @@ public class RestDataCollector {
     /**
      * A GF szerver url-je
      */
-    private String simpleUrl;
+    protected String simpleUrl;
 
     /**
      * GF session token
      */
-    private String sessionToken;
+    protected String sessionToken;
 
     // <editor-fold defaultstate="collapsed" desc="Típusos getterek">
     public long getLong(String uri, String name) {
@@ -182,21 +182,16 @@ public class RestDataCollector {
     // </editor-fold>
 
     /**
-     * A protokoll megállapításánál a sessionTokent kell figyelni (nem az usernevet)
-     *
-     * @return http/https
-     */
-    private String getProtocol() {
-        return StringUtils.isEmpty(sessionToken) ? IGFMonEngineConstants.PROTOCOL_HTTPS : IGFMonEngineConstants.PROTOCOL_HTTP;
-    }
-
-    /**
      * A GF REST API alap URL-jének összeállítása
      *
      * @return
      */
     private String getMonitorBaseURI() {
-        return getProtocol() + simpleUrl + "/monitoring/domain/server/";
+
+        //A protokoll megállapításánál a sessionTokent kell figyelni (nem az usernevet)
+        String protocol = StringUtils.isEmpty(sessionToken) ? IGFMonEngineConstants.PROTOCOL_HTTPS : IGFMonEngineConstants.PROTOCOL_HTTP;
+
+        return protocol + simpleUrl + getSubUri();
     }
 
     /**
@@ -215,7 +210,7 @@ public class RestDataCollector {
      *
      * @return REST válasz
      */
-    private Response getMonitorResponse(String uri) {
+    protected Response getMonitorResponse(String uri) {
 
         String fullUrl = this.getMonitorBaseURI() + uri;
         WebTarget resource = client.target(fullUrl);
@@ -226,24 +221,12 @@ public class RestDataCollector {
             builder.cookie(new Cookie("gfresttoken", sessionToken));
         }
         return builder.get(Response.class);
-
     }
 
     /**
-     * REST válasz olvasása
+     * A szerver url-jéhez képest hol tatlálható a megszerzendő JSon adat
      *
-     * @param uri          monitorozott rest erőforrás URI
-     * @param simpleUrl    a GF szerver url-je
-     * @param sessionToken a GF session token-je
-     *
-     * @return REST válasz
+     * @return sub uri
      */
-    public Response getMonitorResponse(String uri, String simpleUrl, String sessionToken) {
-
-        this.simpleUrl = simpleUrl;
-        this.sessionToken = sessionToken;
-
-        return getMonitorResponse(uri);
-    }
-
+    protected abstract String getSubUri();
 }

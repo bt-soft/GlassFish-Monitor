@@ -9,13 +9,13 @@
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.measure;
+package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.time.Elapsed;
-import hu.btsoft.gfmon.engine.measure.collector.RestDataCollector;
-import hu.btsoft.gfmon.engine.measure.collector.dto.ValueBaseDto;
 import hu.btsoft.gfmon.engine.model.entity.Server;
 import hu.btsoft.gfmon.engine.model.entity.Snapshot;
+import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.dto.ValueBaseDto;
 import java.util.HashMap;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -69,7 +69,7 @@ public class SnapshotProvider {
 
             //Üres a mért eredmének Map-je
             if (valuesMap == null || valuesMap.isEmpty()) {
-                log.warn("A(z) {} szerver {} moduljának mérési eredményei üresek!", server.getSimpleUrl(), collector.getMonitoringServiceModuleName());
+                log.warn("A(z) {} szerver mérési eredményei üresek!", server.getSimpleUrl());
                 continue;
             }
 
@@ -84,52 +84,4 @@ public class SnapshotProvider {
 
         return snapshot;
     }
-
-//    private Snapshot collectData() {
-//
-//        Snapshot snapshot = new Snapshot();
-//
-////        Consumer<HashMap<String, ValueDTOBase>> valuesMapConsumer = (HashMap<String, ValueDTOBase> valuesMap) -> {
-////            if (valuesMap != null) {
-////                for (String entityName : valuesMap.keySet()) {
-////
-////                    ValueDTOBase dto = valuesMap.get(entityName);
-////                    log.trace(String.format("\nEntityName: %s, values: %s", entityName, dto.toString()));
-////                }
-////            }
-////        };
-////
-//        DataCollectionBehaviour dataCollectionBehaviour = new DataCollectionBehaviour(jsonEntityNameToSnapshotMapper, snapshot);
-//
-//        StreamSupport.stream(this.dataCollectors.spliterator(), false /* no/paralel */)
-//                .map(collector -> collector.apply(restDataCollector)) //meghívjuk az adott collector apply metódusát
-//                .map(valuesMap -> (HashMap<String/*entityName*/, ValueBaseDto>) valuesMap)
-//                //.forEach(valuesMapConsumer);
-//                .forEach(dataCollectionBehaviour::perform);
-//
-//        return snapshot;
-//    }
-//
-//    private class DataCollectionBehaviour {
-//
-//        private final JsonEntityNameToSnapshotMapper entityName2SnapshotMapper;
-//        private final Snapshot snapshot;
-//
-//        /**
-//         * Konstruktor
-//         *
-//         * @param entityName2SnapshotMapper
-//         * @param snapshot
-//         */
-//        public DataCollectionBehaviour(JsonEntityNameToSnapshotMapper entityName2SnapshotMapper, Snapshot snapshot) {
-//            this.entityName2SnapshotMapper = entityName2SnapshotMapper;
-//            this.snapshot = snapshot;
-//        }
-//
-//        public void perform(HashMap<String, ValueBaseDto> valuesMap) {
-//            if (valuesMap != null) {
-//                entityName2SnapshotMapper.map(valuesMap, snapshot);
-//            }
-//        }
-//    }
 }

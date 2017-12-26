@@ -9,7 +9,7 @@
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.measure;
+package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.engine.model.entity.Server;
 import hu.btsoft.gfmon.engine.model.entity.Snapshot;

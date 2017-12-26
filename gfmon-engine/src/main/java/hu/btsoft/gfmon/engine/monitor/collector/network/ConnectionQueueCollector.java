@@ -9,15 +9,17 @@
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.measure.collector.network;
+package hu.btsoft.gfmon.engine.monitor.collector.network;
 
-import hu.btsoft.gfmon.engine.measure.collector.CollectorBase;
+import hu.btsoft.gfmon.engine.monitor.collector.CollectorBase;
 
 /**
  *
  * @author BT
  */
 public class ConnectionQueueCollector extends CollectorBase {
+
+    public static final String URI = "network/connection-queue";
 
     /**
      * Az adatgyűjtést a szerver URL-jéhez képest melyik uri-n kell elvégezni?
@@ -26,18 +28,6 @@ public class ConnectionQueueCollector extends CollectorBase {
      */
     @Override
     protected String getUri() {
-        return "network/connection-queue";
-    }
-
-    /**
-     * Az adatgyűjtó melyik modul kategóriát figyeli?
-     * Ezzel azt vizsgáljuk, hogy az adott adatgyűjtőt kell-e futtatni egyáltalán. Ha a GF példányban a modul monitorozása nincs engedélyezve, akkor
-     * nem is futtatjuk rá az adatgyűjtést
-     *
-     * @return modul neve
-     */
-    @Override
-    public String getMonitoringServiceModuleName() {
-        return "network";
+        return URI;
     }
 }
