@@ -275,7 +275,7 @@ public class GFMonitorController {
                 snapshotService.save(snapshot);
                 return snapshot;
             }).forEachOrdered((snapshot) -> {
-                log.trace("Snapshot: {}", snapshot);
+                ///////////////////////////////////////////////////log.trace("Snapshot: {}", snapshot);
             });
 
             //Kiíratjuk a változásokat az adatbázisba
