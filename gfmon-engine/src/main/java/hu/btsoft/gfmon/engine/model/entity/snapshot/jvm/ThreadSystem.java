@@ -20,12 +20,14 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.persistence.annotations.Customizer;
 
 /**
@@ -124,5 +126,27 @@ public class ThreadSystem extends SnapshotBase {
      */
     @ColumnPosition(position = 28)
     private Long totalStartedThreadCount;
+
+    /**
+     * A szöveges változókat töröljük, ha lehet
+     */
+    @PrePersist
+    @Override
+    protected void prePersist() {
+        super.prePersist();
+
+        if (!StringUtils.isEmpty(deadlockedThreads)) {
+            if ("None of the threads are deadlocked.".equals(deadlockedThreads)) {
+                deadlockedThreads = null;
+            }
+        }
+
+        if (!StringUtils.isEmpty(monitorDeadlockedThreads)) {
+            if ("None of the threads are monitor deadlocked.".equals(monitorDeadlockedThreads)) {
+                monitorDeadlockedThreads = null;
+            }
+        }
+
+    }
 
 }
