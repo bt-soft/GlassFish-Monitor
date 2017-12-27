@@ -1,0 +1,128 @@
+/*
+ *  ------------------------------------------------------------------------------------
+ *
+ *  GF Monitor project
+ *
+ *  Module:  gfmon-engine (gfmon-engine)
+ *  File:    ThreadSystem.java
+ *  Created: 2017.12.27. 10:15:19
+ *
+ *  ------------------------------------------------------------------------------------
+ */
+package hu.btsoft.gfmon.engine.model.entity.snapshot.jvm;
+
+import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
+import hu.btsoft.gfmon.engine.model.entity.ColumnPosition;
+import hu.btsoft.gfmon.engine.model.entity.EntityColumnPositionCustomizer;
+import hu.btsoft.gfmon.engine.model.entity.snapshot.SnapshotBase;
+import javax.persistence.Cacheable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.Table;
+import javax.validation.constraints.Size;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import org.eclipse.persistence.annotations.Customizer;
+
+/**
+ * JPA entitás
+ * REST PATH: monitoring/domain/server/jvm/thread-system
+ *
+ * @author BT
+ */
+@Entity
+@Table(name = "SNOT_THRDSYS", catalog = "", schema = IGFMonEngineConstants.DATABASE_SCHEMAN_NAME)
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@Cacheable(false)
+@Data
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
+@Customizer(EntityColumnPositionCustomizer.class)
+public class ThreadSystem extends SnapshotBase {
+
+    private final static int STRING_FIELD_LENGHT = 2048;
+
+    /**
+     * • allthreadids
+     *
+     * Returns all live thread IDs
+     */
+    @ColumnPosition(position = 20)
+    @Size(max = STRING_FIELD_LENGHT, message = "A liveThreads mező hossza nem lehet nagyobb mint {max}")
+    @Column(length = STRING_FIELD_LENGHT)
+    private String liveThreads;
+
+    /**
+     * • currentthreadcputime
+     *
+     * Returns the total CPU time for the current thread in nanoseconds
+     */
+    @ColumnPosition(position = 21)
+    private Long currentThreadCpuTime;
+
+    /**
+     * • currentthreadusertime
+     *
+     * Returns the CPU time that the current thread has executed in user mode in nanoseconds
+     */
+    @ColumnPosition(position = 22)
+    private Long currentThreadUserTime;
+
+    /**
+     * • daemonthreadcount
+     *
+     * Returns the current number of live daemon threads
+     */
+    @ColumnPosition(position = 23)
+    private Long daemonThreadCount;
+
+    /**
+     * • deadlockedthreads
+     *
+     * Finds cycles of threads that are in deadlock waiting to acquire object monitors or ownable synchronizers
+     */
+    @ColumnPosition(position = 24)
+    @Size(max = STRING_FIELD_LENGHT, message = "A DeadlockedThreads mező hossza nem lehet nagyobb mint {max}")
+    @Column(length = STRING_FIELD_LENGHT)
+    private String deadlockedThreads;
+
+    /**
+     * • monitordeadlockedthreads
+     *
+     * Finds cycles of threads that are in deadlock waiting to acquire object monitors
+     */
+    @ColumnPosition(position = 25)
+    @Size(max = STRING_FIELD_LENGHT, message = "A monitorDeadlockedThreads mező hossza nem lehet nagyobb mint {max}")
+    @Column(length = STRING_FIELD_LENGHT)
+    private String monitorDeadlockedThreads;
+
+    /**
+     * • peakthreadcount
+     *
+     * Returns the peak live thread count since the Java virtual machine started or peak was reset
+     */
+    @ColumnPosition(position = 26)
+    private Long peakThreadCount;
+
+    /**
+     * • threadcount
+     *
+     * Returns the current number of live threads including both daemon and non-daemon threads
+     */
+    @ColumnPosition(position = 27)
+    private Long threadCount;
+
+    /**
+     * • totalstartedthreadcount
+     *
+     * Returns the total number of threads created and also started since the Java virtual machine started
+     */
+    @ColumnPosition(position = 28)
+    private Long totalStartedThreadCount;
+
+}

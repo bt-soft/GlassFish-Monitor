@@ -12,12 +12,22 @@
 package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.reflection.ReflectionUtils;
-import hu.btsoft.gfmon.engine.model.entity.snapshot.HttpServiceRequest;
-import hu.btsoft.gfmon.engine.model.entity.snapshot.JvmMemory;
 import hu.btsoft.gfmon.engine.model.entity.snapshot.SnapshotBase;
+import hu.btsoft.gfmon.engine.model.entity.snapshot.httpservice.HttpServiceRequest;
+import hu.btsoft.gfmon.engine.model.entity.snapshot.jvm.JvmMemory;
+import hu.btsoft.gfmon.engine.model.entity.snapshot.jvm.ThreadSystem;
+import hu.btsoft.gfmon.engine.model.entity.snapshot.network.ConnectionQueue;
+import hu.btsoft.gfmon.engine.model.entity.snapshot.network.HttpListener1ConnectionQueue;
+import hu.btsoft.gfmon.engine.model.entity.snapshot.network.HttpListener1KeepAlive;
+import hu.btsoft.gfmon.engine.model.entity.snapshot.network.HttpListener1ThreadPool;
 import hu.btsoft.gfmon.engine.monitor.collector.MonitorValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.httpservice.HttpServiceRequestCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.jvm.MemoryColletor;
+import hu.btsoft.gfmon.engine.monitor.collector.jvm.ThreadSystemCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.network.ConnectionQueueCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.network.HttpListener1ConnectionQueueCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.network.HttpListener1KeepAliveCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.network.HttpListener1ThreadPoolCollector;
 import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.HashMap;
@@ -45,7 +55,7 @@ public class JSonEntityToSnapsotEntityMapper {
     private Set<Field> getAllFields(Class<?> clazz) {
 
         Set<Field> fields = new HashSet<>();
-        ReflectionUtils.getAllFields(clazz, fields);
+        ReflectionUtils.getAllDeclaredFields(clazz, fields);
 
         //A JPA és a Serializable dolgait kitöröljük a halmazból
         for (Iterator<Field> i = fields.iterator(); i.hasNext();) {
@@ -135,11 +145,10 @@ public class JSonEntityToSnapsotEntityMapper {
                 }
             }
 
-            //A lastsampletime mező beállítása
-            if (dto.getLastSampleTime() != null) {
-                jpaEntityRef.setLastSampleTime(dto.getLastSampleTime());
-            }
-
+//            //A lastsampletime mező beállítása
+//            if (dto.getLastSampleTime() != null) {
+//                jpaEntityRef.setLastSampleTime(dto.getLastSampleTime());
+//            }
         } catch (IllegalArgumentException | IllegalAccessException e) {
             log.error("Hiba a(z) '{}' osztály '{}' mezőjének mappingja során!\n", jpaEntityRef.getClass().getSimpleName(), dto.getName(), e);
         }
@@ -149,12 +158,12 @@ public class JSonEntityToSnapsotEntityMapper {
     /**
      * Map
      *
-     * @param valuesMap mérési eredmények MAP
-     * @param snapshots Snapshot entitások halmaza, ebbe gyűjtjük a lementendő JPA entitásokat
+     * @param valuesMap        mérési eredmények MAP
+     * @param snapshotEntities Snapshot JPA entitások halmaza, ebbe gyűjtjük a lementendő JPA entitásokat
      */
-    void map(HashMap<String /*Json entityName*/, MonitorValueDto> valuesMap, Set<SnapshotBase> snapshots) {
+    void map(HashMap<String /*Json entityName*/, MonitorValueDto> valuesMap, Set<SnapshotBase> snapshotEntities) {
 
-        SnapshotBase snapshot = null;
+        SnapshotBase snapshotEntity = null;
 
         //Végigmegyünk az összes mért JSon entitáson
         for (String enityName : valuesMap.keySet()) {
@@ -167,42 +176,56 @@ public class JSonEntityToSnapsotEntityMapper {
             switch (uri) {
 
                 case HttpServiceRequestCollector.URI:
-                    if (snapshot == null) {
-                        snapshot = new HttpServiceRequest();
+                    if (snapshotEntity == null) {
+                        snapshotEntity = new HttpServiceRequest();
                     }
                     break;
 
                 case MemoryColletor.URI:
-                    if (snapshot == null) {
-                        snapshot = new JvmMemory();
+                    if (snapshotEntity == null) {
+                        snapshotEntity = new JvmMemory();
                     }
                     break;
 
-//                case ThreadSystemCollector.URI:
-//                    threadSystemMapper(enityName, dto, snapshot);
-//                    break;
-//
-//                case ConnectionQueueCollector.URI:
-//                    connQueMapper(enityName, dto, snapshot);
-//                    break;
-//
-//                case HttpListener1ConnectionQueueCollector.URI:
-//                    httpListener1ConnQueMapper(enityName, dto, snapshot);
-//                    break;
-//
-//                case HttpListener1KeepAliveCollector.URI:
-//                    httpListener1KeepAlive(enityName, dto, snapshot);
-//                    break;
+                case ThreadSystemCollector.URI:
+                    if (snapshotEntity == null) {
+                        snapshotEntity = new ThreadSystem();
+                    }
+                    break;
+
+                case ConnectionQueueCollector.URI:
+                    if (snapshotEntity == null) {
+                        snapshotEntity = new ConnectionQueue();
+                    }
+                    break;
+
+                case HttpListener1ConnectionQueueCollector.URI:
+                    if (snapshotEntity == null) {
+                        snapshotEntity = new HttpListener1ConnectionQueue();
+                    }
+                    break;
+
+                case HttpListener1KeepAliveCollector.URI:
+                    if (snapshotEntity == null) {
+                        snapshotEntity = new HttpListener1KeepAlive();
+                    }
+                    break;
+
+                case HttpListener1ThreadPoolCollector.URI:
+                    if (snapshotEntity == null) {
+                        snapshotEntity = new HttpListener1ThreadPool();
+                    }
+                    break;
             }
 
-            if (snapshot != null) {
-                this.fieldMapper(snapshot, dto);
+            if (snapshotEntity != null) {
+                this.fieldMapper(snapshotEntity, dto);
             }
         }
 
         //Ha van eredmény, akkor az hozzáadjuk a halmazhoz
-        if (snapshot != null) {
-            snapshots.add(snapshot);
+        if (snapshotEntity != null) {
+            snapshotEntities.add(snapshotEntity);
         }
 
     }

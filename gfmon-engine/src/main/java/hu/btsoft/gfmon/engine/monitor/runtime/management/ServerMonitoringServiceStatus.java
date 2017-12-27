@@ -9,7 +9,7 @@
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.monitor.runtime;
+package hu.btsoft.gfmon.engine.monitor.runtime.management;
 
 import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
 import hu.btsoft.gfmon.engine.rest.GFMonitorRestClient;
@@ -50,7 +50,7 @@ public class ServerMonitoringServiceStatus {
      *
      * @return A GF példány monitorozható GF moduljainak halmaza, vagy null, ha nincs egy sem
      */
-    public Set<String/*GF MoitoringService module name*/> checkMonitorStatus(String simpleUrl, String sessionToken) {
+    public Set<String> checkMonitorStatus(String simpleUrl, String sessionToken) {
 
         String protocol = StringUtils.isEmpty(sessionToken) ? IGFMonEngineConstants.PROTOCOL_HTTPS : IGFMonEngineConstants.PROTOCOL_HTTP;
 
@@ -77,7 +77,7 @@ public class ServerMonitoringServiceStatus {
             return null;
         }
 
-        Set<String/*GF MoitoringService module name*/> result = null;
+        Set<String> result = null;
 
         //entity leszedése
         JsonObject entities = extraProperties.getJsonObject("entity");

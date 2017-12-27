@@ -9,10 +9,12 @@
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.model.entity.snapshot;
+package hu.btsoft.gfmon.engine.model.entity.snapshot.httpservice;
 
 import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
 import hu.btsoft.gfmon.engine.model.entity.ColumnPosition;
+import hu.btsoft.gfmon.engine.model.entity.EntityColumnPositionCustomizer;
+import hu.btsoft.gfmon.engine.model.entity.snapshot.SnapshotBase;
 import javax.persistence.Cacheable;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
@@ -22,6 +24,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.eclipse.persistence.annotations.Customizer;
 
 /**
  * JPA entitás
@@ -37,6 +40,7 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
+@Customizer(EntityColumnPositionCustomizer.class)
 public class HttpServiceRequest extends SnapshotBase {
 
     /**

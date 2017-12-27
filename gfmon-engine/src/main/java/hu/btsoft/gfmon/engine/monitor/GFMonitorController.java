@@ -18,7 +18,7 @@ import hu.btsoft.gfmon.engine.model.entity.snapshot.SnapshotBase;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
 import hu.btsoft.gfmon.engine.model.service.ServerService;
 import hu.btsoft.gfmon.engine.model.service.SnapshotService;
-import hu.btsoft.gfmon.engine.monitor.runtime.ServerMonitoringServiceStatus;
+import hu.btsoft.gfmon.engine.monitor.runtime.management.ServerMonitoringServiceStatus;
 import hu.btsoft.gfmon.engine.security.SessionTokenAcquirer;
 import java.util.Set;
 import javax.annotation.PostConstruct;
