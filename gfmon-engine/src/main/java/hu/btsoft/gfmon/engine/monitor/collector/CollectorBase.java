@@ -14,8 +14,8 @@ package hu.btsoft.gfmon.engine.monitor.collector;
 import hu.btsoft.gfmon.engine.monitor.ICollectMonitoredData;
 import hu.btsoft.gfmon.engine.monitor.collector.types.ValueUnitType;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
@@ -64,15 +64,15 @@ public abstract class CollectorBase implements ICollectMonitoredData {
      *
      * @param entities JSon entitás
      *
-     * @return értékek map
+     * @return értékek
      */
-    protected HashMap<String, MonitorValueDto> fetchValues(JsonObject entities) {
+    protected List<MonitorValueDto> fetchValues(JsonObject entities) {
 
         if (entities == null) {
             return null;
         }
 
-        HashMap<String, MonitorValueDto> result = new LinkedHashMap<>();
+        List<MonitorValueDto> result = new LinkedList<>();
 
         //Végigmegyünk az entitásokon
         for (String entityName : entities.keySet()) {
@@ -131,7 +131,7 @@ public abstract class CollectorBase implements ICollectMonitoredData {
                     break;
             }
 
-            result.put(entityName, dto);
+            result.add(dto);
         }
 
         return result;
@@ -144,10 +144,10 @@ public abstract class CollectorBase implements ICollectMonitoredData {
      * @param simpleUrl         a szerver url-je
      * @param sessionToken      GF session token
      *
-     * @return Json entitás - értékek Map
+     * @return Json entitás - értékek Lista
      */
     @Override
-    public HashMap<String/*JSon entityName*/, MonitorValueDto> execute(RestDataCollector restDataCollector, String simpleUrl, String sessionToken) {
+    public List<MonitorValueDto> execute(RestDataCollector restDataCollector, String simpleUrl, String sessionToken) {
 
         Response response = restDataCollector.getMonitorResponse(getUri(), simpleUrl, sessionToken);
         JsonObject entities = restDataCollector.getJsonEntities(response);

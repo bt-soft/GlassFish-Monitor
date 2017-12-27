@@ -13,7 +13,7 @@ package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.engine.monitor.collector.MonitorValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
-import java.util.HashMap;
+import java.util.List;
 
 /**
  * GF REST adatgyűjtés funkcionális interfész
@@ -29,8 +29,8 @@ public interface ICollectMonitoredData {
      * @param simpleUrl         A GF szerver url-je
      * @param sessionToken      GF session token
      *
-     * @return adatgyűjtés eredménye (JSon entitás - értékek Map)
+     * @return adatgyűjtés eredménye (JSon entitás - értékek Lista)
      */
-    HashMap<String/*Json entityName*/, MonitorValueDto> execute(RestDataCollector restDataCollector, String simpleUrl, String sessionToken);
+    List<MonitorValueDto> execute(RestDataCollector restDataCollector, String simpleUrl, String sessionToken);
 
 }

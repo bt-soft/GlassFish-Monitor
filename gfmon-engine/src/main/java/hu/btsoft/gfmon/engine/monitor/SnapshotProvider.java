@@ -16,8 +16,8 @@ import hu.btsoft.gfmon.engine.model.entity.Server;
 import hu.btsoft.gfmon.engine.model.entity.snapshot.SnapshotBase;
 import hu.btsoft.gfmon.engine.monitor.collector.MonitorValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -66,10 +66,10 @@ public class SnapshotProvider {
 //            }
 //
             //Az adott kollektor adatainak lekérése
-            HashMap<String/*JSon entityName*/, MonitorValueDto> valuesMap = collector.execute(restDataCollector, server.getSimpleUrl(), server.getSessionToken());
+            List<MonitorValueDto> valuesList = collector.execute(restDataCollector, server.getSimpleUrl(), server.getSessionToken());
 
             //Üres a mért eredmének Map-je
-            if (valuesMap == null || valuesMap.isEmpty()) {
+            if (valuesList == null || valuesList.isEmpty()) {
                 log.warn("A(z) {} szerver mérési eredményei üresek!", server.getSimpleUrl());
                 continue;
             }
@@ -78,7 +78,7 @@ public class SnapshotProvider {
             if (snapshots == null) {
                 snapshots = new HashSet<>();
             }
-            jsonEntityToSnapsotModelMapper.map(valuesMap, snapshots);
+            jsonEntityToSnapsotModelMapper.map(valuesList, snapshots);
         }
 
         log.trace("server url: {}, elapsed: {}", server.getUrl(), Elapsed.getNanoStr(start));

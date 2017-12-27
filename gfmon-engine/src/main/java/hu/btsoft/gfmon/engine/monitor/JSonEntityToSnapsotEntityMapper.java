@@ -47,9 +47,9 @@ import hu.btsoft.gfmon.engine.monitor.collector.web.ServletColletor;
 import hu.btsoft.gfmon.engine.monitor.collector.web.SessionCollector;
 import java.lang.reflect.Field;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -216,18 +216,17 @@ public class JSonEntityToSnapsotEntityMapper {
     /**
      * Map
      *
-     * @param valuesMap        mérési eredmények MAP
+     * @param valuesList       mérési eredmények
      * @param snapshotEntities Snapshot JPA entitások halmaza, ebbe gyűjtjük a lementendő JPA entitásokat
      */
-    void map(HashMap<String /*Json entityName*/, MonitorValueDto> valuesMap, Set<SnapshotBase> snapshotEntities) {
+    void map(List<MonitorValueDto> valuesList, Set<SnapshotBase> snapshotEntities) {
 
         SnapshotBase snapshotEntity = null;
 
         //Végigmegyünk az összes mért JSon entitáson
-        for (String enityName : valuesMap.keySet()) {
+        for (MonitorValueDto dto : valuesList) {
 
             //Leszedjük a mért értéket
-            MonitorValueDto dto = valuesMap.get(enityName);
             String uri = dto.getUri();
 
             //A JPA entitás típusát attól függően hozzuk létre, hogy mely uri-ról származik a mérés
