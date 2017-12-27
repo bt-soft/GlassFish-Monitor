@@ -19,7 +19,6 @@ import hu.btsoft.gfmon.engine.model.service.ServerService;
 import hu.btsoft.gfmon.engine.model.service.SnapshotService;
 import hu.btsoft.gfmon.engine.monitor.runtime.ServerMonitoringServiceStatus;
 import hu.btsoft.gfmon.engine.security.SessionTokenAcquirer;
-import java.util.List;
 import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -164,10 +163,8 @@ public class GFMonitorController {
 
         long start = Elapsed.nowNano();
 
-        List<Server> allServers = serverService.findAll();
-
         int checkedServerCnt = 0;
-        for (Server server : allServers) {
+        for (Server server : serverService.findAll()) {
 
             //Az inaktív szerverekkel nem foglalkozunk
             if (!server.isActive()) {
