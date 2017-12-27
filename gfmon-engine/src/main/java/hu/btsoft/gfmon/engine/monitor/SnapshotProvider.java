@@ -28,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
  *
  * - Paraméterként megkapja a monitorozando GF adatait
  * - Jól meg is nézegeti a GF REST interfészén keresztül a szükséges adatokat
- * - Majd az eredményeket beira az adatbázisba
  *
  * @author BT
  */

@@ -11,6 +11,8 @@
  */
 package hu.btsoft.gfmon.engine.security;
 
+import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
+import hu.btsoft.gfmon.engine.rest.GFMonitorRestClient;
 import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -18,14 +20,17 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
 
 /**
  * GF Session token megszerzése
  *
  * A GF administration-guide.pdf-ból infó:
  * <p>
- * To Secure REST Interfaces by Using Session Tokens
+ * Timport javax.ws.rs.client.Client;
+ * import javax.ws.rs.client.Entity;
+ * import javax.ws.rs.client.WebTarget;
+ * import javax.ws.rs.core.MediaType;
+ * o Secure REST Interfaces by Using Session Tokens
  * <p>
  * Basic authentication requires a REST client to cache a user's credentials to
  * enable theclient to pass the credentials with each request. If you require a
@@ -49,6 +54,7 @@ import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
 public class SessionTokenAcquirer {
 
     @Inject
+    @GFMonitorRestClient
     protected Client client;
 
     @Inject

@@ -35,6 +35,7 @@ public abstract class RestDataCollectorBase {
      * REST kliens
      */
     @Inject
+    @GFMonitorRestClient
     private Client client;
 
     /**

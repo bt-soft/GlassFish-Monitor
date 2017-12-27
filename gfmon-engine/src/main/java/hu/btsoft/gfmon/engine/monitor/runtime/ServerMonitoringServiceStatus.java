@@ -12,6 +12,7 @@
 package hu.btsoft.gfmon.engine.monitor.runtime;
 
 import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
+import hu.btsoft.gfmon.engine.rest.GFMonitorRestClient;
 import java.util.HashSet;
 import java.util.Set;
 import javax.inject.Inject;
@@ -38,6 +39,7 @@ public class ServerMonitoringServiceStatus {
     private static final String MONITORING_SERVICE_URI = "/management/domain/configs/config/server-config/monitoring-service/module-monitoring-levels";
 
     @Inject
+    @GFMonitorRestClient
     private Client client;
 
     /**

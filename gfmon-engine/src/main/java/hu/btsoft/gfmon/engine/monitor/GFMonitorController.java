@@ -11,6 +11,7 @@
  */
 package hu.btsoft.gfmon.engine.monitor;
 
+import hu.btsoft.gfmon.corelib.cdi.CdiUtils;
 import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.model.entity.Server;
 import hu.btsoft.gfmon.engine.model.entity.snapshot.SnapshotBase;
@@ -34,7 +35,6 @@ import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.ProcessingException;
 import lombok.extern.slf4j.Slf4j;
@@ -68,15 +68,12 @@ public class GFMonitorController {
 
     private Timer timer;
 
-    @Inject
-    private SessionTokenAcquirer sessionTokenAcquirer;
-
-    @Inject
-    private SnapshotProvider snapshotProvider;
-
-    @Inject
-    private ServerMonitoringServiceStatus serverMonitoringServiceStatus;
-
+//    @Inject
+//    private SessionTokenAcquirer sessionTokenAcquirer;
+//
+//
+//    @Inject
+//    private SnapshotProvider snapshotProvider;
     /**
      * GFMon engine indítása
      */
@@ -163,6 +160,11 @@ public class GFMonitorController {
 
         long start = Elapsed.nowNano();
 
+        //Mivel egy @Singleton Bean-ban vagyunk, emiatt kézzel lookup-oljuk a CDI Bean-t, hogy ne fogjon le egy Rest kliesnt állandó jelleggel
+        SnapshotProvider snapshotProvider = CdiUtils.lookup(SnapshotProvider.class);
+
+        log.trace("this: {}, snapshotProvider: {}", this, snapshotProvider);
+
         int checkedServerCnt = 0;
         for (Server server : serverService.findAll()) {
 
@@ -177,10 +179,15 @@ public class GFMonitorController {
 
             //ha még nincs SessionToken, akkor csinálunk egyet
             if (StringUtils.isEmpty(server.getSessionToken())) {
+
                 try {
+                    //Mivel egy @Singleton Bean-ban vagyunk, emiatt kézzel lookup-oljuk a CDI Bean-t, hogy ne fogjon le egy Rest kliesnt állandó jelleggel
+                    SessionTokenAcquirer sessionTokenAcquirer = CdiUtils.lookup(SessionTokenAcquirer.class);
 
                     String sessionToken = sessionTokenAcquirer.getSessionToken(url, userName, plainPassword);
+
                     server.setSessionToken(sessionToken);
+
                 } catch (Exception e) {
 
                     String logMsg;
@@ -210,6 +217,9 @@ public class GFMonitorController {
 
             //Ha még nem tudjuk, hogy az adott szerveren be van-e kapcsolva a MonitoringService
             if (server.getMonitoringServiceReady() == null || !server.getMonitoringServiceReady()) {
+
+                //Mivel egy @Singleton Bean-ban vagyunk, emiatt kézzel lookup-oljuk a CDI Bean-t, hogy ne fogjon le egy Rest kliesnt állandó jelleggel
+                ServerMonitoringServiceStatus serverMonitoringServiceStatus = CdiUtils.lookup(ServerMonitoringServiceStatus.class);
 
                 // A monitorozandó GF példányok MonitoringService (module-monitoring-levels) ellenőrzése
                 Set<String> monitorableModules = serverMonitoringServiceStatus.checkMonitorStatus(server.getSimpleUrl(), server.getSessionToken());
@@ -256,16 +266,17 @@ public class GFMonitorController {
             }
 
             //JPA mentés
-            for (SnapshotBase snapshot : snapshots) {
-
+            snapshots.stream().map((snapshot) -> {
                 //Beállítjuk, hogy melyik szerver mérési ereménye ez a pillanatfelvétel
                 snapshot.setServer(server);
-
+                return snapshot;
+            }).map((snapshot) -> {
                 //lementjük az adatbázisba
                 snapshotService.save(snapshot);
-
+                return snapshot;
+            }).forEachOrdered((snapshot) -> {
                 log.trace("Snapshot: {}", snapshot);
-            }
+            });
 
             //Kiíratjuk a változásokat az adatbázisba
             snapshotService.flush();
