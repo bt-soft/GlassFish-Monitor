@@ -48,16 +48,39 @@ public class ServerService extends ServiceBase<Server> {
     }
 
     /**
+     * A futási idejű Entitás értékekek törlése
+     * (pl.: sessionToken, readyForMonitoring, stb..)
+     *
+     * @param modifier módosító user
+     */
+    public void clearRuntimeValues(String modifier) {
+
+        super.findAll().stream().map((server) -> {
+            server.setSessionToken(null);
+            return server;
+        }).map((server) -> {
+            server.setMonitoringServiceReady(null);
+            return server;
+        }).map((server) -> {
+            server.setModifiedBy(modifier);
+            return server;
+        }).forEachOrdered((server) -> {
+            super.save(server);
+        });
+
+    }
+
+    /**
      * Kieginfó módosítása
      *
      * @param entity            Server entitás
-     * @param modifiedUser      módosító user
+     * @param modifier          módosító user
      * @param additionalMessage az adatbázisba írandó kieginfo
      */
-    public void updateAdditionalMessage(Server entity, String modifiedUser, String additionalMessage) {
+    public void updateAdditionalMessage(Server entity, String modifier, String additionalMessage) {
 
         //Módosító user
-        entity.setModifiedBy(modifiedUser);
+        entity.setModifiedBy(modifier);
 
         //Kieginfo
         entity.setAdditionalInformation(additionalMessage);
@@ -73,9 +96,10 @@ public class ServerService extends ServiceBase<Server> {
     /**
      * Kieginfo törlése
      *
-     * @param entity Server entitás
+     * @param entity   Server entitás
+     * @param modifier módosító user
      */
-    public void clearAdditionalMessage(Server entity, String modifiedUser) {
+    public void clearAdditionalMessage(Server entity, String modifier) {
 
         //Rákeresünk, hogy ne legyen optimisticLocking
         Server lastVersion = super.find(entity.getId());

@@ -17,7 +17,7 @@ import hu.btsoft.gfmon.engine.model.entity.snapshot.SnapshotBase;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
 import hu.btsoft.gfmon.engine.model.service.ServerService;
 import hu.btsoft.gfmon.engine.model.service.SnapshotService;
-import hu.btsoft.gfmon.engine.rest.CollectMonitorServiceModules;
+import hu.btsoft.gfmon.engine.monitor.runtime.ServerMonitoringServiceStatus;
 import hu.btsoft.gfmon.engine.security.SessionTokenAcquirer;
 import java.util.List;
 import java.util.Set;
@@ -76,7 +76,7 @@ public class GFMonitorController {
     private SnapshotProvider snapshotProvider;
 
     @Inject
-    private CollectMonitorServiceModules checkServerMonitorServiceState;
+    private ServerMonitoringServiceStatus serverMonitoringServiceStatus;
 
     /**
      * GFMon engine indítása
@@ -103,9 +103,13 @@ public class GFMonitorController {
             return;
         }
 
+        //Runtime értékek törlése
+        serverService.clearRuntimeValues(DB_MODIFICATORY_USER);
+
+        //Mérési periódusidő leszedése a konfigból
         int sampleIntervalSec = configService.getSampleInterval();
 
-        //this.timer = this.timerService.createTimer(1_000 /* 1 mp múlva indul */, sampleIntervalSec * 1_000, new ScheduleExpression());
+        //Timer felhúzása
         this.timer = this.timerService.createIntervalTimer(1_000, // késleltetés
                 sampleIntervalSec * 1_000, //intervallum
                 new TimerConfig("GFMon-Timer", false) //ne legyen perzisztens a timer!
@@ -207,11 +211,11 @@ public class GFMonitorController {
                 }
             }
 
-            //Ha még nem tudjuk, hogy az adott szerveren mit lehet monitorozni., akkor azt most kigyűjtjük
-            if (server.getMonitorableModules() == null) {
+            //Ha még nem tudjuk, hogy az adott szerveren be van-e kapcsolva a MonitoringService
+            if (server.getMonitoringServiceReady() == null || !server.getMonitoringServiceReady()) {
 
                 // A monitorozandó GF példányok MonitoringService (module-monitoring-levels) ellenőrzése
-                Set<String/*GF MoitoringService module name*/> monitorableModules = checkServerMonitorServiceState.checkMonitorStatus(server.getSimpleUrl(), server.getSessionToken());
+                Set<String> monitorableModules = serverMonitoringServiceStatus.checkMonitorStatus(server.getSimpleUrl(), server.getSessionToken());
 
                 // Amely szervernek nincs engedélyezve egyetlen monitorozható modulja sem, azt jól inaktívvá tesszük
                 if (monitorableModules == null) {
@@ -226,13 +230,19 @@ public class GFMonitorController {
                     //logot is írunk
                     log.warn("{}: {}", server.getUrl(), kieginfo);
 
-                    //Ezzel a szerverrel már nem foglalkozunk tovább, majd visszabillenthető a UI felületről a státusza
-                    continue;
+                } else {
+                    //Megjegyezzük, hogy a szerver moitorozható
+                    server.setMonitoringServiceReady(true);
+                    log.trace("A(z) {} szerver monitorozható moduljai: {}", url, monitorableModules);
                 }
 
-                //Eltároljuk a monitorozható modulokat a memóriában
-                server.setMonitorableModules(monitorableModules);
-                log.trace("A(z) {} szerver monitorozható moduljai: {}", url, monitorableModules);
+                //lementjük az adatbázisba a szerver megváltozott állapotát
+                serverService.save(server);
+
+                //Ha incs mit monitorozini rajta, akkor már nem foglalkozunk vele tovább, majd visszabillenthető a státusza a UI felületről
+                if (!server.getMonitoringServiceReady()) {
+                    continue;
+                }
             }
 
             log.trace("Adatgyűjtés indul: {}", url);

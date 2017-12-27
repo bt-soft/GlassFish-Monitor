@@ -4,12 +4,12 @@
  *  GF Monitor project
  *
  *  Module:  gfmon-engine (gfmon-engine)
- *  File:    CollectMonitorServiceModules.java
+ *  File:    ServerMonitoringServiceStatus.java
  *  Created: 2017.12.24. 18:31:11
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.rest;
+package hu.btsoft.gfmon.engine.monitor.runtime;
 
 import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
 import java.util.HashSet;
@@ -27,12 +27,13 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * Ellenőrzi az adott GF példány MonitoringService beállításait
+ *
  * pl.: http://localhost:4848/management/domain/configs/config/server-config/monitoring-service/module-monitoring-levels
  *
  * @author BT
  */
 @Slf4j
-public class CollectMonitorServiceModules {
+public class ServerMonitoringServiceStatus {
 
     private static final String MONITORING_SERVICE_URI = "/management/domain/configs/config/server-config/monitoring-service/module-monitoring-levels";
 

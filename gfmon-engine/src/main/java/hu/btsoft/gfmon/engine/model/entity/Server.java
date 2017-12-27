@@ -14,7 +14,6 @@ package hu.btsoft.gfmon.engine.model.entity;
 import hu.btsoft.gfmon.corelib.crypt.CryptUtil;
 import hu.btsoft.gfmon.corelib.network.NetworkUtils;
 import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
-import java.util.Set;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -113,6 +112,29 @@ public class Server extends ModifiableEntityBase {
     @ColumnPosition(position = 17)
     private String additionalInformation;
 
+    /**
+     * REST HTTP token
+     * Induláskor töröljük
+     */
+    @Column(name = "TMP_SESSION_TOKEN", nullable = true)
+    @ColumnPosition(position = 18)
+    private String sessionToken;
+
+    /**
+     * Be van kapcsolva a szerver MonitoringService szolgáltatása?
+     * Induláskor töröljük
+     */
+    @Column(name = "TMP_MONSVCE_RDY", nullable = true)
+    @ColumnPosition(position = 19)
+    private Boolean monitoringServiceReady;
+
+//    /**
+//     * A szerver monitorozható moduljainak halmaza
+//     * Csak runtime változó, nem tároljuk az adatbázisban
+//     */
+//    @Transient
+//    private Set<String/*GF MonitoringService module name*/> monitorableModules;
+//
 //    /**
 //     * A szerver mérési eredményei
 //     */
@@ -120,25 +142,11 @@ public class Server extends ModifiableEntityBase {
 //    private List<SnapshotBase> snapshots;
 //
     /**
-     * A szerver monitorozható moduljainak halmaza
-     * Csak runtime változó, nem tároljuk az adatbázisban
-     */
-    @Transient
-    private Set<String/*GF MonitoringService module name*/> monitorableModules;
-
-    /**
      * A kódolatlan jelszó
      * Csak runtime változó, nem tároljuk az adatbázisban
      */
     @Transient
     private String plainPassword;
-
-    /**
-     * REST HTTP token
-     * Csak runtime változó, nem tároljuk az adatbázisban
-     */
-    @Transient
-    private String sessionToken;
 
     /**
      * Konstruktor - csak a sima jelszót lehet kezelni
