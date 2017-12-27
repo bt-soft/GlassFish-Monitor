@@ -52,11 +52,23 @@ public class Servlet extends SnapshotBase {
     private Long activeServletsLoaded;
 
     /**
+     * LowWatermark
+     */
+    @ColumnPosition(position = 21)
+    private Long activeServletsLoadedLw;
+
+    /**
+     * HighWatermark
+     */
+    @ColumnPosition(position = 22)
+    private Long activeServletsLoadedHw;
+
+    /**
      * • servletprocessingtimes
      *
      * Cumulative Servlet processing times
      */
-    @ColumnPosition(position = 21)
+    @ColumnPosition(position = 23)
     private Long servletProcessingTimes;
 
     /**
@@ -64,7 +76,7 @@ public class Servlet extends SnapshotBase {
      *
      * Total number of Servlets ever loaded
      */
-    @ColumnPosition(position = 21)
+    @ColumnPosition(position = 24)
     private Long totalServletsLoaded;
 
 }
