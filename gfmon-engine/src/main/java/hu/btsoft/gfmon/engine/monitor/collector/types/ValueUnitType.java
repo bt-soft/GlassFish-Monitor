@@ -24,7 +24,9 @@ public enum ValueUnitType {
     SECONDS("seconds", ValueClass.NUMBER),
     BYTES("bytes", ValueClass.NUMBER),
     STRING("String", ValueClass.STRING),
-    LIST("List", ValueClass.STRING);
+    LIST("List", ValueClass.STRING),
+    //
+    COUNT_CURLWHW("ne-találd-meg", ValueClass.NUMBER); //Current/Low/HighWatermark
 
     private final String unitName;
 

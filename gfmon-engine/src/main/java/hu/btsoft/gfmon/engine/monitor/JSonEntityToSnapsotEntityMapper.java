@@ -20,6 +20,14 @@ import hu.btsoft.gfmon.engine.model.entity.snapshot.network.ConnectionQueue;
 import hu.btsoft.gfmon.engine.model.entity.snapshot.network.HttpListener1ConnectionQueue;
 import hu.btsoft.gfmon.engine.model.entity.snapshot.network.HttpListener1KeepAlive;
 import hu.btsoft.gfmon.engine.model.entity.snapshot.network.HttpListener1ThreadPool;
+import hu.btsoft.gfmon.engine.model.entity.snapshot.network.HttpListener2ConnectionQueue;
+import hu.btsoft.gfmon.engine.model.entity.snapshot.network.HttpListener2KeepAlive;
+import hu.btsoft.gfmon.engine.model.entity.snapshot.network.HttpListener2ThreadPool;
+import hu.btsoft.gfmon.engine.model.entity.snapshot.taservice.TransActionService;
+import hu.btsoft.gfmon.engine.model.entity.snapshot.web.Jsp;
+import hu.btsoft.gfmon.engine.model.entity.snapshot.web.Request;
+import hu.btsoft.gfmon.engine.model.entity.snapshot.web.Servlet;
+import hu.btsoft.gfmon.engine.model.entity.snapshot.web.Session;
 import hu.btsoft.gfmon.engine.monitor.collector.MonitorValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.httpservice.HttpServiceRequestCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.jvm.MemoryColletor;
@@ -28,6 +36,15 @@ import hu.btsoft.gfmon.engine.monitor.collector.network.ConnectionQueueCollector
 import hu.btsoft.gfmon.engine.monitor.collector.network.HttpListener1ConnectionQueueCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.network.HttpListener1KeepAliveCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.network.HttpListener1ThreadPoolCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.network.HttpListener2ConnectionQueueCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.network.HttpListener2KeepAliveCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.network.HttpListener2ThreadPoolCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.taservice.TransActionServiceColletor;
+import hu.btsoft.gfmon.engine.monitor.collector.types.ValueUnitType;
+import hu.btsoft.gfmon.engine.monitor.collector.web.JspColletor;
+import hu.btsoft.gfmon.engine.monitor.collector.web.RequestColletor;
+import hu.btsoft.gfmon.engine.monitor.collector.web.ServletColletor;
+import hu.btsoft.gfmon.engine.monitor.collector.web.SessionCollector;
 import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.HashMap;
@@ -35,6 +52,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * JsonEntitások+Eredmények -> Snapshot mapper
@@ -121,7 +139,8 @@ public class JSonEntityToSnapsotEntityMapper {
                         value = dto.getCount();
 
                     } else if (String.class == fieldType) {
-                        value = dto.getCurrent();
+                        String dtoValue = (String) dto.getCurrent();
+                        value = !StringUtils.isEmpty(dtoValue) ? dtoValue.replaceAll("%%%EOL%%%", "\n") : null;
                     }
 
                     field.set(jpaEntityRef, value);
@@ -130,17 +149,19 @@ public class JSonEntityToSnapsotEntityMapper {
                     continue;
                 }
 
-                if (dto.getLowWatermark() != null) { //lowwatermark leszedése - ha van
-                    Field _field = this.getFieldByName(fields, field.getName() + "LW");
-                    if (_field != null) {
-                        _field.setAccessible(true);
-                        _field.set(jpaEntityRef, dto.getLowWatermark());
-                    }
-                } else if (dto.getHighWatermark() != null) { //highwatermark leszedése - ha van
-                    Field _field = this.getFieldByName(fields, field.getName() + "HW");
-                    if (_field != null) {
-                        _field.setAccessible(true);
-                        _field.set(jpaEntityRef, dto.getHighWatermark());
+                if (dto.getUnit() == ValueUnitType.COUNT_CURLWHW) {
+                    if (dto.getLowWatermark() != null) { //lowwatermark leszedése - ha van
+                        Field _field = this.getFieldByName(fields, field.getName() /*+ IGFMonEngineConstants.LOW_WATERMARK_VAR_POSTFX*/);
+                        if (_field != null) {
+                            _field.setAccessible(true);
+                            _field.set(jpaEntityRef, dto.getLowWatermark());
+                        }
+                    } else if (dto.getHighWatermark() != null) { //highwatermark leszedése - ha van
+                        Field _field = this.getFieldByName(fields, field.getName() /*+ IGFMonEngineConstants.HIGH_WATERMARK_VAR_POSTFX*/);
+                        if (_field != null) {
+                            _field.setAccessible(true);
+                            _field.set(jpaEntityRef, dto.getHighWatermark());
+                        }
                     }
                 }
             }
@@ -216,6 +237,55 @@ public class JSonEntityToSnapsotEntityMapper {
                         snapshotEntity = new HttpListener1ThreadPool();
                     }
                     break;
+
+                case HttpListener2ConnectionQueueCollector.URI:
+                    if (snapshotEntity == null) {
+                        snapshotEntity = new HttpListener2ConnectionQueue();
+                    }
+                    break;
+
+                case HttpListener2KeepAliveCollector.URI:
+                    if (snapshotEntity == null) {
+                        snapshotEntity = new HttpListener2KeepAlive();
+                    }
+                    break;
+
+                case HttpListener2ThreadPoolCollector.URI:
+                    if (snapshotEntity == null) {
+                        snapshotEntity = new HttpListener2ThreadPool();
+                    }
+                    break;
+
+                case TransActionServiceColletor.URI:
+                    if (snapshotEntity == null) {
+                        snapshotEntity = new TransActionService();
+                    }
+                    break;
+
+                case JspColletor.URI:
+                    if (snapshotEntity == null) {
+                        snapshotEntity = new Jsp();
+                    }
+                    break;
+
+                case RequestColletor.URI:
+                    if (snapshotEntity == null) {
+                        snapshotEntity = new Request();
+                    }
+                    break;
+
+                case ServletColletor.URI:
+                    if (snapshotEntity == null) {
+                        snapshotEntity = new Servlet();
+                    }
+                    break;
+
+                case SessionCollector.URI:
+                    if (snapshotEntity == null) {
+                        snapshotEntity = new Session();
+                    }
+                    break;
+
             }
 
             if (snapshotEntity != null) {

@@ -4,7 +4,7 @@
  *  GF Monitor project
  *
  *  Module:  gfmon-engine (gfmon-engine)
- *  File:    HttpListener1ThreadPool.java
+ *  File:    HttpListener2ThreadPool.java
  *  Created: 2017.12.27. 10:50:58
  *
  *  ------------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ import org.eclipse.persistence.annotations.Customizer;
  * @author BT
  */
 @Entity
-@Table(name = "SNOT_NET_HTTPL1THRDPOOL", catalog = "", schema = IGFMonEngineConstants.DATABASE_SCHEMAN_NAME)
+@Table(name = "SNOT_NET_HTTPL2THRDPOOL", catalog = "", schema = IGFMonEngineConstants.DATABASE_SCHEMAN_NAME)
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @Cacheable(false)
 @Data
@@ -40,6 +40,6 @@ import org.eclipse.persistence.annotations.Customizer;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-public class HttpListener1ThreadPool extends ThreadPoolFieldsBase {
+public class HttpListener2ThreadPool extends ThreadPoolFieldsBase {
 
 }

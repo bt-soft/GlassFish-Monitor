@@ -61,7 +61,7 @@ public class MonitorValueDto {
     /**
      * A mért érték értéke
      */
-    private String current;
+    private Object current;
 
     /**
      * A mért érték legkisebb értéke

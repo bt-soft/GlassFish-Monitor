@@ -16,6 +16,7 @@ import hu.btsoft.gfmon.engine.monitor.collector.types.ValueUnitType;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
@@ -76,48 +77,54 @@ public abstract class CollectorBase implements ICollectMonitoredData {
         //Végigmegyünk az entitásokon
         for (String entityName : entities.keySet()) {
             JsonObject jsonValueEntity = entities.getJsonObject(entityName);
-            String unitName = jsonValueEntity.getJsonString("unit").getString();
 
+            String unitName = jsonValueEntity.getJsonString("unit").getString();
             if (unitName == null) {
                 log.error("A(z) '{}' JSon entitásnak nincs 'unit' értéke!", entityName);
                 continue;
             }
 
+            //Unit type kitalálása
+            ValueUnitType valueUnitType = ValueUnitType.fromValue(jsonValueEntity.getJsonString("unit").getString());
+            //Ha COUNT az unit, de van 'lowwatermark' és 'highwatermark' -> COUNT_CURLWHW lesz a típus
+            if (valueUnitType == ValueUnitType.COUNT
+                    && jsonValueEntity.getJsonNumber("lowwatermark") != null
+                    && jsonValueEntity.getJsonNumber("highwatermark") != null) {
+                valueUnitType = ValueUnitType.COUNT_CURLWHW;
+            }
+
             MonitorValueDto dto = new MonitorValueDto();
-            dto.setUnit(ValueUnitType.fromValue(jsonValueEntity.getJsonString("unit").getString()));
+
+            dto.setUnit(valueUnitType);
             dto.setLastSampleTime(long2Date(jsonValueEntity.getJsonNumber("lastsampletime").longValue()));
             dto.setName(jsonValueEntity.getJsonString("name").getString());
-//          dto.setDescription(entity.getJsonString("description").getString());
             dto.setStartTime(long2Date(jsonValueEntity.getJsonNumber("starttime").longValue()));
+//          dto.setDescription(entity.getJsonString("description").getString());
             dto.setUri(getUri());
 
             //Érték típushelyes leszedése
-            switch (ValueUnitType.fromValue(unitName)) {
+            switch (valueUnitType) {
 
                 case SECONDS:
                 case MILLISECOND:
                 case NANOSECOND:
                 case COUNT:
-                case BYTES: {
+                case BYTES:
                     dto.setCount(jsonValueEntity.getJsonNumber("count").longValue());
-
-                    //lowwatermark leszedése - ha van
-                    if (jsonValueEntity.getJsonNumber("lowwatermark") != null) {
-                        dto.setLowWatermark(jsonValueEntity.getJsonNumber("lowwatermark").longValue());
-                    }
-
-                    //highwatermark leszedése - ha van
-                    if (jsonValueEntity.getJsonNumber("highwatermark") != null) {
-                        dto.setHighWatermark(jsonValueEntity.getJsonNumber("highwatermark").longValue());
-                    }
                     break;
-                }
+
+                case COUNT_CURLWHW:
+                    JsonNumber jn = jsonValueEntity.getJsonNumber("current");
+                    dto.setCurrent(jn.longValue());
+
+                    dto.setLowWatermark(jsonValueEntity.getJsonNumber("lowwatermark").longValue());
+                    dto.setHighWatermark(jsonValueEntity.getJsonNumber("highwatermark").longValue());
+                    break;
 
                 case LIST:
-                case STRING: {
+                case STRING:
                     dto.setCurrent(jsonValueEntity.getJsonString("current").getString());
                     break;
-                }
 
                 default:
                     log.warn("Nincs lekezelve a JSon entitás, név: '{}', unit: '{}' !", entityName, unitName);

@@ -4,8 +4,8 @@
  *  GF Monitor project
  *
  *  Module:  gfmon-engine (gfmon-engine)
- *  File:    HttpListener1ThreadPool.java
- *  Created: 2017.12.27. 10:50:58
+ *  File:    HttpListener2ConnectionQueue.java
+ *  Created: 2017.12.27. 10:33:51
  *
  *  ------------------------------------------------------------------------------------
  */
@@ -13,7 +13,7 @@ package hu.btsoft.gfmon.engine.model.entity.snapshot.network;
 
 import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
 import hu.btsoft.gfmon.engine.model.entity.EntityColumnPositionCustomizer;
-import hu.btsoft.gfmon.engine.model.entity.snapshot.ThreadPoolFieldsBase;
+import hu.btsoft.gfmon.engine.model.entity.snapshot.ConnectionQueueFieldsBase;
 import javax.persistence.Cacheable;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
@@ -27,12 +27,12 @@ import org.eclipse.persistence.annotations.Customizer;
 
 /**
  * JPA entitás
- * REST PATH: monitoring/domain/server/network/connection-queue
+ * REST PATH: monitoring/domain/server/network/http-listener-2/connection-queue
  *
  * @author BT
  */
 @Entity
-@Table(name = "SNOT_NET_HTTPL1THRDPOOL", catalog = "", schema = IGFMonEngineConstants.DATABASE_SCHEMAN_NAME)
+@Table(name = "SNOT_NET_HTTPL2CONNQ", catalog = "", schema = IGFMonEngineConstants.DATABASE_SCHEMAN_NAME)
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @Cacheable(false)
 @Data
@@ -40,6 +40,8 @@ import org.eclipse.persistence.annotations.Customizer;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-public class HttpListener1ThreadPool extends ThreadPoolFieldsBase {
+public class HttpListener2ConnectionQueue extends ConnectionQueueFieldsBase {
 
+//    @Embedded
+//    private FieldsConnectionQueue connectionQueueFields;
 }

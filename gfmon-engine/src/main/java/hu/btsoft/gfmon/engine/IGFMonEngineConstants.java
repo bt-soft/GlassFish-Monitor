@@ -28,4 +28,7 @@ public interface IGFMonEngineConstants {
     String PROTOCOL_HTTP = "http://";
     String PROTOCOL_HTTPS = "https://";
 
+    String LOW_WATERMARK_VAR_POSTFX = "Lw";
+    String HIGH_WATERMARK_VAR_POSTFX = "Hw";
+
 }
