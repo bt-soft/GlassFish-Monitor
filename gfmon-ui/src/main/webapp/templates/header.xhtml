@@ -14,14 +14,9 @@
         </div>
 
         <div class="ui-g-4" style="text-align: center; padding: 0">
-            <div>
-                <h:outputLabel value="User: "/>
-                <h:outputText value="#{request.remoteUser}"/>
-            </div>
-            <div>
-                <h:outputLabel value="Jog: "/>
-                <h:outputText value="#{request.isUserInRole('APP_GFMON_ADMIN') ? 'admin' : 'user'}"/>
-            </div>
+            <h:outputLabel value="User: "/>
+            <h:outputText value="#{request.remoteUser}"/>
+            <h:outputText value=" (admin jog: #{request.isUserInRole('APP_GFMON_ADMIN') ? 'igen' : 'nem'})"/>
         </div>
 
         <div class="ui-g-4" style="text-align: right; padding: 0">
