@@ -51,4 +51,14 @@ public class GFMonJSFLib implements Serializable {
         return RequestContext.getCurrentInstance().getApplicationContext().getConfig().getBuildVersion();
     }
 
+    /**
+     * Redit a login lapra
+     *
+     * @return login lap JSF rtedir URL
+     */
+    public String logout() {
+        FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
+        return GFMonUIConstants.JSF_URL + GFMonUIConstants.MAIN_PAGE + GFMonUIConstants.JSF_REDIRECT;
+    }
+
 }
