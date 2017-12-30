@@ -32,7 +32,7 @@ import org.eclipse.persistence.annotations.Customizer;
  * @author BT
  */
 @Entity
-@Table(name = "SNOT_NET_HTTPL1THRDPOOL", catalog = "", schema = IGFMonEngineConstants.DATABASE_SCHEMAN_NAME)
+@Table(name = "SNOT_NET_HTTPL1THRDPOOL", catalog = "", schema = IGFMonEngineConstants.DATABASE_SCHEMA_NAME)
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @Cacheable(false)
 @Data

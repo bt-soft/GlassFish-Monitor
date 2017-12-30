@@ -3,28 +3,34 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
       xmlns:p="http://primefaces.org/ui"
       xmlns:fn="http://java.sun.com/jsp/jstl/functions"
       >
 
+    <p:importConstants type="hu.btsoft.gfmon.ui.GFMonUIConstants" var="GFMonUIConstants"/>
+
+
     <h:head>
+
         <f:facet name="first">
-            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            <!--[if IE]>
+              <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+            <![endif]-->
+
+            <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
             <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-            <link rel="shortcut icon" type="image/x-icon" href="#{request.contextPath}/resources/images/favicon.png" />
+            <!--<link rel="shortcut icon" type="image/x-icon" href="#{request.contextPath}/resources/images/favicon.png" />-->
         </f:facet>
 
-        <h:outputStylesheet name="/css/cssLayout.css"/>
-        <h:outputStylesheet name="/css/bevfeld_relative.css"/>
-        <h:outputScript library="js" name="bevfeld.js" />
+        <h:outputStylesheet name="/css/gfMonitor.css"/>
+
 
         <title>
-            <ui:insert name="title" >SimplePageTemplate</ui:insert>
+            <ui:insert name="title" >#{IGFMonUIConstants.SHORT_APP_NAME} - title</ui:insert>
         </title>
 
-        <ui:insert name="html:head" />
 
     </h:head>
 
@@ -35,31 +41,29 @@
         <c:set var="isRunningOnWebLogic" scope="request" value="#{fn:startsWith(request.servletContext.serverInfo, 'WebLogic')}" />
 
         <p:growl id="growl" widgetVar="growl" showDetail="true" showSummary="true"/>
-
         <ui:debug hotkey="x" rendered="#{isDeveloperMode}" />
 
 
-        <div id="top">
-            <ui:insert name="top">
-                <ui:include src="simpleHeader.xhtml"/>
-            </ui:insert>
+        <div id="wrapper">
+            <div id="header">
+                <ui:insert name="header">
+                    <ui:include src="simpleHeader.xhtml"/>
+                </ui:insert>
+            </div>
+
+            <div id="main">
+                <ui:insert name="content">Content</ui:insert>
+            </div>
+
+            <div id="footer">
+                <ui:insert name="footer">
+                    <ui:include src="footer.xhtml" />
+                </ui:insert>
+            </div>
+
         </div>
 
-        <div id="content" class="center_content">
-            <ui:insert name="content">Page Content</ui:insert>
-        </div>
-
-        <div id="bottom">
-            <ui:insert name="bottom">
-                <ui:include src="footer.xhtml" />
-            </ui:insert>
-        </div>
 
     </h:body>
-
-    <p:blockUI block="body" widgetVar="blockUI">
-        <h:outputText value="Kérem várjon.." />
-    </p:blockUI>
-
 
 </html>

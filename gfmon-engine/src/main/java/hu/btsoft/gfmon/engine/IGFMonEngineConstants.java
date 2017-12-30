@@ -11,22 +11,19 @@
  */
 package hu.btsoft.gfmon.engine;
 
-import java.text.SimpleDateFormat;
+import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 
 /**
- * Monitor konstansok
+ * Monitor motor konstansok
  *
  * @author BT
  */
-public interface IGFMonEngineConstants {
+public interface IGFMonEngineConstants extends IGFMonCoreLibConstants {
 
-    SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-    String SHORT_APP_NAME = "GF-MON";
-
-    String DATABASE_SCHEMAN_NAME = "GFMON";
     String PROTOCOL_HTTP = "http://";
     String PROTOCOL_HTTPS = "https://";
+
+    String DATABASE_SCHEMA_NAME = "GFMON";
 
     String LOW_WATERMARK_VAR_POSTFX = "Lw";
     String HIGH_WATERMARK_VAR_POSTFX = "Hw";

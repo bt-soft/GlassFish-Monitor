@@ -35,7 +35,7 @@ import lombok.NoArgsConstructor;
  */
 @Entity
 @Cacheable(false)
-@Table(name = "CONFIG", catalog = "", schema = IGFMonEngineConstants.DATABASE_SCHEMAN_NAME)
+@Table(name = "CONFIG", catalog = "", schema = IGFMonEngineConstants.DATABASE_SCHEMA_NAME)
 @Data
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor

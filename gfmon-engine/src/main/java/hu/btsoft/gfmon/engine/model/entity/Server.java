@@ -40,7 +40,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author BT
  */
 @Entity
-@Table(name = "SERVER", catalog = "", schema = IGFMonEngineConstants.DATABASE_SCHEMAN_NAME)
+@Table(name = "SERVER", catalog = "", schema = IGFMonEngineConstants.DATABASE_SCHEMA_NAME)
 @Cacheable(false)
 @Data
 @ToString(callSuper = false, of = {"hostName", "ipAddress", "portNumber", "active"})

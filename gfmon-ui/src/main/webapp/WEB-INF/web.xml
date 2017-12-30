@@ -7,13 +7,11 @@
 
 
     <context-param>
-        <description> JSF mód ( Development | Production | SystemTest | UnitTest )</description>
         <param-name>javax.faces.PROJECT_STAGE</param-name>
         <param-value>${web.inf.project.stage}</param-value>
     </context-param>
 
     <context-param>
-        <description>State saving mód: client | server (=default)</description>
         <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
         <param-value>server</param-value>
     </context-param>
@@ -25,7 +23,6 @@
 
     <!-- PrimeFaces kliens oldali Validáció bekapcsolása -->
     <context-param>
-        <description>Kliens oldali validáció bekapcsolása</description>
         <param-name>primefaces.CLIENT_SIDE_VALIDATION</param-name>
         <param-value>true</param-value>
     </context-param>

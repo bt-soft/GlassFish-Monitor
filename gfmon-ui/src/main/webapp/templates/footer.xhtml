@@ -5,10 +5,19 @@
                 xmlns:p="http://primefaces.org/ui"
                 xmlns:ui="http://java.sun.com/jsf/facelets">
 
-    <p:separator style="color: #ccc; margin: 0; padding: 0" />
 
-    <h:panelGrid columns="3"  style="margin: 0; padding: 0; width: 100%; text-align: center">
-        <h:outputText value="#{request.servletContext.serverInfo}" style="color: blue; font-size: 0.6em !important;" rendered="#{isDeveloperMode}"/>
-    </h:panelGrid>
 
+
+
+    <div class="ui-g">
+        <div class="ui-g-4" style="text-align: left; padding: 0">
+            <h:outputText value="#{gfMonJsfLib.shortAppNameAndversion}"/>
+        </div>
+        <div class="ui-g-4" style="text-align: center; padding: 0">
+            <h:outputText value="#{request.servletContext.serverInfo}"/>
+        </div>
+        <div class="ui-g-4" style="text-align: right; padding: 0">
+            <h:outputText value="PrimeFaces V#{gfMonJsfLib.primefacesVersion} [on #{gfMonJsfLib.jsfVersion}]"/>
+        </div>
+    </div>
 </ui:composition>
