@@ -1,6 +1,7 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<ui:composition xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:p="http://primefaces.org/ui"
                 template="./../templates/simplePageTemplate.xhtml"
@@ -11,9 +12,11 @@
     </ui:define>
 
     <ui:define name="content">
-        <h1>A unexpected error occured! </h1>
-        <p:outputLabel value="Message: " />
-        <h:outputText value="#{pfExceptionHandler.message}" style="color: red"/>
+        <p:panel>
+            <h1>Váratlan hiba!</h1>
+            <p:outputLabel value="Üzenet: " style="font-weight: bold"/>
+            <h:outputText value="#{pfExceptionHandler.message}" style="color: red; font-weight: bold"/>
+        </p:panel>
 
 
         <p:panel style="background: whitesmoke; padding-left: 2em">

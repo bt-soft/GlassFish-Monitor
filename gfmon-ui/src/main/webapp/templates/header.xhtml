@@ -8,11 +8,22 @@
 
 
     <div class="ui-g">
+
         <div class="ui-g-4" style="text-align: left; padding: 0">
             <h:outputText value="#{GFMonUIConstants.LONG_APP_NAME} V#{gfMonJsfLib.version}"/>
         </div>
+
         <div class="ui-g-4" style="text-align: center; padding: 0">
+            <div>
+                <h:outputLabel value="User: "/>
+                <h:outputText value="#{request.remoteUser}"/>
+            </div>
+            <div>
+                <h:outputLabel value="Jog: "/>
+                <h:outputText value="#{request.isUserInRole('APP_GFMON_ADMIN') ? 'admin' : 'user'}"/>
+            </div>
         </div>
+
         <div class="ui-g-4" style="text-align: right; padding: 0">
             <h:outputText value="Mód: #{facesContext.application.projectStage}"/>
         </div>

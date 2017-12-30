@@ -7,8 +7,9 @@
 
 
     <context-param>
+        <description>Development, UnitTest, SystemTest Production</description>
         <param-name>javax.faces.PROJECT_STAGE</param-name>
-        <param-value>${web.inf.project.stage}</param-value>
+        <param-value>Development</param-value>
     </context-param>
 
     <context-param>
@@ -152,10 +153,10 @@
         </web-resource-collection>
         <auth-constraint>
             <description>App role-ok a használathoz</description>
-            <role-name>APP_MON_USER</role-name>
+            <role-name>APP_GFMON_USER</role-name>
         </auth-constraint>
         <user-data-constraint>
-            <description>Hálózati kommunikáció ( NONE | INTEGRAL | CONFIDENTIAL (SSL) )</description>
+            <description>NONE | INTEGRAL | CONFIDENTIAL (SSL)</description>
             <transport-guarantee>NONE</transport-guarantee>
         </user-data-constraint>
     </security-constraint>

@@ -1,19 +1,97 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<ui:composition xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-                template="./templates/simplePageTemplate.xhtml">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                template="./templates/simplePageTemplate.xhtml"
+                >
 
     <ui:define name="title">
         #{GFMonUIConstants.SHORT_APP_NAME} - login
     </ui:define>
 
+    <ui:define name="htmlHead">
+        <style type="text/css">
+            .login-box {
+                background-color: whitesmoke;
+                width: auto;
+                padding: 2em 4em 2em 4em;
+                display: box;
+                border-style: solid;
+                border-width: thin;
+                border-color: grey;
+                position: fixed;
+                top: 80%;
+                left: 80%;
+                transform: translate(-80%, -80%);
+            }
+
+        </style>
+    </ui:define>
+
     <ui:define name="content">
 
-        login content<br/>
-        login content<br/>
-        login content<br/>
-        login content<br/>
-        login content<br/>
+        <div class="login-box">
+
+
+            <h:form id="loginForm" onsubmit="document.getElementById('loginForm').action = 'j_security_check';" prependId="false">
+
+                <p:outputLabel value="Bejelentkezés" style="font-size: 4em;"/>
+
+
+                <h:panelGrid style="margin-top: 1em">
+                    <p:panelGrid columns="2">
+                        <p:outputLabel style="width: 1em; height: 1em" for="j_username">
+                            <i class="fa fa-user"/>
+                        </p:outputLabel>
+                        <p:inputText id="j_username"
+                                     autocomplete="off"
+                                     style="border: none"
+                                     placeholder="Felhasználó neve"
+                                     >
+                        </p:inputText>
+                    </p:panelGrid>
+
+                    <p:panelGrid columns="2">
+                        <p:outputLabel for="j_password"><i class="fa fa-lock"/></p:outputLabel>
+                        <p:password id="j_password"
+                                    autocomplete="off"
+                                    style="border: none"
+                                    placeholder="Jelszó"
+                                    >
+                        </p:password>
+                    </p:panelGrid>
+                </h:panelGrid>
+
+                <p:separator/>
+
+                <h:panelGroup>
+                    <p:commandButton value="Belépés"
+                                     ajax="false"
+                                     icon="ui-icon-person"
+                                     style="float: right"
+                                     />
+
+                    <p:commandButton value="admin"
+                                     ajax="false"
+                                     onclick="$('#j_username').val('admin'); $('#j_password').val('Password12');"
+                                     icon="fa fa-user-circle-o"
+                                     rendered="#{isDeveloperMode}"
+                                     style="float: left; color: yellowgreen"
+                                     />
+                    <p:commandButton value="user"
+                                     ajax="false"
+                                     onclick="$('#j_username').val('user'); $('#j_password').val('Password12');"
+                                     icon="fa fa-user-circle"
+                                     rendered="#{isDeveloperMode}"
+                                     style="float: left; color: yellowgreen"
+                                     />
+                </h:panelGroup>
+
+            </h:form>
+
+        </div>
 
     </ui:define>
 

@@ -21,6 +21,10 @@ import org.primefaces.context.RequestContext;
 @ApplicationScoped
 public class GFMonJSFLib implements Serializable {
 
+    public String getVersion() {
+        return VersionUtils.getModuleVersionStr(GFMonJSFLib.class);
+    }
+
     public String getShortAppNameAndversion() {
         return GFMonUIConstants.SHORT_APP_NAME + " V" + VersionUtils.getModuleVersionStr(GFMonJSFLib.class);
     }
