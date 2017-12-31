@@ -4,6 +4,7 @@
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions"
                 template="./templates/simplePageTemplate.xhtml"
                 >
 
@@ -27,13 +28,24 @@
                 transform: translate(-80%, -80%);
             }
 
+            .gitHubpanel {
+                width: 20%;
+                position: fixed;
+                top: 10%;
+                left: 5%;
+            }
         </style>
     </ui:define>
 
     <ui:define name="content">
 
-        <div class="login-box">
 
+        <p:panel id="gitHubPanel" styleClass="gitHubpanel">
+            <pe:github id="gitHub" repository="bt-soft/GlassFish-Monitor" iconForks="true" iconIssues="true" iconStars="true"/>
+        </p:panel>
+
+
+        <div class="login-box">
 
             <h:form id="loginForm" onsubmit="document.getElementById('loginForm').action = 'j_security_check';" prependId="false">
 
