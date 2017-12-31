@@ -1,4 +1,5 @@
 /** --- Layout definíciók ------------------------------------------------------------------------------------------------------------------------------------*/
+
 html,body {
 
     /*font-family: Verdana, "Verdana CE",  Arial, "Arial CE", "Lucida Grande CE", lucida, "Helvetica CE", sans-serif;*/
@@ -17,10 +18,32 @@ html,body {
     margin: 0;
 }
 
+
+root {
+    font-size: 1em;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.ui-widget {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 1em;
+}
+.ui-widget .ui-widget {
+    font-size: 1em;
+}
+.ui-widget input,
+.ui-widget select,
+.ui-widget textarea,
+.ui-widget button {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 0.8em;
+}
+
+
 /** --- Layout definíciók ------------------------------------------------------------------------------------------------------------------------------------*/
 
 
-body {
+#simple-body {
     background-image: -webkit-gradient(
         linear,
         right bottom,
@@ -71,6 +94,17 @@ body {
 
     height: 2em;
     margin-top: -1em;
+}
+/** --- Header feliratok ------------------------------------------------------------------------------------------------------------------------------*/
+.header-version {
+    font-size: 1.8em;
+    font-weight: bold;
+    font-family: Arial;
+    color: navy
+}
+
+.header-mode{
+
 }
 
 /** --- Input -----------------------------------------------------------------------------------------------------------------------------------------*/

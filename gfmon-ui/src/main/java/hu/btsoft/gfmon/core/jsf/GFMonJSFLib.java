@@ -58,7 +58,7 @@ public class GFMonJSFLib implements Serializable {
      */
     public String logout() {
         FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
-        return GFMonUIConstants.JSF_URL + GFMonUIConstants.MAIN_PAGE + GFMonUIConstants.JSF_REDIRECT;
+        return GFMonUIConstants.JSF_START_URL + GFMonUIConstants.MAIN_PAGE + GFMonUIConstants.JSF_REDIRECT;
     }
 
 }

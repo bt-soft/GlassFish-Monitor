@@ -16,6 +16,8 @@
             <h1>Váratlan hiba!</h1>
             <p:outputLabel value="Üzenet: " style="font-weight: bold"/>
             <h:outputText value="#{pfExceptionHandler.message}" style="color: red; font-weight: bold"/>
+
+            <input type="button" onclick="window.location.replace(document.referrer);" value="Vissza" style="float: right"/>
         </p:panel>
 
 

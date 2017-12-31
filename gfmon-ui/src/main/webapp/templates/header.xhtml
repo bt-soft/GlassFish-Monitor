@@ -7,10 +7,11 @@
 
 
 
+
     <div class="ui-g">
 
         <div class="ui-g-4" style="text-align: left; padding: 0">
-            <h:outputText value="#{GFMonUIConstants.LONG_APP_NAME} V#{gfMonJsfLib.version}"/>
+            <h:outputText value="#{GFMonUIConstants.LONG_APP_NAME} V#{gfMonJsfLib.version}" styleClass="header-version"/>
         </div>
 
         <div class="ui-g-2" style="text-align: center; padding: 0">
@@ -20,17 +21,10 @@
             <h:outputText value="#{request.isUserInRole('APP_GFMON_ADMIN') ? 'igen' : 'nem'}" style="color: #{request.isUserInRole('APP_GFMON_ADMIN') ? 'red' : null}"/>
             <h:outputText value=")"/>
         </div>
-        <div class="ui-g-2" style="text-align: center; padding: 0">
-            <h:form>
-                <p:commandLink action="#{gfMonJsfLib.logout()}" style="text-decoration: none" ajax="false">
-                    <p:confirm header="Megerősítés" message="Valóban ki szeretne lépni?" icon="ui-icon-alert" />
-                    <i class="fa fa-sign-out" style="margin-top: 0.4em; margin-right: 1em" title="Kilépés" />
-                </p:commandLink>
-            </h:form>
-        </div>
 
         <div class="ui-g-4" style="text-align: right; padding: 0">
-            <h:outputText value="Mód: #{facesContext.application.projectStage}"/>
+            <h:outputText value="Mód: " styleClass="header-mode"/>
+            <h:outputText value="#{facesContext.application.projectStage}" styleClass="header-mode"/>
         </div>
     </div>
 
