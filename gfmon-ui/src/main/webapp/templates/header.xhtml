@@ -18,7 +18,7 @@
             <h:outputLabel value="User: "/>
             <h:outputText value="#{request.remoteUser}" style="color: green"/>
             <h:outputText value=" (admin jog: "/>
-            <h:outputText value="#{request.isUserInRole('APP_GFMON_ADMIN') ? 'igen' : 'nem'}" style="color: #{request.isUserInRole('APP_GFMON_ADMIN') ? 'red' : null}"/>
+            <h:outputText value="#{isAdmin ? 'igen' : 'nem'}" style="color: #{request.isUserInRole('APP_GFMON_ADMIN') ? 'red' : null}"/>
             <h:outputText value=")"/>
         </div>
 

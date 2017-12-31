@@ -26,6 +26,13 @@
 
     <dependencies>
 
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>gfmon-corelib</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+
         <!-- @Getter/@Setter/@Data/@Slf4j/... -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -51,11 +58,7 @@
             <groupId>org.primefaces.extensions</groupId>
             <artifactId>primefaces-extensions</artifactId>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>gfmon-core-lib</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-web-api</artifactId>

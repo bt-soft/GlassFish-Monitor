@@ -42,9 +42,9 @@
 
 
     <modules>
-        <module>gfmon-core-lib</module>
         <module>gfmon-engine</module>
         <module>gfmon-ui</module>
+        <module>gfmon-corelib</module>
     </modules>
 
 

@@ -11,11 +11,11 @@
  */
 package hu.btsoft.gfmon.engine.config;
 
-import hu.btsoft.gfmon.engine.model.entity.Config;
-import hu.btsoft.gfmon.engine.model.entity.Server;
-import hu.btsoft.gfmon.engine.model.service.ConfigService;
-import hu.btsoft.gfmon.engine.model.service.ServerService;
-import java.util.List;
+import hu.btsoft.gfmon.corelib.model.entity.Config;
+import hu.btsoft.gfmon.corelib.model.entity.ConfigValueType;
+import hu.btsoft.gfmon.corelib.model.entity.Server;
+import hu.btsoft.gfmon.corelib.model.service.ConfigService;
+import hu.btsoft.gfmon.corelib.model.service.ServerService;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -44,11 +44,9 @@ public class DefaultConfigCreator {
      * Default értékek beállítása, ha szükséges
      */
     public void checkDefaults() {
-        //Megnézzük, hogy létezik-e bármilyen beállítás rekord az adatbázisban
-        List<Config> all = configService.findAll();
 
-        //Van már konfig
-        if (all != null && !all.isEmpty()) {
+        //Megnézzük, hogy létezik-e bármilyen beállítás rekord az adatbázisban
+        if (configService.count() > 0) {
             return;
         }
 
@@ -60,22 +58,20 @@ public class DefaultConfigCreator {
      */
     private void createDefaults() {
         log.trace("Default beállítások létrehozása");
+
         {//autostart
             Config config = new Config(ConfigService.KEYCLASS_NAME, ConfigService.KEY_AUTOSTART, ConfigValueType.B, "true");
-            config.setCreatedBy(DEF_USERNAME);
-            configService.save(config);
+            configService.save(config, DEF_USERNAME);
         }
         {//sampleInterval
             Config config = new Config(ConfigService.KEYCLASS_NAME, ConfigService.KEY_SAMPLEINTERVAL, ConfigValueType.I, "60");
-            config.setCreatedBy(DEF_USERNAME);
-            configService.save(config);
+            configService.save(config, DEF_USERNAME);
         }
 
         {//Server 1
             Server server = new Server("localhost", 4848, "Lokális GlassFish Admin", null /*user*/, null /*passwd*/, true /*enabled*/);
 //            Server server = new Server("localhost", 4848, "Lokális GlassFish Admin", "admin" /*user*/, "admin" /*passwd*/, true /*enabled*/);
-            server.setCreatedBy(DEF_USERNAME);
-            serverService.save(server);
+            serverService.save(server, DEF_USERNAME);
         }
 
     }

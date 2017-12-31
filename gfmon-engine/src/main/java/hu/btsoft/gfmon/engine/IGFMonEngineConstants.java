@@ -20,11 +20,6 @@ import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
  */
 public interface IGFMonEngineConstants extends IGFMonCoreLibConstants {
 
-    String PROTOCOL_HTTP = "http://";
-    String PROTOCOL_HTTPS = "https://";
-
-    String DATABASE_SCHEMA_NAME = "GFMON";
-
     String LOW_WATERMARK_VAR_POSTFX = "Lw";
     String HIGH_WATERMARK_VAR_POSTFX = "Hw";
 

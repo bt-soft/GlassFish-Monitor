@@ -1,7 +1,13 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ *  ------------------------------------------------------------------------------------
+ *
+ *  GF Monitor project
+ *
+ *  Module:  gfmon-ui (gfmon-ui)
+ *  File:    GFMonJSFLib.java
+ *  Created: 2017.12.31. 22:12:22
+ *
+ *  ------------------------------------------------------------------------------------
  */
 package hu.btsoft.gfmon.core.jsf;
 
@@ -61,4 +67,12 @@ public class GFMonJSFLib implements Serializable {
         return GFMonUIConstants.JSF_START_URL + GFMonUIConstants.MAIN_PAGE + GFMonUIConstants.JSF_REDIRECT;
     }
 
+    /**
+     * Aktuális user lekérése
+     *
+     * @return user
+     */
+    public static String getCurrentUser() {
+        return FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
+    }
 }
