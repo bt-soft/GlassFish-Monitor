@@ -17,13 +17,13 @@
 
     <h:form id="menuBarForm">
         <p:menubar style="">
-            <p:submenu label="Beállítások" icon="fa fa-gears">
-                <p:menuitem value="Általános" url="#" />
-            </p:submenu>
+            <p:menuitem value="Beállítások" action="/pages/settings.xhtml?faces-redirect=true" />
 
-            <p:menuitem value="Logout" icon="fa fa-sign-out" action="#{gfMonJsfLib.logout()}" >
-                <p:confirm header="Megerősítés" message="Valóban ki szeretne lépni?" icon="ui-icon-alert" />
-            </p:menuitem>
+            <p:submenu label="Kilépés" style="float: right">
+                <p:menuitem value="Logout" icon="fa fa-sign-out" action="#{gfMonJsfLib.logout()}" >
+                    <p:confirm header="Megerősítés" message="Valóban ki szeretne lépni?" icon="ui-icon-alert" />
+                </p:menuitem>
+            </p:submenu>
         </p:menubar>
     </h:form>
 
