@@ -5,6 +5,8 @@
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:p="http://primefaces.org/ui"
 
+                xmlns:bt="http://bt-soft.hu/jsf/ui"
+
                 template="./../templates/pageTemplate.xhtml"
                 >
 
@@ -19,17 +21,17 @@
 
         <h:form id="settingsForm">
 
-            <p:panel id="basic" header="Általános beállítások">
+            <bt:disablePanel disabled="#{not isAdmin}">
 
                 <h:panelGrid columns="2">
                     <h:panelGrid columns="5" cellpadding="10">
                         <h:outputLabel value="Automatikus indítás: " />
-                        <p:inputSwitch value="#{settingsView.autoStart}" offLabel="ki" onLabel="be" disabled="#{not isAdmin}"/>
+                        <p:inputSwitch value="#{settingsView.autoStart}" offLabel="ki" onLabel="be" />
 
                         <p:spacer/>
 
                         <h:outputLabel value="Automatikus indítás: " />
-                        <p:spinner  value="#{settingsView.sampleInterval}" min="10" max="300" stepFactor="5" size="1" disabled="#{not isAdmin}"/>
+                        <p:spinner  value="#{settingsView.sampleInterval}" min="10" max="300" stepFactor="5" size="1" />
                     </h:panelGrid>
 
                     <p:commandButton value="Mentés"
@@ -37,11 +39,10 @@
                                      actionListener="#{settingsView.saveConfig}"
                                      style="float: right"
                                      update="growl"
-                                     disabled="#{not isAdmin}"
                                      />
 
                 </h:panelGrid>
-            </p:panel>
+            </bt:disablePanel>
 
 
         </h:form>
