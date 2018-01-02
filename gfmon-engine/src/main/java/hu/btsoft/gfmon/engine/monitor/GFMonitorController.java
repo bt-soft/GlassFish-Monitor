@@ -12,12 +12,12 @@
 package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.cdi.CdiUtils;
-import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.corelib.model.entity.Server;
 import hu.btsoft.gfmon.corelib.model.entity.snapshot.SnapshotBase;
 import hu.btsoft.gfmon.corelib.model.service.ConfigService;
 import hu.btsoft.gfmon.corelib.model.service.ServerService;
 import hu.btsoft.gfmon.corelib.model.service.SnapshotService;
+import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.monitor.runtime.management.ServerMonitoringServiceStatus;
 import hu.btsoft.gfmon.engine.security.SessionTokenAcquirer;
 import java.util.Set;
@@ -163,8 +163,7 @@ public class GFMonitorController {
         //Mivel egy @Singleton Bean-ban vagyunk, emiatt kézzel lookup-oljuk a CDI Bean-t, hogy ne fogjon le egy Rest kliesnt állandó jelleggel
         SnapshotProvider snapshotProvider = CdiUtils.lookup(SnapshotProvider.class);
 
-        log.trace("this: {}, snapshotProvider: {}", this, snapshotProvider);
-
+//        log.trace("this: {}, snapshotProvider: {}", this, snapshotProvider);
         int checkedServerCnt = 0;
         for (Server server : serverService.findAll()) {
 

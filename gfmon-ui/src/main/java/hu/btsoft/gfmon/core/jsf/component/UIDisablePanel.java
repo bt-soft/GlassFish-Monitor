@@ -15,7 +15,10 @@ import java.io.IOException;
 import javax.faces.component.FacesComponent;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIComponentBase;
+import javax.faces.component.html.HtmlOutputLabel;
 import javax.faces.context.FacesContext;
+import org.apache.commons.lang3.StringUtils;
+import org.primefaces.component.datatable.DataTable;
 
 /**
  * A JSF konténeren elhelyezkedő összes JSF komponens tiltására képes Panel
@@ -29,6 +32,8 @@ public class UIDisablePanel extends UIComponentBase {
 
     private static final String OWN_ATTRIBUTE_FLAG = UIDisablePanel.class.getSimpleName() + "Flag";
     private static final String DISABLED_ATTRIBUTE = "disabled";
+    private static final String UI_STATE_DISABLED_STYLECLASS = "ui-state-disabled";
+    private static final String PF_DATATABLE_ROWSTYLECLASS_ATTRIBUTE = "rowStyleClass";
 
     /**
      * Konstruktor
@@ -50,6 +55,82 @@ public class UIDisablePanel extends UIComponentBase {
     }
 
     /**
+     * A HtmlOutputLabel stílus osztályának birizgálása
+     *
+     * @param htmlOutputLabel JSF HTMLOutputLabel komponens példány
+     * @param toDisable       enable/disable
+     */
+    private void setHtmlOutputLabelStyleClass(HtmlOutputLabel htmlOutputLabel, boolean toDisable) {
+
+        //Most mi az állapota?
+        String currStyleClass = (String) htmlOutputLabel.getStyleClass();
+
+        if (toDisable) {
+
+            if (currStyleClass == null || !currStyleClass.contains(UI_STATE_DISABLED_STYLECLASS)) {
+                htmlOutputLabel.getAttributes().put(OWN_ATTRIBUTE_FLAG, true); //megjelöljük, hogy mi raktuk rá az attribútumot
+
+                //beállítjuk, hogy tiltott a komponens
+                String s = currStyleClass == null ? UI_STATE_DISABLED_STYLECLASS : currStyleClass + " " + UI_STATE_DISABLED_STYLECLASS;
+                htmlOutputLabel.setStyleClass(s);
+            }
+
+        } else {
+
+            if (htmlOutputLabel.getAttributes().get(OWN_ATTRIBUTE_FLAG) != null) {  //csak a magunk által beállított attribútummal foglalkozunk
+                htmlOutputLabel.getAttributes().remove(OWN_ATTRIBUTE_FLAG); //leszedjük a saját attribútumot
+
+                if (currStyleClass != null) {
+                    String s = StringUtils.normalizeSpace(currStyleClass.replaceAll(UI_STATE_DISABLED_STYLECLASS, ""));
+                    htmlOutputLabel.setStyleClass(s);
+                }
+            }
+        }
+
+    }
+
+    /**
+     * Komponens tiltása/engedélyezése
+     * PrimeFaces DataTable komponensnél a rowStyleClass-t is állítgatja
+     *
+     * @param uiComponent JSF komponens példány
+     * @param toDisable   enable/disable
+     * @param attribute   a komponens attribútuma, amely jelzi a tiltást
+     */
+    private void setComponentDisable(UIComponent uiComponent, boolean toDisable, String attribute) {
+        if (toDisable) {
+            //Most mi az állapota?
+            Boolean curState = (Boolean) uiComponent.getAttributes().get(attribute);
+
+            if (curState == null || curState == false) {
+                uiComponent.getAttributes().put(OWN_ATTRIBUTE_FLAG, true); //megjelöljük, hogy mi raktuk rá az attribútumot
+                uiComponent.getAttributes().put(attribute, true); //beállítjuk, hogy tiltott a komponens
+
+                //Primefaces datatable?
+                //Ha igen akkor beállítjuk a rowStyleClass-t is
+                if (uiComponent instanceof DataTable) {
+                    uiComponent.getAttributes().put(PF_DATATABLE_ROWSTYLECLASS_ATTRIBUTE, UI_STATE_DISABLED_STYLECLASS);
+                }
+            }
+
+        } else {
+
+            if (uiComponent.getAttributes().get(OWN_ATTRIBUTE_FLAG) != null) {  //csak a magunk által beállított attribútummal foglalkozunk
+                uiComponent.getAttributes().remove(OWN_ATTRIBUTE_FLAG); //leszedjük a saját attribútumot
+                uiComponent.getAttributes().put(attribute, false); //beállítjuk, hogy nem tiltott a komponens
+
+                //Primefaces datatable?
+                //Ha igen akkor leszedjük a rowStyleClass-t is
+                if (uiComponent instanceof DataTable) {
+                    uiComponent.getAttributes().remove(PF_DATATABLE_ROWSTYLECLASS_ATTRIBUTE);
+                }
+
+            }
+        }
+
+    }
+
+    /**
      * A JSF komponensfán véggigyalogolava engedélyezi/tiltja az erre alkalmas komponenseket
      *
      * @param root      komponensfa gyökér elem
@@ -58,29 +139,18 @@ public class UIDisablePanel extends UIComponentBase {
     public void processDisablePanel(UIComponent root, boolean toDisable) {
 
         //végigmegyünk az összes gyerek komponensen
-        root.getChildren().stream().map((c) -> {
+        root.getChildren().stream().map((UIComponent c) -> {
 
             //if (c instanceof UIInput || c instanceof UICommand) {
-            if (c instanceof UIComponentBase) { //Minden komponensen vágiggyaloglunk
+            if (c instanceof HtmlOutputLabel) { //JSF output (label, text, ...) ?
 
-                if (toDisable) {
+                setHtmlOutputLabelStyleClass((HtmlOutputLabel) c, toDisable);
 
-                    //Most mi az állapota?
-                    Boolean curState = (Boolean) c.getAttributes().get(DISABLED_ATTRIBUTE);
+            } else if (c instanceof DataTable) { //Primefaces datatable?
+                setComponentDisable(c, toDisable, DataTable.PropertyKeys.disabledSelection.toString());
 
-                    if (curState == null || curState == false) {
-                        c.getAttributes().put(OWN_ATTRIBUTE_FLAG, true); //megjelöljük, hogy mi raktuk rá az attribútumot
-                        c.getAttributes().put(DISABLED_ATTRIBUTE, true); //beállítjuk, hogy tiltott a komponens
-                    }
-
-                } else {
-
-                    if (c.getAttributes().get(OWN_ATTRIBUTE_FLAG) != null) {  //csak a magunk által beállított attribútummal foglalkozunk
-                        c.getAttributes().remove(OWN_ATTRIBUTE_FLAG); //leszedjük a saját attribútumot
-                        c.getAttributes().put(DISABLED_ATTRIBUTE, false); //beállítjuk, hogy nem tiltott a komponens
-                    }
-                }
-
+            } else if (c instanceof UIComponentBase) { //Minden más JSF UI komponensen vágiggyaloglunk
+                setComponentDisable(c, toDisable, DISABLED_ATTRIBUTE);
             }
             return c;
 

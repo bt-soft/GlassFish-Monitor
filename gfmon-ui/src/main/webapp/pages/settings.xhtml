@@ -39,7 +39,7 @@
 
                         <p:spacer/>
 
-                        <h:outputLabel value="Mintavétel [mp]: " />
+                        <h:outputLabel value="Mintavétel [mp]: "/>
                         <p:spinner  value="#{settingsView.sampleInterval}" min="10" max="300" stepFactor="5" size="1" />
                     </h:panelGrid>
 
@@ -50,7 +50,7 @@
                 <br/>
 
                 <h:outputText value="Monitorozott szerverek" styleClass="category-header-text"/>
-                <h:panelGrid id="tableButtonsPanelGrid" columns="8">
+                <p:panel id="tableButtonsPanelGrid" style="background: transparent; border: none;">
 
                     <p:commandButton id="refreshBtn"
                                      value="Frissít"
@@ -71,11 +71,20 @@
                                      onstart="GfMon.updateAndShowDialog('settingsForm:viewBtn', 'settingsForm', 'viewServerDetailsDlg');"
                                      />
 
-                </h:panelGrid>
+                    <p:commandButton value="Beállítások mentése"
+                                     icon="fa fa-save"
+                                     actionListener="#{settingsView.saveConfig}"
+
+                                     update="settingsForm growl"
+                                     style="float: right"
+                                     />
+
+                </p:panel>
 
                 <p:dataTable id="serversTable"
                              value="#{settingsView.servers}"
                              var="server"
+
 
                              disabledTextSelection="false"
 
@@ -115,16 +124,9 @@
                         <i class="fa #{server.active ? 'fa-check-square-o' : 'fa-square-o'}" aria-hidden="true"/>
                     </p:column>
 
-                    <p:column headerText="Monitorozva"
-                              styleClass="alignCenter"
-                              >
-                        <i class="fa #{settingsView.selectedServer.monitoringServiceReady ? 'fa-check-square-o' : 'fa-square-o'}" aria-hidden="true"/>
-                    </p:column>
-
                     <p:column headerText="URL">
                         <h:outputText value="#{server.url}"/>
                     </p:column>
-
 
                     <p:column headerText="Leírás">
                         <h:outputText value="#{server.description}"/>
@@ -141,21 +143,6 @@
             </bt:disablePanel>
         </h:form>
 
-        <h:form id="buttonsForm">
-
-
-            <bt:disablePanel disabled="#{not isAdmin}">
-                <p:commandButton value="Beállítások mentése"
-                                 icon="fa fa-save"
-                                 actionListener="#{settingsView.saveConfig}"
-
-                                 update="settingsForm growl"
-                                 style="float: right"
-                                 />
-
-            </bt:disablePanel>
-
-        </h:form>
 
         <ui:include src="../dialogs/server/viewServerDetailsDlg.xhtml" />
 
