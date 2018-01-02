@@ -68,6 +68,11 @@ public abstract class ServiceBase<T extends EntityBase> {
      */
     public void save(T entity, String user) {
 
+        if (entity == null) {
+            log.warn("null az entitás!");
+            return;
+        }
+
         if (entity instanceof ModifiableEntityBase) {
             if (entity.getId() == null) {
                 ((ModifiableEntityBase) entity).setCreatedBy(user);
@@ -75,7 +80,7 @@ public abstract class ServiceBase<T extends EntityBase> {
             } else {
                 //Csak akkor mentünk, ha valóban van változás az entitásban
                 T t = find(entity.getId());
-                if (t.equals(entity)) {
+                if (t != null && t.equals(entity)) {
                     return;
                 }
                 //Mehet a mentés
@@ -92,6 +97,12 @@ public abstract class ServiceBase<T extends EntityBase> {
      * @param entity entitás példány
      */
     public void save(T entity) {
+
+        if (entity == null) {
+            log.warn("null az entitás!");
+            return;
+        }
+
         try {
             //Új elntitás lesz?
             if (entity.getId() == null) {
@@ -123,6 +134,12 @@ public abstract class ServiceBase<T extends EntityBase> {
      * @param entity entitás példány
      */
     public void remove(T entity) {
+
+        if (entity == null) {
+            log.warn("null az entitás!");
+            return;
+        }
+
         try {
             getEntityManager().remove(getEntityManager().merge(entity));
 

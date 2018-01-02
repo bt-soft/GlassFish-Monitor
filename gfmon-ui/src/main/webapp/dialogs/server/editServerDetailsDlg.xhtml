@@ -29,7 +29,7 @@
             <p:panelGrid columns="2" styleClass="noBorderPanelGrid" columnClasses="viewDlgTblPrompt, viewDlgTblValue" >
 
                 <h:outputLabel value="Aktív" />
-                <p:selectBooleanCheckbox value="#{settingsView.selectedServer.active}" />
+                <p:selectBooleanCheckbox value="#{settingsView.modifiedServer.active}" />
 
                 <h:outputLabel value="DNS Név vagy IP cím" />
                 <p:inputText value="#{settingsView.modifiedServer.hostName}" onfocus="this.select();" required="true" >
