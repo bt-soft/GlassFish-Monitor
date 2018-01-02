@@ -13,7 +13,9 @@ package hu.btsoft.gfmon.ui.view;
 
 import hu.btsoft.gfmon.core.jsf.GFMonJSFLib;
 import hu.btsoft.gfmon.corelib.model.entity.Config;
+import hu.btsoft.gfmon.corelib.model.entity.Server;
 import hu.btsoft.gfmon.corelib.model.service.ConfigService;
+import hu.btsoft.gfmon.corelib.model.service.ServerService;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -21,6 +23,8 @@ import javax.faces.application.FacesMessage;
 import javax.faces.view.ViewScoped;
 import javax.inject.Named;
 import javax.persistence.PersistenceException;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -37,9 +41,30 @@ public class SettingsView extends ViewBase {
 
     private List<Config> configs;
 
+    @EJB
+    private ServerService serverService;
+
+    @Getter
+    private List<Server> servers;
+
+    @Getter
+    @Setter
+    private Server selectedServer;
+
+    /**
+     * JSF ManagedBean init
+     */
     @PostConstruct
     protected void init() {
+        refresh();
+    }
+
+    /**
+     * Adatok lekérése az adatbázisból
+     */
+    public void refresh() {
         configs = configService.findAll();
+        servers = serverService.findAll();
     }
 
     /**

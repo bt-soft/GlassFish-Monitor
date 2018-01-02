@@ -95,6 +95,15 @@ root {
     height: 2em;
     margin-top: -1em;
 }
+
+/* Képernyő közepére */
+.centerOfScreen {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    /* a 'margin-left'-et és a 'margin-top'-ot a komponens mérete szerint utánahúzni! */
+}
+
 /** --- Header feliratok ------------------------------------------------------------------------------------------------------------------------------*/
 .header-version {
     font-size: 1.8em;
@@ -115,4 +124,35 @@ root {
 /* IE watermark */
 *:-ms-input-placeholder {
     color: #d0d0d0 !important;
+}
+
+
+/** --- PanelGrid ---------------------------------------------------------------------------------------------------------------------------------*/
+/* Panelgrid margin és padding nélkül */
+.strictPanelGrid.ui-panelgrid>*>tr,
+.strictPanelGrid.ui-panelgrid>*>tr>td {
+    margin: 0;
+    padding: 0;
+}
+
+/* Panelgrid keret nélkül */
+.noBorderPanelGrid.ui-panelgrid>*>tr,
+.noBorderPanelGrid.ui-panelgrid>*>tr>td {
+    border: none;
+}
+
+/* Átlátszó panelgrid */
+.transparentPanelGrid tr,
+.transparentPanelGrid td {
+    background: transparent !important;
+}
+
+
+/** --- Nézegetős Dialógusok PanelGrid ------------------------------------------------------------------------------------------------------------*/
+.viewDlgTblPrompt{
+    text-align: right;
+    font-weight: bold;
+    background-color: menu;
+}
+.viewDlgTblValue{
 }

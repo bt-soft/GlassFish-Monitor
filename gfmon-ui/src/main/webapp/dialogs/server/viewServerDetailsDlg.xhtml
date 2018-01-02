@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                >
+
+
+    <p:dialog id="viewServerDetailsDlg"
+              widgetVar="viewServerDetailsDlg"
+              modal="true"
+              resizable="true"
+              appendTo="@(body)"
+              closeOnEscape="true"
+              closable="true"
+
+              header="Szerver: #{settingsView.selectedServer.url}"
+
+              showEffect="fade"
+              hideEffect="fold"
+
+              >
+
+
+        <h:form id="viewServerDetailsDlgForm">
+
+            <p:panelGrid columns="2" styleClass="noBorderPanelGrid" columnClasses="viewDlgTblPrompt, viewDlgTblValue" >
+
+                <h:outputText value="Aktív" />
+                <i class="fa #{settingsView.selectedServer.active ? 'fa-check-square-o' : 'fa-square-o'}" aria-hidden="true"/>
+
+                <h:outputText value="Monitorozva" />
+                <i class="fa #{settingsView.selectedServer.monitoringServiceReady ? 'fa-check-square-o' : 'fa-square-o'}" aria-hidden="true"/>
+
+                <h:outputText value="Host" />
+                <h:outputText value="#{settingsView.selectedServer.hostName}"/>
+
+                <h:outputText value="IP" />
+                <h:outputText value="#{settingsView.selectedServer.ipAddress}"/>
+
+                <h:outputText value="Port" />
+                <h:outputText value="#{settingsView.selectedServer.portNumber}"/>
+
+                <h:outputText value="User" />
+                <h:outputText value="#{settingsView.selectedServer.userName}"/>
+
+                <h:outputText value="Leírás" />
+                <h:outputText value="#{settingsView.selectedServer.description}"/>
+
+                <h:outputText value="KiegInfó" />
+                <h:outputText value="#{settingsView.selectedServer.additionalInformation}"/>
+
+                <h:outputText value="Létrehozva" />
+                <h:outputText value="#{settingsView.selectedServer.createdDate}">
+                    <f:convertDateTime pattern="yyyy.MM.dd HH:mm:ss"
+                                       timeZone="Europe/Budapest"
+                                       locale="hu_HU"/>
+                </h:outputText>
+
+                <h:outputText value="Létrehozó" />
+                <h:outputText value="#{settingsView.selectedServer.createdBy}"/>
+
+                <h:outputText value="Módosítva" />
+                <h:outputText value="#{settingsView.selectedServer.modifiedDate}">
+                    <f:convertDateTime pattern="yyyy.MM.dd HH:mm:ss"
+                                       timeZone="Europe/Budapest"
+                                       locale="hu_HU"/>
+                </h:outputText>
+
+                <h:outputText value="Módosító" />
+                <h:outputText value="#{settingsView.selectedServer.modifiedBy}"/>
+
+            </p:panelGrid>
+
+
+            <p:separator style="color: #ccc;" />
+
+            <p:commandButton value="OK"
+                             icon="fa fa-check"
+                             onclick="PF('viewServerDetailsDlg').hide();"
+                             style="float: right"
+                             />
+        </h:form>
+
+    </p:dialog>
+
+
+</ui:composition>

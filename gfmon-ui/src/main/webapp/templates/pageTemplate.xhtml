@@ -5,8 +5,9 @@
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
-      xmlns:p="http://primefaces.org/ui"
       xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pe="http://primefaces.org/ui/extensions"
       >
 
     <p:importConstants type="hu.btsoft.gfmon.ui.GFMonUIConstants" var="GFMonUIConstants"/>
@@ -25,6 +26,8 @@
         </f:facet>
 
         <h:outputStylesheet name="/css/gfMonitor.css"/>
+        <h:outputScript library="js" name="gf-mon.js" />
+
 
 
         <title>
@@ -68,8 +71,20 @@
 
         </div>
 
+
         <ui:include src="../dialogs/confirmationDgl.xhtml" />
 
+        <pe:blockUI widgetVar = "blockUI" >
+            <h:panelGrid columns = "1" style = "text-align: center">
+                <h:graphicImage library = "images"
+                                name = "loader/ajax-loader-osc.gif"
+                                style = "/*margin-right: 12px;*/ vertical-align: middle;" />
+                <h:outputText value = "Dolgozom..." style = "white-space: nowrap;" />
+            </h:panelGrid>
+        </pe:blockUI>
+
     </h:body>
+
+
 
 </html>

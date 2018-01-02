@@ -1,20 +1,25 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<ui:composition xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-
-                xmlns:h="http://xmlns.jcp.org/jsf/html"
-                xmlns:p="http://primefaces.org/ui"
-
-                xmlns:bt="http://bt-soft.hu/jsf/ui"
-
-                template="./../templates/pageTemplate.xhtml"
-                >
+<ui:composition  xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                 xmlns:h="http://xmlns.jcp.org/jsf/html"
+                 xmlns:p="http://primefaces.org/ui"
+                 xmlns:f="http://xmlns.jcp.org/jsf/core"
+                 xmlns:bt="http://bt-soft.hu/jsf/ui"
+                 template="./../templates/pageTemplate.xhtml"
+                 >
 
     <ui:define name="title">
         #{GFMonUIConstants.SHORT_APP_NAME} - Bállítások
     </ui:define>
 
     <ui:define name="htmlHead">
+        <style type="text/css">
+            .category-header-text {
+                font-size: 2em;
+                font-family: Arial;
+            }
+        </style>
     </ui:define>
 
     <ui:define name="content">
@@ -23,6 +28,10 @@
 
             <bt:disablePanel disabled="#{not isAdmin}">
 
+
+
+                <h:outputText value="Működés" styleClass="category-header-text"/>
+
                 <h:panelGrid columns="2">
                     <h:panelGrid columns="5" cellpadding="10">
                         <h:outputLabel value="Automatikus indítás: " />
@@ -30,22 +39,126 @@
 
                         <p:spacer/>
 
-                        <h:outputLabel value="Automatikus indítás: " />
+                        <h:outputLabel value="Mintavétel [mp]: " />
                         <p:spinner  value="#{settingsView.sampleInterval}" min="10" max="300" stepFactor="5" size="1" />
                     </h:panelGrid>
 
-                    <p:commandButton value="Mentés"
-                                     icon="fa fa-save"
-                                     actionListener="#{settingsView.saveConfig}"
-                                     style="float: right"
-                                     update="growl"
+                </h:panelGrid>
+
+
+
+                <br/>
+
+                <h:outputText value="Monitorozott szerverek" styleClass="category-header-text"/>
+                <h:panelGrid id="tableButtonsPanelGrid" columns="8">
+
+                    <p:commandButton id="refreshBtn"
+                                     value="Frissít"
+                                     title="Táblázat frissítése"
+                                     icon="fa fa-refresh"
+                                     actionListener="#{settingsView.refresh()}"
+                                     update="@form"
+                                     onstart="PF('blockUI').block();"
+                                     oncomplete="PF('blockUI').unblock();"
+                                     />
+
+
+                    <p:commandButton id="viewBtn"
+                                     value="Részletek"
+                                     title="Részletek megtekintése"
+                                     icon="fa fa-id-card-o"
+                                     disabled="#{empty settingsView.selectedServer}"
+                                     onstart="GfMon.updateAndShowDialog('settingsForm:viewBtn', 'settingsForm', 'viewServerDetailsDlg');"
                                      />
 
                 </h:panelGrid>
+
+                <p:dataTable id="serversTable"
+                             value="#{settingsView.servers}"
+                             var="server"
+
+                             disabledTextSelection="false"
+
+                             selectionMode="single"
+                             selection="#{settingsView.selectedServer}"
+
+                             rowIndexVar="rowNdx"
+                             rowKey="#{server.id}"
+
+                             emptyMessage="Nincs monitorozott szerver"
+                             >
+
+
+                    <p:ajax event="rowSelect"  update="settingsForm:tableButtonsPanelGrid :growl" />
+                    <p:ajax event="rowUnselect"  update="settingsForm:tableButtonsPanelGrid :growl" />
+
+                    <p:column headerText="No#"
+                              styleClass="alignCenter"
+                              style="width: 1.5em">
+                        <h:outputText value="#{rowNdx + 1}" />
+                    </p:column>
+
+
+                    <p:column headerText="DB id"
+                              rendered="#{isDeveloperMode}"
+                              styleClass="alignCenter"
+                              style="width: 3em"
+                              >
+
+                        <h:outputText value="#{server.id}"/>
+                    </p:column>
+
+                    <p:column headerText="Aktív"
+                              styleClass="alignCenter"
+                              style="width: 3em"
+                              >
+                        <i class="fa #{server.active ? 'fa-check-square-o' : 'fa-square-o'}" aria-hidden="true"/>
+                    </p:column>
+
+                    <p:column headerText="Monitorozva"
+                              styleClass="alignCenter"
+                              >
+                        <i class="fa #{settingsView.selectedServer.monitoringServiceReady ? 'fa-check-square-o' : 'fa-square-o'}" aria-hidden="true"/>
+                    </p:column>
+
+                    <p:column headerText="URL">
+                        <h:outputText value="#{server.url}"/>
+                    </p:column>
+
+
+                    <p:column headerText="Leírás">
+                        <h:outputText value="#{server.description}"/>
+                    </p:column>
+
+                    <p:column headerText="KiegInfó">
+                        <h:outputText value="#{server.additionalInformation}"/>
+                    </p:column>
+
+                </p:dataTable>
+
+
+
+            </bt:disablePanel>
+        </h:form>
+
+        <h:form id="buttonsForm">
+
+
+            <bt:disablePanel disabled="#{not isAdmin}">
+                <p:commandButton value="Beállítások mentése"
+                                 icon="fa fa-save"
+                                 actionListener="#{settingsView.saveConfig}"
+
+                                 update="settingsForm growl"
+                                 style="float: right"
+                                 />
+
             </bt:disablePanel>
 
-
         </h:form>
+
+        <ui:include src="../dialogs/server/viewServerDetailsDlg.xhtml" />
+
     </ui:define>
 
 </ui:composition>
