@@ -45,6 +45,8 @@ public class DefaultConfigCreator {
      */
     public void checkDefaults() {
 
+        configService.dropAndCreate();
+
         //Megnézzük, hogy létezik-e bármilyen beállítás rekord az adatbázisban
         if (configService.count() > 0) {
             return;
