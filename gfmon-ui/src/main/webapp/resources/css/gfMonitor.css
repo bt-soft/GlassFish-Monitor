@@ -41,8 +41,6 @@ root {
 
 
 /** --- Layout definíciók ------------------------------------------------------------------------------------------------------------------------------------*/
-
-
 #simple-body {
     background-image: -webkit-gradient(
         linear,
@@ -102,6 +100,17 @@ root {
     top: 50%;
     left: 50%;
     /* a 'margin-left'-et és a 'margin-top'-ot a komponens mérete szerint utánahúzni! */
+}
+
+
+.alignLeft {
+    text-align: left;
+}
+.alignCenter {
+    text-align: center;
+}
+.alignRight {
+    text-align: right;
 }
 
 /** --- Header feliratok ------------------------------------------------------------------------------------------------------------------------------*/
