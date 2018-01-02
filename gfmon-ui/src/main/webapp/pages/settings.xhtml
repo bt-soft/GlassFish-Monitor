@@ -24,30 +24,12 @@
 
     <ui:define name="content">
 
+        <p:importEnum type="hu.btsoft.gfmon.ui.view.SettingsCommands" var="settingsCmds" />
+
         <h:form id="settingsForm">
 
             <bt:disablePanel disabled="#{not isAdmin}">
 
-
-
-                <h:outputText value="Működés" styleClass="category-header-text"/>
-
-                <h:panelGrid columns="2">
-                    <h:panelGrid columns="5" cellpadding="10">
-                        <h:outputLabel value="Automatikus indítás: " />
-                        <p:inputSwitch value="#{settingsView.autoStart}" offLabel="ki" onLabel="be" />
-
-                        <p:spacer/>
-
-                        <h:outputLabel value="Mintavétel [mp]: "/>
-                        <p:spinner  value="#{settingsView.sampleInterval}" min="10" max="300" stepFactor="5" size="1" />
-                    </h:panelGrid>
-
-                </h:panelGrid>
-
-
-
-                <br/>
 
                 <h:outputText value="Monitorozott szerverek" styleClass="category-header-text"/>
                 <p:panel id="tableButtonsPanelGrid" style="background: transparent; border: none;">
@@ -56,12 +38,14 @@
                                      value="Frissít"
                                      title="Táblázat frissítése"
                                      icon="fa fa-refresh"
-                                     actionListener="#{settingsView.refresh()}"
-                                     update="@form"
+
+                                     actionListener="#{settingsView.refreshServers()}"
+
                                      onstart="PF('blockUI').block();"
                                      oncomplete="PF('blockUI').unblock();"
-                                     />
 
+                                     update="tableButtonsPanelGrid serversTable"
+                                     />
 
                     <p:commandButton id="viewBtn"
                                      value="Részletek"
@@ -71,11 +55,40 @@
                                      onstart="GfMon.updateAndShowDialog('settingsForm:viewBtn', 'settingsForm', 'viewServerDetailsDlg');"
                                      />
 
+
+                    <p:commandButton id="editBtn"
+                                     value="Módosítás"
+                                     title="Szerver adatok módosítása"
+                                     icon="fa fa-pencil"
+                                     disabled="#{empty settingsView.selectedServer}"
+
+                                     actionListener="#{settingsView.commandHandler(settingsCmds.COPY_SELECTED)}"
+                                     onsuccess="GfMon.updateAndShowDialog('settingsForm:editBtn', 'settingsForm', 'editServerDetailsDlg');"
+                                     />
+
+                    <p:commandButton id="deleteBtn"
+                                     value="Törlés"
+                                     title="Szerver törlése"
+                                     icon="fa fa-trash"
+                                     disabled="#{empty settingsView.selectedServer}"
+
+                                     actionListener="#{settingsView.commandHandler(settingsCmds.DELETE_SELECTED)}"
+
+                                     update="tableButtonsPanelGrid serversTable"
+                                     >
+                        <p:confirm header="Törlés"
+                                   message="Biztosan törölni kívánja a(z) '#{settingsView.selectedServer.url}' szervert?"
+                                   icon="fa fa-question-circle-o"
+                                   />
+                    </p:commandButton>
+
+
+
                     <p:commandButton value="Beállítások mentése"
                                      icon="fa fa-save"
                                      actionListener="#{settingsView.saveConfig}"
 
-                                     update="settingsForm growl"
+                                     update="@form :growl"
                                      style="float: right"
                                      />
 
@@ -113,8 +126,15 @@
                               styleClass="alignCenter"
                               style="width: 3em"
                               >
-
                         <h:outputText value="#{server.id}"/>
+                    </p:column>
+
+                    <p:column headerText="DB ver"
+                              rendered="#{isDeveloperMode}"
+                              styleClass="alignCenter"
+                              style="width: 3em"
+                              >
+                        <h:outputText value="#{server.optLockVersion}"/>
                     </p:column>
 
                     <p:column headerText="Aktív"
@@ -139,12 +159,30 @@
                 </p:dataTable>
 
 
+                <br/>
+
+                <h:outputText value="Működés" styleClass="category-header-text"/>
+
+                <h:panelGrid columns="2">
+                    <h:panelGrid columns="5" cellpadding="10">
+                        <h:outputLabel value="Automatikus indítás: " />
+                        <p:inputSwitch value="#{settingsView.autoStart}" offLabel="ki" onLabel="be" />
+
+                        <p:spacer/>
+
+                        <h:outputLabel value="Mintavétel [mp]: "/>
+                        <p:spinner  value="#{settingsView.sampleInterval}" min="10" max="300" stepFactor="5" size="1" />
+                    </h:panelGrid>
+
+                </h:panelGrid>
+
 
             </bt:disablePanel>
         </h:form>
 
 
         <ui:include src="../dialogs/server/viewServerDetailsDlg.xhtml" />
+        <ui:include src="../dialogs/server/editServerDetailsDlg.xhtml" />
 
     </ui:define>
 

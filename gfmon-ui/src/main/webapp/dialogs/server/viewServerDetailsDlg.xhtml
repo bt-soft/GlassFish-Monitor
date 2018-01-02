@@ -29,10 +29,12 @@
             <p:panelGrid columns="2" styleClass="noBorderPanelGrid" columnClasses="viewDlgTblPrompt, viewDlgTblValue" >
 
                 <h:outputText value="Aktív" />
-                <i class="fa #{settingsView.selectedServer.active ? 'fa-check-square-o' : 'fa-square-o'}" aria-hidden="true"/>
+                <p:selectBooleanCheckbox value="#{settingsView.selectedServer.active}" disabled="true"/>
+                <!--<i class="fa #{settingsView.selectedServer.active ? 'fa-check-square-o' : 'fa-square-o'}" aria-hidden="true"/>-->
 
                 <h:outputText value="MonitoringService OK" />
-                <i class="fa #{settingsView.selectedServer.monitoringServiceReady ? 'fa-check-square-o' : 'fa-square-o'}" aria-hidden="true"/>
+                <p:selectBooleanCheckbox value="#{settingsView.selectedServer.monitoringServiceReady}" disabled="true"/>
+                <!--<i class="fa #{settingsView.selectedServer.monitoringServiceReady ? 'fa-check-square-o' : 'fa-square-o'}" aria-hidden="true"/>-->
 
                 <h:outputText value="Host" />
                 <h:outputText value="#{settingsView.selectedServer.hostName}"/>

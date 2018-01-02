@@ -31,7 +31,7 @@ public abstract class ViewBase implements Serializable {
      * @param severity sújosság
      * @param msg      szöveg
      */
-    protected void updateJsfMessage(String clientId, FacesMessage.Severity severity, String msg) {
+    protected void addJsfMessage(String clientId, FacesMessage.Severity severity, String msg) {
         String summary = "nemtom";
         if (FacesMessage.SEVERITY_INFO == severity) {
             summary = "Információ";

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                >
+
+    <p:dialog id="editServerDetailsDlg"
+              widgetVar="editServerDetailsDlg"
+              modal="true"
+              resizable="true"
+              appendTo="@(body)"
+              closeOnEscape="true"
+              closable="true"
+
+              header="Szerver: #{settingsView.selectedServer.url}"
+
+              showEffect="fade"
+              hideEffect="fold"
+
+              focus="editServerDetailsDlgForm:cancelBtn"
+              >
+
+
+        <h:form id="editServerDetailsDlgForm">
+
+            <p:panelGrid columns="2" styleClass="noBorderPanelGrid" columnClasses="viewDlgTblPrompt, viewDlgTblValue" >
+
+                <h:outputLabel value="Aktív" />
+                <p:selectBooleanCheckbox value="#{settingsView.selectedServer.active}" />
+
+                <h:outputLabel value="DNS Név vagy IP cím" />
+                <p:inputText value="#{settingsView.modifiedServer.hostName}" onfocus="this.select();" required="true" >
+                    <p:ajax event="blur"
+                            onstart="PF('blockServerDetailDlg').block();"
+                            listener="#{settingsView.fillIpByHostName()}"
+                            onsuccess="PF('blockServerDetailDlg').unblock();"
+                            update=":growl" />
+                </p:inputText>
+
+                <h:outputLabel id="ip" value="Host/cím" />
+                <p:inputText value="#{settingsView.modifiedServer.ipAddress}" disabled="true"/>
+
+                <h:outputLabel value="Port" />
+                <p:inputNumber value="#{settingsView.modifiedServer.portNumber}" onfocus="this.select();" minValue="1024" maxValue="65565" required="true"/>
+
+                <h:outputLabel value="User" />
+                <p:inputText id="user" value="#{settingsView.modifiedServer.userName}" onfocus="this.select();">
+                    <p:ajax event="blur" update="password" oncomplete="$('#password').focus();"/>
+                </p:inputText>
+
+                <h:outputLabel value="Jelszó" />
+                <p:password id="password" value="#{settingsView.modifiedServer.plainPassword}" onfocus="this.select();" disabled="#{empty settingsView.modifiedServer.userName}"/>
+
+                <h:outputLabel value="Leírás" />
+                <p:inputText value="#{settingsView.modifiedServer.description}" onfocus="this.select();"/>
+
+
+            </p:panelGrid>
+
+
+            <p:separator style="color: #ccc;" />
+
+            <p:commandButton id="cancelBtn"
+                             icon="fa fa-ban"
+                             value="Mégsem"
+                             style="float: right"
+
+                             actionListener="#{settingsView.commandHandler(settingsCmds.CANCEL_MODIFY)}"
+
+                             onsuccess="PF('editServerDetailsDlg').hide();"
+                             update="settingsForm :growl"
+
+                             resetValues="true"
+
+                             immediate="true"
+                             />
+
+            <p:commandButton value="OK"
+                             icon="fa fa-check"
+                             style="float: right"
+
+                             actionListener="#{settingsView.commandHandler(settingsCmds.SAVE_MODIFIED)}"
+
+                             onsuccess="PF('editServerDetailsDlg').hide();"
+                             update="settingsForm :growl"
+
+                             resetValues="true"
+                             />
+
+
+        </h:form>
+
+
+        <pe:blockUI id="blockServerDetailDlg" widgetVar="blockServerDetailDlg" target="editServerDetailsDlg" >
+            <h:panelGrid columns="2">
+                <h:graphicImage library="images" name="loader/ajax-loader-spiner1.gif"
+                                style="margin-right: 1em; vertical-align: middle;"/>
+                <h:outputText value="Szerver név/cím ellenőrzés..." style="white-space: nowrap;"/>
+            </h:panelGrid>
+        </pe:blockUI>
+
+    </p:dialog>
+
+</ui:composition>

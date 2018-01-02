@@ -61,7 +61,23 @@ try {
 var GfMon = {
 
     /**
-     * Update and show promefaces Dialog
+     * Ajax Update PF library segítségével
+     * @param {type} source forrás Id
+     * @param {type} form forrás form
+     * @param {type} update frissítendő komponens
+     * @returns {undefined}
+     */
+    update: function (source, form, update) {
+        PrimeFaces.ab({
+            s: source,
+            f: form,
+            u: update
+        });
+    },
+
+    /**
+     * Update and show PrimeFaces Dialog
+     *
      * @param {type} fromId forrás id
      * @param {type} fromForm forrás form
      * @param {type} dglWidgetWar PF dialógus WidgetWar

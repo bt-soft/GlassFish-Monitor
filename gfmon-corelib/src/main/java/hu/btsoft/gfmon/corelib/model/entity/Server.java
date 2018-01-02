@@ -68,7 +68,7 @@ public class Server extends ModifiableEntityBase {
     /**
      * A szerver IP címe, ezt programmatikusan töljük majd ki
      */
-    @Size(min = 5, max = 255, message = "A ipAddress mező hossza {min} és {max} között lehet")
+    @Size(min = 6, max = 255, message = "Az ipAddress mező hossza {min} és {max} között lehet")
     @Column(name = "IP_ADDRESS", length = 255, nullable = true)
     @ColumnPosition(position = 12)
     private String ipAddress;

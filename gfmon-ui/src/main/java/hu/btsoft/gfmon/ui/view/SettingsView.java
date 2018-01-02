@@ -16,6 +16,8 @@ import hu.btsoft.gfmon.corelib.model.entity.Config;
 import hu.btsoft.gfmon.corelib.model.entity.Server;
 import hu.btsoft.gfmon.corelib.model.service.ConfigService;
 import hu.btsoft.gfmon.corelib.model.service.ServerService;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -26,8 +28,11 @@ import javax.persistence.PersistenceException;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.modelmapper.ModelMapper;
 
 /**
+ * Beállítások LAP JSF Managed Bean
  *
  * @author BT
  */
@@ -47,23 +52,41 @@ public class SettingsView extends ViewBase {
     @Getter
     private List<Server> servers;
 
+    /**
+     * A táblázatban kiválasztott szerver (viewDetail)
+     */
     @Getter
     @Setter
     private Server selectedServer;
 
     /**
+     * A szerver adatainak módosítása (editDetail)
+     */
+    @Getter
+    @Setter
+    private Server modifiedServer;
+
+    /**
      * JSF ManagedBean init
      */
     @PostConstruct
-    protected void init() {
-        refresh();
+    protected void loadAllFromDb() {
+        configs = configService.findAll();
+        refreshServers();
     }
 
     /**
-     * Adatok lekérése az adatbázisból
+     * minden változó törlése
      */
-    public void refresh() {
-        configs = configService.findAll();
+    private void clearAll() {
+        selectedServer = null;
+        modifiedServer = null;
+    }
+
+    /**
+     * Szerver adatok lekérése az adatbázisból
+     */
+    public void refreshServers() {
         servers = serverService.findAll();
     }
 
@@ -135,14 +158,91 @@ public class SettingsView extends ViewBase {
      */
     public void saveConfig() {
 
+        String currentUser = GFMonJSFLib.getCurrentUser();
+
         try {
+            //Config mentése
             configs.stream()
                     .forEach((Config config) -> {
-                        configService.save(config, GFMonJSFLib.getCurrentUser());
+                        configService.save(config, currentUser);
                     });
-            updateJsfMessage("growl", FacesMessage.SEVERITY_INFO, "Konfig mentése OK");
+
+            //Szerverek mentése
+            servers.stream()
+                    .forEach((Server server) -> {
+                        serverService.save(server, currentUser);
+                    });
+
+            //Újra betöltünk mindent
+            clearAll();
+            configs = null;
+            servers = null;
+            loadAllFromDb();
+
+            addJsfMessage("growl", FacesMessage.SEVERITY_INFO, "Beállítások adatbázisba mentése OK");
+
         } catch (PersistenceException e) {
-            updateJsfMessage("growl", FacesMessage.SEVERITY_ERROR, String.format("Konfig mentési hiba: %s", e.getMessage()));
+            addJsfMessage("growl", FacesMessage.SEVERITY_ERROR, String.format("Konfig mentési hiba: %s", e.getMessage()));
+
+        }
+    }
+
+    /**
+     * Az aktuálisan editált modifiedServer host neve alapján kitalálja az IP címet
+     * és beírja az modifiedServer példányba
+     */
+    public void fillIpByHostName() {
+        //Ha nincs kitöltve a host
+        if (modifiedServer == null || StringUtils.isEmpty(modifiedServer.getHostName())) {
+            return;
+        }
+
+        try {
+            InetAddress inetAddress = InetAddress.getByName(modifiedServer.getHostName());
+            modifiedServer.setHostName(inetAddress.getHostName());
+            modifiedServer.setIpAddress(inetAddress.getHostAddress());
+
+        } catch (UnknownHostException ex) {
+            modifiedServer.setIpAddress(null);
+            addJsfMessage("growl", FacesMessage.SEVERITY_WARN, String.format("Ismeretlen host név: %s!", modifiedServer.getHostName()));
+        }
+
+    }
+
+    /**
+     * A parancshandler
+     *
+     * @param cmd műveleti parancs
+     */
+    public void commandHandler(SettingsCommands cmd) {
+
+        switch (cmd) {
+            case COPY_SELECTED:
+                if (selectedServer == null) {
+                    break;
+                }
+                ModelMapper mapper = new ModelMapper();
+                modifiedServer = new Server();
+                mapper.map(selectedServer, modifiedServer);
+                break;
+
+            case SAVE_MODIFIED:
+                servers.remove(selectedServer); //A korábbi szerver példányt töröljük a litából
+                servers.add(modifiedServer); //Az editált szerver példány megy be helyette
+                selectedServer = modifiedServer;    //ez lesz kiválasztva
+                addJsfMessage("growl", FacesMessage.SEVERITY_INFO, "A szerver módosítása OK");
+                break;
+
+            case DELETE_SELECTED:
+                servers.remove(selectedServer); //A kiválasztot szerver példányt töröljük a listából
+                selectedServer = null;
+                addJsfMessage("growl", FacesMessage.SEVERITY_INFO, "A szerver törlése OK");
+                break;
+
+            case CANCEL_MODIFY:
+                modifiedServer = null;
+                addJsfMessage("growl", FacesMessage.SEVERITY_WARN, "A szerver módosítása eldobva");
+                break;
         }
     }
 }
