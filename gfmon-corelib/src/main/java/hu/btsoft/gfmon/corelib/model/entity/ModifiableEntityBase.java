@@ -18,6 +18,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -35,6 +36,13 @@ import org.eclipse.persistence.annotations.Customizer;
 @EqualsAndHashCode(callSuper = false)
 @Customizer(EntityColumnPositionCustomizer.class)
 public class ModifiableEntityBase extends EntityBase {
+
+    /**
+     * Szekvencia, Id-szerű egyedi sorszám (de ahhoz semmi köze)
+     * Runtime változó, csak a konfig UI felületen használjuk, pl az újonnan felvett szerver rekordok azonosítása érdekében
+     */
+    @Transient
+    private Long runtimeSeqId;
 
     /**
      * Létrehozó user

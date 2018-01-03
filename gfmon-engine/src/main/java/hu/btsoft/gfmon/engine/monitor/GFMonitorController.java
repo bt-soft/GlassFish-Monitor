@@ -99,8 +99,8 @@ public class GFMonitorController {
             return;
         }
 
-        //Runtime értékek törlése
-        serverService.clearRuntimeValues(DB_MODIFICATORY_USER);
+        //Runtime értékek törlése az adatbázisból
+        serverService.clearRuntimeValuesAndSave(DB_MODIFICATORY_USER);
 
         //Mérési periódusidő leszedése a konfigból
         int sampleIntervalSec = configService.getSampleInterval();

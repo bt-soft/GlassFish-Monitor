@@ -12,6 +12,7 @@
 package hu.btsoft.gfmon.ui.view;
 
 import hu.btsoft.gfmon.core.jsf.GFMonJSFLib;
+import hu.btsoft.gfmon.corelib.model.RuntimeSequenceGenerator;
 import hu.btsoft.gfmon.corelib.model.entity.Config;
 import hu.btsoft.gfmon.corelib.model.entity.Server;
 import hu.btsoft.gfmon.corelib.model.service.ConfigService;
@@ -53,6 +54,14 @@ public class SettingsView extends ViewBase {
     @Getter
     private List<Server> servers;
 
+    @Getter
+    @Setter
+    private Boolean configAutoStart;
+
+    @Getter
+    @Setter
+    private Integer configSampleInterval;
+
     /**
      * A táblázatban kiválasztott szerver (viewDetail)
      */
@@ -65,7 +74,7 @@ public class SettingsView extends ViewBase {
      */
     @Getter
     @Setter
-    private Server modifiedServer;
+    private Server editedServer;
 
     /**
      * editServerDialog fejléc szövege
@@ -74,11 +83,32 @@ public class SettingsView extends ViewBase {
     private String editServerDialogHeaderText;
 
     /**
+     * Változott valamilyen adat, amit menteni kellene?
+     */
+    @Getter
+    private boolean settingsDataChanged;
+
+    /**
+     * Módosítás van folyamatban?
+     */
+    private boolean underModifyProcess;
+
+    /**
      * JSF ManagedBean init
      */
     @PostConstruct
     protected void loadAllFromDb() {
+
+        //Konfig rekordok betöltése
         configs = configService.findAll();
+
+        Config config = findConfig(ConfigService.KEY_AUTOSTART);
+        configAutoStart = config != null ? Boolean.parseBoolean(config.getKeyValue()) : null;
+
+        config = findConfig(ConfigService.KEY_SAMPLEINTERVAL);
+        configSampleInterval = config != null ? Integer.parseInt(config.getKeyValue()) : null;
+
+        //Szerverek betöltése
         refreshServers();
     }
 
@@ -87,15 +117,20 @@ public class SettingsView extends ViewBase {
      */
     private void clearAll() {
         selectedServer = null;
-        modifiedServer = null;
+        editedServer = null;
         editServerDialogHeaderText = null;
+        configs = null;
+        servers = null;
+        configAutoStart = null;
+        configSampleInterval = null;
+        settingsDataChanged = false;
     }
 
     /**
      * Szerver adatok lekérése az adatbázisból
      */
     public void refreshServers() {
-        servers = serverService.findAll();
+        servers = serverService.findAllAndSetRuntimeSeqId();
     }
 
     /**
@@ -113,59 +148,28 @@ public class SettingsView extends ViewBase {
     }
 
     /**
-     * AutoStart lekérése
-     *
-     * @return true/false vagy null, ha nincs ilyen konfig
+     * Beállítások mentése
      */
-    public Boolean getAutoStart() {
+    public void saveSettings() {
 
-        Config config = findConfig(ConfigService.KEY_AUTOSTART);
+        {//A mentendő Config rekord beállítása
 
-        return config != null ? Boolean.parseBoolean(config.getKeyValue()) : null;
-    }
+            //SampleInterval beállítása
+            Config config = findConfig(ConfigService.KEY_SAMPLEINTERVAL);
+            if (config != null) {
+                config.setKeyValue(configSampleInterval.toString());
+                settingsDataChanged = true;
+            }
 
-    /**
-     * AutoStart beállítása
-     *
-     * @param value beállítandó érték
-     */
-    public void setAutoStart(Boolean value) {
-        Config config = findConfig(ConfigService.KEY_AUTOSTART);
-
-        if (config != null) {
-            config.setKeyValue(value.toString());
+            //AutoStart beállítása
+            config = findConfig(ConfigService.KEY_AUTOSTART);
+            if (config != null) {
+                config.setKeyValue(configAutoStart.toString());
+                settingsDataChanged = true;
+            }
         }
-    }
 
-    /**
-     * SampleInterval lekérése
-     *
-     * @return sec-ben a mintavétel, vagy null, ha nincs ilyen
-     */
-    public Integer getSampleInterval() {
-        Config config = findConfig(ConfigService.KEY_SAMPLEINTERVAL);
-
-        return config != null ? Integer.parseInt(config.getKeyValue()) : null;
-    }
-
-    /**
-     * SampleInterval beállítása
-     *
-     * @param value új intervallum sec-ben
-     */
-    public void setSampleInterval(Integer value) {
-        Config config = findConfig(ConfigService.KEY_SAMPLEINTERVAL);
-
-        if (config != null) {
-            config.setKeyValue(value.toString());
-        }
-    }
-
-    /**
-     * Konfig mentése
-     */
-    public void saveConfig() {
-
+        //Az aktuálisan bejelentkezett user lesz a változtató user
         String currentUser = GFMonJSFLib.getCurrentUser();
 
         try {
@@ -183,8 +187,6 @@ public class SettingsView extends ViewBase {
 
             //Újra betöltünk mindent
             clearAll();
-            configs = null;
-            servers = null;
             loadAllFromDb();
 
             addJsfMessage("growl", FacesMessage.SEVERITY_INFO, "Beállítások adatbázisba mentése OK");
@@ -196,23 +198,23 @@ public class SettingsView extends ViewBase {
     }
 
     /**
-     * Az aktuálisan editált modifiedServer host neve alapján kitalálja az IP címet
-     * és beírja az modifiedServer példányba
+     * Az aktuálisan editált editedServer host neve alapján kitalálja az IP címet
+     * és beírja az editedServer példányba
      */
     public void fillIpByHostName() {
         //Ha nincs kitöltve a host
-        if (modifiedServer == null || StringUtils.isEmpty(modifiedServer.getHostName())) {
+        if (editedServer == null || StringUtils.isEmpty(editedServer.getHostName())) {
             return;
         }
 
         try {
-            InetAddress inetAddress = InetAddress.getByName(modifiedServer.getHostName());
-            modifiedServer.setHostName(inetAddress.getHostName());
-            modifiedServer.setIpAddress(inetAddress.getHostAddress());
+            InetAddress inetAddress = InetAddress.getByName(editedServer.getHostName());
+            editedServer.setHostName(inetAddress.getHostName());
+            editedServer.setIpAddress(inetAddress.getHostAddress());
 
         } catch (UnknownHostException ex) {
-            modifiedServer.setIpAddress(null);
-            addJsfMessage("growl", FacesMessage.SEVERITY_WARN, String.format("Ismeretlen host név: %s!", modifiedServer.getHostName()));
+            editedServer.setIpAddress(null);
+            addJsfMessage("growl", FacesMessage.SEVERITY_WARN, String.format("Ismeretlen host név: %s!", editedServer.getHostName()));
         }
     }
 
@@ -227,83 +229,91 @@ public class SettingsView extends ViewBase {
      */
     private boolean isDuplicateNewServer(Server newServer) {
 
-        if (servers.stream().anyMatch((server) -> (server.getHostName().equalsIgnoreCase(newServer.getHostName())
-                && server.getIpAddress().equalsIgnoreCase(newServer.getIpAddress())
-                && server.getPortNumber() == newServer.getPortNumber()))) {
-            return true;
-        }
-
-        return false;
+        return servers.stream().anyMatch((server) -> ( //
+                (!server.getRuntimeSeqId().equals(newServer.getRuntimeSeqId())) // nem saját maga
+                && server.getHostName().equalsIgnoreCase(newServer.getHostName()) //Ha azonos a neve
+                && server.getIpAddress().equalsIgnoreCase(newServer.getIpAddress()) //azonos az IP címe
+                && server.getPortNumber() == newServer.getPortNumber() //azonos a portja
+                ));
     }
 
     /**
-     * A parancs handler
-     *
-     * @param cmd műveleti parancs
+     * Új szerver felvételének megkezdése
      */
-    public void commandHandler(SettingsCommands cmd) {
+    public void newServerBegin() {
+        editedServer = new Server("localhost", 4848, "Local GlassFish", null, null, true);
+        editedServer.setRuntimeSeqId(RuntimeSequenceGenerator.getNextLong());
+        selectedServer = null;
+        editServerDialogHeaderText = "Új szerver felvétele";
+    }
 
-        editServerDialogHeaderText = null;
+    /**
+     * Új vagy módosított szerver mentése a listába
+     */
+    public void save() {
 
-        switch (cmd) {
+        //Duplikált a mentendő szerver adata?
+        if (isDuplicateNewServer(editedServer)) {
+            FacesMessage facesMessage = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Hiba", "A megadott szerver adatok már léteznek!");
+            RequestContext.getCurrentInstance().showMessageInDialog(facesMessage);
 
-            //Új szerver felvétele
-            case NEW_SERVER:
-                modifiedServer = new Server("localhost", 4848, "Local GlassFish", null, null, true);
-                selectedServer = null;
-                editServerDialogHeaderText = "Új szerver felvétele";
-                break;
-
-            //Új szerver mentése
-            case SAVE_NEW_SERVER:
-                if (isDuplicateNewServer(modifiedServer)) {
-                    FacesMessage facesMessage = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Hiba", "A megadott szerver adatok már léteznek!");
-                    RequestContext.getCurrentInstance().showMessageInDialog(facesMessage);
-
-                    //A dialógust nyitva hagyjuk
-                    return;
-                }
-                servers.add(modifiedServer); //Az új szervert hozáadjuk a listához
-                selectedServer = modifiedServer;    //ez lesz kiválasztva
-                modifiedServer = null;
-                addJsfMessage("growl", FacesMessage.SEVERITY_INFO, "Új szerver felvétele OK");
-                break;
-
-            //Szerver módosítása kezdés
-            case COPY_SELECTED:
-                if (selectedServer == null) {
-                    break;
-                }
-                ModelMapper mapper = new ModelMapper();
-                modifiedServer = new Server();
-                mapper.map(selectedServer, modifiedServer);
-                editServerDialogHeaderText = "Szerver módosítása: " + selectedServer.getUrl();
-                break;
-
-            //Módosított szerver mentés
-            case SAVE_MODIFIED:
-                servers.remove(selectedServer); //A korábbi szerver példányt töröljük a litából
-                servers.add(modifiedServer); //Az editált szerver példány megy be helyette
-                selectedServer = modifiedServer;    //ez lesz kiválasztva
-                addJsfMessage("growl", FacesMessage.SEVERITY_INFO, "A szerver módosítása OK");
-                break;
-
-            //Kiválasztott szerver törlés
-            case DELETE_SELECTED:
-                servers.remove(selectedServer); //A kiválasztot szerver példányt töröljük a listából
-                selectedServer = null;
-                addJsfMessage("growl", FacesMessage.SEVERITY_INFO, "A szerver törlése OK");
-                break;
-
-            //Módosítások eldobása
-            case CANCEL_MODIFIED:
-                modifiedServer = null;
-                addJsfMessage("growl", FacesMessage.SEVERITY_WARN, "A adatok eldobva");
-                break;
+            //A dialógust nyitva hagyjuk
+            return;
         }
+
+        boolean isNewServer = editedServer.getId() == null;
+
+        //Ez egy módosítás?
+        if (underModifyProcess && selectedServer != null) {
+            servers.remove(selectedServer); //A korábbi szerver példányt töröljük a litából
+        }
+
+        //Mentjük a változtatást
+        servers.add(editedServer); //Az editált szerver példány megy be helyette
+        selectedServer = editedServer;    //ez lesz kiválasztva
+
+        addJsfMessage("growl", FacesMessage.SEVERITY_INFO, underModifyProcess ? "A szerver módosítása OK" : "Az új szerver felvétele OK");
+        underModifyProcess = false;
+
+        //Beállítjuk,  hogy változott valamilyen adat
+        settingsDataChanged = true;
 
         //becsukjuk a dialógust
         RequestContext.getCurrentInstance().execute("PF('editServerDetailsDlg').hide();");
-
     }
+
+    /**
+     * Módosítást kezdünk
+     */
+    public void modifyBegin() {
+        if (selectedServer == null) {
+            return;
+        }
+        ModelMapper mapper = new ModelMapper();
+        editedServer = new Server();
+        mapper.map(selectedServer, editedServer);
+        editServerDialogHeaderText = "Szerver módosítása: " + selectedServer.getUrl();
+
+        underModifyProcess = true;
+    }
+
+    /**
+     * Módosítások eldobása
+     */
+    public void cancel() {
+        editedServer = null;
+        addJsfMessage("growl", FacesMessage.SEVERITY_WARN, "A adatok eldobva");
+        underModifyProcess = false;
+    }
+
+    /**
+     * Kiválasztott szerver törlése a listából
+     */
+    public void delete() {
+        servers.remove(selectedServer); //A kiválasztot szerver példányt töröljük a listából
+        selectedServer = null;
+        addJsfMessage("growl", FacesMessage.SEVERITY_INFO, "A szerver törlése OK");
+        underModifyProcess = false;
+    }
+
 }

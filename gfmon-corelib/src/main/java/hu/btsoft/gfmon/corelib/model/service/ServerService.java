@@ -11,7 +11,9 @@
  */
 package hu.btsoft.gfmon.corelib.model.service;
 
+import hu.btsoft.gfmon.corelib.model.RuntimeSequenceGenerator;
 import hu.btsoft.gfmon.corelib.model.entity.Server;
+import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -49,25 +51,40 @@ public class ServerService extends ServiceBase<Server> {
 
     /**
      * A futási idejű Entitás értékekek törlése
+     * - Lekéri az összes entitást az adatbázisból
+     * - Törli a runtime értékeket
+     * - majd visszamenti az adatbázisba
+     *
      * (pl.: sessionToken, readyForMonitoring, stb..)
      *
      * @param modifier módosító user
      */
-    public void clearRuntimeValues(String modifier) {
+    public void clearRuntimeValuesAndSave(String modifier) {
 
         super.findAll().stream().map((server) -> {
             server.setSessionToken(null);
-            return server;
-        }).map((server) -> {
             server.setMonitoringServiceReady(null);
-            return server;
-        }).map((server) -> {
+            server.setRuntimeSeqId(null);
             server.setModifiedBy(modifier);
             return server;
         }).forEachOrdered((server) -> {
             super.save(server);
         });
+    }
 
+    /**
+     * Lekéri az adatbázisból az összes rekordot, és a runtimeSeqId feltölti értékekkel
+     *
+     * @return a runtimeSeqId-vel feltöltött adatbázisrekordok listája
+     */
+    public List<Server> findAllAndSetRuntimeSeqId() {
+
+        List<Server> servers = super.findAll();
+        servers.forEach((server) -> {
+            server.setRuntimeSeqId(RuntimeSequenceGenerator.getNextLong());
+        });
+
+        return servers;
     }
 
     /**

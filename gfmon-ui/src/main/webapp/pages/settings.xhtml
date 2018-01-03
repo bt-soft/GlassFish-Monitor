@@ -24,8 +24,6 @@
 
     <ui:define name="content">
 
-        <p:importEnum type="hu.btsoft.gfmon.ui.view.SettingsCommands" var="settingsCmds" />
-
         <h:form id="settingsForm">
 
             <bt:disablePanel disabled="#{not isAdmin}">
@@ -36,7 +34,7 @@
 
                     <p:commandButton id="refreshBtn"
                                      value="Frissít"
-                                     title="Táblázat frissítése"
+                                     title="Szerver lista frissítése"
                                      icon="fa fa-refresh"
 
                                      actionListener="#{settingsView.refreshServers()}"
@@ -47,48 +45,47 @@
                                      update="tableButtonsPanelGrid serversTable"
                                      />
 
-                    <p:commandButton id="newBtn"
-                                     value="Új"
-                                     title="Új szerver felvétele"
-                                     icon="fa fa-plus"
-
-                                     actionListener="#{settingsView.commandHandler(settingsCmds.NEW_SERVER)}"
-
-                                     onsuccess="GfMon.updateAndShowDialog('settingsForm:newBtn', 'settingsForm', 'editServerDetailsDlg');"
-                                     />
-
                     <p:commandButton id="viewBtn"
                                      value="Részletek"
-                                     title="Részletek megtekintése"
+                                     title="A kiválasztott szerver részleteinek megtekintése"
                                      icon="fa fa-id-card-o"
                                      disabled="#{empty settingsView.selectedServer}"
                                      onstart="GfMon.updateAndShowDialog('settingsForm:viewBtn', 'settingsForm', 'viewServerDetailsDlg');"
                                      />
 
+                    <p:commandButton id="newBtn"
+                                     value="Új"
+                                     title="Új szerver felvétele a listába"
+                                     icon="fa fa-plus"
+
+                                     actionListener="#{settingsView.newServerBegin()}"
+
+                                     onsuccess="GfMon.updateAndShowDialog('settingsForm:newBtn', 'settingsForm', 'editServerDetailsDlg');"
+                                     />
 
                     <p:commandButton id="editBtn"
                                      value="Módosítás"
-                                     title="Szerver adatok módosítása"
+                                     title="A kiválasztott szerver adatainak módosítása"
                                      icon="fa fa-pencil"
                                      disabled="#{empty settingsView.selectedServer}"
 
-                                     actionListener="#{settingsView.commandHandler(settingsCmds.COPY_SELECTED)}"
+                                     actionListener="#{settingsView.modifyBegin()}"
 
                                      onsuccess="GfMon.updateAndShowDialog('settingsForm:editBtn', 'settingsForm', 'editServerDetailsDlg');"
                                      />
 
                     <p:commandButton id="deleteBtn"
                                      value="Törlés"
-                                     title="Szerver törlése"
+                                     title="A kiválasztott szerver törlése a listából"
                                      icon="fa fa-trash"
                                      disabled="#{empty settingsView.selectedServer}"
 
-                                     actionListener="#{settingsView.commandHandler(settingsCmds.DELETE_SELECTED)}"
+                                     actionListener="#{settingsView.delete()}"
 
                                      update="tableButtonsPanelGrid serversTable"
                                      >
                         <p:confirm header="Törlés"
-                                   message="Biztosan törölni kívánja a(z) '#{settingsView.selectedServer.url}' szervert?"
+                                   message="Biztosan törölni kívánja a(z) '#{settingsView.selectedServer.url}' szervert a listából?"
                                    icon="fa fa-question-circle-o"
                                    />
                     </p:commandButton>
@@ -97,7 +94,10 @@
 
                     <p:commandButton value="Beállítások mentése"
                                      icon="fa fa-save"
-                                     actionListener="#{settingsView.saveConfig}"
+                                     title="Beállítások mentése az adatbázisba"
+                                     actionListener="#{settingsView.saveSettings}"
+
+                                     disabled="#{not settingsView.settingsDataChanged}"
 
                                      update="@form :growl"
                                      style="float: right"
@@ -148,6 +148,14 @@
                         <h:outputText value="#{server.optLockVersion}"/>
                     </p:column>
 
+                    <p:column headerText="RT Seq"
+                              rendered="#{isDeveloperMode}"
+                              styleClass="alignCenter"
+                              style="width: 3em"
+                              >
+                        <h:outputText value="#{server.runtimeSeqId}"/>
+                    </p:column>
+
                     <p:column headerText="Aktív"
                               styleClass="alignCenter"
                               style="width: 3em"
@@ -177,12 +185,12 @@
                 <h:panelGrid columns="2">
                     <h:panelGrid columns="5" cellpadding="10">
                         <h:outputLabel value="Automatikus indítás: " />
-                        <p:inputSwitch value="#{settingsView.autoStart}" offLabel="ki" onLabel="be" />
+                        <p:inputSwitch value="#{settingsView.configAutoStart}" offLabel="ki" onLabel="be"/>
 
                         <p:spacer/>
 
                         <h:outputLabel value="Mintavétel [mp]: "/>
-                        <p:spinner  value="#{settingsView.sampleInterval}" min="10" max="300" stepFactor="5" size="1" />
+                        <p:spinner  value="#{settingsView.configSampleInterval}" min="10" max="300" stepFactor="5" size="1" />
                     </h:panelGrid>
 
                 </h:panelGrid>
