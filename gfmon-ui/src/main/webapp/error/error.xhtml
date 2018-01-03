@@ -12,18 +12,20 @@
     </ui:define>
 
     <ui:define name="content">
-        <p:panel>
-            <h1>Váratlan hiba!</h1>
-            <p:outputLabel value="Üzenet: " style="font-weight: bold"/>
-            <h:outputText value="#{pfExceptionHandler.message}" style="color: red; font-weight: bold"/>
+        <h:form>
+            <p:panel>
+                <h1>Váratlan hiba!</h1>
+                <p:outputLabel value="Üzenet: " style="font-weight: bold"/>
+                <h:outputText value="#{pfExceptionHandler.message}" style="color: red; font-weight: bold"/>
 
-            <input type="button" onclick="window.location.replace(document.referrer);" value="Vissza" style="float: right"/>
-        </p:panel>
+                <!--<input type="button" onclick="window.location.replace(document.referrer);" value="Vissza" style="float: right"/>-->
+                <p:commandButton onclick="window.location.replace(document.referrer);" icon="fa fa-reply"  value="Vissza" ajax="false" style="float: right; margin-top: -1em"/>
+            </p:panel>
 
-
-        <p:panel style="background: whitesmoke; padding-left: 2em">
-            <h:outputText value="#{pfExceptionHandler.formattedStackTrace}" escape="false" style="font-family: 'Courier New';"/>
-        </p:panel>
+            <p:panel style="background: whitesmoke; padding-left: 2em">
+                <h:outputText value="#{pfExceptionHandler.formattedStackTrace}" escape="false" style="font-family: 'Courier New';"/>
+            </p:panel>
+        </h:form>
     </ui:define>
 
 </ui:composition>

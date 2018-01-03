@@ -2,23 +2,12 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
-                xmlns:p="http://primefaces.org/ui"
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
 
 
-    <div class="ui-g">
-        <div class="ui-g-4" style="text-align: left; padding: 0">
-            <h:outputText value="#{GFMonUIConstants.LONG_APP_NAME} V#{gfMonJsfLib.version}"
-                          styleClass="header-version"/>
-
-        </div>
-        <div class="ui-g-4" style="text-align: center; padding: 0">
-        </div>
-        <div class="ui-g-4" style="text-align: right; padding: 0">
-            <h:outputText value="Mód: " styleClass="header-mode"/>
-            <h:outputText value="#{facesContext.application.projectStage}" styleClass="header-mode"/>
-        </div>
-    </div>
+    <h:panelGrid columns="2" styleClass="strictPanelGrid" style="width: 100%">
+        <h:outputText value="#{GFMonUIConstants.LONG_APP_NAME} V#{gfMonJsfLib.version}" styleClass="header-version"/>
+    </h:panelGrid>
 
 </ui:composition>

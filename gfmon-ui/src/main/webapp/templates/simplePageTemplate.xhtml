@@ -15,13 +15,8 @@
     <h:head>
 
         <f:facet name="first">
-            <!--[if IE]>
-              <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-            <![endif]-->
-
             <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
             <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-            <!--<link rel="shortcut icon" type="image/x-icon" href="#{request.contextPath}/resources/images/favicon.png" />-->
         </f:facet>
 
         <h:outputStylesheet name="/css/gfMonitor.css"/>
@@ -47,12 +42,13 @@
         <ui:debug hotkey="x" rendered="#{isDeveloperMode}" />
 
 
-        <div id="wrapper">
+        <div id="bodyWrapper">
             <div id="header">
                 <ui:insert name="header">
                     <ui:include src="simpleHeader.xhtml"/>
                 </ui:insert>
             </div>
+
 
             <div id="main">
                 <ui:insert name="content">Content</ui:insert>

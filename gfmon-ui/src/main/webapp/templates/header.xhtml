@@ -8,24 +8,25 @@
 
 
 
-    <div class="ui-g">
+    <h:panelGrid columns="2" styleClass="strictPanelGrid" style="width: 100%">
 
-        <div class="ui-g-4" style="text-align: left; padding: 0">
-            <h:outputText value="#{GFMonUIConstants.LONG_APP_NAME} V#{gfMonJsfLib.version}" styleClass="header-version"/>
-        </div>
+        <h:outputText value="#{GFMonUIConstants.LONG_APP_NAME} V#{gfMonJsfLib.version}" styleClass="header-version"/>
 
-        <div class="ui-g-2" style="text-align: center; padding: 0">
-            <h:outputLabel value="User: "/>
-            <h:outputText value="#{request.remoteUser}" style="color: green"/>
-            <h:outputText value=" (admin jog: "/>
-            <h:outputText value="#{isAdmin ? 'igen' : 'nem'}" style="color: #{request.isUserInRole('APP_GFMON_ADMIN') ? 'red' : null}"/>
-            <h:outputText value=")"/>
-        </div>
+        <h:panelGrid columns="2" styleClass="strictPanelGrid transparentPanelGrid noBorderPanelGrid">
 
-        <div class="ui-g-4" style="text-align: right; padding: 0">
-            <h:outputText value="Mód: " styleClass="header-mode"/>
-            <h:outputText value="#{facesContext.application.projectStage}" styleClass="header-mode"/>
-        </div>
-    </div>
+            <i class="fa fa-3x fa-user-circle-o" aria-hidden="true"/>
+
+            <p:panelGrid columns="2" styleClass="strictPanelGrid noBorderPanelGrid top-aligned-columns" columnClasses="alignRight">
+                <h:outputLabel value="User: " styleClass="header-detail-prompt"/>
+                <h:outputText value=" #{request.remoteUser}" style="color: green;" styleClass="header-detail-value"/>
+
+                <h:outputText value="Jog: " styleClass="header-detail-prompt"/>
+                <h:outputText value=" #{isAdmin ? 'Admin' : 'User'}" style="color: #{request.isUserInRole('APP_GFMON_ADMIN') ? 'red' : null};" styleClass="header-detail-value"/>
+
+                <h:outputText value="Mód: " styleClass="header-detail-prompt" rendered="#{isDeveloperMode}"/>
+                <h:outputText value="#{facesContext.application.projectStage}" style="color: #{isDeveloperMode ? 'blue' : null};" styleClass="header-detail-value" rendered="#{isDeveloperMode}"/>
+            </p:panelGrid>
+        </h:panelGrid>
+    </h:panelGrid>
 
 </ui:composition>

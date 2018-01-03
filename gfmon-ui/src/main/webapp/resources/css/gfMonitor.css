@@ -1,3 +1,5 @@
+@CHARSET "UTF-8";
+
 /** --- Layout definíciók ------------------------------------------------------------------------------------------------------------------------------------*/
 
 html,body {
@@ -11,8 +13,8 @@ html,body {
         Így az 1em alapértelmezett mérete 16px.
         0.75em = 10px :)
     */
-    font-size: 1em;
-
+    /*font-size: 1em;*/
+    font-size: 1.5vh !important;
 
     padding: 0;
     margin: 0;
@@ -59,7 +61,7 @@ root {
 }
 
 
-#wrapper {
+#bodyWrapper {
     padding: 0;
     margin: 0;
     min-height:100%;
@@ -70,23 +72,22 @@ root {
     position: absolute;
     width: 100%;
 
-
-    height: 2em;
+    height: 4em;
 
     color: white;
-    background-color: hsl(210, 60%, 70%);
+    background-color: hsla(0, 5%, 96%, 0.57);
 }
 
 #main {
-    min-height: 90%;
-    padding-top: 2em;
+    min-height: 89.5%;
+    padding-top: 4em;
     padding-bottom: 2em;
     background-color: hsla(24, 30%, 90%, 0.3);
 
 }
 
 #footer {
-    background-color: hsla(324, 30%, 90%, 0.3);
+    background-color: hsla(0, 0%, 78%, 0.29);
     color: black;
     width: 100%;
 
@@ -118,11 +119,14 @@ root {
     font-size: 1.8em;
     font-weight: bold;
     font-family: Arial;
-    color: navy
+    color: teal;
 }
-
-.header-mode{
-
+.header-detail-prompt {
+    font-size: 0.6em;
+}
+.header-detail-value {
+    font-size: 0.6em;
+    margin-left: 0.5em
 }
 
 /** --- Általánoc -------------------------------------------------------------------------------------------------------------------------------------*/
@@ -162,6 +166,15 @@ root {
     background: transparent !important;
 }
 
+/** cellatartalom felülre */
+.top-aligned-columns td{
+    vertical-align: top;
+}
+
+/** cellatartalom jobbra */
+.rigth-aligned-columns td{
+    text-align: right;
+}
 
 /** --- Nézegetős Dialógusok PanelGrid ------------------------------------------------------------------------------------------------------------*/
 .viewDlgTblPrompt{
