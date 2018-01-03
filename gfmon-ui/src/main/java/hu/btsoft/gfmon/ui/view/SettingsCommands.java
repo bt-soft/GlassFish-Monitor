@@ -17,9 +17,13 @@ package hu.btsoft.gfmon.ui.view;
  * @author BT
  */
 public enum SettingsCommands {
-    COPY_SELECTED, //selectedServer -> modifiedServer copy
-    SAVE_MODIFIED, //modifiedServer -> servers replace, megváltoztatta a szerver beállításokat
-    CANCEL_MODIFY, //modifiedServer -> eldobni, mégsem akarja megváltoztatni
-    DELETE_SELECTED, //selectedServer -> törölni, a kiválasztott szervert törölte
+    NEW_SERVER, //új szerver felvétele: new modifiedServer
+    SAVE_NEW_SERVER, //új szerver mentése: new modifiedServer
+    CANCEL_NEW_SERVER, //mégsem menti az új szervert
+    //
+    COPY_SELECTED, //meg akarja változtatni a szerver beálíltásokat: selectedServer -> modifiedServer
+    SAVE_MODIFIED, //megváltoztatta a szerver beállításokat: modifiedServer -> servers replace
+    CANCEL_MODIFIED, //mégsem akarja megváltoztatni: modifiedServer -> eldobni
+    DELETE_SELECTED, //a kiválasztott szervert törölte: selectedServer -> törölni
 
 }

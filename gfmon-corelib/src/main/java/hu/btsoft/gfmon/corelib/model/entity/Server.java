@@ -23,6 +23,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -40,7 +41,11 @@ import org.apache.commons.lang3.StringUtils;
  * @author BT
  */
 @Entity
-@Table(name = "SERVER", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
+@Table(name = "SERVER",
+        catalog = "",
+        schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,
+        uniqueConstraints = @UniqueConstraint(columnNames = {"HOST_NAME", "IP_ADDRESS", "PORT_NUM"})
+)
 @Cacheable(false)
 @Data
 @ToString(callSuper = false, of = {"hostName", "ipAddress", "portNumber", "active"})

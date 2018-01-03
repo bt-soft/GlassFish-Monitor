@@ -47,6 +47,16 @@
                                      update="tableButtonsPanelGrid serversTable"
                                      />
 
+                    <p:commandButton id="newBtn"
+                                     value="Új"
+                                     title="Új szerver felvétele"
+                                     icon="fa fa-plus"
+
+                                     actionListener="#{settingsView.commandHandler(settingsCmds.NEW_SERVER)}"
+
+                                     onsuccess="GfMon.updateAndShowDialog('settingsForm:newBtn', 'settingsForm', 'editServerDetailsDlg');"
+                                     />
+
                     <p:commandButton id="viewBtn"
                                      value="Részletek"
                                      title="Részletek megtekintése"
@@ -63,6 +73,7 @@
                                      disabled="#{empty settingsView.selectedServer}"
 
                                      actionListener="#{settingsView.commandHandler(settingsCmds.COPY_SELECTED)}"
+
                                      onsuccess="GfMon.updateAndShowDialog('settingsForm:editBtn', 'settingsForm', 'editServerDetailsDlg');"
                                      />
 
@@ -105,7 +116,7 @@
                              selection="#{settingsView.selectedServer}"
 
                              rowIndexVar="rowNdx"
-                             rowKey="#{server.id}"
+                             rowKey="#{server.url}"
 
                              emptyMessage="Nincs monitorozott szerver"
                              >

@@ -30,6 +30,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
+import org.primefaces.context.RequestContext;
 
 /**
  * Beállítások LAP JSF Managed Bean
@@ -67,6 +68,12 @@ public class SettingsView extends ViewBase {
     private Server modifiedServer;
 
     /**
+     * editServerDialog fejléc szövege
+     */
+    @Getter
+    private String editServerDialogHeaderText;
+
+    /**
      * JSF ManagedBean init
      */
     @PostConstruct
@@ -81,6 +88,7 @@ public class SettingsView extends ViewBase {
     private void clearAll() {
         selectedServer = null;
         modifiedServer = null;
+        editServerDialogHeaderText = null;
     }
 
     /**
@@ -206,17 +214,62 @@ public class SettingsView extends ViewBase {
             modifiedServer.setIpAddress(null);
             addJsfMessage("growl", FacesMessage.SEVERITY_WARN, String.format("Ismeretlen host név: %s!", modifiedServer.getHostName()));
         }
-
     }
 
     /**
-     * A parancshandler
+     * Az új szerver duplikált?
+     * (hostName + IpAddress + portNumber)
+     *
+     * @param newServer új szerver adatok
+     *
+     * @return true -> duplikált
+     *         false -> valóban új szerver
+     */
+    private boolean isDuplicateNewServer(Server newServer) {
+
+        if (servers.stream().anyMatch((server) -> (server.getHostName().equalsIgnoreCase(newServer.getHostName())
+                && server.getIpAddress().equalsIgnoreCase(newServer.getIpAddress())
+                && server.getPortNumber() == newServer.getPortNumber()))) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * A parancs handler
      *
      * @param cmd műveleti parancs
      */
     public void commandHandler(SettingsCommands cmd) {
 
+        editServerDialogHeaderText = null;
+
         switch (cmd) {
+
+            //Új szerver felvétele
+            case NEW_SERVER:
+                modifiedServer = new Server("localhost", 4848, "Local GlassFish", null, null, true);
+                selectedServer = null;
+                editServerDialogHeaderText = "Új szerver felvétele";
+                break;
+
+            //Új szerver mentése
+            case SAVE_NEW_SERVER:
+                if (isDuplicateNewServer(modifiedServer)) {
+                    FacesMessage facesMessage = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Hiba", "A megadott szerver adatok már léteznek!");
+                    RequestContext.getCurrentInstance().showMessageInDialog(facesMessage);
+
+                    //A dialógust nyitva hagyjuk
+                    return;
+                }
+                servers.add(modifiedServer); //Az új szervert hozáadjuk a listához
+                selectedServer = modifiedServer;    //ez lesz kiválasztva
+                modifiedServer = null;
+                addJsfMessage("growl", FacesMessage.SEVERITY_INFO, "Új szerver felvétele OK");
+                break;
+
+            //Szerver módosítása kezdés
             case COPY_SELECTED:
                 if (selectedServer == null) {
                     break;
@@ -224,8 +277,10 @@ public class SettingsView extends ViewBase {
                 ModelMapper mapper = new ModelMapper();
                 modifiedServer = new Server();
                 mapper.map(selectedServer, modifiedServer);
+                editServerDialogHeaderText = "Szerver módosítása: " + selectedServer.getUrl();
                 break;
 
+            //Módosított szerver mentés
             case SAVE_MODIFIED:
                 servers.remove(selectedServer); //A korábbi szerver példányt töröljük a litából
                 servers.add(modifiedServer); //Az editált szerver példány megy be helyette
@@ -233,16 +288,22 @@ public class SettingsView extends ViewBase {
                 addJsfMessage("growl", FacesMessage.SEVERITY_INFO, "A szerver módosítása OK");
                 break;
 
+            //Kiválasztott szerver törlés
             case DELETE_SELECTED:
                 servers.remove(selectedServer); //A kiválasztot szerver példányt töröljük a listából
                 selectedServer = null;
                 addJsfMessage("growl", FacesMessage.SEVERITY_INFO, "A szerver törlése OK");
                 break;
 
-            case CANCEL_MODIFY:
+            //Módosítások eldobása
+            case CANCEL_MODIFIED:
                 modifiedServer = null;
-                addJsfMessage("growl", FacesMessage.SEVERITY_WARN, "A szerver módosítása eldobva");
+                addJsfMessage("growl", FacesMessage.SEVERITY_WARN, "A adatok eldobva");
                 break;
         }
+
+        //becsukjuk a dialógust
+        RequestContext.getCurrentInstance().execute("PF('editServerDetailsDlg').hide();");
+
     }
 }
