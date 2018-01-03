@@ -28,7 +28,7 @@ public class RuntimeSequenceGenerator {
      *
      * @return új Integer érték
      */
-    public static synchronized Integer getNextInt() {
+    public static Integer getNextInt() {
         return new Long(COUNT.getAndIncrement()).intValue();
     }
 
@@ -37,7 +37,7 @@ public class RuntimeSequenceGenerator {
      *
      * @return új Long érték
      */
-    public static synchronized Long getNextLong() {
+    public static Long getNextLong() {
         return COUNT.getAndIncrement();
     }
 
