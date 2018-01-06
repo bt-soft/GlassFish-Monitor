@@ -20,7 +20,7 @@ import hu.btsoft.gfmon.engine.monitor.collector.CollectorBase;
  */
 public class MemoryColletor extends CollectorBase {
 
-    public static final String URI = "jvm/memory";
+    public static final String PATH = "jvm/memory";
 
     /**
      * Az adatgyűjtést a szerver URL-jéhez képest melyik uri-n kell elvégezni?
@@ -28,8 +28,8 @@ public class MemoryColletor extends CollectorBase {
      * @return uri
      */
     @Override
-    protected String getUri() {
-        return URI;
+    protected String getPath() {
+        return PATH;
     }
 
 }

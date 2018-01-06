@@ -24,9 +24,9 @@ import lombok.Data;
 public class MonitorValueDto {
 
     /**
-     * Milyen uri-n mértük?
+     * Milyen path-on mértük?
      */
-    private String uri;
+    private String path;
 
     /**
      * Mértékegység

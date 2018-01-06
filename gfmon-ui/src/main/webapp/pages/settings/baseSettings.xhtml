@@ -180,20 +180,21 @@
 
                 <br/>
 
-                <h:outputText value="Működés" styleClass="category-header-text"/>
+                <h:outputText value="Működés" styleClass="category-header-text" />
 
-                <h:panelGrid columns="2">
-                    <h:panelGrid columns="5" cellpadding="10">
-                        <h:outputLabel value="Automatikus indítás: " />
-                        <p:inputSwitch value="#{settingsView.configAutoStart}" offLabel="ki" onLabel="be"/>
+                <h:panelGrid columns="8" cellpadding="10">
+                    <h:outputLabel value="Automatikus indítás: " />
+                    <p:inputSwitch value="#{settingsView.configAutoStart}" offLabel="ki" onLabel="be"/>
 
-                        <p:spacer/>
 
-                        <h:outputLabel value="Mintavétel [mp]: "/>
-                        <p:spinner  value="#{settingsView.configSampleInterval}" min="10" max="300" stepFactor="5" size="1" />
-                    </h:panelGrid>
+                    <h:outputLabel value="Mintavétel [mp]: "/>
+                    <p:spinner  value="#{settingsView.configSampleInterval}" min="10" max="300" stepFactor="5" size="1" />
 
+
+                    <h:outputLabel value="Megőrzendő napok száma [db]: "/>
+                    <p:spinner  value="#{settingsView.configSampleDataKeepDays}" min="10" max="300" stepFactor="1" size="1" />
                 </h:panelGrid>
+
 
 
             </bt:disablePanel>

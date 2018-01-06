@@ -20,16 +20,16 @@ import hu.btsoft.gfmon.engine.monitor.collector.CollectorBase;
  */
 public class JspColletor extends CollectorBase {
 
-    public static final String URI = "web/jsp";
+    public static final String PATH = "web/jsp";
 
     /**
      * Az adatgyűjtést a szerver URL-jéhez képest melyik uri-n kell elvégezni?
      *
-     * @return uri
+     * @return path
      */
     @Override
-    protected String getUri() {
-        return URI;
+    protected String getPath() {
+        return PATH;
     }
 
 }

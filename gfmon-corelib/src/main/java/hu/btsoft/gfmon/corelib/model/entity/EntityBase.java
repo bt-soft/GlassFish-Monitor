@@ -44,7 +44,7 @@ public class EntityBase implements Serializable {
      */
     @Id
     @NotNull(message = "Az ID nem lehet null")
-    @Column(name = "ID", nullable = false)
+    @Column(name = "ID", nullable = false, updatable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
     //    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gfMonSeq")
     @SequenceGenerator(name = "gfMonSeq", sequenceName = "GFMON_SEQ")
@@ -56,7 +56,7 @@ public class EntityBase implements Serializable {
      */
     @ColumnPosition(position = 100)
     @NotNull(message = "A createdDate nem lehet null")
-    @Column(name = "CREATED_DATE", nullable = false)
+    @Column(name = "CREATED_DATE", nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
 

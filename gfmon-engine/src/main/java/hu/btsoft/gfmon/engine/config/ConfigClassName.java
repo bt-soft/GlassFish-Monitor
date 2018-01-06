@@ -4,7 +4,7 @@
  *  GF Monitor project
  *
  *  Module:  gfmon-engine (gfmon-engine)
- *  File:    ConfigKeyName.java
+ *  File:    ConfigClassName.java
  *  Created: 2017.12.23. 14:49:39
  *
  *  ------------------------------------------------------------------------------------
@@ -16,7 +16,7 @@ package hu.btsoft.gfmon.engine.config;
  *
  * @author BT
  */
-public enum ConfigKeyName {
+public enum ConfigClassName {
 
     SETTINGS,
 

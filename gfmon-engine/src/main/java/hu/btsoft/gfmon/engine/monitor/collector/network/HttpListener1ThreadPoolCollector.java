@@ -20,16 +20,16 @@ import hu.btsoft.gfmon.engine.monitor.collector.CollectorBase;
  */
 public class HttpListener1ThreadPoolCollector extends CollectorBase {
 
-    public static final String URI = "network/http-listener-1/thread-pool";
+    public static final String PATH = "network/http-listener-1/thread-pool";
 
     /**
      * Az adatgyűjtést a szerver URL-jéhez képest melyik uri-n kell elvégezni?
      *
-     * @return uri
+     * @return public static final String URI =
      */
     @Override
-    protected String getUri() {
-        return URI;
+    protected String getPath() {
+        return PATH;
     }
 
 }

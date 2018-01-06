@@ -29,10 +29,6 @@ import org.eclipse.persistence.tools.schemaframework.SchemaManager;
 @Slf4j
 public class ConfigService extends ServiceBase<Config> {
 
-    public final static String KEYCLASS_NAME = "settings";
-    public final static String KEY_AUTOSTART = "autoStart";
-    public final static String KEY_SAMPLEINTERVAL = "sampleInterval";
-
     @PersistenceContext
     private EntityManager em;
 
@@ -82,7 +78,7 @@ public class ConfigService extends ServiceBase<Config> {
      */
     private Config getConfig(String keyName) {
         Query query = em.createNamedQuery("Config.findByKeyNames");
-        query.setParameter("keyClassName", KEYCLASS_NAME);
+        query.setParameter("keyClassName", IConfigKeyNames.CLASS_NAME);
         query.setParameter("keyName", keyName);
 
         Config config = (Config) query.getSingleResult();
@@ -91,22 +87,38 @@ public class ConfigService extends ServiceBase<Config> {
     }
 
     /**
-     * Automatikusan kell indítani a méréseket a start után?
+     * Boolean érték leszedése
      *
-     * @return true -> igen
+     * @param keyName konfig kulcs neve
+     *
+     * @return boolean érték, vagy null, ha nincs ilyen kulcs
      */
-    public boolean isAutoStart() {
-        Config config = getConfig("autoStart");
-        return Boolean.parseBoolean(config.getKeyValue());
+    public boolean getBoolean(String keyName) {
+        Config config = getConfig(keyName);
+        return config == null ? null : Boolean.parseBoolean(config.getKeyValue());
     }
 
     /**
-     * Mérési időciklus lekérése [sec]
+     * Integer érték leszedése
      *
-     * @return időciklus másodpercekben
+     * @param keyName konfig kulcs neve
+     *
+     * @return Integer érték, vagy null, ha nincs ilyen kulcs
      */
-    public int getSampleInterval() {
-        Config config = getConfig("sampleInterval");
-        return Integer.parseInt(config.getKeyValue());
+    public Integer getInteger(String keyName) {
+        Config config = getConfig(keyName);
+        return config == null ? null : Integer.parseInt(config.getKeyValue());
+    }
+
+    /**
+     * String érték leszedése
+     *
+     * @param keyName konfig kulcs neve
+     *
+     * @return String érték, vagy null, ha nincs ilyen kulcs
+     */
+    public String getString(String keyName) {
+        Config config = getConfig(keyName);
+        return config == null ? null : config.getKeyValue();
     }
 }

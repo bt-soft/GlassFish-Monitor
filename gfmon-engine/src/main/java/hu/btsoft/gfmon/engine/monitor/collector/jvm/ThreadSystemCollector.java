@@ -20,16 +20,16 @@ import hu.btsoft.gfmon.engine.monitor.collector.CollectorBase;
  */
 public class ThreadSystemCollector extends CollectorBase {
 
-    public static final String URI = "jvm/thread-system";
+    public static final String PATH = "jvm/thread-system";
 
     /**
      * Az adatgyűjtést a szerver URL-jéhez képest melyik uri-n kell elvégezni?
      *
-     * @return uri
+     * @return path
      */
     @Override
-    protected String getUri() {
-        return URI;
+    protected String getPath() {
+        return PATH;
     }
 
 }

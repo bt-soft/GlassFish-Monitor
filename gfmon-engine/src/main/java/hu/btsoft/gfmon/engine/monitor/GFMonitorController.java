@@ -15,6 +15,7 @@ import hu.btsoft.gfmon.corelib.cdi.CdiUtils;
 import hu.btsoft.gfmon.corelib.model.entity.Server;
 import hu.btsoft.gfmon.corelib.model.entity.snapshot.SnapshotBase;
 import hu.btsoft.gfmon.corelib.model.service.ConfigService;
+import hu.btsoft.gfmon.corelib.model.service.IConfigKeyNames;
 import hu.btsoft.gfmon.corelib.model.service.ServerService;
 import hu.btsoft.gfmon.corelib.model.service.SnapshotService;
 import hu.btsoft.gfmon.corelib.time.Elapsed;
@@ -27,6 +28,7 @@ import javax.annotation.Resource;
 import javax.ejb.DependsOn;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
+import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.ejb.Timeout;
@@ -68,19 +70,13 @@ public class GFMonitorController {
 
     private Timer timer;
 
-//    @Inject
-//    private SessionTokenAcquirer sessionTokenAcquirer;
-//
-//
-//    @Inject
-//    private SnapshotProvider snapshotProvider;
     /**
      * GFMon engine indítása
      */
     @PostConstruct
     protected void initApp() {
 
-        if (!configService.isAutoStart()) {
+        if (!configService.getBoolean(IConfigKeyNames.AUTOSTART)) {
             log.debug("Az automatikus indítás kikapcsolva");
             return;
         }
@@ -103,7 +99,7 @@ public class GFMonitorController {
         serverService.clearRuntimeValuesAndSave(DB_MODIFICATORY_USER);
 
         //Mérési periódusidő leszedése a konfigból
-        int sampleIntervalSec = configService.getSampleInterval();
+        int sampleIntervalSec = configService.getInteger(IConfigKeyNames.SAMPLE_INTERVAL);
 
         //Timer felhúzása
         this.timer = this.timerService.createIntervalTimer(1_000, // késleltetés
@@ -160,10 +156,9 @@ public class GFMonitorController {
 
         long start = Elapsed.nowNano();
 
-        //Mivel egy @Singleton Bean-ban vagyunk, emiatt kézzel lookup-oljuk a CDI Bean-t, hogy ne fogjon le egy Rest kliesnt állandó jelleggel
-        SnapshotProvider snapshotProvider = CdiUtils.lookup(SnapshotProvider.class);
+        //Mivel egy @Singleton Bean-ban vagyunk, emiatt kézzel lookupOne-oljuk a CDI Bean-t, hogy ne fogjon le egy Rest kliesnt állandó jelleggel
+        SnapshotProvider snapshotProvider = CdiUtils.lookupOne(SnapshotProvider.class);
 
-//        log.trace("this: {}, snapshotProvider: {}", this, snapshotProvider);
         int checkedServerCnt = 0;
         for (Server server : serverService.findAll()) {
 
@@ -180,8 +175,8 @@ public class GFMonitorController {
             if (StringUtils.isEmpty(server.getSessionToken())) {
 
                 try {
-                    //Mivel egy @Singleton Bean-ban vagyunk, emiatt kézzel lookup-oljuk a CDI Bean-t, hogy ne fogjon le egy Rest kliesnt állandó jelleggel
-                    SessionTokenAcquirer sessionTokenAcquirer = CdiUtils.lookup(SessionTokenAcquirer.class);
+                    //Mivel egy @Singleton Bean-ban vagyunk, emiatt kézzel lookupOne-oljuk a CDI Bean-t, hogy ne fogjon le egy Rest kliesnt állandó jelleggel
+                    SessionTokenAcquirer sessionTokenAcquirer = CdiUtils.lookupOne(SessionTokenAcquirer.class);
 
                     String sessionToken = sessionTokenAcquirer.getSessionToken(url, userName, plainPassword);
 
@@ -217,8 +212,8 @@ public class GFMonitorController {
             //Ha még nem tudjuk, hogy az adott szerveren be van-e kapcsolva a MonitoringService
             if (server.getMonitoringServiceReady() == null || !server.getMonitoringServiceReady()) {
 
-                //Mivel egy @Singleton Bean-ban vagyunk, emiatt kézzel lookup-oljuk a CDI Bean-t, hogy ne fogjon le egy Rest kliesnt állandó jelleggel
-                ServerMonitoringServiceStatus serverMonitoringServiceStatus = CdiUtils.lookup(ServerMonitoringServiceStatus.class);
+                //Mivel egy @Singleton Bean-ban vagyunk, emiatt kézzel lookupOne-oljuk a CDI Bean-t, hogy ne fogjon le egy Rest kliesnt állandó jelleggel
+                ServerMonitoringServiceStatus serverMonitoringServiceStatus = CdiUtils.lookupOne(ServerMonitoringServiceStatus.class);
 
                 // A monitorozandó GF példányok MonitoringService (module-monitoring-levels) ellenőrzése
                 Set<String> monitorableModules = serverMonitoringServiceStatus.checkMonitorStatus(server.getSimpleUrl(), server.getSessionToken());
@@ -283,4 +278,25 @@ public class GFMonitorController {
 
         log.trace("Monitor {} db szerverre, elapsed: {}", checkedServerCnt, Elapsed.getNanoStr(start));
     }
+
+    /**
+     * Automatikus takarítás
+     * minden nap éjfélkor fut le
+     */
+    @Schedule(hour = "00", minute = "00", second = "00")
+    public void doPeriodicCleanup() {
+
+        log.info("Mérési adatok pucolása indul");
+
+        long start = Elapsed.nowNano();
+
+        //Megőrzendő napok száma
+        Integer keepDays = configService.getInteger(IConfigKeyNames.SAMPLE_DATA_KEEP_DAYS);
+
+        //Összes régi rekord törlése
+        int deletedRecords = snapshotService.deleteOldRecords(keepDays);
+
+        log.info("Adatok pucolása OK, rekord: {}, elapsed: {}", deletedRecords, Elapsed.getNanoStr(start));
+    }
+
 }

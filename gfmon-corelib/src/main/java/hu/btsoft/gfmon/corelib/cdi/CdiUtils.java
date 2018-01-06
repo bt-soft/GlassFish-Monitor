@@ -24,19 +24,32 @@ import lombok.extern.slf4j.Slf4j;
 public class CdiUtils {
 
     /**
-     * CDI bean kikeresése és a példányának visszaadása
+     * CDI bean kikeresése és az összes példány visszaadása
      *
      * @param <T>   Keresett osztály típusa
      * @param clazz keresett osztály
      *
-     * @return CDI példány
+     * @return összes CDI példány
      */
-    public static <T> T lookup(Class<T> clazz) {
+    public static <T> Instance<T> lookupAll(Class<T> clazz) {
         Instance<T> instances = CDI.current().select(clazz);
-        T instance = instances.get();
+        return instances;
+    }
 
-        //log.trace("CDI Lokup: {}", instance);
-        return instance;
+    /**
+     * CDI bean kikeresése és egy példányának visszaadása
+     *
+     * @param <T>   Keresett osztály típusa
+     * @param clazz keresett osztály
+     *
+     * @return egy CDI példány
+     */
+    public static <T> T lookupOne(Class<T> clazz) {
+        Instance<T> allInstances = lookupAll(clazz);
+        if (allInstances == null) {
+            return null;
+        }
+        return allInstances.get();
     }
 
 }

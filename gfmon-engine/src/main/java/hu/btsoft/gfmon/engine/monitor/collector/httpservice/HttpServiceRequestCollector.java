@@ -20,7 +20,7 @@ import hu.btsoft.gfmon.engine.monitor.collector.CollectorBase;
  */
 public class HttpServiceRequestCollector extends CollectorBase {
 
-    public static final String URI = "server/http-service/server/request";
+    public static final String PATH = "server/http-service/server/request";
 
     /**
      * Az adatgyűjtést a szerver URL-jéhez képest melyik uri-n kell elvégezni?
@@ -29,7 +29,7 @@ public class HttpServiceRequestCollector extends CollectorBase {
      * @return uri
      */
     @Override
-    protected String getUri() {
-        return URI;
+    protected String getPath() {
+        return PATH;
     }
 }

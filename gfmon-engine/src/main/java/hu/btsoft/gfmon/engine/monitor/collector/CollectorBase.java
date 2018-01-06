@@ -33,9 +33,9 @@ public abstract class CollectorBase implements ICollectMonitoredData {
      * Az adatgyűjtést a szerver URL-jéhez képest melyik uri-n kell elvégezni?
      * pl.: "server/http-service/server/request"
      *
-     * @return uri
+     * @return path
      */
-    protected abstract String getUri();
+    protected abstract String getPath();
 
     /**
      * Timestamp -> Date konverzió
@@ -100,7 +100,7 @@ public abstract class CollectorBase implements ICollectMonitoredData {
             dto.setName(jsonValueEntity.getJsonString("name").getString());
             dto.setStartTime(long2Date(jsonValueEntity.getJsonNumber("starttime").longValue()));
 //          dto.setDescription(entity.getJsonString("description").getString());
-            dto.setUri(getUri());
+            dto.setPath(getPath());
 
             //Érték típushelyes leszedése
             switch (valueUnitType) {
@@ -149,7 +149,7 @@ public abstract class CollectorBase implements ICollectMonitoredData {
     @Override
     public List<MonitorValueDto> execute(RestDataCollector restDataCollector, String simpleUrl, String sessionToken) {
 
-        Response response = restDataCollector.getMonitorResponse(getUri(), simpleUrl, sessionToken);
+        Response response = restDataCollector.getMonitorResponse(getPath(), simpleUrl, sessionToken);
         JsonObject entities = restDataCollector.getJsonEntities(response);
 
         return this.fetchValues(entities);

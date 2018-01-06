@@ -49,7 +49,7 @@ public class ModifiableEntityBase extends EntityBase {
      */
     @Size(min = 1, max = 30, message = "A createdBy 1-30 hosszú lehet")
     @NotNull(message = "A createdBy nem lehet null")
-    @Column(name = "CREATED_BY", nullable = false)
+    @Column(name = "CREATED_BY", nullable = false, updatable = false)
     @ColumnPosition(position = 101)
     private String createdBy;
 

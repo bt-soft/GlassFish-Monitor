@@ -20,16 +20,16 @@ import hu.btsoft.gfmon.engine.monitor.collector.CollectorBase;
  */
 public class HttpListener1ConnectionQueueCollector extends CollectorBase {
 
-    public static final String URI = "network/http-listener-1/connection-queue";
+    public static final String PATH = "network/http-listener-1/connection-queue";
 
     /**
      * Az adatgyűjtést a szerver URL-jéhez képest melyik uri-n kell elvégezni?
      *
-     * @return uri
+     * @return path
      */
     @Override
-    protected String getUri() {
-        return URI;
+    protected String getPath() {
+        return PATH;
     }
 
 }

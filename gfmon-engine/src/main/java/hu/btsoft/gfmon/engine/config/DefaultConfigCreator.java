@@ -11,6 +11,7 @@
  */
 package hu.btsoft.gfmon.engine.config;
 
+import hu.btsoft.gfmon.corelib.model.service.IConfigKeyNames;
 import hu.btsoft.gfmon.corelib.model.entity.Config;
 import hu.btsoft.gfmon.corelib.model.entity.ConfigValueType;
 import hu.btsoft.gfmon.corelib.model.entity.Server;
@@ -62,11 +63,11 @@ public class DefaultConfigCreator {
         log.trace("Default beállítások létrehozása");
 
         {//autostart
-            Config config = new Config(ConfigService.KEYCLASS_NAME, ConfigService.KEY_AUTOSTART, ConfigValueType.B, "true");
+            Config config = new Config(IConfigKeyNames.CLASS_NAME, IConfigKeyNames.AUTOSTART, ConfigValueType.B, "true");
             configService.save(config, DEF_USERNAME);
         }
         {//sampleInterval
-            Config config = new Config(ConfigService.KEYCLASS_NAME, ConfigService.KEY_SAMPLEINTERVAL, ConfigValueType.I, "60");
+            Config config = new Config(IConfigKeyNames.CLASS_NAME, IConfigKeyNames.SAMPLE_INTERVAL, ConfigValueType.I, "60");
             configService.save(config, DEF_USERNAME);
         }
 
@@ -74,6 +75,11 @@ public class DefaultConfigCreator {
             Server server = new Server("localhost", 4848, "Lokális GlassFish Admin", null /*user*/, null /*passwd*/, true /*enabled*/);
 //            Server server = new Server("localhost", 4848, "Lokális GlassFish Admin", "admin" /*user*/, "admin" /*passwd*/, true /*enabled*/);
             serverService.save(server, DEF_USERNAME);
+        }
+
+        {//Clearing limit days
+            Config config = new Config(IConfigKeyNames.CLASS_NAME, IConfigKeyNames.SAMPLE_DATA_KEEP_DAYS, ConfigValueType.I, "90");
+            configService.save(config, DEF_USERNAME);
         }
 
     }

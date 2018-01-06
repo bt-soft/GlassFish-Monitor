@@ -16,6 +16,7 @@ import hu.btsoft.gfmon.corelib.model.RuntimeSequenceGenerator;
 import hu.btsoft.gfmon.corelib.model.entity.Config;
 import hu.btsoft.gfmon.corelib.model.entity.Server;
 import hu.btsoft.gfmon.corelib.model.service.ConfigService;
+import hu.btsoft.gfmon.corelib.model.service.IConfigKeyNames;
 import hu.btsoft.gfmon.corelib.model.service.ServerService;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -43,16 +44,11 @@ import org.primefaces.context.RequestContext;
 @Slf4j
 public class SettingsView extends ViewBase {
 
+    // --- Config -----------------------------------
     @EJB
     private ConfigService configService;
 
     private List<Config> configs;
-
-    @EJB
-    private ServerService serverService;
-
-    @Getter
-    private List<Server> servers;
 
     @Getter
     @Setter
@@ -61,6 +57,17 @@ public class SettingsView extends ViewBase {
     @Getter
     @Setter
     private Integer configSampleInterval;
+
+    @Getter
+    @Setter
+    private Integer configSampleDataKeepDays;
+
+    // --- Server -----------------------------------
+    @EJB
+    private ServerService serverService;
+
+    @Getter
+    private List<Server> servers;
 
     /**
      * A táblázatban kiválasztott szerver (viewDetail)
@@ -102,11 +109,14 @@ public class SettingsView extends ViewBase {
         //Konfig rekordok betöltése
         configs = configService.findAll();
 
-        Config config = findConfig(ConfigService.KEY_AUTOSTART);
+        Config config = findConfig(IConfigKeyNames.AUTOSTART);
         configAutoStart = config != null ? Boolean.parseBoolean(config.getKeyValue()) : null;
 
-        config = findConfig(ConfigService.KEY_SAMPLEINTERVAL);
+        config = findConfig(IConfigKeyNames.SAMPLE_INTERVAL);
         configSampleInterval = config != null ? Integer.parseInt(config.getKeyValue()) : null;
+
+        config = findConfig(IConfigKeyNames.SAMPLE_DATA_KEEP_DAYS);
+        configSampleDataKeepDays = config != null ? Integer.parseInt(config.getKeyValue()) : null;
 
         //Szerverek betöltése
         refreshServers();
@@ -116,13 +126,16 @@ public class SettingsView extends ViewBase {
      * minden változó törlése
      */
     private void clearAll() {
+
+        configs = null;
+        configAutoStart = null;
+        configSampleInterval = null;
+        configSampleDataKeepDays = null;
+
+        servers = null;
         selectedServer = null;
         editedServer = null;
         editServerDialogHeaderText = null;
-        configs = null;
-        servers = null;
-        configAutoStart = null;
-        configSampleInterval = null;
         settingsDataChanged = false;
     }
 
@@ -155,16 +168,23 @@ public class SettingsView extends ViewBase {
         {//A mentendő Config rekord beállítása
 
             //SampleInterval beállítása
-            Config config = findConfig(ConfigService.KEY_SAMPLEINTERVAL);
+            Config config = findConfig(IConfigKeyNames.SAMPLE_INTERVAL);
             if (config != null) {
                 config.setKeyValue(configSampleInterval.toString());
                 settingsDataChanged = true;
             }
 
             //AutoStart beállítása
-            config = findConfig(ConfigService.KEY_AUTOSTART);
+            config = findConfig(IConfigKeyNames.AUTOSTART);
             if (config != null) {
                 config.setKeyValue(configAutoStart.toString());
+                settingsDataChanged = true;
+            }
+
+            //KeepDays beállítása
+            config = findConfig(IConfigKeyNames.SAMPLE_DATA_KEEP_DAYS);
+            if (config != null) {
+                config.setKeyValue(configSampleDataKeepDays.toString());
                 settingsDataChanged = true;
             }
         }

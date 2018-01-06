@@ -11,40 +11,10 @@
  */
 package hu.btsoft.gfmon.engine.monitor;
 
+import hu.btsoft.gfmon.corelib.model.entity.snapshot.SnapshotBase;
 import hu.btsoft.gfmon.corelib.reflection.ReflectionUtils;
 import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
-import hu.btsoft.gfmon.corelib.model.entity.snapshot.SnapshotBase;
-import hu.btsoft.gfmon.corelib.model.entity.snapshot.httpservice.HttpServiceRequest;
-import hu.btsoft.gfmon.corelib.model.entity.snapshot.jvm.JvmMemory;
-import hu.btsoft.gfmon.corelib.model.entity.snapshot.jvm.ThreadSystem;
-import hu.btsoft.gfmon.corelib.model.entity.snapshot.network.ConnectionQueue;
-import hu.btsoft.gfmon.corelib.model.entity.snapshot.network.HttpListener1ConnectionQueue;
-import hu.btsoft.gfmon.corelib.model.entity.snapshot.network.HttpListener1KeepAlive;
-import hu.btsoft.gfmon.corelib.model.entity.snapshot.network.HttpListener1ThreadPool;
-import hu.btsoft.gfmon.corelib.model.entity.snapshot.network.HttpListener2ConnectionQueue;
-import hu.btsoft.gfmon.corelib.model.entity.snapshot.network.HttpListener2KeepAlive;
-import hu.btsoft.gfmon.corelib.model.entity.snapshot.network.HttpListener2ThreadPool;
-import hu.btsoft.gfmon.corelib.model.entity.snapshot.taservice.TransActionService;
-import hu.btsoft.gfmon.corelib.model.entity.snapshot.web.Jsp;
-import hu.btsoft.gfmon.corelib.model.entity.snapshot.web.Request;
-import hu.btsoft.gfmon.corelib.model.entity.snapshot.web.Servlet;
-import hu.btsoft.gfmon.corelib.model.entity.snapshot.web.Session;
 import hu.btsoft.gfmon.engine.monitor.collector.MonitorValueDto;
-import hu.btsoft.gfmon.engine.monitor.collector.httpservice.HttpServiceRequestCollector;
-import hu.btsoft.gfmon.engine.monitor.collector.jvm.MemoryColletor;
-import hu.btsoft.gfmon.engine.monitor.collector.jvm.ThreadSystemCollector;
-import hu.btsoft.gfmon.engine.monitor.collector.network.ConnectionQueueCollector;
-import hu.btsoft.gfmon.engine.monitor.collector.network.HttpListener1ConnectionQueueCollector;
-import hu.btsoft.gfmon.engine.monitor.collector.network.HttpListener1KeepAliveCollector;
-import hu.btsoft.gfmon.engine.monitor.collector.network.HttpListener1ThreadPoolCollector;
-import hu.btsoft.gfmon.engine.monitor.collector.network.HttpListener2ConnectionQueueCollector;
-import hu.btsoft.gfmon.engine.monitor.collector.network.HttpListener2KeepAliveCollector;
-import hu.btsoft.gfmon.engine.monitor.collector.network.HttpListener2ThreadPoolCollector;
-import hu.btsoft.gfmon.engine.monitor.collector.taservice.TransActionServiceColletor;
-import hu.btsoft.gfmon.engine.monitor.collector.web.JspColletor;
-import hu.btsoft.gfmon.engine.monitor.collector.web.RequestColletor;
-import hu.btsoft.gfmon.engine.monitor.collector.web.ServletColletor;
-import hu.btsoft.gfmon.engine.monitor.collector.web.SessionCollector;
 import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.HashSet;
@@ -55,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * JsonEntitások+Eredmények -> Snapshot mapper
+ * JsonEntitások+Eredmények -> Snapshot mapper CDI bean
  * Ebben az osztályban szűrjük ki, hogy a töménytelen mérési eredmények közül valójában melyek érdekelnek minket
  *
  * @author BT
@@ -227,112 +197,29 @@ public class JSonEntityToSnapsotEntityMapper {
         for (MonitorValueDto dto : valuesList) {
 
             //Leszedjük a mért értéket
-            String uri = dto.getUri();
+            String path = dto.getPath();
 
             //A JPA entitás típusát attól függően hozzuk létre, hogy mely uri-ról származik a mérés
-            switch (uri) {
+            Class<? extends SnapshotBase> jpaEntityClass = MonitorPathToJpaEntityClassMap.getJpaEntityClass(path);
 
-                case HttpServiceRequestCollector.URI:
+            if (jpaEntityClass != null) {
+                try {
                     if (snapshotEntity == null) {
-                        snapshotEntity = new HttpServiceRequest();
+                        snapshotEntity = (SnapshotBase) jpaEntityClass.newInstance();
                     }
-                    break;
 
-                case MemoryColletor.URI:
-                    if (snapshotEntity == null) {
-                        snapshotEntity = new JvmMemory();
-                    }
-                    break;
+                    //DTO -> JPA entitás map
+                    this.fieldMapper(snapshotEntity, dto);
 
-                case ThreadSystemCollector.URI:
-                    if (snapshotEntity == null) {
-                        snapshotEntity = new ThreadSystem();
-                    }
-                    break;
-
-                case ConnectionQueueCollector.URI:
-                    if (snapshotEntity == null) {
-                        snapshotEntity = new ConnectionQueue();
-                    }
-                    break;
-
-                case HttpListener1ConnectionQueueCollector.URI:
-                    if (snapshotEntity == null) {
-                        snapshotEntity = new HttpListener1ConnectionQueue();
-                    }
-                    break;
-
-                case HttpListener1KeepAliveCollector.URI:
-                    if (snapshotEntity == null) {
-                        snapshotEntity = new HttpListener1KeepAlive();
-                    }
-                    break;
-
-                case HttpListener1ThreadPoolCollector.URI:
-                    if (snapshotEntity == null) {
-                        snapshotEntity = new HttpListener1ThreadPool();
-                    }
-                    break;
-
-                case HttpListener2ConnectionQueueCollector.URI:
-                    if (snapshotEntity == null) {
-                        snapshotEntity = new HttpListener2ConnectionQueue();
-                    }
-                    break;
-
-                case HttpListener2KeepAliveCollector.URI:
-                    if (snapshotEntity == null) {
-                        snapshotEntity = new HttpListener2KeepAlive();
-                    }
-                    break;
-
-                case HttpListener2ThreadPoolCollector.URI:
-                    if (snapshotEntity == null) {
-                        snapshotEntity = new HttpListener2ThreadPool();
-                    }
-                    break;
-
-                case TransActionServiceColletor.URI:
-                    if (snapshotEntity == null) {
-                        snapshotEntity = new TransActionService();
-                    }
-                    break;
-
-                case JspColletor.URI:
-                    if (snapshotEntity == null) {
-                        snapshotEntity = new Jsp();
-                    }
-                    break;
-
-                case RequestColletor.URI:
-                    if (snapshotEntity == null) {
-                        snapshotEntity = new Request();
-                    }
-                    break;
-
-                case ServletColletor.URI:
-                    if (snapshotEntity == null) {
-                        snapshotEntity = new Servlet();
-                    }
-                    break;
-
-                case SessionCollector.URI:
-                    if (snapshotEntity == null) {
-                        snapshotEntity = new Session();
-                    }
-                    break;
-
-            }
-
-            if (snapshotEntity != null) {
-                this.fieldMapper(snapshotEntity, dto);
+                } catch (InstantiationException | IllegalAccessException e) {
+                    log.error("Nem lehet létrehozni az entitás példányt!", e);
+                }
             }
         }
 
-        //Ha van eredmény, akkor az hozzáadjuk a halmazhoz
+        //Ha van eredmény, akkor az hozzáadjuk a mérési halmazhoz
         if (snapshotEntity != null) {
             snapshotEntities.add(snapshotEntity);
         }
-
     }
 }

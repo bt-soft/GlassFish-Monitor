@@ -198,8 +198,8 @@ public abstract class ServiceBase<T extends EntityBase> {
      */
     public int count() {
         CriteriaQuery cq = getEntityManager().getCriteriaBuilder().createQuery();
-        Root<T> rt = cq.from(entityClass);
-        cq.select(getEntityManager().getCriteriaBuilder().count(rt));
+        Root<T> root = cq.from(entityClass);
+        cq.select(getEntityManager().getCriteriaBuilder().count(root));
         Query q = getEntityManager().createQuery(cq);
         return ((Long) q.getSingleResult()).intValue();
     }

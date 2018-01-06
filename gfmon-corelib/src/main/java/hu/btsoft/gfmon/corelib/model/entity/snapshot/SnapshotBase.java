@@ -44,14 +44,4 @@ public abstract class SnapshotBase extends EntityBase {
     @JoinColumn(name = "SERVER_ID")
     @ColumnPosition(position = 10)
     private Server server;
-
-    /**
-     * A mérés eredményét a GF mikor gyűjtötte?
-     * (Ez a JSon 'lastsampletime' mezőjének értéke)
-     */
-//    @Temporal(TemporalType.TIMESTAMP)
-//    //@NotNull(message = "A lastSampleTime nem lehet null")
-//    @Column(name = "LAST_SAMPLE_TIME"/*, nullable = false*/)
-//    @ColumnPosition(position = 11)
-//    private Date lastSampleTime;
 }
