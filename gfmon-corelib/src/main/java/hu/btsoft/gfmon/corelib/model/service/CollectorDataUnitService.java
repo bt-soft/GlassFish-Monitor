@@ -51,6 +51,17 @@ public class CollectorDataUnitService extends ServiceBase<CollectorDataUnit> {
     }
 
     /**
+     * Az összes entitás lekérdezése
+     *
+     * @return path lista
+     */
+    public List<CollectorDataUnit> getAll() {
+        Query query = em.createNamedQuery("CollectorDataUnit.findAll");
+        List<CollectorDataUnit> queryResult = query.getResultList();
+        return queryResult;
+    }
+
+    /**
      * Entitás lista -> DTO map
      *
      * @param entities entitás lista
@@ -82,18 +93,6 @@ public class CollectorDataUnitService extends ServiceBase<CollectorDataUnit> {
         List<String> result = query.getResultList();
 
         return result;
-    }
-
-    /**
-     * Az összes mérhető Rest Path lekérdezése
-     *
-     * @return path lista
-     */
-    public List<DataUnitDto> getAll() {
-        Query query = em.createNamedQuery("CollectorDataUnit.findAll");
-        List<CollectorDataUnit> queryResult = query.getResultList();
-
-        return mapEntityToDto(queryResult);
     }
 
     /**

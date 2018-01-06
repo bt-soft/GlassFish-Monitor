@@ -11,7 +11,7 @@
  */
 package hu.btsoft.gfmon.ui.view.settings;
 
-import hu.btsoft.gfmon.corelib.model.dto.DataUnitDto;
+import hu.btsoft.gfmon.corelib.model.entity.CollectorDataUnit;
 import hu.btsoft.gfmon.corelib.model.service.CollectorDataUnitService;
 import hu.btsoft.gfmon.ui.view.ViewBase;
 import java.util.List;
@@ -33,10 +33,10 @@ public class CollectorSettingsView extends ViewBase {
     private CollectorDataUnitService collectorDataUnitService;
 
     @Getter
-    private List<DataUnitDto> alldto;
+    private List<CollectorDataUnit> collectorDataUnits;
 
     @PostConstruct
     protected void init() {
-        alldto = collectorDataUnitService.getAll();
+        collectorDataUnits = collectorDataUnitService.getAll();
     }
 }

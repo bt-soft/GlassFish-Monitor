@@ -37,8 +37,8 @@
 
 
             <p:dataTable id="allDtoTable"
-                         value="#{collectorSettingsView.alldto}"
-                         var="dto"
+                         value="#{collectorSettingsView.collectorDataUnits}"
+                         var="collectorDataUnit"
 
                          rowIndexVar="rowNdx"
 
@@ -51,24 +51,28 @@
                     <h:outputText value="#{rowNdx + 1}" />
                 </p:column>
 
+                <p:column headerText="dbId">
+                    <h:outputText value="#{collectorDataUnit.id}" />
+                </p:column>
+
                 <p:column headerText="restPath">
-                    <h:outputText value="#{dto.restPath}" />
+                    <h:outputText value="#{collectorDataUnit.restPath}" />
                 </p:column>
 
                 <p:column headerText="entityName">
-                    <h:outputText value="#{dto.entityName}" />
+                    <h:outputText value="#{collectorDataUnit.entityName}" />
                 </p:column>
 
                 <p:column headerText="dataName">
-                    <h:outputText value="#{dto.dataName}" />
+                    <h:outputText value="#{collectorDataUnit.dataName}" />
                 </p:column>
 
                 <p:column headerText="unit">
-                    <h:outputText value="#{dto.unit}" />
+                    <h:outputText value="#{collectorDataUnit.unit}" />
                 </p:column>
 
                 <p:column headerText="description">
-                    <h:outputText value="#{dto.description}" />
+                    <h:outputText value="#{collectorDataUnit.description}" />
                 </p:column>
             </p:dataTable>
 

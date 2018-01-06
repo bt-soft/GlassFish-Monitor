@@ -311,6 +311,13 @@ public class GFMonitorController {
                     log.trace("A(z) {} szerver monitorozható moduljai: {}", server.getUrl(), monitorableModules);
                 }
 
+                //Ha még nincs definiálva a szerveren, hogy mit mérjünk, akkor mindent bekapcsolunk rajta
+                if (server.getCollectorDataUnit() == null || server.getCollectorDataUnit().isEmpty()) {
+                    //Mindent mérjünk rajta!
+                    List<CollectorDataUnit> allCollectorDataUnits = collectorDataUnitService.getAll();
+                    server.setCollectorDataUnit(allCollectorDataUnits);
+                }
+
                 //lementjük az adatbázisba a szerver megváltozott állapotát
                 serverService.save(server);
 

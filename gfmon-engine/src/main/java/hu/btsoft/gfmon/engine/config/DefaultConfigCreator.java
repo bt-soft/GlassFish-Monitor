@@ -74,6 +74,7 @@ public class DefaultConfigCreator {
         {//Server 1
             Server server = new Server("localhost", 4848, "Lokális GlassFish Admin", null /*user*/, null /*passwd*/, true /*enabled*/);
 //            Server server = new Server("localhost", 4848, "Lokális GlassFish Admin", "admin" /*user*/, "admin" /*passwd*/, true /*enabled*/);
+
             serverService.save(server, DEF_USERNAME);
         }
 

@@ -17,6 +17,7 @@ import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.NamedQueries;
@@ -49,7 +50,10 @@ import org.eclipse.persistence.annotations.Customizer;
  */
 @Entity
 @Cacheable(true)
-@Table(name = "COLLDATA_UNIT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
+@Table(name = "COLLDATA_UNIT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,
+        indexes = {
+            @Index(name = "IDX_RESTPATH", columnList = "RESTPATH", unique = false)
+        })
 @NamedQueries({
     @NamedQuery(name = "CollectorDataUnit.findAll", query = "SELECT e from CollectorDataUnit e ORDER BY e.restPath, e.dataName"),//
     @NamedQuery(name = "CollectorDataUnit.findByPath", query = "SELECT e from CollectorDataUnit e WHERE e.restPath = :restPath ORDER BY e.dataName"),//

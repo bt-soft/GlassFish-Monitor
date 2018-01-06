@@ -15,11 +15,13 @@ import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.crypt.CryptUtil;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.network.NetworkUtils;
+import java.util.List;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
@@ -139,19 +141,13 @@ public class Server extends ModifiableEntityBase {
     @ColumnPosition(position = 19)
     private Boolean monitoringServiceReady;
 
-//    /**
-//     * A szerver monitorozható moduljainak halmaza
-//     * Csak runtime változó, nem tároljuk az adatbázisban
-//     */
-//    @Transient
-//    private Set<String/*GF MonitoringService module name*/> monitorableModules;
-//
-//    /**
-//     * A szerver mérési eredményei
-//     */
-//    @OneToMany(mappedBy = "server")
-//    private List<SnapshotBase> snapshots;
-//
+    /**
+     * A szerver mérendő adatai
+     * A 'GFMON.SERVER_COLLDATA_UNIT' JoinTable automatikusan létrejön, jó így, nem kell hangoni rajta
+     */
+    @OneToMany
+    private List<CollectorDataUnit> collectorDataUnit;
+
     /**
      * A kódolatlan jelszó
      * Csak runtime változó, nem tároljuk az adatbázisban
