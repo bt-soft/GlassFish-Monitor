@@ -54,7 +54,7 @@ import org.apache.commons.lang3.StringUtils;
 @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW) //A BEAN-be záródik a tranzakció
 public class GFMonitorController {
 
-    private static final String DB_MODIFICATORY_USER = "GF-Monitor-Controller";
+    private static final String DB_MODIFICATORY_USER = "monitor-controller";
 
     @EJB
     private ConfigService configService;

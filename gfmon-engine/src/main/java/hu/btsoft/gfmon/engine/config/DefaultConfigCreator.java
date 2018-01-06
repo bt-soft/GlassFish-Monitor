@@ -11,11 +11,11 @@
  */
 package hu.btsoft.gfmon.engine.config;
 
-import hu.btsoft.gfmon.corelib.model.service.IConfigKeyNames;
 import hu.btsoft.gfmon.corelib.model.entity.Config;
 import hu.btsoft.gfmon.corelib.model.entity.ConfigValueType;
 import hu.btsoft.gfmon.corelib.model.entity.Server;
 import hu.btsoft.gfmon.corelib.model.service.ConfigService;
+import hu.btsoft.gfmon.corelib.model.service.IConfigKeyNames;
 import hu.btsoft.gfmon.corelib.model.service.ServerService;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW) //A BEAN-be záródik a tranzakció
 public class DefaultConfigCreator {
 
-    private static final String DEF_USERNAME = "DefaultConfigCreator";
+    private static final String DEF_USERNAME = "default-config-creator";
 
     @EJB
     private ConfigService configService;
