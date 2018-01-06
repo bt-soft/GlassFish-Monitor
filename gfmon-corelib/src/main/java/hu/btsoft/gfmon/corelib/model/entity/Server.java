@@ -19,6 +19,7 @@ import java.util.List;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -46,6 +47,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author BT
  */
 @Entity
+@Cacheable(true)
 @Table(name = "SERVER",
         catalog = "",
         schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,
@@ -54,7 +56,6 @@ import org.apache.commons.lang3.StringUtils;
 @NamedQueries({
     @NamedQuery(name = "Server.findAllActive", query = "SELECT s FROM Server s WHERE s.active = true"), //
 })
-@Cacheable(false)
 @Data
 @ToString(callSuper = false, of = {"hostName", "ipAddress", "portNumber", "active"})
 @EqualsAndHashCode(callSuper = false)
@@ -145,7 +146,7 @@ public class Server extends ModifiableEntityBase {
      * A szerver mérendő adatai
      * A 'GFMON.SERVER_COLLDATA_UNIT' JoinTable automatikusan létrejön, jó így, nem kell hangoni rajta
      */
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER) //mindig kell, emiatt előre felolvassuk
     private List<CollectorDataUnit> collectorDataUnit;
 
     /**
