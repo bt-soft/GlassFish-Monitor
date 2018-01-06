@@ -11,6 +11,7 @@
  */
 package hu.btsoft.gfmon.corelib.model.entity;
 
+import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;

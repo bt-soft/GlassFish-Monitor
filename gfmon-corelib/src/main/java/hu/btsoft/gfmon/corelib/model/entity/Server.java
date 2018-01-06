@@ -11,6 +11,7 @@
  */
 package hu.btsoft.gfmon.corelib.model.entity;
 
+import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.crypt.CryptUtil;
 import hu.btsoft.gfmon.corelib.network.NetworkUtils;

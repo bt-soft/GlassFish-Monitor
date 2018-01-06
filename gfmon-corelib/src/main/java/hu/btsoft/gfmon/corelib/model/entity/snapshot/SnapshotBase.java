@@ -11,9 +11,9 @@
  */
 package hu.btsoft.gfmon.corelib.model.entity.snapshot;
 
-import hu.btsoft.gfmon.corelib.model.entity.ColumnPosition;
+import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.entity.EntityBase;
-import hu.btsoft.gfmon.corelib.model.entity.EntityColumnPositionCustomizer;
+import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.corelib.model.entity.Server;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;

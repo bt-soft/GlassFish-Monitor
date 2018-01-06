@@ -9,7 +9,7 @@
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.corelib.model.entity;
+package hu.btsoft.gfmon.corelib.model.colpos;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;

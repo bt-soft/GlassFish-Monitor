@@ -12,7 +12,7 @@
 package hu.btsoft.gfmon.corelib.model.entity.snapshot.network;
 
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
-import hu.btsoft.gfmon.corelib.model.entity.EntityColumnPositionCustomizer;
+import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.corelib.model.entity.snapshot.ThreadPoolFieldsBase;
 import javax.persistence.Cacheable;
 import javax.persistence.Entity;

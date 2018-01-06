@@ -11,6 +11,8 @@
  */
 package hu.btsoft.gfmon.corelib.model.entity;
 
+import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
+import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;

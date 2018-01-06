@@ -12,8 +12,8 @@
 package hu.btsoft.gfmon.corelib.model.entity.snapshot.jvm;
 
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
-import hu.btsoft.gfmon.corelib.model.entity.ColumnPosition;
-import hu.btsoft.gfmon.corelib.model.entity.EntityColumnPositionCustomizer;
+import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
+import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.corelib.model.entity.snapshot.SnapshotBase;
 import javax.persistence.Cacheable;
 import javax.persistence.Entity;
