@@ -172,7 +172,7 @@ public class UIDisablePanel extends UIComponentBase {
      */
     @Override
     public String getFamily() {
-        return null;
+        return "uiDisablePanel";
     }
 
     /**

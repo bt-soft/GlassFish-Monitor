@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition  xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                 xmlns:h="http://xmlns.jcp.org/jsf/html"
+                 xmlns:p="http://primefaces.org/ui"
+                 xmlns:f="http://xmlns.jcp.org/jsf/core"
+                 xmlns:bt="http://bt-soft.hu/jsf/ui"
+                 template="./../../templates/pageTemplate.xhtml"
+                 >
+
+    <ui:define name="title">
+        #{GFMonUIConstants.SHORT_APP_NAME} - Gyűjtendő adatok
+    </ui:define>
+
+    <ui:define name="htmlHead">
+        <ui:define name="htmlHead">
+            <style type="text/css">
+                .category-header-text {
+                    font-size: 2em;
+                    font-family: Arial;
+                    font-weight: bold;
+                }
+                .sub-category-header-text {
+                    font-size: 1.4em;
+                    font-family: Arial;
+                }
+            </style>
+        </ui:define>
+
+    </ui:define>
+
+    <ui:define name="content">
+        <h:outputText value="Általános beállítások" styleClass="category-header-text"/>
+        <br/>
+        <br/>
+        <bt:disablePanel disabled="#{not isAdmin}">
+        </bt:disablePanel>
+
+    </ui:define>
+
+</ui:composition>
