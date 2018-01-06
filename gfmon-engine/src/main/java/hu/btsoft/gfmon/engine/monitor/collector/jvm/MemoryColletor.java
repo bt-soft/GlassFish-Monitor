@@ -28,7 +28,7 @@ public class MemoryColletor extends CollectorBase {
      * @return uri
      */
     @Override
-    protected String getPath() {
+    public String getPath() {
         return PATH;
     }
 

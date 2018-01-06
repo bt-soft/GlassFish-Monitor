@@ -29,7 +29,7 @@ public class HttpServiceRequestCollector extends CollectorBase {
      * @return uri
      */
     @Override
-    protected String getPath() {
+    public String getPath() {
         return PATH;
     }
 }

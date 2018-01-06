@@ -32,14 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class CollectorBase implements ICollectMonitoredData {
 
     /**
-     * Az adatgyűjtést a szerver URL-jéhez képest melyik uri-n kell elvégezni?
-     * pl.: "server/http-service/server/request"
-     *
-     * @return path
-     */
-    protected abstract String getPath();
-
-    /**
      * Timestamp -> Date konverzió
      *
      * @param value dátum timestamp formátumban

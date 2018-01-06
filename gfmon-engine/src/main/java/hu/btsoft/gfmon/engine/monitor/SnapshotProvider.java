@@ -88,19 +88,25 @@ public class SnapshotProvider {
 
         Set<SnapshotBase> snapshots = null;
 
+        //Kigyűjtjük a szerver beállításaiban található monitorozandó path-okat
+        //Majd ezzel tudjuk eldönteni, hogy egy kolektort meg kell-e hívni egyáltalán
+        Set<String> serverMonitorablePaths = new HashSet<>();
+        server.getCollectorDataUnit().forEach((cu) -> {
+            serverMonitorablePaths.add(cu.getRestPath());
+        });
+
         //Végigmegyünk az összes adatgyűjtőn
         for (ICollectMonitoredData collector : dataCollectors) {
 
-//            //Megvizsgáljuk, hogy az adott szervernél be van-e kapcsolva az a MonitorServices modul, amit a kollektor nézegetne
-//            //Ha nem, akkor nem indítjuk a kollektort
-//            if (!server.getMonitorableModules().contains(collector.getMonitoringServiceModuleName())) {
-//                continue;
-//            }
-//
+            //meg kell hívni ezt az adatgyűjtőt?
+            if (!serverMonitorablePaths.contains(collector.getPath())) {
+                continue;
+            }
+
             //Az adott kollektor adatainak lekérése
             List<MonitorValueDto> valuesList = collector.execute(restDataCollector, server.getSimpleUrl(), server.getSessionToken());
 
-            //Üres a mért eredmének Map-je
+            //Üres a mért eredmények Map-je
             if (valuesList == null || valuesList.isEmpty()) {
                 log.warn("A(z) {} szerver mérési eredményei üresek!", server.getSimpleUrl());
                 continue;

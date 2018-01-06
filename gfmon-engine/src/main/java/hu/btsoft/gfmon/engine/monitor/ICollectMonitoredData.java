@@ -24,6 +24,14 @@ import java.util.List;
 public interface ICollectMonitoredData {
 
     /**
+     * Az adatgyűjtést a szerver URL-jéhez képest melyik uri-n kell elvégezni?
+     * pl.: "server/http-service/server/request"
+     *
+     * @return path
+     */
+    String getPath();
+
+    /**
      * A mért adatok neve/mértékegysége/leírása lista
      *
      * @param restDataCollector REST Data Collector példány

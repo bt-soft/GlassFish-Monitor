@@ -28,7 +28,7 @@ public class JspColletor extends CollectorBase {
      * @return path
      */
     @Override
-    protected String getPath() {
+    public String getPath() {
         return PATH;
     }
 

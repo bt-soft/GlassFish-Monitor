@@ -28,7 +28,7 @@ public class HttpListener1ThreadPoolCollector extends CollectorBase {
      * @return public static final String URI =
      */
     @Override
-    protected String getPath() {
+    public String getPath() {
         return PATH;
     }
 
