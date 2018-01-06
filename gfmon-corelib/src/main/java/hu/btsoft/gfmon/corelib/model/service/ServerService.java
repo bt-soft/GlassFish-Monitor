@@ -17,6 +17,7 @@ import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -47,6 +48,18 @@ public class ServerService extends ServiceBase<Server> {
     @Override
     protected EntityManager getEntityManager() {
         return em;
+    }
+
+    /**
+     * Összes aktív szertver lekérdezése
+     *
+     * @return aktív szerverek listája
+     */
+    public List<Server> findAllActiveServer() {
+        Query query = em.createNamedQuery("Server.findAllActive");
+        List<Server> resultList = query.getResultList();
+
+        return resultList;
     }
 
     /**

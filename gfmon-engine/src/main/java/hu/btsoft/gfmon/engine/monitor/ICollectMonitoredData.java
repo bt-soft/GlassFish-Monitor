@@ -11,6 +11,7 @@
  */
 package hu.btsoft.gfmon.engine.monitor;
 
+import hu.btsoft.gfmon.corelib.model.dto.DataUnitDto;
 import hu.btsoft.gfmon.engine.monitor.collector.MonitorValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
 import java.util.List;
@@ -23,7 +24,18 @@ import java.util.List;
 public interface ICollectMonitoredData {
 
     /**
-     * Adatgyűjtés végrahajtása
+     * A mért adatok neve/mértékegysége/leírása lista
+     *
+     * @param restDataCollector REST Data Collector példány
+     * @param simpleUrl         A GF szerver url-je
+     * @param sessionToken      GF session token
+     *
+     * @return mért adatok leírásának listája
+     */
+    List<DataUnitDto> collectDataUnits(RestDataCollector restDataCollector, String simpleUrl, String sessionToken);
+
+    /**
+     * Adatgyűjtés végrehajtása
      *
      * @param restDataCollector REST Data Collector példány
      * @param simpleUrl         A GF szerver url-je

@@ -67,6 +67,15 @@
             <artifactId>java-semver</artifactId>
         </dependency>
 
+        <!-- ModelMapper -->
+        <!--
+        <dependency>
+            <groupId>org.modelmapper</groupId>
+            <artifactId>modelmapper</artifactId>
+        </dependency>
+        -->
+
+
         <!-- JPA API -->
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
@@ -78,8 +87,6 @@
             <artifactId>org.eclipse.persistence.jpa.modelgen.processor</artifactId>
             <scope>provided</scope>
         </dependency>
-
-
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>

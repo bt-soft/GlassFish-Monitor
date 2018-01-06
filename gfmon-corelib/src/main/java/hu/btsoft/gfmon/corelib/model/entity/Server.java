@@ -11,13 +11,15 @@
  */
 package hu.btsoft.gfmon.corelib.model.entity;
 
-import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.crypt.CryptUtil;
+import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.network.NetworkUtils;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.PostLoad;
 import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
@@ -47,6 +49,9 @@ import org.apache.commons.lang3.StringUtils;
         schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,
         uniqueConstraints = @UniqueConstraint(columnNames = {"HOST_NAME", "IP_ADDRESS", "PORT_NUM"})
 )
+@NamedQueries({
+    @NamedQuery(name = "Server.findAllActive", query = "SELECT s FROM Server s WHERE s.active = true"), //
+})
 @Cacheable(false)
 @Data
 @ToString(callSuper = false, of = {"hostName", "ipAddress", "portNumber", "active"})

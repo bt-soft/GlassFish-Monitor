@@ -9,7 +9,7 @@
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.ui.view;
+package hu.btsoft.gfmon.ui.view.settings;
 
 import hu.btsoft.gfmon.core.jsf.GFMonJSFLib;
 import hu.btsoft.gfmon.corelib.model.RuntimeSequenceGenerator;
@@ -18,6 +18,7 @@ import hu.btsoft.gfmon.corelib.model.entity.Server;
 import hu.btsoft.gfmon.corelib.model.service.ConfigService;
 import hu.btsoft.gfmon.corelib.model.service.IConfigKeyNames;
 import hu.btsoft.gfmon.corelib.model.service.ServerService;
+import hu.btsoft.gfmon.ui.view.ViewBase;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;

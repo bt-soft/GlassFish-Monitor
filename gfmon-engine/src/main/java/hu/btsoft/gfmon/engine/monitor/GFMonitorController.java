@@ -12,8 +12,11 @@
 package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.cdi.CdiUtils;
+import hu.btsoft.gfmon.corelib.model.dto.DataUnitDto;
+import hu.btsoft.gfmon.corelib.model.entity.CollectorDataUnit;
 import hu.btsoft.gfmon.corelib.model.entity.Server;
 import hu.btsoft.gfmon.corelib.model.entity.snapshot.SnapshotBase;
+import hu.btsoft.gfmon.corelib.model.service.CollectorDataUnitService;
 import hu.btsoft.gfmon.corelib.model.service.ConfigService;
 import hu.btsoft.gfmon.corelib.model.service.IConfigKeyNames;
 import hu.btsoft.gfmon.corelib.model.service.ServerService;
@@ -21,6 +24,7 @@ import hu.btsoft.gfmon.corelib.model.service.SnapshotService;
 import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.monitor.runtime.management.ServerMonitoringServiceStatus;
 import hu.btsoft.gfmon.engine.security.SessionTokenAcquirer;
+import java.util.List;
 import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -63,6 +67,9 @@ public class GFMonitorController {
     private ServerService serverService;
 
     @EJB
+    private CollectorDataUnitService collectorDataUnitService;
+
+    @EJB
     private SnapshotService snapshotService;
 
     @Resource
@@ -97,6 +104,16 @@ public class GFMonitorController {
 
         //Runtime értékek törlése az adatbázisból
         serverService.clearRuntimeValuesAndSave(DB_MODIFICATORY_USER);
+
+        //Van egyáltalán monitorizható szerver?
+        List<Server> allServers = serverService.findAll();
+        if (allServers == null || allServers.isEmpty()) {
+            log.warn("Nincs monitorozható szerver definiálva!");
+            return;
+        }
+
+        //Adatnevek táblájának felépítése
+        this.checkCollectorDataUnits();
 
         //Mérési periódusidő leszedése a konfigból
         int sampleIntervalSec = configService.getInteger(IConfigKeyNames.SAMPLE_INTERVAL);
@@ -149,6 +166,105 @@ public class GFMonitorController {
     }
 
     /**
+     * Bejelentkezés a szerverbe
+     *
+     * @param server szerver entitás
+     *
+     * @return true -> sikeres bejelentkezés
+     */
+    private boolean acquireSessionToken(Server server) {
+
+        //Van már sessionToken:
+        if (!StringUtils.isEmpty(server.getSessionToken())) {
+            return true;
+        }
+
+        String url = server.getUrl();
+        String userName = server.getUserName();
+        String plainPassword = server.getPlainPassword();
+
+        //ha még nincs SessionToken, akkor csinálunk egyet
+        try {
+            //Mivel egy @Singleton Bean-ban vagyunk, emiatt kézzel lookupOne-oljuk a CDI Bean-t, hogy ne fogjon le egy Rest kliesnt állandó jelleggel
+            SessionTokenAcquirer sessionTokenAcquirer = CdiUtils.lookupOne(SessionTokenAcquirer.class);
+
+            String sessionToken = sessionTokenAcquirer.getSessionToken(url, userName, plainPassword);
+
+            server.setSessionToken(sessionToken);
+
+        } catch (Exception e) {
+
+            String logMsg;
+            String dbMsg;
+            if (e instanceof NotAuthorizedException) {
+                logMsg = "A(z) '{}' szerverbe nem lehet bejelnetkezni!";
+                dbMsg = "Nem lehet bejelentkezni!";
+
+            } else if (e instanceof ProcessingException) {
+                logMsg = "A(z) '{}' szerver nem érhető el!";
+                dbMsg = "A szerver nem érhető el!";
+
+            } else {
+                logMsg = String.format("A(z) '{}' szerver monitorozása ismeretlen hibára futott: %s", e.getCause().getMessage());
+                dbMsg = "Ismeretlen hiba: " + e.getCause().getMessage();
+            }
+
+            log.error(logMsg, server.getUrl());
+
+            //Beírjuk az üzenetet az adatbázisba is
+            serverService.updateAdditionalMessage(server, DB_MODIFICATORY_USER, dbMsg);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Ellenőrzi és szükség esetén felépíti az adatnevek tábláját
+     */
+    private void checkCollectorDataUnits() {
+
+        if (collectorDataUnitService.count() > 1) {
+            log.info("Az 'adatnevek' tábla már OK");
+            return;
+        }
+
+        log.info("Adatnevek táblájának felépítése indul");
+        long start = Elapsed.nowNano();
+
+        //Mivel egy @Singleton Bean-ban vagyunk, emiatt kézzel lookupOne-oljuk a CDI Bean-t, hogy ne fogjon le egy Rest kliesnt állandó jelleggel
+        SnapshotProvider snapshotProvider = CdiUtils.lookupOne(SnapshotProvider.class);
+
+        List<DataUnitDto> dataUnits = null;
+        for (Server server : serverService.findAllActiveServer()) {
+            if (!acquireSessionToken(server)) {
+                // nem sikerült bejelentkezni -> letiltjuk és jöhet a következő szerver
+                continue;
+            }
+
+            dataUnits = snapshotProvider.fetchDataUnits(server);
+            if (dataUnits != null) {
+                break;
+            }
+        }
+
+        //Ha nem sikerült semelyik szervertől sem kigyűjteni az adatokat
+        if (dataUnits == null) {
+            log.warn("Nem gyűjthető ki a monitor adatnevek!");
+            return;
+        }
+
+        //Végigmegyünk az összes adatneven és jól beírjuk az adatbázisba őket
+        for (DataUnitDto dto : dataUnits) {
+            CollectorDataUnit entity = new CollectorDataUnit(dto.getRestPath(), dto.getEntityName(), dto.getDataName(), dto.getUnit(), dto.getDescription());
+            collectorDataUnitService.save(entity, DB_MODIFICATORY_USER);
+        }
+
+        log.info("Adatnevek felépítése OK, adatnevek: {}db, elapsed: {}", dataUnits.size(), Elapsed.getNanoStr(start));
+    }
+
+    /**
      * A monitorozási mintavétel indítása
      */
     @Timeout
@@ -160,53 +276,11 @@ public class GFMonitorController {
         SnapshotProvider snapshotProvider = CdiUtils.lookupOne(SnapshotProvider.class);
 
         int checkedServerCnt = 0;
-        for (Server server : serverService.findAll()) {
+        for (Server server : serverService.findAllActiveServer()) {
 
-            //Az inaktív szerverekkel nem foglalkozunk
-            if (!server.isActive()) {
+            if (!acquireSessionToken(server)) {
+                // nem sikerült bejelentkezni -> letiltjuk és jöhet a következő szerver
                 continue;
-            }
-
-            String url = server.getUrl();
-            String userName = server.getUserName();
-            String plainPassword = server.getPlainPassword();
-
-            //ha még nincs SessionToken, akkor csinálunk egyet
-            if (StringUtils.isEmpty(server.getSessionToken())) {
-
-                try {
-                    //Mivel egy @Singleton Bean-ban vagyunk, emiatt kézzel lookupOne-oljuk a CDI Bean-t, hogy ne fogjon le egy Rest kliesnt állandó jelleggel
-                    SessionTokenAcquirer sessionTokenAcquirer = CdiUtils.lookupOne(SessionTokenAcquirer.class);
-
-                    String sessionToken = sessionTokenAcquirer.getSessionToken(url, userName, plainPassword);
-
-                    server.setSessionToken(sessionToken);
-
-                } catch (Exception e) {
-
-                    String logMsg;
-                    String dbMsg;
-                    if (e instanceof NotAuthorizedException) {
-                        logMsg = "A(z) '{}' szerverbe nem lehet bejelnetkezni!";
-                        dbMsg = "Nem lehet bejelentkezni!";
-
-                    } else if (e instanceof ProcessingException) {
-                        logMsg = "A(z) '{}' szerver nem érhető el!";
-                        dbMsg = "A szerver nem érhető el!";
-
-                    } else {
-                        logMsg = String.format("A(z) '{}' szerver monitorozása ismeretlen hibára futott: %s", e.getCause().getMessage());
-                        dbMsg = "Ismeretlen hiba: " + e.getCause().getMessage();
-                    }
-
-                    log.error(logMsg, server.getUrl());
-
-                    //Beírjuk az üzenetet az adatbázisba is
-                    serverService.updateAdditionalMessage(server, DB_MODIFICATORY_USER, dbMsg);
-
-                    //jöhet a következő szerver
-                    continue;
-                }
             }
 
             //Ha még nem tudjuk, hogy az adott szerveren be van-e kapcsolva a MonitoringService
@@ -234,7 +308,7 @@ public class GFMonitorController {
                 } else {
                     //Megjegyezzük, hogy a szerver moitorozható
                     server.setMonitoringServiceReady(true);
-                    log.trace("A(z) {} szerver monitorozható moduljai: {}", url, monitorableModules);
+                    log.trace("A(z) {} szerver monitorozható moduljai: {}", server.getUrl(), monitorableModules);
                 }
 
                 //lementjük az adatbázisba a szerver megváltozott állapotát
@@ -246,7 +320,7 @@ public class GFMonitorController {
                 }
             }
 
-            log.trace("Adatgyűjtés indul: {}", url);
+            log.trace("Adatgyűjtés indul: {}", server.getUrl());
 
             Set<SnapshotBase> snapshots = snapshotProvider.fetchSnapshot(server);
             checkedServerCnt++;

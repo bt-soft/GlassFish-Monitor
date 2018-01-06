@@ -11,7 +11,9 @@
  */
 package hu.btsoft.gfmon.engine.monitor.collector;
 
+import hu.btsoft.gfmon.corelib.model.dto.DataUnitDto;
 import hu.btsoft.gfmon.engine.monitor.ICollectMonitoredData;
+import hu.btsoft.gfmon.engine.monitor.MonitorPathToJpaEntityClassMap;
 import hu.btsoft.gfmon.engine.monitor.collector.types.ValueUnitType;
 import java.util.Date;
 import java.util.LinkedList;
@@ -64,7 +66,7 @@ public abstract class CollectorBase implements ICollectMonitoredData {
      *
      * @param entities JSon entitás
      *
-     * @return értékek
+     * @return értékek listája
      */
     protected List<MonitorValueDto> fetchValues(JsonObject entities) {
 
@@ -153,6 +155,56 @@ public abstract class CollectorBase implements ICollectMonitoredData {
         JsonObject entities = restDataCollector.getJsonEntities(response);
 
         return this.fetchValues(entities);
+    }
+
+    /**
+     * A REST válaszokból kinyeri az adatneveket és leírásukat
+     *
+     * @param entities JSon entitás
+     *
+     * @return adatneves leírása
+     */
+    protected List<DataUnitDto> fetchDataUnits(JsonObject entities) {
+
+        if (entities == null) {
+            return null;
+        }
+
+        List<DataUnitDto> result = new LinkedList<>();
+
+        //Végigmegyünk az entitásokon
+        entities.keySet().stream().map((entityName) -> entities.getJsonObject(entityName)).map((jsonValueEntity) -> {
+            DataUnitDto dto = new DataUnitDto();
+            dto.setRestPath(this.getPath());
+            Class entityClass = MonitorPathToJpaEntityClassMap.getJpaEntityClass(this.getPath());
+            dto.setEntityName(entityClass != null ? entityClass.getSimpleName() : "unknown");
+            dto.setDataName(jsonValueEntity.getJsonString("name").getString());
+            dto.setUnit(jsonValueEntity.getJsonString("unit").getString());
+            dto.setDescription(jsonValueEntity.getJsonString("description").getString());
+            return dto;
+        }).forEachOrdered((dto) -> {
+            result.add(dto);
+        });
+
+        return result;
+
+    }
+
+    /**
+     * A mért adatok neve/mértékegysége/leírása lista
+     *
+     * @param restDataCollector REST Data Collector példány
+     * @param simpleUrl         A GF szerver url-je
+     * @param sessionToken      GF session token
+     *
+     * @return mért adatok leírásának listája
+     */
+    @Override
+    public List<DataUnitDto> collectDataUnits(RestDataCollector restDataCollector, String simpleUrl, String sessionToken) {
+        Response response = restDataCollector.getMonitorResponse(this.getPath(), simpleUrl, sessionToken);
+        JsonObject entities = restDataCollector.getJsonEntities(response);
+
+        return this.fetchDataUnits(entities);
     }
 
 }

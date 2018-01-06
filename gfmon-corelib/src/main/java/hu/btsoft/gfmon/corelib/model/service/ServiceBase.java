@@ -212,8 +212,7 @@ public abstract class ServiceBase<T extends EntityBase> {
     public boolean checkEntityTableExist() {
 
         try {
-            int cnt = count();
-            return true;
+            count();
         } catch (Exception e) {
             //log.error(e);
         }
