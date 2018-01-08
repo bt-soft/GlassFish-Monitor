@@ -66,7 +66,8 @@ import org.eclipse.persistence.annotations.Customizer;
     @NamedQuery(name = "CollectorDataUnit.findAll", query = "SELECT cdu from CollectorDataUnit cdu ORDER BY cdu.restPath, cdu.dataName"),//
     @NamedQuery(name = "CollectorDataUnit.findAllPaths", query = "SELECT cdu.restPath from CollectorDataUnit cdu GROUP BY cdu.restPath ORDER BY cdu.restPath, cdu.dataName"),//
     @NamedQuery(name = "CollectorDataUnit.findByPath", query = "SELECT cdu from CollectorDataUnit cdu WHERE cdu.restPath = :restPath ORDER BY cdu.dataName"),//
-    @NamedQuery(name = "CollectorDataUnit.findByActiveAndServerId", query = "SELECT cdu from CollectorDataUnit cdu INNER JOIN cdu.serverCollDataUnitJoiners j WHERE j.active = 1 AND j.pk.server.id = :serverId"),//
+    @NamedQuery(name = "CollectorDataUnit.findByServerId", query = "SELECT cdu from CollectorDataUnit cdu INNER JOIN cdu.serverCollDataUnitJoiners j WHERE  j.pk.server.id = :serverId ORDER BY cdu.restPath, cdu.dataName"),//
+    @NamedQuery(name = "CollectorDataUnit.findByActiveAndServerId", query = "SELECT cdu from CollectorDataUnit cdu INNER JOIN cdu.serverCollDataUnitJoiners j WHERE j.active = 1 AND j.pk.server.id = :serverId ORDER BY cdu.restPath, cdu.dataName"),//
 })
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @Data

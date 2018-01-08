@@ -60,11 +60,26 @@ public class CollectorDataUnitService extends ServiceBase<CollectorDataUnit> {
     }
 
     /**
-     * A szerver ID alapján kikeresi a CDU-kat
+     * A szerver ID alapján kikeresi az összes CDU-t
      *
-     * @param serverId
+     * @param serverId szerver id-je
      *
-     * @return CDU lista
+     * @return a szerver összes CDU listája
+     */
+    public List<CollectorDataUnit> findByServerId(Long serverId) {
+        Query query = em.createNamedQuery("CollectorDataUnit.findByServerId");
+        query.setParameter("serverId", serverId);
+        List<CollectorDataUnit> queryResult = query.getResultList();
+
+        return queryResult;
+    }
+
+    /**
+     * A szerver ID alapján kikeresi az aktív CDU-kat
+     *
+     * @param serverId szerver id-je
+     *
+     * @return a szerveren aktív CDU lista
      */
     public List<CollectorDataUnit> findByActiveAndServerId(Long serverId) {
         Query query = em.createNamedQuery("CollectorDataUnit.findByActiveAndServerId");
