@@ -9,22 +9,30 @@
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.corelib.model.entity;
+package hu.btsoft.gfmon.corelib.model.entity.server;
 
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
+import hu.btsoft.gfmon.corelib.model.entity.EntityBase;
+import java.util.List;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.PostLoad;
+import javax.persistence.PostUpdate;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -55,16 +63,15 @@ import org.eclipse.persistence.annotations.Customizer;
             @Index(name = "IDX_RESTPATH", columnList = "RESTPATH", unique = false)
         })
 @NamedQueries({
-    @NamedQuery(name = "CollectorDataUnit.findAll", query = "SELECT e from CollectorDataUnit e ORDER BY e.restPath, e.dataName"),//
-    @NamedQuery(name = "CollectorDataUnit.findByPath", query = "SELECT e from CollectorDataUnit e WHERE e.restPath = :restPath ORDER BY e.dataName"),//
-    //
-    @NamedQuery(name = "CollectorDataUnit.findAllPaths", query = "SELECT e.restPath from CollectorDataUnit e GROUP BY e.restPath ORDER BY e.restPath, e.dataName"),//
+    @NamedQuery(name = "CollectorDataUnit.findAll", query = "SELECT cdu from CollectorDataUnit cdu ORDER BY cdu.restPath, cdu.dataName"),//
+    @NamedQuery(name = "CollectorDataUnit.findAllPaths", query = "SELECT cdu.restPath from CollectorDataUnit cdu GROUP BY cdu.restPath ORDER BY cdu.restPath, cdu.dataName"),//
+    @NamedQuery(name = "CollectorDataUnit.findByPath", query = "SELECT cdu from CollectorDataUnit cdu WHERE cdu.restPath = :restPath ORDER BY cdu.dataName"),//
+    @NamedQuery(name = "CollectorDataUnit.findByActiveAndServerId", query = "SELECT cdu from CollectorDataUnit cdu INNER JOIN cdu.serverCollDataUnitJoiners j WHERE j.active = 1 AND j.pk.server.id = :serverId"),//
 })
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @Data
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-@AllArgsConstructor
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
 public class CollectorDataUnit extends EntityBase {
@@ -108,4 +115,64 @@ public class CollectorDataUnit extends EntityBase {
     @NotNull(message = "A description nem lehet null")
     @Column(length = 512)
     private String description;
+
+    /**
+     * A visszairány a szerverhez
+     */
+    @OneToMany(mappedBy = "pk.collectorDataUnit", fetch = FetchType.LAZY)
+    private List<ServerCollDataUnitJoiner> serverCollDataUnitJoiners;
+
+    /**
+     * Az adott szerver esetén aktív?
+     * Nem mentjük az adatbázisba, itt csak runtime értékként használjuk, a ServerCollDataUnitJoiner entitásban van az adott szerverhez rendelve!
+     *
+     * A flag kezelése:
+     * - Itt az entitás @PostLoad/@PostUpdate JPA életciklus metódusában
+     * - A ServerCollDataUnitJoiner join entitás @PostLoad/@PostUpdate JPA életciklus metódusában
+     */
+    @Transient
+    private Boolean active;
+
+    /**
+     * Konstruktor
+     *
+     * @param restPath    path, ahol szerepel az adatnév
+     * @param entityName  entitás neve, ami használja
+     * @param dataName    adatnév
+     * @param unit        mértékegység
+     * @param description leírás
+     * @param active      aktiv?
+     */
+    public CollectorDataUnit(String restPath, String entityName, String dataName, String unit, String description, Boolean active) {
+        this.restPath = restPath;
+        this.entityName = entityName;
+        this.dataName = dataName;
+        this.unit = unit;
+        this.description = description;
+        this.active = active;
+    }
+
+    /**
+     * A mentés előtt beállítjuk az active adatot, ha szükséges
+     *
+     */
+    @PrePersist
+    @PreUpdate
+    protected void pre() {
+        if (this.active == null) {
+            this.active = Boolean.TRUE;
+        }
+    }
+
+    /**
+     * Felolvasás után beállítjuk az active adatot, ha szükséges
+     */
+    @PostLoad
+    @PostUpdate
+    protected void post() {
+        if (this.active == null) {
+            this.active = Boolean.TRUE;
+        }
+    }
+
 }

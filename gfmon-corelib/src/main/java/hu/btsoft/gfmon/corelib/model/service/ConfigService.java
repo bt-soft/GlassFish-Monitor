@@ -56,17 +56,8 @@ public class ConfigService extends ServiceBase<Config> {
         log.trace("Séma: programmatikus Drop & Create!");
 
         ServerSession session = em.unwrap(ServerSession.class);
-        int originalLevel = session.getSessionLog().getLevel();
-        boolean originalShouldLogExceptionStackTrace = session.getSessionLog().shouldLogExceptionStackTrace();
-
-//        session.getSessionLog().setLevel(0); // 0 -> ALL, 8 -> OFF
-//        session.getSessionLog().setShouldLogExceptionStackTrace(false);
-//
         SchemaManager schemaManager = new SchemaManager(session);
         schemaManager.replaceDefaultTables();
-
-//        session.getSessionLog().setLevel(originalLevel);
-//        session.getSessionLog().setShouldLogExceptionStackTrace(originalShouldLogExceptionStackTrace);
     }
 
     /**

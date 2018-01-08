@@ -14,7 +14,7 @@ package hu.btsoft.gfmon.ui.view.settings;
 import hu.btsoft.gfmon.core.jsf.GFMonJSFLib;
 import hu.btsoft.gfmon.corelib.model.RuntimeSequenceGenerator;
 import hu.btsoft.gfmon.corelib.model.entity.Config;
-import hu.btsoft.gfmon.corelib.model.entity.Server;
+import hu.btsoft.gfmon.corelib.model.entity.server.Server;
 import hu.btsoft.gfmon.corelib.model.service.ConfigService;
 import hu.btsoft.gfmon.corelib.model.service.IConfigKeyNames;
 import hu.btsoft.gfmon.corelib.model.service.ServerService;
@@ -203,6 +203,16 @@ public class SettingsView extends ViewBase {
             //Szerverek mentése
             servers.stream()
                     .forEach((Server server) -> {
+                        //Beállítjuk a mérendő adatok listáját
+                        if (server.getCollectorDataUnits() == null || server.getCollectorDataUnits().isEmpty()) {
+                            //Default esetben mindent mérjünk rajta!
+                            serverService.addDefaultAllCollectorDataUnits(server);
+                        }
+                        //A JSF "" string lecserélése null-ra
+                        if (StringUtils.isEmpty(server.getUserName())) {
+                            server.setUserName(null);
+                            server.setPlainPassword(null);
+                        }
                         serverService.save(server, currentUser);
                     });
 

@@ -11,9 +11,7 @@
  */
 package hu.btsoft.gfmon.corelib.model.service;
 
-import hu.btsoft.gfmon.corelib.model.dto.DataUnitDto;
-import hu.btsoft.gfmon.corelib.model.entity.CollectorDataUnit;
-import java.util.LinkedList;
+import hu.btsoft.gfmon.corelib.model.entity.server.CollectorDataUnit;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -22,7 +20,7 @@ import javax.persistence.Query;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * CollectorDataUnit entitások kezelése
+ * CollectorDataUnit (CDU) entitások kezelése
  *
  * @author BT
  */
@@ -51,9 +49,9 @@ public class CollectorDataUnitService extends ServiceBase<CollectorDataUnit> {
     }
 
     /**
-     * Az összes entitás lekérdezése
+     * Az összes CDU entitás lekérdezése
      *
-     * @return path lista
+     * @return összes CDU entitás lista
      */
     public List<CollectorDataUnit> getAll() {
         Query query = em.createNamedQuery("CollectorDataUnit.findAll");
@@ -62,27 +60,41 @@ public class CollectorDataUnitService extends ServiceBase<CollectorDataUnit> {
     }
 
     /**
-     * Entitás lista -> DTO map
+     * A szerver ID alapján kikeresi a CDU-kat
      *
-     * @param entities entitás lista
+     * @param serverId
      *
-     * @return dto lista vagy null
+     * @return CDU lista
      */
-    private List<DataUnitDto> mapEntityToDto(List<CollectorDataUnit> entities) {
-        if (entities == null) {
-            return null;
-        }
+    public List<CollectorDataUnit> findByActiveAndServerId(Long serverId) {
+        Query query = em.createNamedQuery("CollectorDataUnit.findByActiveAndServerId");
+        query.setParameter("serverId", serverId);
+        List<CollectorDataUnit> queryResult = query.getResultList();
 
-        List<DataUnitDto> result = new LinkedList<>();
-        entities.stream().map(
-                (entity) -> new DataUnitDto(entity.getRestPath(), entity.getEntityName(), entity.getDataName(), entity.getUnit(), entity.getDescription())
-        ).forEachOrdered((dto) -> {
-            result.add(dto);
-        });
-
-        return result;
+        return queryResult;
     }
 
+//    /**
+//     * Entitás lista -> DTO map
+//     *
+//     * @param entities entitás lista
+//     *
+//     * @return dto lista vagy null
+//     */
+//    private List<DataUnitDto> mapEntityToDto(List<CollectorDataUnit> entities) {
+//        if (entities == null) {
+//            return null;
+//        }
+//
+//        List<DataUnitDto> result = new LinkedList<>();
+//        entities.stream().map(
+//                (entity) -> new DataUnitDto(entity.getRestPath(), entity.getEntityName(), entity.getDataName(), entity.getUnit(), entity.getDescription())
+//        ).forEachOrdered((dto) -> {
+//            result.add(dto);
+//        });
+//
+//        return result;
+//    }
     /**
      * Az összes mérhető Rest Path lekérdezése
      *
@@ -95,17 +107,18 @@ public class CollectorDataUnitService extends ServiceBase<CollectorDataUnit> {
         return result;
     }
 
-    /**
-     *
-     * @param restPath
-     *
-     * @return
-     */
-    public List<DataUnitDto> findByPath(String restPath) {
-        Query query = em.createNamedQuery("CollectorDataUnit.findByPath");
-        query.setParameter("restPath", restPath);
-        List<CollectorDataUnit> queryResult = query.getResultList();
-
-        return mapEntityToDto(queryResult);
-    }
+//    /**
+//     * Path alapján kikeresi a CDU-kat
+//     *
+//     * @param restPath path
+//     *
+//     * @return CDU lista
+//     */
+//    public List<DataUnitDto> findByPath(String restPath) {
+//        Query query = em.createNamedQuery("CollectorDataUnit.findByPath");
+//        query.setParameter("restPath", restPath);
+//        List<CollectorDataUnit> queryResult = query.getResultList();
+//
+//        return mapEntityToDto(queryResult);
+//    }
 }

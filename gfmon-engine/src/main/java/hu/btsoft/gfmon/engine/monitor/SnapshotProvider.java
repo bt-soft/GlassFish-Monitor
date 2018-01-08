@@ -12,7 +12,7 @@
 package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.model.dto.DataUnitDto;
-import hu.btsoft.gfmon.corelib.model.entity.Server;
+import hu.btsoft.gfmon.corelib.model.entity.server.Server;
 import hu.btsoft.gfmon.corelib.model.entity.snapshot.SnapshotBase;
 import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.monitor.collector.MonitorValueDto;
@@ -95,21 +95,27 @@ public class SnapshotProvider {
         //A path-al tudjuk eldönteni, hogy egy kolektort egyáltalán meg kell-e hívni?
         Set<String> serverMonitorablePaths = new HashSet<>();
 
-        //Az egyes Path-ok alatti adatnevek halmaza, ezzel az adaott kollektor munkáját tudjuk szűkíteni
+        //Az egyes Path-ok alatti adatnevek halmaza, ezzel az adott kollektor munkáját tudjuk szűkíteni
         Map<String, Set<String>> collectedDatatNamesMap = new HashMap<>();
 
-        server.getCollectorDataUnits().forEach((collectorDataUnit) -> {
+        if (server.getCollectorDataUnits() != null) {
+            server.getCollectorDataUnits().forEach((cdu) -> {
 
-            //A kollektorok Path-jai
-            String path = collectorDataUnit.getRestPath();
-            serverMonitorablePaths.add(path);
+                //A kollektorok Path-jai
+                String path = cdu.getRestPath();
+                serverMonitorablePaths.add(path);
 
-            if (!collectedDatatNamesMap.containsKey(path)) {
-                collectedDatatNamesMap.put(path, new HashSet<>());
-            }
-            Set<String> collectedDatatNames = collectedDatatNamesMap.get(path);
-            collectedDatatNames.add(collectorDataUnit.getDataName());
-        });
+                if (!collectedDatatNamesMap.containsKey(path)) {
+                    collectedDatatNamesMap.put(path, new HashSet<>());
+                }
+                Set<String> collectedDatatNames = collectedDatatNamesMap.get(path);
+
+                //Ha kell gyűjteni az adatnevet, akkor megjegyezzük
+                if (cdu.getActive()) {
+                    collectedDatatNames.add(cdu.getDataName());
+                }
+            });
+        }
 
         //Végigmegyünk az összes adatgyűjtőn
         for (ICollectMonitoredData collector : dataCollectors) {

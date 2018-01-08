@@ -13,7 +13,7 @@ package hu.btsoft.gfmon.engine.config;
 
 import hu.btsoft.gfmon.corelib.model.entity.Config;
 import hu.btsoft.gfmon.corelib.model.entity.ConfigValueType;
-import hu.btsoft.gfmon.corelib.model.entity.Server;
+import hu.btsoft.gfmon.corelib.model.entity.server.Server;
 import hu.btsoft.gfmon.corelib.model.service.ConfigService;
 import hu.btsoft.gfmon.corelib.model.service.IConfigKeyNames;
 import hu.btsoft.gfmon.corelib.model.service.ServerService;
@@ -72,6 +72,10 @@ public class DefaultConfigCreator {
         }
 
         {//Server 1
+            //
+            // Az itt megadott szervereknél a gyűjtendő adatok listáját ( List<CollectorDataUnit> ) a GFMonitorController az első mérés során állítja be
+            // Alapesetben minden Entitás-t összegyűjt, amit a UI felületen a szerver mért adatainak beállításánál lehet testre szabni
+            //
             Server server = new Server("localhost", 4848, "Lokális GlassFish Admin", null /*user*/, null /*passwd*/, true /*enabled*/);
 //            Server server = new Server("localhost", 4848, "Lokális GlassFish Admin", "admin" /*user*/, "admin" /*passwd*/, true /*enabled*/);
 

@@ -19,6 +19,7 @@ import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import javax.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.persistence.exceptions.DatabaseException;
 
@@ -65,8 +66,12 @@ public abstract class ServiceBase<T extends EntityBase> {
      *
      * @param entity entitás
      * @param user   módosító user
+     *
+     * @throws ConstraintViolationException validációs hiba
+     * @throws PersistenceException         JPA hiba
+     * @throws DatabaseException            DB hiba
      */
-    public void save(T entity, String user) {
+    public void save(T entity, String user) throws RuntimeException {
 
         if (entity == null) {
             log.warn("null az entitás!");
@@ -95,8 +100,12 @@ public abstract class ServiceBase<T extends EntityBase> {
      * Új entitás létrehozása vagy létező entitás update
      *
      * @param entity entitás példány
+     *
+     * @throws ConstraintViolationException validációs hiba
+     * @throws PersistenceException         JPA hiba
+     * @throws DatabaseException            DB hiba
      */
-    public void save(T entity) {
+    public void save(T entity) throws RuntimeException {
 
         if (entity == null) {
             log.warn("null az entitás!");
@@ -110,12 +119,16 @@ public abstract class ServiceBase<T extends EntityBase> {
             } else {
                 getEntityManager().merge(entity);
             }
-
-//            this.flush();
+        } catch (ConstraintViolationException e) {
+            log.error("Entitás validációs hiba: ");
+            e.getConstraintViolations().forEach(err -> log.error("errStr: {}", err));
+            throw e;
         } catch (PersistenceException e) {
             log.error("Entitás mentés/update hiba", e);
+            throw e;
         } catch (DatabaseException e) {
             log.error("Entitás mentés/update adatbázis hiba", e);
+            throw e;
         }
     }
 
@@ -132,8 +145,11 @@ public abstract class ServiceBase<T extends EntityBase> {
      * Entitás törlése
      *
      * @param entity entitás példány
+     *
+     * @throws PersistenceException JPA hiba
+     * @throws DatabaseException    DB hiba
      */
-    public void remove(T entity) {
+    public void remove(T entity) throws RuntimeException {
 
         if (entity == null) {
             log.warn("null az entitás!");
@@ -147,8 +163,10 @@ public abstract class ServiceBase<T extends EntityBase> {
             getEntityManager().flush();
         } catch (PersistenceException e) {
             log.error("Entitás törlés hiba", e);
+            throw e;
         } catch (DatabaseException e) {
             log.error("Entitás törlés adatbázis hiba", e);
+            throw e;
         }
 
     }

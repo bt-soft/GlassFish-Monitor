@@ -11,7 +11,7 @@
  */
 package hu.btsoft.gfmon.ui.view.settings;
 
-import hu.btsoft.gfmon.corelib.model.entity.CollectorDataUnit;
+import hu.btsoft.gfmon.corelib.model.entity.server.CollectorDataUnit;
 import hu.btsoft.gfmon.corelib.model.service.CollectorDataUnitService;
 import hu.btsoft.gfmon.ui.view.ViewBase;
 import java.util.List;

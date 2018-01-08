@@ -13,8 +13,8 @@ package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.cdi.CdiUtils;
 import hu.btsoft.gfmon.corelib.model.dto.DataUnitDto;
-import hu.btsoft.gfmon.corelib.model.entity.CollectorDataUnit;
-import hu.btsoft.gfmon.corelib.model.entity.Server;
+import hu.btsoft.gfmon.corelib.model.entity.server.CollectorDataUnit;
+import hu.btsoft.gfmon.corelib.model.entity.server.Server;
 import hu.btsoft.gfmon.corelib.model.entity.snapshot.SnapshotBase;
 import hu.btsoft.gfmon.corelib.model.service.CollectorDataUnitService;
 import hu.btsoft.gfmon.corelib.model.service.ConfigService;
@@ -257,8 +257,8 @@ public class GFMonitorController {
 
         //Végigmegyünk az összes adatneven és jól beírjuk az adatbázisba őket
         for (DataUnitDto dto : dataUnits) {
-            CollectorDataUnit entity = new CollectorDataUnit(dto.getRestPath(), dto.getEntityName(), dto.getDataName(), dto.getUnit(), dto.getDescription());
-            collectorDataUnitService.save(entity, DB_MODIFICATORY_USER);
+            CollectorDataUnit dcu = new CollectorDataUnit(dto.getRestPath(), dto.getEntityName(), dto.getDataName(), dto.getUnit(), dto.getDescription(), Boolean.TRUE);
+            collectorDataUnitService.save(dcu, DB_MODIFICATORY_USER);
         }
 
         log.info("Adatnevek felépítése OK, adatnevek: {}db, elapsed: {}", dataUnits.size(), Elapsed.getNanoStr(start));
@@ -311,11 +311,11 @@ public class GFMonitorController {
                     log.trace("A(z) {} szerver monitorozható moduljai: {}", server.getUrl(), monitorableModules);
                 }
 
-                //Ha még nincs definiálva a szerveren, hogy mit mérjünk, akkor mindent bekapcsolunk rajta
+                //Az első indításkort még nem tudjuk, hogy a GF példányról milyen patháon milyen adatneveket lehet gyűjteni
+                //Emiatt a DefaultConfigCreator-ban létrehozott szervereknél itt kapcsoljuk be a gyűjtendő adatneveket
                 if (server.getCollectorDataUnits() == null || server.getCollectorDataUnits().isEmpty()) {
                     //Mindent mérjünk rajta!
-                    List<CollectorDataUnit> allCollectorDataUnits = collectorDataUnitService.getAll();
-                    server.setCollectorDataUnits(allCollectorDataUnits);
+                    serverService.addDefaultAllCollectorDataUnits(server);
                 }
 
                 //lementjük az adatbázisba a szerver megváltozott állapotát

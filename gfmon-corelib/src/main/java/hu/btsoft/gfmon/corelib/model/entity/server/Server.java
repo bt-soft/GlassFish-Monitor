@@ -9,14 +9,18 @@
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.corelib.model.entity;
+package hu.btsoft.gfmon.corelib.model.entity.server;
 
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.crypt.CryptUtil;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
+import hu.btsoft.gfmon.corelib.model.entity.ModifiableEntityBase;
 import hu.btsoft.gfmon.corelib.network.NetworkUtils;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import javax.persistence.Cacheable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -58,7 +62,7 @@ import org.apache.commons.lang3.StringUtils;
 })
 @Data
 @ToString(callSuper = false, of = {"hostName", "ipAddress", "portNumber", "active"})
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true, exclude = "serverCollDataUnitJoiners")
 @NoArgsConstructor
 @Slf4j
 public class Server extends ModifiableEntityBase {
@@ -144,10 +148,11 @@ public class Server extends ModifiableEntityBase {
 
     /**
      * A szerver mérendő adatai
-     * A 'GFMON.SERVER_COLLDATA_UNIT' JoinTable automatikusan létrejön, jó így, nem kell hangoni rajta
+     * - eager: mindig kell -> mindig felolvassuk
+     * - cascade: ha a szervert töröljük, akkor törlődjönenek a CollectorDataUnit-ok is
      */
-    @OneToMany(fetch = FetchType.EAGER) //mindig kell, emiatt előre felolvassuk
-    private List<CollectorDataUnit> collectorDataUnits;
+    @OneToMany(mappedBy = "pk.server", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ServerCollDataUnitJoiner> serverCollDataUnitJoiners;
 
     /**
      * A kódolatlan jelszó
@@ -178,22 +183,26 @@ public class Server extends ModifiableEntityBase {
     }
 
     /**
-     * Jelszó kezelése
-     * mentés előtt kódolunk egyet
+     * Mentés előtt
+     * - jelszó kódolása
      */
     @PrePersist
     @PreUpdate
     protected void pre() {
+        // Jelszó kezelése
+        // mentés előtt kódolunk egyet
         this.encPasswd = CryptUtil.encrypt(plainPassword);
     }
 
     /**
-     * Jelszó kezelése
-     * beolvasás után dekódolunk egyet
+     * Betöltés után
+     * - jelszó dekódolása
      */
     @PostLoad
     @PostUpdate
     protected void post() {
+        // Jelszó kezelése
+        // beolvasás után dekódolunk egyet
         plainPassword = CryptUtil.decrypt(this.encPasswd);
     }
 
@@ -224,4 +233,69 @@ public class Server extends ModifiableEntityBase {
         return String.format("%s:%d", hostName, portNumber);
     }
 
+    /**
+     * CollectorDataUnit példányok listájának lekérdezése a jointábla segítségével
+     *
+     * @return CollectorDataUnit lista
+     */
+    public List<CollectorDataUnit> getCollectorDataUnits() {
+        if (serverCollDataUnitJoiners == null) {
+            return null;
+        }
+
+        List<CollectorDataUnit> cdus = new LinkedList<>();
+        serverCollDataUnitJoiners.forEach(joiner -> {
+            cdus.add(joiner.getCollectorDataUnit());
+        });
+
+        return cdus;
+    }
+
+    /**
+     * CollectorDataUnit példányok beírása a jointábla segítségével
+     *
+     * @param collectorDataUnits CollectorDataUnit példányok
+     *
+     * @throws IllegalStateException ha nme található az adott CDU id-hez a join rekord
+     */
+    public void setCollectorDataUnits(List<CollectorDataUnit> collectorDataUnits) throws IllegalStateException {
+
+        if (collectorDataUnits == null || collectorDataUnits.isEmpty()) {
+            return;
+        }
+
+        //List<ServerCollDataUnitJoiner> serverCollDataUnitJoiners
+        if (serverCollDataUnitJoiners == null) {
+            serverCollDataUnitJoiners = new LinkedList<>();
+        }
+
+        collectorDataUnits.forEach((CollectorDataUnit cdu) -> {
+
+            if (cdu.getId() == null) { //Nincs ID-je a cdu-nak -> új bejegyzése lesz a join táblában (..is, meg mindenhol)
+                //Hozzáadjuk join táblához az új join-t
+                serverCollDataUnitJoiners.add(new ServerCollDataUnitJoiner(this, cdu));
+
+            } else {
+
+                //Van ID-je a cdu-nak, akkor megkeressük a joiner táblában és jól fejbenyomjuk, ha változott
+                ServerCollDataUnitJoiner joiner = serverCollDataUnitJoiners.stream()
+                        .parallel()
+                        .filter(element -> Objects.equals(element.getCollectorDataUnit().getId(), cdu.getId()))
+                        .findAny()
+                        .orElse(null);
+
+                //Megvan a joiner!
+                if (joiner != null) {
+                    //Csak akkor piszkáljuk meg a join táblát, ha változott a CDU entitás
+                    if (!joiner.getCollectorDataUnit().equals(cdu)) {
+                        joiner.setCollectorDataUnit(cdu);
+                    }
+                } else { //nem találtunk ilyen joinert -> új bejegyzés lesz
+
+                    //Hozzáadjuk join táblához az új join-t
+                    serverCollDataUnitJoiners.add(new ServerCollDataUnitJoiner(this, cdu));
+                }
+            }
+        });
+    }
 }

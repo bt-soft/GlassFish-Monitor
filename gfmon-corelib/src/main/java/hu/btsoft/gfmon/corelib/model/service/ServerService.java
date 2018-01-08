@@ -12,8 +12,10 @@
 package hu.btsoft.gfmon.corelib.model.service;
 
 import hu.btsoft.gfmon.corelib.model.RuntimeSequenceGenerator;
-import hu.btsoft.gfmon.corelib.model.entity.Server;
+import hu.btsoft.gfmon.corelib.model.entity.server.CollectorDataUnit;
+import hu.btsoft.gfmon.corelib.model.entity.server.Server;
 import java.util.List;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -29,6 +31,9 @@ import org.apache.commons.lang3.StringUtils;
 @Stateless
 @Slf4j
 public class ServerService extends ServiceBase<Server> {
+
+    @EJB
+    private CollectorDataUnitService collectorDataUnitService;
 
     @PersistenceContext
     private EntityManager em;
@@ -48,6 +53,23 @@ public class ServerService extends ServiceBase<Server> {
     @Override
     protected EntityManager getEntityManager() {
         return em;
+    }
+
+    /**
+     * Minden DataCollectorUnit hozzáadása a aszerverhez
+     *
+     * @param server szerver példány
+     */
+    public void addDefaultAllCollectorDataUnits(Server server) {
+        //Ha még nincs definálva semmi, akkor mindent mérünk rajta
+        if (server.getCollectorDataUnits() == null || server.getCollectorDataUnits().isEmpty()) {
+            List<CollectorDataUnit> allCollectorDataUnits = collectorDataUnitService.getAll();
+            if (allCollectorDataUnits != null && !allCollectorDataUnits.isEmpty()) {
+
+                //Hozzáadjuk az összes DataUnit-et egy Join tábla segítségével
+                server.setCollectorDataUnits(allCollectorDataUnits);
+            }
+        }
     }
 
     /**
