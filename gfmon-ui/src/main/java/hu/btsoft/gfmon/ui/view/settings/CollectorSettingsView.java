@@ -37,6 +37,6 @@ public class CollectorSettingsView extends ViewBase {
 
     @PostConstruct
     protected void init() {
-        collectorDataUnits = collectorDataUnitService.getAll();
+        collectorDataUnits = collectorDataUnitService.findAll();
     }
 }

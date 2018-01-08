@@ -56,16 +56,15 @@ public class ServerService extends ServiceBase<Server> {
     }
 
     /**
-     * Minden DataCollectorUnit hozzáadása a aszerverhez
+     * Az összes ismert DataCollectorUnit hozzáadása a aszerverhez
      *
      * @param server szerver példány
      */
     public void addDefaultAllCollectorDataUnits(Server server) {
         //Ha még nincs definálva semmi, akkor mindent mérünk rajta
         if (server.getCollectorDataUnits() == null || server.getCollectorDataUnits().isEmpty()) {
-            List<CollectorDataUnit> allCollectorDataUnits = collectorDataUnitService.getAll();
+            List<CollectorDataUnit> allCollectorDataUnits = collectorDataUnitService.findAll();
             if (allCollectorDataUnits != null && !allCollectorDataUnits.isEmpty()) {
-
                 //Hozzáadjuk az összes DataUnit-et egy Join tábla segítségével
                 server.setCollectorDataUnits(allCollectorDataUnits);
             }
@@ -73,7 +72,21 @@ public class ServerService extends ServiceBase<Server> {
     }
 
     /**
-     * Összes aktív szertver lekérdezése
+     * Összes szerver lekérdezése
+     * A rendezés miatt nem az ös findAll() metódusát használjuk
+     *
+     * @return az összes szerver listája
+     */
+    @Override
+    public List<Server> findAll() {
+        Query query = em.createNamedQuery("Server.findAll");
+        List<Server> resultList = query.getResultList();
+
+        return resultList;
+    }
+
+    /**
+     * Összes aktív szerver lekérdezése
      *
      * @return aktív szerverek listája
      */

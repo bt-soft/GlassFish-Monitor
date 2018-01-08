@@ -50,10 +50,12 @@ public class CollectorDataUnitService extends ServiceBase<CollectorDataUnit> {
 
     /**
      * Az összes CDU entitás lekérdezése
+     * A rendezés miatt nem az ös findAll() metódusát használjuk
      *
      * @return összes CDU entitás lista
      */
-    public List<CollectorDataUnit> getAll() {
+    @Override
+    public List<CollectorDataUnit> findAll() {
         Query query = em.createNamedQuery("CollectorDataUnit.findAll");
         List<CollectorDataUnit> queryResult = query.getResultList();
         return queryResult;
@@ -64,7 +66,7 @@ public class CollectorDataUnitService extends ServiceBase<CollectorDataUnit> {
      *
      * @param serverId szerver id-je
      *
-     * @return a szerver összes CDU listája
+     * @return a szerver összes CDU list
      */
     public List<CollectorDataUnit> findByServerId(Long serverId) {
         Query query = em.createNamedQuery("CollectorDataUnit.findByServerId");

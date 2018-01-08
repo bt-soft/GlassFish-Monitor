@@ -58,7 +58,8 @@ import org.apache.commons.lang3.StringUtils;
         uniqueConstraints = @UniqueConstraint(columnNames = {"HOST_NAME", "IP_ADDRESS", "PORT_NUM"})
 )
 @NamedQueries({
-    @NamedQuery(name = "Server.findAllActive", query = "SELECT s FROM Server s WHERE s.active = true"), //
+    @NamedQuery(name = "Server.findAll", query = "SELECT s FROM Server s ORDER BY s.hostName, s.portNumber"), //
+    @NamedQuery(name = "Server.findAllActive", query = "SELECT s FROM Server s WHERE s.active = true ORDER BY s.hostName, s.portNumber"), //
 })
 @Data
 @ToString(callSuper = false, of = {"hostName", "ipAddress", "portNumber", "active"})
