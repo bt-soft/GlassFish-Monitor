@@ -147,7 +147,7 @@ public class Server extends ModifiableEntityBase {
      * A 'GFMON.SERVER_COLLDATA_UNIT' JoinTable automatikusan létrejön, jó így, nem kell hangoni rajta
      */
     @OneToMany(fetch = FetchType.EAGER) //mindig kell, emiatt előre felolvassuk
-    private List<CollectorDataUnit> collectorDataUnit;
+    private List<CollectorDataUnit> collectorDataUnits;
 
     /**
      * A kódolatlan jelszó

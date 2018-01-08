@@ -312,10 +312,10 @@ public class GFMonitorController {
                 }
 
                 //Ha még nincs definiálva a szerveren, hogy mit mérjünk, akkor mindent bekapcsolunk rajta
-                if (server.getCollectorDataUnit() == null || server.getCollectorDataUnit().isEmpty()) {
+                if (server.getCollectorDataUnits() == null || server.getCollectorDataUnits().isEmpty()) {
                     //Mindent mérjünk rajta!
                     List<CollectorDataUnit> allCollectorDataUnits = collectorDataUnitService.getAll();
-                    server.setCollectorDataUnit(allCollectorDataUnits);
+                    server.setCollectorDataUnits(allCollectorDataUnits);
                 }
 
                 //lementjük az adatbázisba a szerver megváltozott állapotát

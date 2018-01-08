@@ -18,6 +18,7 @@ import hu.btsoft.gfmon.engine.monitor.collector.types.ValueUnitType;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
@@ -55,12 +56,14 @@ public abstract class CollectorBase implements ICollectMonitoredData {
 
     /**
      * A REST válaszokból kinyeri az értékeket
+     * Csak a collectedDatatNames halmazban szereplő adatnevekkel foglalkozunk
      *
-     * @param entities JSon entitás
+     * @param entities            JSon entitás
+     * @param collectedDatatNames kigyűjtendő adatnevek halmaza
      *
      * @return értékek listája
      */
-    protected List<MonitorValueDto> fetchValues(JsonObject entities) {
+    protected List<MonitorValueDto> fetchValues(JsonObject entities, Set<String> collectedDatatNames) {
 
         if (entities == null) {
             return null;
@@ -71,6 +74,12 @@ public abstract class CollectorBase implements ICollectMonitoredData {
         //Végigmegyünk az entitásokon
         for (String entityName : entities.keySet()) {
             JsonObject jsonValueEntity = entities.getJsonObject(entityName);
+
+            //Leszedjük az adatnevet és megvizsgáljuk, hogy kell-e gyűjteni egyáltalán ezt az adatnév értéket?
+            String dataName = jsonValueEntity.getJsonString("name").getString();
+            if (!collectedDatatNames.contains(dataName)) {
+                continue;
+            }
 
             String unitName = jsonValueEntity.getJsonString("unit").getString();
             if (unitName == null) {
@@ -91,9 +100,8 @@ public abstract class CollectorBase implements ICollectMonitoredData {
 
             dto.setUnit(valueUnitType);
             dto.setLastSampleTime(long2Date(jsonValueEntity.getJsonNumber("lastsampletime").longValue()));
-            dto.setName(jsonValueEntity.getJsonString("name").getString());
+            dto.setName(dataName);
             dto.setStartTime(long2Date(jsonValueEntity.getJsonNumber("starttime").longValue()));
-//          dto.setDescription(entity.getJsonString("description").getString());
             dto.setPath(getPath());
 
             //Érték típushelyes leszedése
@@ -134,21 +142,28 @@ public abstract class CollectorBase implements ICollectMonitoredData {
     /**
      * REST JSon monitor adatok összegyűjtése
      *
-     * @param restDataCollector REST adatgyűjtó példány
-     * @param simpleUrl         a szerver url-je
-     * @param sessionToken      GF session token
+     * @param restDataCollector   REST adatgyűjtó példány
+     * @param simpleUrl           a szerver url-je
+     * @param sessionToken        GF session token
+     * @param collectedDatatNames kigyűjtendő adatnevek halmaza
      *
      * @return Json entitás - értékek Lista
      */
     @Override
-    public List<MonitorValueDto> execute(RestDataCollector restDataCollector, String simpleUrl, String sessionToken) {
+    public List<MonitorValueDto> execute(RestDataCollector restDataCollector, String simpleUrl, String sessionToken, Set<String> collectedDatatNames) {
+
+        //Ha nem kell ebből az adatgyűjtőből semmi adat, akkor meg sem hívjuk;
+        if (collectedDatatNames == null) {
+            return null;
+        }
 
         Response response = restDataCollector.getMonitorResponse(getPath(), simpleUrl, sessionToken);
         JsonObject entities = restDataCollector.getJsonEntities(response);
 
-        return this.fetchValues(entities);
+        return this.fetchValues(entities, collectedDatatNames);
     }
 
+//<editor-fold defaultstate="collapsed" desc="Adatnevek + mértékegysége + leírás kigyűjtése">
     /**
      * A REST válaszokból kinyeri az adatneveket és leírásukat
      *
@@ -198,5 +213,5 @@ public abstract class CollectorBase implements ICollectMonitoredData {
 
         return this.fetchDataUnits(entities);
     }
-
+//</editor-fold>
 }

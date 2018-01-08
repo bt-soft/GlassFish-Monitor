@@ -17,9 +17,11 @@ import hu.btsoft.gfmon.corelib.model.entity.snapshot.SnapshotBase;
 import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.monitor.collector.MonitorValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -88,11 +90,25 @@ public class SnapshotProvider {
 
         Set<SnapshotBase> snapshots = null;
 
-        //Kigyűjtjük a szerver beállításaiban található monitorozandó path-okat
-        //Majd ezzel tudjuk eldönteni, hogy egy kolektort meg kell-e hívni egyáltalán
+        //Kigyűjtjük a szerver beállításaiban található monitorozandó path-okat és adatneveket
+        //
+        //A path-al tudjuk eldönteni, hogy egy kolektort egyáltalán meg kell-e hívni?
         Set<String> serverMonitorablePaths = new HashSet<>();
-        server.getCollectorDataUnit().forEach((cu) -> {
-            serverMonitorablePaths.add(cu.getRestPath());
+
+        //Az egyes Path-ok alatti adatnevek halmaza, ezzel az adaott kollektor munkáját tudjuk szűkíteni
+        Map<String, Set<String>> collectedDatatNamesMap = new HashMap<>();
+
+        server.getCollectorDataUnits().forEach((collectorDataUnit) -> {
+
+            //A kollektorok Path-jai
+            String path = collectorDataUnit.getRestPath();
+            serverMonitorablePaths.add(path);
+
+            if (!collectedDatatNamesMap.containsKey(path)) {
+                collectedDatatNamesMap.put(path, new HashSet<>());
+            }
+            Set<String> collectedDatatNames = collectedDatatNamesMap.get(path);
+            collectedDatatNames.add(collectorDataUnit.getDataName());
         });
 
         //Végigmegyünk az összes adatgyűjtőn
@@ -103,8 +119,11 @@ public class SnapshotProvider {
                 continue;
             }
 
+            //Gyűjtendő adatnevek halmaza
+            Set<String> collectedDatatNames = collectedDatatNamesMap.get(collector.getPath());
+
             //Az adott kollektor adatainak lekérése
-            List<MonitorValueDto> valuesList = collector.execute(restDataCollector, server.getSimpleUrl(), server.getSessionToken());
+            List<MonitorValueDto> valuesList = collector.execute(restDataCollector, server.getSimpleUrl(), server.getSessionToken(), collectedDatatNames);
 
             //Üres a mért eredmények Map-je
             if (valuesList == null || valuesList.isEmpty()) {
