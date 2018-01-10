@@ -24,6 +24,7 @@ import javax.faces.view.ViewScoped;
 import javax.inject.Named;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.primefaces.event.CellEditEvent;
 
 /**
@@ -32,6 +33,7 @@ import org.primefaces.event.CellEditEvent;
  */
 @Named(value = "collectorSettingsView")
 @ViewScoped
+@Slf4j
 public class CollectorSettingsView extends ViewBase {
 
     @EJB

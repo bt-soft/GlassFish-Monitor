@@ -99,6 +99,10 @@
 
                              multiViewState="false"
 
+                             selectionMode="single"
+                             editable="true"
+                             editMode="cell"
+
                              rowIndexVar="rowNdx"
                              rowKey="#{joiner.collectorDataUnitId}"
 
@@ -118,8 +122,14 @@
                               style="width: 4em"
                               >
                         <p:cellEditor>
-                            <f:facet name="output"><p:selectBooleanCheckbox value="#{joiner.active}"/></f:facet>
-                            <f:facet name="input"><p:selectBooleanCheckbox value="#{joiner.active}" immediate="true"/></f:facet>
+                            <f:facet name="output">
+                                <p:selectBooleanCheckbox value="#{joiner.active}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <h:inputHidden value="#{joiner.active}" />
+                                <h:selectBooleanCheckbox value="#{joiner.active}" onclick="$(this).prev().val(this.checked)" />
+                            </f:facet>
+
                         </p:cellEditor>
                     </p:column>
 
