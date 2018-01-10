@@ -94,8 +94,6 @@ public class ServerService extends ServiceBase<Server> {
                 em.merge(cdu);
             });
         }
-
-        int a = 1;
     }
 
     /**
