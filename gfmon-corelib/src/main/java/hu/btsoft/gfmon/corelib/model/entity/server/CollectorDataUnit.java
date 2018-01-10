@@ -26,12 +26,7 @@ import javax.persistence.InheritanceType;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.PostLoad;
-import javax.persistence.PostUpdate;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -66,8 +61,8 @@ import org.eclipse.persistence.annotations.Customizer;
     @NamedQuery(name = "CollectorDataUnit.findAll", query = "SELECT cdu from CollectorDataUnit cdu ORDER BY cdu.restPath, cdu.dataName"),//
     @NamedQuery(name = "CollectorDataUnit.findAllPaths", query = "SELECT cdu.restPath from CollectorDataUnit cdu GROUP BY cdu.restPath ORDER BY cdu.restPath, cdu.dataName"),//
     @NamedQuery(name = "CollectorDataUnit.findByPath", query = "SELECT cdu from CollectorDataUnit cdu WHERE cdu.restPath = :restPath ORDER BY cdu.dataName"),//
-    @NamedQuery(name = "CollectorDataUnit.findByServerId", query = "SELECT cdu from CollectorDataUnit cdu INNER JOIN cdu.serverCollDataUnitJoiners j WHERE  j.pk.server.id = :serverId ORDER BY cdu.restPath, cdu.dataName"),//
-    @NamedQuery(name = "CollectorDataUnit.findByActiveAndServerId", query = "SELECT cdu from CollectorDataUnit cdu INNER JOIN cdu.serverCollDataUnitJoiners j WHERE j.active = 1 AND j.pk.server.id = :serverId ORDER BY cdu.restPath, cdu.dataName"),//
+    @NamedQuery(name = "CollectorDataUnit.findByServerId", query = "SELECT cdu from CollectorDataUnit cdu INNER JOIN cdu.joiners j WHERE  j.serverId = :serverId ORDER BY cdu.restPath, cdu.dataName"),//
+    @NamedQuery(name = "CollectorDataUnit.findByActiveAndServerId", query = "SELECT cdu from CollectorDataUnit cdu INNER JOIN cdu.joiners j WHERE j.active = true AND j.serverId = :serverId ORDER BY cdu.restPath, cdu.dataName"),//
 })
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @Data
@@ -82,7 +77,7 @@ public class CollectorDataUnit extends EntityBase {
      */
     @ColumnPosition(position = 20)
     @NotNull(message = "A restPath nem lehet null")
-    @Column(length = 50)
+    @Column(length = 50, nullable = false)
     private String restPath;
 
     /**
@@ -90,7 +85,7 @@ public class CollectorDataUnit extends EntityBase {
      */
     @ColumnPosition(position = 21)
     @NotNull(message = "Az entityName nem lehet null")
-    @Column(length = 50)
+    @Column(length = 50, nullable = false)
     private String entityName;
 
     /**
@@ -98,7 +93,7 @@ public class CollectorDataUnit extends EntityBase {
      */
     @ColumnPosition(position = 22)
     @NotNull(message = "A name nem lehet null")
-    @Column(length = 50)
+    @Column(length = 50, nullable = false)
     private String dataName;
 
     /**
@@ -106,7 +101,7 @@ public class CollectorDataUnit extends EntityBase {
      */
     @ColumnPosition(position = 23)
     @NotNull(message = "Az unit nem lehet null")
-    @Column(length = 15)
+    @Column(length = 15, nullable = false)
     private String unit;
 
     /**
@@ -114,66 +109,29 @@ public class CollectorDataUnit extends EntityBase {
      */
     @ColumnPosition(position = 24)
     @NotNull(message = "A description nem lehet null")
-    @Column(length = 512)
+    @Column(length = 512, nullable = false)
     private String description;
 
     /**
      * A visszairány a szerverhez
      */
-    @OneToMany(mappedBy = "pk.collectorDataUnit", fetch = FetchType.LAZY)
-    private List<ServerCollDataUnitJoiner> serverCollDataUnitJoiners;
-
-    /**
-     * Az adott szerver esetén aktív?
-     * Nem mentjük az adatbázisba, itt csak runtime értékként használjuk, a ServerCollDataUnitJoiner entitásban van az adott szerverhez rendelve!
-     *
-     * A flag kezelése:
-     * - Itt az entitás @PostLoad/@PostUpdate JPA életciklus metódusában
-     * - A ServerCollDataUnitJoiner join entitás @PostLoad/@PostUpdate JPA életciklus metódusában
-     */
-    @Transient
-    private Boolean active;
+    @OneToMany(mappedBy = "collectorDataUnit", fetch = FetchType.LAZY)
+    private List<ServerCollDataUnitJoiner> joiners;
 
     /**
      * Konstruktor
      *
-     * @param restPath    path, ahol szerepel az adatnév
-     * @param entityName  entitás neve, ami használja
+     * @param restPath    REST path, ahol szerepel a mért adatnév
+     * @param entityName  JPA entitás neve, ami használja ezt az adatevet (ez lehet, hogy nem is kellene...)
      * @param dataName    adatnév
      * @param unit        mértékegység
      * @param description leírás
-     * @param active      aktiv?
      */
-    public CollectorDataUnit(String restPath, String entityName, String dataName, String unit, String description, Boolean active) {
+    public CollectorDataUnit(String restPath, String entityName, String dataName, String unit, String description) {
         this.restPath = restPath;
         this.entityName = entityName;
         this.dataName = dataName;
         this.unit = unit;
         this.description = description;
-        this.active = active;
     }
-
-    /**
-     * A mentés előtt beállítjuk az active adatot, ha szükséges
-     *
-     */
-    @PrePersist
-    @PreUpdate
-    protected void pre() {
-        if (this.active == null) {
-            this.active = Boolean.TRUE;
-        }
-    }
-
-    /**
-     * Felolvasás után beállítjuk az active adatot, ha szükséges
-     */
-    @PostLoad
-    @PostUpdate
-    protected void post() {
-        if (this.active == null) {
-            this.active = Boolean.TRUE;
-        }
-    }
-
 }

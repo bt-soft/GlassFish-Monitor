@@ -11,30 +11,28 @@
  */
 package hu.btsoft.gfmon.corelib.model.entity.server;
 
-import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
-import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import java.io.Serializable;
-import javax.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.eclipse.persistence.annotations.Customizer;
 
 /**
- * Kompozik elsődleges kulcs begyazható JPA osztály
+ * Kompozik elsődleges kulcs a SERVER_COLLDATA_UNIT táblához
  *
  * @author BT
  */
-@Embeddable
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@Customizer(EntityColumnPositionCustomizer.class)
 public class ServerCollDataUnitJoinerPK implements Serializable {
 
-    @ColumnPosition(position = 20)
-    private Server server;
+    /**
+     * Server ID
+     */
+    private Long serverId;
 
-    @ColumnPosition(position = 21)
-    private CollectorDataUnit collectorDataUnit;
+    /**
+     * CDU ID
+     */
+    private Long collectorDataUnitId;
 }

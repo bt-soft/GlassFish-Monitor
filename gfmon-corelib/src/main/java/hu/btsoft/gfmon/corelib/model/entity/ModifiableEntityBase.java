@@ -26,6 +26,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.persistence.annotations.Customizer;
 
 /**
@@ -36,6 +37,7 @@ import org.eclipse.persistence.annotations.Customizer;
 @MappedSuperclass
 @Data
 @EqualsAndHashCode(callSuper = false)
+@ToString(callSuper = true)
 @Customizer(EntityColumnPositionCustomizer.class)
 public class ModifiableEntityBase extends EntityBase {
 
@@ -56,11 +58,6 @@ public class ModifiableEntityBase extends EntityBase {
     private String createdBy;
 
     /**
-     * A létrehozás ideje
-     */
-    //A létrehozás ideje az EntityBase osztályban
-//
-    /**
      * A módosítás ideje
      */
     @Column(name = "MODIFIED_DATE", nullable = true)
@@ -72,7 +69,6 @@ public class ModifiableEntityBase extends EntityBase {
      * Módosító user
      */
     @Size(min = 1, max = 30, message = "A modifiedBy 1-30 hosszú lehet")
-    //@NotNull(message = "A modifiedBy nem lehet null")
     @Column(name = "MODIFIED_BY", nullable = true)
     @ColumnPosition(position = 103)
     private String modifiedBy;

@@ -19,10 +19,12 @@ import java.util.Objects;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Named;
 import lombok.Getter;
 import lombok.Setter;
+import org.primefaces.event.CellEditEvent;
 
 /**
  *
@@ -52,22 +54,10 @@ public class CollectorSettingsView extends ViewBase {
     @PostConstruct
     protected void init() {
         servers = serverService.findAll();
-        selectedServer = servers.get(0); //kiválasztjuk az elsőt
-        selectedServerId = selectedServer.getId();
-    }
-
-    /**
-     * A kiválasztott szerver összes cdu adatának aktív flagjának állítgatása
-     *
-     * @param newActiveFlag 'true'/'false'
-     */
-    public void allActiveFlagSetter(boolean newActiveFlag) {
-
-        selectedServer.getCollectorDataUnits()
-                .stream()
-                .forEach((cdu) -> {
-                    cdu.setActive(newActiveFlag);
-                });
+        if (servers != null && !servers.isEmpty()) {
+            selectedServer = servers.get(0); //kiválasztjuk az elsőt
+            selectedServerId = selectedServer.getId();
+        }
     }
 
     /**
@@ -82,14 +72,38 @@ public class CollectorSettingsView extends ViewBase {
     }
 
     /**
+     * A kiválasztott szerver összes cdu adatának aktív flagjának állítgatása
+     *
+     * @param newActiveFlag 'true'/'false'
+     */
+    public void allActiveFlagSetter(boolean newActiveFlag) {
+
+        selectedServer.getJoiners()
+                .forEach((joiner) -> {
+                    joiner.setActive(newActiveFlag);
+                });
+    }
+
+    public void onCellEdit(CellEditEvent event) {
+        Object oldValue = event.getOldValue();
+        Object newValue = event.getNewValue();
+
+        if (newValue != null && !newValue.equals(oldValue)) {
+            FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Cell Changed", "Old: " + oldValue + ", New:" + newValue);
+            FacesContext.getCurrentInstance().addMessage(null, msg);
+        }
+    }
+
+    /**
      * Beállítások mentése
      */
     public void saveSettings() {
 
-        servers.stream().forEach((server) -> {
+        servers.forEach((server) -> {
             serverService.save(server, currentUser);
         });
 
         addJsfMessage("growl", FacesMessage.SEVERITY_INFO, "Adatbázisba mentés OK");
     }
+
 }

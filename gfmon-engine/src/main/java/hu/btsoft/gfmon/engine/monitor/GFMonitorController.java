@@ -257,8 +257,8 @@ public class GFMonitorController {
 
         //Végigmegyünk az összes adatneven és jól beírjuk az adatbázisba őket
         for (DataUnitDto dto : dataUnits) {
-            CollectorDataUnit dcu = new CollectorDataUnit(dto.getRestPath(), dto.getEntityName(), dto.getDataName(), dto.getUnit(), dto.getDescription(), Boolean.TRUE);
-            collectorDataUnitService.save(dcu, DB_MODIFICATORY_USER);
+            CollectorDataUnit cdu = new CollectorDataUnit(dto.getRestPath(), dto.getEntityName(), dto.getDataName(), dto.getUnit(), dto.getDescription());
+            collectorDataUnitService.save(cdu, DB_MODIFICATORY_USER);
         }
 
         log.info("Adatnevek felépítése OK, adatnevek: {}db, elapsed: {}", dataUnits.size(), Elapsed.getNanoStr(start));
@@ -313,9 +313,9 @@ public class GFMonitorController {
 
                 //Az első indításkort még nem tudjuk, hogy a GF példányról milyen patháon milyen adatneveket lehet gyűjteni
                 //Emiatt a DefaultConfigCreator-ban létrehozott szervereknél itt kapcsoljuk be a gyűjtendő adatneveket
-                if (server.getCollectorDataUnits() == null || server.getCollectorDataUnits().isEmpty()) {
+                if (server.getJoiners() == null || server.getJoiners().isEmpty()) {
                     //Mindent mérjünk rajta!
-                    serverService.addDefaultAllCollectorDataUnits(server);
+                    serverService.addDefaultAllCollectorDataUnits(server, DB_MODIFICATORY_USER);
                 }
 
                 //lementjük az adatbázisba a szerver megváltozott állapotát

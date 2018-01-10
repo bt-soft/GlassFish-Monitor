@@ -14,22 +14,25 @@ package hu.btsoft.gfmon.corelib.model.entity.server;
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
-import hu.btsoft.gfmon.corelib.model.entity.EntityBase;
-import javax.persistence.AssociationOverride;
-import javax.persistence.AssociationOverrides;
-import javax.persistence.Embedded;
+import java.io.Serializable;
+import java.util.Date;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
-import javax.persistence.PostLoad;
-import javax.persistence.PostUpdate;
+import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import org.eclipse.persistence.annotations.Customizer;
 
 /**
@@ -39,92 +42,129 @@ import org.eclipse.persistence.annotations.Customizer;
  */
 @Entity
 @Table(name = "SERVER_COLLDATA_UNIT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
-@AssociationOverrides({
-    @AssociationOverride(name = "pk.server", joinColumns = @JoinColumn(name = "SERVER_ID", referencedColumnName = "ID")),
-    @AssociationOverride(name = "pk.collectorDataUnit", joinColumns = @JoinColumn(name = "COLLECTORDATAUNIT_ID", referencedColumnName = "ID"))
-})
 @Data
-@EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-public class ServerCollDataUnitJoiner extends EntityBase {
+@IdClass(ServerCollDataUnitJoinerPK.class)
+public class ServerCollDataUnitJoiner implements Serializable {
 
-    /**
-     * Kompozik elsődleges kulcs
-     */
-    @Embedded
-    private ServerCollDataUnitJoinerPK pk;
+    @Id
+    @Column(name = "SERVER_ID", insertable = false, updatable = false)
+    @ColumnPosition(position = 1)
+    private Long serverId;
+
+    @Id
+    @Column(name = "COLLECTORDATAUNIT_ID", insertable = false, updatable = false)
+    @ColumnPosition(position = 2)
+    private Long collectorDataUnitId;
 
     /**
      * Az adott szerveren aktív az adatnév gyűjtése?
      */
     @NotNull(message = "Az active nem lehet null")
-    @ColumnPosition(position = 30)
+    @Column(name = "ACTIVE", nullable = false)
+    @ColumnPosition(position = 3)
     private Boolean active;
+
+    /**
+     * Szerver
+     */
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "SERVER_ID", referencedColumnName = "ID")
+    private Server server;
+
+    /**
+     * CDU
+     */
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "COLLECTORDATAUNIT_ID", referencedColumnName = "ID")
+    private CollectorDataUnit collectorDataUnit;
+
+    /**
+     * A létrehozás dátuma és ideje
+     */
+    @NotNull(message = "A createdDate nem lehet null")
+    @Column(name = "CREATED_DATE", nullable = false, updatable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    @ColumnPosition(position = 100)
+    private Date createdDate;
+
+    /**
+     * Létrehozó user
+     */
+    @Size(min = 1, max = 30, message = "A createdBy 1-30 hosszú lehet")
+    @NotNull(message = "A createdBy nem lehet null")
+    @Column(name = "CREATED_BY", nullable = false, updatable = false)
+    @ColumnPosition(position = 101)
+    private String createdBy;
+
+    /**
+     * A módosítás ideje
+     */
+    @Column(name = "MODIFIED_DATE", nullable = true)
+    @Temporal(TemporalType.TIMESTAMP)
+    @ColumnPosition(position = 102)
+    private Date modifiedDate;
+
+    /**
+     * Módosító user
+     */
+    @Size(min = 1, max = 30, message = "A modifiedBy 1-30 hosszú lehet")
+    @Column(name = "MODIFIED_BY", nullable = true)
+    @ColumnPosition(position = 103)
+    private String modifiedBy;
+
+    /**
+     * JPA optimista lock
+     */
+    @Version
+    @Column(name = "Version", columnDefinition = "Integer DEFAULT 0", nullable = false)
+    @ColumnPosition(position = 200)
+    private Long optLockVersion;
 
     /**
      * Konstruktor
      *
-     * @param server            szerver entitás példány
-     * @param collectorDataUnit CDU entitás példány
+     * @param server            szerver
+     * @param collectorDataUnit a szerver CDU-ja
+     * @param createdBy         létrehozó user
+     * @param active            aktív az adott szerveren a CDU?
      */
-    public ServerCollDataUnitJoiner(Server server, CollectorDataUnit collectorDataUnit) {
-        this.pk = new ServerCollDataUnitJoinerPK(server, collectorDataUnit);
-        this.active = collectorDataUnit.getActive();
+    public ServerCollDataUnitJoiner(Server server, CollectorDataUnit collectorDataUnit, String createdBy, Boolean active) {
+        this.server = server;
+        this.collectorDataUnit = collectorDataUnit;
+        this.createdBy = createdBy;
+        this.active = active;
     }
 
     /**
-     * Szerver elkérése
-     *
-     * @return szerver entitás
-     */
-    public Server getServer() {
-        return pk.getServer();
-    }
-
-    /**
-     * Szerver beállítása
-     *
-     * @param server szerver entitás
-     */
-    public void setServer(Server server) {
-        pk.setServer(server);
-    }
-
-    /**
-     * CDU entitás elkérése
-     *
-     * @return CDU entitás
-     */
-    public CollectorDataUnit getCollectorDataUnit() {
-        return pk.getCollectorDataUnit();
-    }
-
-    /**
-     * CDU entitás beállítása
-     *
-     * @param collectorDataUnit CDU entitás
-     */
-    public void setCollectorDataUnit(CollectorDataUnit collectorDataUnit) {
-        pk.setCollectorDataUnit(collectorDataUnit);
-    }
-
-    /**
-     * A mentés előtt a CDU entitás active Transient mezőjéből állítjuk be az aktív mezőt
+     * Technikai mezők karbantartása - új entitás mentése
      */
     @PrePersist
-    @PreUpdate
-    protected void pre() {
-        this.active = pk.getCollectorDataUnit().getActive();
+    protected void prePersist() {
+        //A createdDate kitöltése, ha üres
+        if (createdDate == null) {
+            createdDate = new Date();
+        }
+
+        //createdBy kitöltése, ha üres
+        if (createdBy == null) {
+            createdBy = "!Unknown User!";
+        }
     }
 
     /**
-     * A CDU entitás active Transient mezőjét itt állítjuk be a felolvasás után
+     * Technikai mezők karbantartása - entitás update
      */
-    @PostLoad
-    @PostUpdate
-    protected void post() {
-        pk.getCollectorDataUnit().setActive(this.active);
+    @PreUpdate
+    protected void preUpdate() {
+        //ModDat kitöltése, ha üres
+        if (modifiedDate == null) {
+            modifiedDate = new Date();
+        }
+        //ModUser kitöltése, ha üres
+        if (modifiedBy == null) {
+            modifiedBy = "!Unknown User!";
+        }
     }
 }

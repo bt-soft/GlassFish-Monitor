@@ -190,26 +190,25 @@ public class SettingsView extends ViewBase {
         }
         try {
             //Config mentése
-            configs/*.stream()*/
-                    .forEach((Config config) -> {
-                        configService.save(config, currentUser);
-                    });
+            configs.forEach((Config config) -> {
+                configService.save(config, currentUser);
+            });
 
             //Szerverek mentése
-            servers/*.stream()*/
-                    .forEach((Server server) -> {
-                        //Beállítjuk a mérendő adatok listáját
-                        if (server.getCollectorDataUnits() == null || server.getCollectorDataUnits().isEmpty()) {
-                            //Default esetben mindent mérjünk rajta!
-                            serverService.addDefaultAllCollectorDataUnits(server);
-                        }
-                        //A JSF "" string lecserélése null-ra
-                        if (StringUtils.isEmpty(server.getUserName())) {
-                            server.setUserName(null);
-                            server.setPlainPassword(null);
-                        }
-                        serverService.save(server, currentUser);
-                    });
+            servers.forEach((Server server) -> {
+                //A JSF "" string lecserélése null-ra
+                if (StringUtils.isEmpty(server.getUserName())) {
+                    server.setUserName(null);
+                    server.setPlainPassword(null);
+                }
+
+                //Beállítjuk a mérendő adatok listáját
+                if (server.getJoiners() == null || server.getJoiners().isEmpty()) {
+                    //Default esetben mindent mérjünk rajta!
+                    serverService.addDefaultAllCollectorDataUnits(server, currentUser);
+                }
+                serverService.save(server, currentUser);
+            });
 
             //Újra betöltünk mindent
             clearAll();

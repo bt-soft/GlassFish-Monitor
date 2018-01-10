@@ -172,13 +172,23 @@ public abstract class ServiceBase<T extends EntityBase> {
     }
 
     /**
+     * Entitás betöltése az adatbázisból
+     * (Ha a memóriában entitásban változás történt, akor az most elveszik, az adatbázis állapota lesz a nyerő)
+     *
+     * @param entiy entitás példány
+     */
+    public void refresh(T entiy) {
+        getEntityManager().refresh(entiy);
+    }
+
+    /**
      * Entitás keresése
      *
      * @param id entitás kulcsa
      *
      * @return entitás példány
      */
-    public T find(Object id) {
+    public T find(Long id) {
         return getEntityManager().find(entityClass, id);
     }
 

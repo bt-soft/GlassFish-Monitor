@@ -89,10 +89,10 @@
                 </p:panel>
 
                 <p:dataTable id="cdusTable"
-                             widgetVar="serverCdusTable"
+                             widgetVar="cdusTable"
 
-                             value="#{collectorSettingsView.selectedServer.collectorDataUnits}"
-                             var="serverCdu"
+                             value="#{collectorSettingsView.selectedServer.joiners}"
+                             var="joiner"
 
                              scrollable="true"
                              scrollHeight="500"
@@ -100,11 +100,12 @@
                              multiViewState="false"
 
                              rowIndexVar="rowNdx"
-                             rowKey="#{serverCdu.id}"
+                             rowKey="#{joiner.collectorDataUnitId}"
 
                              emptyMessage="Nincs Adat"
                              >
 
+                    <p:ajax event="cellEdit" listener="#{collectorSettingsView.onCellEdit}" update="cdusTable :growl" />
 
                     <p:column headerText="No#"
                               styleClass="alignCenter"
@@ -117,62 +118,54 @@
                               style="width: 4em"
                               >
                         <p:cellEditor>
-                            <f:facet name="output"><p:selectBooleanCheckbox value="#{serverCdu.active}"/></f:facet>
-                            <f:facet name="input"><p:selectBooleanCheckbox value="#{serverCdu.active}"/></f:facet>
+                            <f:facet name="output"><p:selectBooleanCheckbox value="#{joiner.active}"/></f:facet>
+                            <f:facet name="input"><p:selectBooleanCheckbox value="#{joiner.active}" immediate="true"/></f:facet>
                         </p:cellEditor>
                     </p:column>
-
-                    <!--
-                    <p:column headerText="dbId"
-                              style="width: 4em"
-                              rendered="#{isDeveloperMode}">
-                        <h:outputText value="#{serverCdu.id}" />
-                    </p:column>
-                    -->
 
                     <p:column headerText="srvId"
                               style="width: 4em"
                               rendered="#{isDeveloperMode}">
-                        <h:outputText value="#{collectorSettingsView.selectedServer.id}" />
+                        <h:outputText value="#{joiner.server.id}" />
                     </p:column>
 
                     <p:column headerText="restPath"
                               style="width: 20em"
-                              sortBy="#{serverCdu.restPath}"
-                              filterBy="#{serverCdu.restPath}"
+                              sortBy="#{joiner.collectorDataUnit.restPath}"
+                              filterBy="#{joiner.collectorDataUnit.restPath}"
                               filterStyle="width: 10em; font-size: 0.6em"
                               filterMatchMode="contains"
                               >
-                        <h:outputText value="#{serverCdu.restPath}" />
+                        <h:outputText value="#{joiner.collectorDataUnit.restPath}" />
                     </p:column>
 
                     <!--
                     <p:column headerText="entityName"
                               style="width: 15em"
                               rendered="#{isDeveloperMode}">
-                        <h:outputText value="#{serverCdu.entityName}" />
+                        <h:outputText value="#{joiner.collectorDataUnit.entityName}" />
                     </p:column>
                     -->
 
                     <p:column headerText="dataName"
                               style="width: 15em"
-                              sortBy="#{serverCdu.dataName}"
-                              filterBy="#{serverCdu.dataName}"
+                              sortBy="#{joiner.collectorDataUnit.dataName}"
+                              filterBy="#{joiner.collectorDataUnit.dataName}"
                               filterStyle="width: 10em; font-size: 0.6em"
                               filterMatchMode="contains"
                               >
-                        <h:outputText value="#{serverCdu.dataName}" />
+                        <h:outputText value="#{joiner.collectorDataUnit.dataName}" />
                     </p:column>
 
                     <p:column headerText="unit"
                               style="width: 6em"
-                              sortBy="#{serverCdu.unit}"
+                              sortBy="#{joiner.collectorDataUnit.unit}"
                               >
-                        <h:outputText value="#{serverCdu.unit}" />
+                        <h:outputText value="#{joiner.collectorDataUnit.unit}" />
                     </p:column>
 
                     <p:column headerText="description">
-                        <h:outputText value="#{serverCdu.description}" />
+                        <h:outputText value="#{joiner.collectorDataUnit.description}" />
                     </p:column>
                 </p:dataTable>
             </h:form>

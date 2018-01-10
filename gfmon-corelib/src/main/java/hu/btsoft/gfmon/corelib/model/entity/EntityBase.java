@@ -48,7 +48,6 @@ public class EntityBase implements Serializable {
     @NotNull(message = "Az ID nem lehet null")
     @Column(name = "ID", nullable = false, updatable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
-    //    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gfMonSeq")
     @SequenceGenerator(name = "gfMonSeq", sequenceName = "GFMON_SEQ")
     @ColumnPosition(position = 0)
     private Long id;

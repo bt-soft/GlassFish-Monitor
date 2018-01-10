@@ -14,6 +14,8 @@ package hu.btsoft.gfmon.corelib.model.service;
 import hu.btsoft.gfmon.corelib.model.RuntimeSequenceGenerator;
 import hu.btsoft.gfmon.corelib.model.entity.server.CollectorDataUnit;
 import hu.btsoft.gfmon.corelib.model.entity.server.Server;
+import hu.btsoft.gfmon.corelib.model.entity.server.ServerCollDataUnitJoiner;
+import java.util.LinkedList;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -58,17 +60,42 @@ public class ServerService extends ServiceBase<Server> {
     /**
      * Az összes ismert DataCollectorUnit hozzáadása a aszerverhez
      *
-     * @param server szerver példány
+     * @param server    szerver példány
+     * @param createdBy létrehozó user
      */
-    public void addDefaultAllCollectorDataUnits(Server server) {
-        //Ha még nincs definálva semmi, akkor mindent mérünk rajta
-        if (server.getCollectorDataUnits() == null || server.getCollectorDataUnits().isEmpty()) {
-            List<CollectorDataUnit> allCollectorDataUnits = collectorDataUnitService.findAll();
-            if (allCollectorDataUnits != null && !allCollectorDataUnits.isEmpty()) {
-                //Hozzáadjuk az összes DataUnit-et egy Join tábla segítségével
-                server.setCollectorDataUnits(allCollectorDataUnits);
+    public void addDefaultAllCollectorDataUnits(Server server, String createdBy) {
+
+        List<CollectorDataUnit> allCdus = collectorDataUnitService.findAll();
+
+        if (allCdus != null && !allCdus.isEmpty()) {
+
+            //Ha zsír új a szerver (pl.: GUI felületen újonnan vették fel), akkor most jól lementjük,
+            // hogy a kapcolótáblát fel tudjuk építeni
+            if (server.getId() == null) {
+                if (server.getJoiners() == null) {
+                    server.setJoiners(new LinkedList<>());
+                }
+                super.save(server, createdBy);
             }
+
+            //Hozzáadjuk az összes DataUnit-et egy Join tábla segítségével, default esetben minden CDU aktív
+            allCdus.forEach((cdu) -> {
+
+                //Létrehozuk a kapcsolótábla entitását
+                ServerCollDataUnitJoiner joiner = new ServerCollDataUnitJoiner(server, cdu, createdBy, Boolean.TRUE);
+                em.persist(joiner);
+
+                //Behuzalozzuk aszerverbe és le is mentjük
+                server.getJoiners().add(joiner);
+                em.merge(server);
+
+                //behuzalozzuk a CDU-ba és le is mentjük
+                cdu.getJoiners().add(joiner);
+                em.merge(cdu);
+            });
         }
+
+        int a = 1;
     }
 
     /**

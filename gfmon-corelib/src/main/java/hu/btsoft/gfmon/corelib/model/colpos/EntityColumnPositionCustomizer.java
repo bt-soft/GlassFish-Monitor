@@ -60,7 +60,6 @@ public class EntityColumnPositionCustomizer implements DescriptorCustomizer {
         mappings.forEach((mapping) -> {
             String key = mapping.getAttributeName();
             Object obj = fieldOrderMap.get(key);
-//            int weight = 1;
             int weight = Integer.MAX_VALUE;
             if (obj != null) {
                 weight = Integer.parseInt(obj.toString());

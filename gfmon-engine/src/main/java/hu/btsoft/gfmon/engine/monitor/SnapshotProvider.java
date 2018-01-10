@@ -12,6 +12,7 @@
 package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.model.dto.DataUnitDto;
+import hu.btsoft.gfmon.corelib.model.entity.server.CollectorDataUnit;
 import hu.btsoft.gfmon.corelib.model.entity.server.Server;
 import hu.btsoft.gfmon.corelib.model.entity.snapshot.SnapshotBase;
 import hu.btsoft.gfmon.corelib.time.Elapsed;
@@ -22,6 +23,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -98,11 +100,13 @@ public class SnapshotProvider {
         //Az egyes Path-ok alatti adatnevek halmaza, ezzel az adott kollektor munkáját tudjuk szűkíteni
         Map<String, Set<String>> collectedDatatNamesMap = new HashMap<>();
 
-        if (server.getCollectorDataUnits() != null) {
-            server.getCollectorDataUnits().forEach((cdu) -> {
+        if (server.getJoiners() != null) {
+            server.getJoiners().forEach((joiner) -> {
+
+                CollectorDataUnit dcu = joiner.getCollectorDataUnit();
 
                 //A kollektorok Path-jai
-                String path = cdu.getRestPath();
+                String path = dcu.getRestPath();
                 serverMonitorablePaths.add(path);
 
                 if (!collectedDatatNamesMap.containsKey(path)) {
@@ -111,12 +115,20 @@ public class SnapshotProvider {
                 Set<String> collectedDatatNames = collectedDatatNamesMap.get(path);
 
                 //Ha kell gyűjteni az adatnevet, akkor megjegyezzük
-                if (cdu.getActive()) {
-                    collectedDatatNames.add(cdu.getDataName());
+                if (Objects.equals(Boolean.TRUE, joiner.getActive())) {
+                    collectedDatatNames.add(dcu.getDataName());
                 }
             });
         }
 
+//
+//        StreamSupport.stream(this.dataCollectors.spliterator(), false)
+//                .filter(collector -> serverMonitorablePaths.contains(collector.getPath()))
+//                .map(collector -> collector.execute(restDataCollector, server.getSimpleUrl(), server.getSessionToken(), collectedDatatNamesMap.get(collector.getPath())))
+//                .map(valuesList -> (List<MonitorValueDto>)valuesList)
+//                .filter(list -> list != null && !list.isEmpty())
+//
+//
         //Végigmegyünk az összes adatgyűjtőn
         for (ICollectMonitoredData collector : dataCollectors) {
 
