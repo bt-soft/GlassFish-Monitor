@@ -67,7 +67,7 @@ import org.eclipse.persistence.annotations.Customizer;
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @Data
 @ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = "joiners")
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
 public class CollectorDataUnit extends EntityBase {
