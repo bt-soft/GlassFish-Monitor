@@ -184,3 +184,11 @@ root {
 }
 .viewDlgTblValue{
 }
+
+
+/** --- DataTable ---------------------------------------------------------------------------------------------------------------------------------*/
+/* filter a header text után */
+.ui-datatable th .ui-column-filter {
+    display: inline;
+    margin-left: 0.5em;
+}

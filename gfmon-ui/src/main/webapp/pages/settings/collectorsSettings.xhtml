@@ -35,46 +35,147 @@
         <bt:disablePanel disabled="#{not isAdmin}">
 
 
+            <h:form id="cdusForm">
 
-            <p:dataTable id="allDtoTable"
-                         value="#{collectorSettingsView.collectorDataUnits}"
-                         var="collectorDataUnit"
 
-                         rowIndexVar="rowNdx"
+                <p:panel id="buttonsPanelGrid" style="vertical-align: middle">
 
-                         emptyMessage="Nincs Adat"
-                         >
+                    <h:outputLabel for="server" value="Szerver: "/>
+                    <p:selectOneMenu id="server"
+                                     value="#{collectorSettingsView.selectedServerId}"
+                                     editable="false"
+                                     >
+                        <f:selectItems value="#{collectorSettingsView.servers}"
+                                       var="server"
+                                       itemLabel="#{server.url}"
+                                       itemValue="#{server.id}"
+                                       />
+                        <p:ajax onstart="PF('blockUI').block();"
+                                oncomplete="PF('blockUI').unblock();"
+                                listener="#{collectorSettingsView.selectedServerChanged()}"
+                                update="cdusTable"
+                                />
+                    </p:selectOneMenu>
 
-                <p:column headerText="No#"
-                          styleClass="alignCenter"
-                          style="width: 1.5em">
-                    <h:outputText value="#{rowNdx + 1}" />
-                </p:column>
+                    <p:commandButton value="Összes aktív"
+                                     icon="fa fa-check-square-o"
+                                     title="Minden gyűjtendő adatnév aktív"
+                                     onstart="PF('blockUI').block();"
+                                     oncomplete="PF('blockUI').unblock();"
+                                     actionListener="#{collectorSettingsView.allActiveFlagSetter(true)}"
+                                     update="@form :growl"
+                                     />
 
-                <p:column headerText="dbId">
-                    <h:outputText value="#{collectorDataUnit.id}" />
-                </p:column>
+                    <p:commandButton value="Összes inaktív"
+                                     icon="fa fa-square-o"
+                                     title="Minden gyűjtendő adatnév inaktív"
+                                     actionListener="#{collectorSettingsView.allActiveFlagSetter(false)}"
+                                     onstart="PF('blockUI').block();"
+                                     oncomplete="PF('blockUI').unblock();"
+                                     update="@form :growl"
+                                     />
 
-                <p:column headerText="restPath">
-                    <h:outputText value="#{collectorDataUnit.restPath}" />
-                </p:column>
 
-                <p:column headerText="entityName">
-                    <h:outputText value="#{collectorDataUnit.entityName}" />
-                </p:column>
+                    <p:commandButton value="Beállítások mentése"
+                                     icon="fa fa-save"
+                                     title="Beállítások mentése az adatbázisba"
+                                     actionListener="#{collectorSettingsView.saveSettings()}"
+                                     onstart="PF('blockUI').block();"
+                                     oncomplete="PF('blockUI').unblock();"
+                                     update="@form :growl"
+                                     style="float: right"
+                                     />
 
-                <p:column headerText="dataName">
-                    <h:outputText value="#{collectorDataUnit.dataName}" />
-                </p:column>
+                </p:panel>
 
-                <p:column headerText="unit">
-                    <h:outputText value="#{collectorDataUnit.unit}" />
-                </p:column>
+                <p:dataTable id="cdusTable"
+                             widgetVar="serverCdusTable"
 
-                <p:column headerText="description">
-                    <h:outputText value="#{collectorDataUnit.description}" />
-                </p:column>
-            </p:dataTable>
+                             value="#{collectorSettingsView.selectedServer.collectorDataUnits}"
+                             var="serverCdu"
+
+                             scrollable="true"
+                             scrollHeight="500"
+
+                             multiViewState="false"
+
+                             rowIndexVar="rowNdx"
+                             rowKey="#{serverCdu.id}"
+
+                             emptyMessage="Nincs Adat"
+                             >
+
+
+                    <p:column headerText="No#"
+                              styleClass="alignCenter"
+                              style="width: 1.5em">
+                        <h:outputText value="#{rowNdx + 1}" />
+                    </p:column>
+
+                    <p:column headerText="active"
+                              styleClass="alignCenter"
+                              style="width: 4em"
+                              >
+                        <p:cellEditor>
+                            <f:facet name="output"><p:selectBooleanCheckbox value="#{serverCdu.active}"/></f:facet>
+                            <f:facet name="input"><p:selectBooleanCheckbox value="#{serverCdu.active}"/></f:facet>
+                        </p:cellEditor>
+                    </p:column>
+
+                    <!--
+                    <p:column headerText="dbId"
+                              style="width: 4em"
+                              rendered="#{isDeveloperMode}">
+                        <h:outputText value="#{serverCdu.id}" />
+                    </p:column>
+                    -->
+
+                    <p:column headerText="srvId"
+                              style="width: 4em"
+                              rendered="#{isDeveloperMode}">
+                        <h:outputText value="#{collectorSettingsView.selectedServer.id}" />
+                    </p:column>
+
+                    <p:column headerText="restPath"
+                              style="width: 20em"
+                              sortBy="#{serverCdu.restPath}"
+                              filterBy="#{serverCdu.restPath}"
+                              filterStyle="width: 10em; font-size: 0.6em"
+                              filterMatchMode="contains"
+                              >
+                        <h:outputText value="#{serverCdu.restPath}" />
+                    </p:column>
+
+                    <!--
+                    <p:column headerText="entityName"
+                              style="width: 15em"
+                              rendered="#{isDeveloperMode}">
+                        <h:outputText value="#{serverCdu.entityName}" />
+                    </p:column>
+                    -->
+
+                    <p:column headerText="dataName"
+                              style="width: 15em"
+                              sortBy="#{serverCdu.dataName}"
+                              filterBy="#{serverCdu.dataName}"
+                              filterStyle="width: 10em; font-size: 0.6em"
+                              filterMatchMode="contains"
+                              >
+                        <h:outputText value="#{serverCdu.dataName}" />
+                    </p:column>
+
+                    <p:column headerText="unit"
+                              style="width: 6em"
+                              sortBy="#{serverCdu.unit}"
+                              >
+                        <h:outputText value="#{serverCdu.unit}" />
+                    </p:column>
+
+                    <p:column headerText="description">
+                        <h:outputText value="#{serverCdu.description}" />
+                    </p:column>
+                </p:dataTable>
+            </h:form>
 
         </bt:disablePanel>
 

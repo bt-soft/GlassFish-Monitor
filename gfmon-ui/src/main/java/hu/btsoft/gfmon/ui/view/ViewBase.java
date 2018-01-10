@@ -11,7 +11,9 @@
  */
 package hu.btsoft.gfmon.ui.view;
 
+import hu.btsoft.gfmon.core.jsf.GFMonJSFLib;
 import java.io.Serializable;
+import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +25,17 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public abstract class ViewBase implements Serializable {
+
+    protected String currentUser;
+
+    /**
+     *
+     */
+    @PostConstruct
+    protected void superInit() {
+        //Az aktuálisan bejelentkezett user lesz a változtató user
+        currentUser = GFMonJSFLib.getCurrentUser();
+    }
 
     /**
      * JSF message megjelenítése

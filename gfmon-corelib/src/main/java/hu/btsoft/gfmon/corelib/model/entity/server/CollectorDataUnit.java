@@ -45,7 +45,7 @@ import org.eclipse.persistence.annotations.Customizer;
  * pl.:
  * http://localhost:4848/monitoring/domain/server/jvm/memory
  *
- * •committedheapsize-count
+ * • committedheapsize-count
  * ◦ unit : bytes
  * ◦ lastsampletime : 1515250670904
  * ◦ dataName : CommittedHeapSize

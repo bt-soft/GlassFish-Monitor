@@ -11,7 +11,6 @@
  */
 package hu.btsoft.gfmon.ui.view.settings;
 
-import hu.btsoft.gfmon.core.jsf.GFMonJSFLib;
 import hu.btsoft.gfmon.corelib.model.RuntimeSequenceGenerator;
 import hu.btsoft.gfmon.corelib.model.entity.Config;
 import hu.btsoft.gfmon.corelib.model.entity.server.Server;
@@ -189,19 +188,15 @@ public class SettingsView extends ViewBase {
                 settingsDataChanged = true;
             }
         }
-
-        //Az aktuálisan bejelentkezett user lesz a változtató user
-        String currentUser = GFMonJSFLib.getCurrentUser();
-
         try {
             //Config mentése
-            configs.stream()
+            configs/*.stream()*/
                     .forEach((Config config) -> {
                         configService.save(config, currentUser);
                     });
 
             //Szerverek mentése
-            servers.stream()
+            servers/*.stream()*/
                     .forEach((Server server) -> {
                         //Beállítjuk a mérendő adatok listáját
                         if (server.getCollectorDataUnits() == null || server.getCollectorDataUnits().isEmpty()) {
@@ -220,7 +215,7 @@ public class SettingsView extends ViewBase {
             clearAll();
             loadAllFromDb();
 
-            addJsfMessage("growl", FacesMessage.SEVERITY_INFO, "Beállítások adatbázisba mentése OK");
+            addJsfMessage("growl", FacesMessage.SEVERITY_INFO, "Adatbázisba mentés OK");
 
         } catch (PersistenceException e) {
             addJsfMessage("growl", FacesMessage.SEVERITY_ERROR, String.format("Konfig mentési hiba: %s", e.getMessage()));
