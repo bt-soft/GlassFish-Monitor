@@ -341,15 +341,18 @@ public class GFMonitorController {
             }
 
             //JPA mentés
-            snapshots.stream().map((snapshot) -> {
-                //Beállítjuk, hogy melyik szerver mérési ereménye ez a pillanatfelvétel
-                snapshot.setServer(server);
-                return snapshot;
-            }).map((snapshot) -> {
-                //lementjük az adatbázisba
-                snapshotService.save(snapshot);
-                return snapshot;
-            }).forEachOrdered((snapshot) -> {
+            snapshots.stream()
+                    //.parallel()  nem jó ötlet a paralele -> lock hiba lesz tőle
+                    .map((snapshot) -> {
+                        //Beállítjuk, hogy melyik szerver mérési ereménye ez a pillanatfelvétel
+                        snapshot.setServer(server);
+                        return snapshot;
+                    })
+                    .map((snapshot) -> {
+                        //lementjük az adatbázisba
+                        snapshotService.save(snapshot);
+                        return snapshot;
+                    }).forEachOrdered((snapshot) -> {
                 ///////////////////////////////////////////////////log.trace("Snapshot: {}", snapshot);
             });
 

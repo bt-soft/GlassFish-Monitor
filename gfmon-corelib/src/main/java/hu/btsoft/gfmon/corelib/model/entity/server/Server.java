@@ -49,7 +49,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author BT
  */
 @Entity
-@Cacheable(true)
+@Cacheable(false)
 @Table(name = "SERVER",
         catalog = "",
         schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,

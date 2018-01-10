@@ -21,6 +21,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -35,6 +36,9 @@ public class DefaultConfigCreator {
 
     private static final String DEF_USERNAME = "default-config-creator";
 
+    @Inject
+    private PropertiesConfig propertiesConfig;
+
     @EJB
     private ConfigService configService;
 
@@ -46,7 +50,10 @@ public class DefaultConfigCreator {
      */
     public void checkDefaults() {
 
-        configService.dropAndCreate();
+        //Induláskor kell séma legyártás?
+        if (propertiesConfig.getConfig().getBoolean(PropertiesConfig.STARTUP_JPA_DROPANDCREATE_KEY, false)) {
+            configService.dropAndCreate();
+        }
 
         //Megnézzük, hogy létezik-e bármilyen beállítás rekord az adatbázisban
         if (configService.count() > 0) {

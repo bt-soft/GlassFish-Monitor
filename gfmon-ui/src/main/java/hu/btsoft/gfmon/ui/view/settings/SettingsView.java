@@ -339,6 +339,7 @@ public class SettingsView extends ViewBase {
         selectedServer = null;
         addJsfMessage("growl", FacesMessage.SEVERITY_INFO, "A szerver törlése OK");
         underModifyProcess = false;
+        settingsDataChanged = true;
     }
 
 }

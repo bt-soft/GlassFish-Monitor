@@ -83,11 +83,11 @@ public abstract class ServiceBase<T extends EntityBase> {
                 ((ModifiableEntityBase) entity).setCreatedBy(user);
 
             } else {
-//                //Csak akkor mentünk, ha valóban van változás az entitásban
-//                T t = find(entity.getId());
-//                if (t != null && t.equals(entity)) {
-//                    return;
-//                }
+                //Csak akkor mentünk, ha valóban van változás az entitásban
+                T t = find(entity.getId());
+                if (t != null && t.equals(entity)) {
+                    return;
+                }
                 //Mehet a mentés
                 ((ModifiableEntityBase) entity).setModifiedBy(user);
             }
@@ -113,7 +113,7 @@ public abstract class ServiceBase<T extends EntityBase> {
         }
 
         try {
-            //Új elntitás lesz?
+            //Új entitás lesz?
             if (entity.getId() == null) {
                 getEntityManager().persist(entity);
             } else {

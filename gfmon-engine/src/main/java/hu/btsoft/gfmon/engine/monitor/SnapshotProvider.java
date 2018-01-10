@@ -140,12 +140,19 @@ public class SnapshotProvider {
             //Gyűjtendő adatnevek halmaza
             Set<String> collectedDatatNames = collectedDatatNamesMap.get(collector.getPath());
 
+            //Csak, ha van mit összegyűjteni, akkor indítjuk a kollektort
+            if (collectedDatatNames == null || collectedDatatNames.isEmpty()) {
+                //log.trace("A(z) {} szerveren a(z) '{}' adatgyűjtőt nem kell futtatni", server.getUrl(), collector.getPath());
+                continue;
+            }
+
             //Az adott kollektor adatainak lekérése
+            log.trace("A(z) '{}' szerveren a(z) '{}' adatgyűjtő futtatása", server.getUrl(), collector.getPath());
             List<MonitorValueDto> valuesList = collector.execute(restDataCollector, server.getSimpleUrl(), server.getSessionToken(), collectedDatatNames);
 
             //Üres a mért eredmények Map-je
             if (valuesList == null || valuesList.isEmpty()) {
-                log.warn("A(z) {} szerver mérési eredményei üresek!", server.getSimpleUrl());
+                log.warn("A(z) '{}' szerver mérési eredményei üresek!", server.getSimpleUrl());
                 continue;
             }
 

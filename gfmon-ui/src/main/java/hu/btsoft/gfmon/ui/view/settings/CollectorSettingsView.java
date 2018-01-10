@@ -19,13 +19,11 @@ import java.util.Objects;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
-import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Named;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.primefaces.event.CellEditEvent;
 
 /**
  *
@@ -86,24 +84,18 @@ public class CollectorSettingsView extends ViewBase {
                 });
     }
 
-    public void onCellEdit(CellEditEvent event) {
-        Object oldValue = event.getOldValue();
-        Object newValue = event.getNewValue();
-
-        if (newValue != null && !newValue.equals(oldValue)) {
-            FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Cell Changed", "Old: " + oldValue + ", New:" + newValue);
-            FacesContext.getCurrentInstance().addMessage(null, msg);
-        }
-    }
-
     /**
      * Beállítások mentése
      */
     public void saveSettings() {
 
         servers.forEach((server) -> {
-            serverService.save(server, currentUser);
+            serverService.updateServerAndJoiner(server, currentUser);
         });
+
+        //Újra betöltjük az adatbázisból
+        servers = serverService.findAll();
+        this.selectedServerChanged();
 
         addJsfMessage("growl", FacesMessage.SEVERITY_INFO, "Adatbázisba mentés OK");
     }

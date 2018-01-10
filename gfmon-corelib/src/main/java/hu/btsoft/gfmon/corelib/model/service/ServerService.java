@@ -15,6 +15,7 @@ import hu.btsoft.gfmon.corelib.model.RuntimeSequenceGenerator;
 import hu.btsoft.gfmon.corelib.model.entity.server.CollectorDataUnit;
 import hu.btsoft.gfmon.corelib.model.entity.server.Server;
 import hu.btsoft.gfmon.corelib.model.entity.server.ServerCollDataUnitJoiner;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import javax.ejb.EJB;
@@ -85,7 +86,7 @@ public class ServerService extends ServiceBase<Server> {
                 ServerCollDataUnitJoiner joiner = new ServerCollDataUnitJoiner(server, cdu, createdBy, Boolean.TRUE);
                 em.persist(joiner);
 
-                //Behuzalozzuk aszerverbe és le is mentjük
+                //Behuzalozzuk a szerverbe és le is mentjük
                 server.getJoiners().add(joiner);
                 em.merge(server);
 
@@ -196,5 +197,46 @@ public class ServerService extends ServiceBase<Server> {
             lastVersion.setAdditionalInformation(null);
             super.save(lastVersion, modifier);
         }
+    }
+
+    /**
+     * Szerver entitás + DCU update
+     *
+     * @param server entitás
+     * @param user   létrehozó/módosító user
+     *
+     * @throws RuntimeException ha hiba van
+     */
+    public void updateServerAndJoiner(Server server, String user) throws RuntimeException {
+        if (server == null) {
+            log.warn("null a Server entitás!");
+            return;
+        }
+
+        //Csak olyan szerver használható, ami már létezik az adatbázisban
+        if (server.getId() == null) {
+            throw new IllegalStateException("A szerver ID nem lehet null!");
+        }
+
+        //Csak olyan szerver használható, aminek van kapcsolótáblája
+        if (server.getJoiners() == null) {
+            throw new IllegalStateException("A szerver-nek kell léteznie DCU kapcsolótáblájának!");
+        }
+
+        //Mehet az update
+        server.getJoiners().stream().map((joiner) -> {
+            joiner.setModifiedBy(user);
+            return joiner;
+        }).map((joiner) -> {
+            joiner.setModifiedDate(new Date());
+            return joiner;
+        }).forEachOrdered((joiner) -> {
+            em.merge(joiner);
+        });
+
+        server.setModifiedBy(user);
+        server.setModifiedDate(new Date());
+        em.merge(server);
+        em.flush();
     }
 }

@@ -108,8 +108,6 @@
                              emptyMessage="Nincs Adat"
                              >
 
-                    <p:ajax event="cellEdit" listener="#{collectorSettingsView.onCellEdit}" update="cdusTable :growl" />
-
                     <p:column headerText="No#"
                               styleClass="alignCenter"
                               style="width: 1.5em">
@@ -135,7 +133,13 @@
                     <p:column headerText="srvId"
                               style="width: 4em"
                               rendered="#{isDeveloperMode}">
-                        <h:outputText value="#{joiner.server.id}" />
+                        <h:outputText value="#{joiner.serverId}" />
+                    </p:column>
+
+                    <p:column headerText="cduId"
+                              style="width: 4em"
+                              rendered="#{isDeveloperMode}">
+                        <h:outputText value="#{joiner.collectorDataUnitId}" />
                     </p:column>
 
                     <p:column headerText="restPath"
