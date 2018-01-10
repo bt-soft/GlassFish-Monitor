@@ -18,6 +18,7 @@ import hu.btsoft.gfmon.corelib.model.entity.server.ServerCollDataUnitJoiner;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -207,7 +208,7 @@ public class ServerService extends ServiceBase<Server> {
      *
      * @throws RuntimeException ha hiba van
      */
-    public void updateServerAndJoiner(Server server, String user) throws RuntimeException {
+    public void updateJoiners(Server server, String user) throws RuntimeException {
         if (server == null) {
             log.warn("null a Server entitás!");
             return;
@@ -220,23 +221,22 @@ public class ServerService extends ServiceBase<Server> {
 
         //Csak olyan szerver használható, aminek van kapcsolótáblája
         if (server.getJoiners() == null) {
-            throw new IllegalStateException("A szerver-nek kell léteznie DCU kapcsolótáblájának!");
+            throw new IllegalStateException("A szerver-nek rendelkeznie kell DCU kapcsolótáblával!");
         }
 
-        //Mehet az update
-        server.getJoiners().stream().map((joiner) -> {
-            joiner.setModifiedBy(user);
-            return joiner;
-        }).map((joiner) -> {
-            joiner.setModifiedDate(new Date());
-            return joiner;
-        }).forEachOrdered((joiner) -> {
-            em.merge(joiner);
-        });
-
-        server.setModifiedBy(user);
-        server.setModifiedDate(new Date());
-        em.merge(server);
-        em.flush();
+        //Mehet az update - de csak ha változott az active értéke a DB-hez képest
+        server.getJoiners().stream()
+                .filter((joiner) -> !(Objects.equals(joiner.getActive(), joiner.getActiveDbValue()))) //csak, ha nem azonos az active
+                .map((joiner) -> {
+                    joiner.setModifiedBy(user);
+                    return joiner;
+                })
+                .map((joiner) -> {
+                    joiner.setModifiedDate(new Date());
+                    return joiner;
+                })
+                .forEachOrdered((joiner) -> {
+                    em.merge(joiner);
+                });
     }
 }

@@ -25,11 +25,14 @@ import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OrderBy;
+import javax.persistence.PostLoad;
+import javax.persistence.PostPersist;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -130,6 +133,14 @@ public class ServerCollDataUnitJoiner implements Serializable {
     private Long optLockVersion;
 
     /**
+     * Eredeti DB érték
+     * Az adatbázisból való felolvasáss után beállítjuk
+     * Ezzel tudjuk detektálni, hogy változott-e az értéke az adatbázishoz képest?
+     */
+    @Transient
+    private Boolean activeDbValue;
+
+    /**
      * Konstruktor
      *
      * @param server            szerver
@@ -173,5 +184,14 @@ public class ServerCollDataUnitJoiner implements Serializable {
         if (modifiedBy == null) {
             modifiedBy = "!Unknown User!";
         }
+    }
+
+    /**
+     * Adatbázisművelet után beállítjuk a DB értéket, hogy detektálni tudjuk a változást
+     */
+    @PostPersist
+    @PostLoad
+    protected void post() {
+        activeDbValue = active;
     }
 }

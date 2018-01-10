@@ -90,7 +90,7 @@ public class CollectorSettingsView extends ViewBase {
     public void saveSettings() {
 
         servers.forEach((server) -> {
-            serverService.updateServerAndJoiner(server, currentUser);
+            serverService.updateJoiners(server, currentUser);
         });
 
         //Újra betöltjük az adatbázisból
