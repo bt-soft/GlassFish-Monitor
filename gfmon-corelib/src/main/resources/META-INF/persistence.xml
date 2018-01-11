@@ -6,7 +6,7 @@
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <properties>
             <property name="eclipselink.logging.level" value="WARNING"/>
-            <property name="eclipselink.logging.level.sql" value="WARNING"/>
+            <property name="eclipselink.logging.level.sql" value="ALL"/>
             <property name="eclipselink.logging.parameters" value="true"/>
             <property name="eclipselink.logging.logger" value="JavaLogger"/>
             <property name="eclipselink.logging.session" value="true"/>

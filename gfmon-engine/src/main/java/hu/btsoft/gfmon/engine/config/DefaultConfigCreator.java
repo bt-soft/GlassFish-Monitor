@@ -56,17 +56,16 @@ public class DefaultConfigCreator {
         }
 
         //Megnézzük, hogy létezik-e bármilyen beállítás rekord az adatbázisban
-        if (configService.count() > 0) {
-            return;
+        if (!configService.checkEntityTableExist()) {
+            createDefaultConfig();
         }
 
-        createDefaults();
     }
 
     /**
      * Default beállítások létrehozása az adatbázisban
      */
-    private void createDefaults() {
+    private void createDefaultConfig() {
         log.trace("Default beállítások létrehozása");
 
         {//autostart

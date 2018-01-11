@@ -24,7 +24,6 @@ import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OrderBy;
 import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PrePersist;
@@ -79,7 +78,6 @@ public class ServerCollDataUnitJoiner implements Serializable {
      */
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "SERVER_ID", referencedColumnName = "ID")
-    @OrderBy("hostName, ipAddress")
     private Server server;
 
     /**
@@ -87,7 +85,6 @@ public class ServerCollDataUnitJoiner implements Serializable {
      */
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "COLLECTORDATAUNIT_ID", referencedColumnName = "ID")
-    @OrderBy("restPath, dataName")
     private CollectorDataUnit collectorDataUnit;
 
     /**

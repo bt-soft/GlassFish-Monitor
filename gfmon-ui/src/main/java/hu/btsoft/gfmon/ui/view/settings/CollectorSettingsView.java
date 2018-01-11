@@ -12,6 +12,7 @@
 package hu.btsoft.gfmon.ui.view.settings;
 
 import hu.btsoft.gfmon.corelib.model.entity.server.Server;
+import hu.btsoft.gfmon.corelib.model.entity.server.ServerCollDataUnitJoiner;
 import hu.btsoft.gfmon.corelib.model.service.ServerService;
 import hu.btsoft.gfmon.ui.view.ViewBase;
 import java.util.List;
@@ -57,6 +58,7 @@ public class CollectorSettingsView extends ViewBase {
         if (servers != null && !servers.isEmpty()) {
             selectedServer = servers.get(0); //kiválasztjuk az elsőt
             selectedServerId = selectedServer.getId();
+            sortSelectedServerJoinersList();
         }
     }
 
@@ -69,6 +71,29 @@ public class CollectorSettingsView extends ViewBase {
                 .filter(server -> Objects.equals(server.getId(), selectedServerId))
                 .findAny()
                 .orElse(null);
+
+        sortSelectedServerJoinersList();
+    }
+
+    /**
+     * A kiválasztott szerver joiner tábláját lerendezzük a DCU-k path és adatnevei szerint
+     */
+    private void sortSelectedServerJoinersList() {
+
+        selectedServer.getJoiners().sort((o1, o2) -> {
+            ServerCollDataUnitJoiner j1 = (ServerCollDataUnitJoiner) o1;
+            ServerCollDataUnitJoiner j2 = (ServerCollDataUnitJoiner) o2;
+
+            //Először a Path szerint hasonlítjuk össze
+            int result = j1.getCollectorDataUnit().getRestPath().compareTo(j2.getCollectorDataUnit().getRestPath());
+
+            //Ha a Path azonos, akkor az adatnév szerint hasonlítunk
+            if (result == 0) {
+                result = j1.getCollectorDataUnit().getDataName().compareTo(j2.getCollectorDataUnit().getDataName());
+            }
+
+            return result;
+        });
     }
 
     /**
