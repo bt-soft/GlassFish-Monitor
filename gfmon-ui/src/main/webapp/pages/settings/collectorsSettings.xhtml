@@ -38,44 +38,43 @@
             <h:form id="cdusForm">
 
 
-                <p:panel id="buttonsPanelGrid" style="vertical-align: middle">
+                <h:panelGrid columns="2" style="width: 100%">
+                    <h:panelGrid columns="4">
+                        <h:outputLabel for="server" value="Szerver: "/>
+                        <p:selectOneMenu id="server"
+                                         value="#{collectorSettingsView.selectedServerId}"
+                                         editable="false"
+                                         >
+                            <f:selectItems value="#{collectorSettingsView.servers}"
+                                           var="server"
+                                           itemLabel="#{server.url}"
+                                           itemValue="#{server.id}"
+                                           />
+                            <p:ajax onstart="PF('blockUI').block();"
+                                    oncomplete="PF('blockUI').unblock();"
+                                    listener="#{collectorSettingsView.selectedServerChanged()}"
+                                    update="cdusTable"
+                                    />
+                        </p:selectOneMenu>
 
-                    <h:outputLabel for="server" value="Szerver: "/>
-                    <p:selectOneMenu id="server"
-                                     value="#{collectorSettingsView.selectedServerId}"
-                                     editable="false"
-                                     >
-                        <f:selectItems value="#{collectorSettingsView.servers}"
-                                       var="server"
-                                       itemLabel="#{server.url}"
-                                       itemValue="#{server.id}"
-                                       />
-                        <p:ajax onstart="PF('blockUI').block();"
-                                oncomplete="PF('blockUI').unblock();"
-                                listener="#{collectorSettingsView.selectedServerChanged()}"
-                                update="cdusTable"
-                                />
-                    </p:selectOneMenu>
+                        <p:commandButton value="Összes aktív"
+                                         icon="fa fa-check-square-o"
+                                         title="Minden gyűjtendő adatnév aktív"
+                                         onstart="PF('blockUI').block();"
+                                         oncomplete="PF('blockUI').unblock();"
+                                         actionListener="#{collectorSettingsView.allActiveFlagSetter(true)}"
+                                         update="@form :growl"
+                                         />
 
-                    <p:commandButton value="Összes aktív"
-                                     icon="fa fa-check-square-o"
-                                     title="Minden gyűjtendő adatnév aktív"
-                                     onstart="PF('blockUI').block();"
-                                     oncomplete="PF('blockUI').unblock();"
-                                     actionListener="#{collectorSettingsView.allActiveFlagSetter(true)}"
-                                     update="@form :growl"
-                                     />
-
-                    <p:commandButton value="Összes inaktív"
-                                     icon="fa fa-square-o"
-                                     title="Minden gyűjtendő adatnév inaktív"
-                                     actionListener="#{collectorSettingsView.allActiveFlagSetter(false)}"
-                                     onstart="PF('blockUI').block();"
-                                     oncomplete="PF('blockUI').unblock();"
-                                     update="@form :growl"
-                                     />
-
-
+                        <p:commandButton value="Összes inaktív"
+                                         icon="fa fa-square-o"
+                                         title="Minden gyűjtendő adatnév inaktív"
+                                         actionListener="#{collectorSettingsView.allActiveFlagSetter(false)}"
+                                         onstart="PF('blockUI').block();"
+                                         oncomplete="PF('blockUI').unblock();"
+                                         update="@form :growl"
+                                         />
+                    </h:panelGrid>
                     <p:commandButton value="Beállítások mentése"
                                      icon="fa fa-save"
                                      title="Beállítások mentése az adatbázisba"
@@ -85,8 +84,7 @@
                                      update="@form :growl"
                                      style="float: right"
                                      />
-
-                </p:panel>
+                </h:panelGrid>
 
                 <p:dataTable id="cdusTable"
                              widgetVar="cdusTable"
@@ -95,7 +93,7 @@
                              var="joiner"
 
                              scrollable="true"
-                             scrollHeight="500"
+                             scrollHeight="600"
 
                              multiViewState="false"
 
@@ -130,6 +128,7 @@
                         </p:cellEditor>
                     </p:column>
 
+                    <!--
                     <p:column headerText="srvId"
                               style="width: 4em"
                               rendered="#{isDeveloperMode}">
@@ -141,6 +140,7 @@
                               rendered="#{isDeveloperMode}">
                         <h:outputText value="#{joiner.collectorDataUnitId}" />
                     </p:column>
+                    -->
 
                     <p:column headerText="restPath"
                               style="width: 20em"
@@ -151,14 +151,6 @@
                               >
                         <h:outputText value="#{joiner.collectorDataUnit.restPath}" />
                     </p:column>
-
-                    <!--
-                    <p:column headerText="entityName"
-                              style="width: 15em"
-                              rendered="#{isDeveloperMode}">
-                        <h:outputText value="#{joiner.collectorDataUnit.entityName}" />
-                    </p:column>
-                    -->
 
                     <p:column headerText="dataName"
                               style="width: 15em"
