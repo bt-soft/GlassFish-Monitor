@@ -1,7 +1,7 @@
 /*
  *  ------------------------------------------------------------------------------------
  *
- *  GF Monitor project
+ *  JPA Real User Test Monitor project
  *
  *  Module:  gfmon-ui (gfmon-ui)
  *  File:    UIDisablePanel.java
@@ -12,24 +12,33 @@
 package hu.btsoft.gfmon.core.jsf.component;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import javax.faces.component.FacesComponent;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIComponentBase;
-import javax.faces.component.html.HtmlOutputLabel;
+import javax.faces.component.UIOutput;
 import javax.faces.context.FacesContext;
+import javax.swing.Renderer;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.primefaces.component.datatable.DataTable;
 
 /**
  * A JSF konténeren elhelyezkedő összes JSF komponens tiltására képes Panel
  *
- * ötlet: https://stackoverflow.com/questions/3152561/how-to-disable-page-form-in-jsf
+ * ötlet:
+ *
+ * @see
+ * https://stackoverflow.com/questions/3152561/how-to-disable-page-form-in-jsf
  *
  * @author BT
  */
 @FacesComponent("hu.btsoft.gfmon.core.jsf.component.UIDisablePanel")
+@Slf4j
 public class UIDisablePanel extends UIComponentBase {
 
+    private static final String BEAN_STYLECLASS_PROPERTY = "styleClass";
     private static final String OWN_ATTRIBUTE_FLAG = UIDisablePanel.class.getSimpleName() + "Flag";
     private static final String DISABLED_ATTRIBUTE = "disabled";
     private static final String UI_STATE_DISABLED_STYLECLASS = "ui-state-disabled";
@@ -55,47 +64,55 @@ public class UIDisablePanel extends UIComponentBase {
     }
 
     /**
-     * A HtmlOutputLabel stílus osztályának birizgálása
+     * A UIOutput stílus osztályának birizgálása
      *
-     * @param htmlOutputLabel JSF HTMLOutputLabel komponens példány
-     * @param toDisable       enable/disable
+     * @param uiOutput JSF UIOutput komponens példány
+     * @param toDisable enable/disable
      */
-    private void setHtmlOutputLabelStyleClass(HtmlOutputLabel htmlOutputLabel, boolean toDisable) {
+    private void setHtmlOutputLabelStyleClass(UIOutput uiOutput, boolean toDisable) {
 
-        //Most mi az állapota?
-        String currStyleClass = (String) htmlOutputLabel.getStyleClass();
+        try {
+            //A HtmlOutputText, HtmlOutputLabel ugyan leszármazottja a UIOutput-nak, de az ősnek nincs get/setStyleClass metódusa
+            //Emiatt reflectionnal próbáljuk meg kikeresni a publikus metódust
 
-        if (toDisable) {
+            //Most mi az állapota?
+            String currStyleClass = BeanUtils.getProperty(uiOutput, BEAN_STYLECLASS_PROPERTY);
 
-            if (currStyleClass == null || !currStyleClass.contains(UI_STATE_DISABLED_STYLECLASS)) {
-                htmlOutputLabel.getAttributes().put(OWN_ATTRIBUTE_FLAG, true); //megjelöljük, hogy mi raktuk rá az attribútumot
+            if (toDisable) {
 
-                //beállítjuk, hogy tiltott a komponens
-                String s = currStyleClass == null ? UI_STATE_DISABLED_STYLECLASS : currStyleClass + " " + UI_STATE_DISABLED_STYLECLASS;
-                htmlOutputLabel.setStyleClass(s);
-            }
+                if (currStyleClass == null || !currStyleClass.contains(UI_STATE_DISABLED_STYLECLASS)) {
+                    uiOutput.getAttributes().put(OWN_ATTRIBUTE_FLAG, true); //megjelöljük, hogy mi raktuk rá az attribútumot
 
-        } else {
+                    //beállítjuk, hogy tiltott a komponens
+                    String s = currStyleClass == null ? UI_STATE_DISABLED_STYLECLASS : currStyleClass + " " + UI_STATE_DISABLED_STYLECLASS;
+                    BeanUtils.setProperty(uiOutput, BEAN_STYLECLASS_PROPERTY, s);
+                }
 
-            if (htmlOutputLabel.getAttributes().get(OWN_ATTRIBUTE_FLAG) != null) {  //csak a magunk által beállított attribútummal foglalkozunk
-                htmlOutputLabel.getAttributes().remove(OWN_ATTRIBUTE_FLAG); //leszedjük a saját attribútumot
+            } else {
 
-                if (currStyleClass != null) {
-                    String s = StringUtils.normalizeSpace(currStyleClass.replaceAll(UI_STATE_DISABLED_STYLECLASS, ""));
-                    htmlOutputLabel.setStyleClass(s);
+                if (uiOutput.getAttributes().get(OWN_ATTRIBUTE_FLAG) != null) {  //csak a magunk által beállított attribútummal foglalkozunk
+                    uiOutput.getAttributes().remove(OWN_ATTRIBUTE_FLAG); //leszedjük a saját attribútumot
+
+                    if (currStyleClass != null) {
+                        String s = StringUtils.normalizeSpace(currStyleClass.replaceAll(UI_STATE_DISABLED_STYLECLASS, ""));
+                        BeanUtils.setProperty(uiOutput, BEAN_STYLECLASS_PROPERTY, s);
+                    }
                 }
             }
+
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            log.error(String.format("A(z) '{}' osztálynak nincs '{}' property-je", uiOutput.getClass().getName(), BEAN_STYLECLASS_PROPERTY), e);
         }
 
     }
 
     /**
-     * Komponens tiltása/engedélyezése
-     * PrimeFaces DataTable komponensnél a rowStyleClass-t is állítgatja
+     * Komponens tiltása/engedélyezése PrimeFaces DataTable komponensnél a
+     * rowStyleClass-t is állítgatja
      *
      * @param uiComponent JSF komponens példány
-     * @param toDisable   enable/disable
-     * @param attribute   a komponens attribútuma, amely jelzi a tiltást
+     * @param toDisable enable/disable
+     * @param attribute a komponens attribútuma, amely jelzi a tiltást
      */
     private void setComponentDisable(UIComponent uiComponent, boolean toDisable, String attribute) {
         if (toDisable) {
@@ -131,9 +148,10 @@ public class UIDisablePanel extends UIComponentBase {
     }
 
     /**
-     * A JSF komponensfán véggigyalogolava engedélyezi/tiltja az erre alkalmas komponenseket
+     * A JSF komponens fán véggigyalogolva engedélyezi/tiltja az erre alkalmas
+     * komponenseket
      *
-     * @param root      komponensfa gyökér elem
+     * @param root komponensfa gyökér elem
      * @param toDisable tiltás/engedélyezés
      */
     public void processDisablePanel(UIComponent root, boolean toDisable) {
@@ -142,9 +160,9 @@ public class UIDisablePanel extends UIComponentBase {
         root.getChildren().stream().map((UIComponent c) -> {
 
             //if (c instanceof UIInput || c instanceof UICommand) {
-            if (c instanceof HtmlOutputLabel) { //JSF output (label, text, ...) ?
+            if (c instanceof UIOutput) { //JSF output (HtmlOutputLabel, HtmlOutputText, ...) ?
 
-                setHtmlOutputLabelStyleClass((HtmlOutputLabel) c, toDisable);
+                setHtmlOutputLabelStyleClass((UIOutput) c, toDisable);
 
             } else if (c instanceof DataTable) { //Primefaces datatable?
                 setComponentDisable(c, toDisable, DataTable.PropertyKeys.disabledSelection.toString());
@@ -164,9 +182,10 @@ public class UIDisablePanel extends UIComponentBase {
 
     /**
      * <p>
-     * Return the identifier of the component family to which this component belongs.
-     * This identifier, in conjunction with the value of the <code>rendererType</code> property,
-     * may be used to select the appropriate {@link Renderer} for this component instance.</p>
+     * Return the identifier of the component family to which this component
+     * belongs. This identifier, in conjunction with the value of the
+     * <code>rendererType</code> property, may be used to select the appropriate
+     * {@link Renderer} for this component instance.</p>
      *
      * @return
      */

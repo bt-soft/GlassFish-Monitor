@@ -21,10 +21,17 @@
         <additionalparam>-Xdoclint:none</additionalparam>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
+
+        <!--
+            GlassFish 4.1.x: 2.6.1
+            GlassFish 4.1.x: 2.7.1
+        -->
+        <eclipselink.version>2.7.1</eclipselink.version>
 
     </properties>
 
@@ -62,7 +69,7 @@
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.16.18</version>
+                <version>1.16.20</version>
             </dependency>
 
             <!-- LogBack + Slf4j -->
@@ -121,16 +128,21 @@
                 <version>0.9.0</version>
             </dependency>
 
-            <!-- JPA EclipseLink -->
+            <!-- JPA API: EclipseLink -->
+            <!-- GF v4.1.x: 2.6.1, GF v5: 2.7.1 -->
             <dependency>
                 <groupId>org.eclipse.persistence</groupId>
                 <artifactId>eclipselink</artifactId>
-                <version>2.6.1</version>
+                <version>${eclipselink.version}</version>
             </dependency>
             <dependency>
+                <!--
+                 EclipseLink logoláshoz:
+                   Ez csak GF5 esetén kell igaziból (4.1..x esetén nem zavar), ott az SLF4J logolás már az extensions-ban van
+                -->
                 <groupId>org.eclipse.persistence</groupId>
-                <artifactId>org.eclipse.persistence.jpa.modelgen.processor</artifactId>
-                <version>2.6.1</version>
+                <artifactId>org.eclipse.persistence.extension</artifactId>
+                <version>${eclipselink.version}</version>
             </dependency>
 
             <!-- TEST -->
@@ -221,7 +233,7 @@
                 <plugin>
                     <groupId>org.primefaces.extensions</groupId>
                     <artifactId>resources-optimizer-maven-plugin</artifactId>
-                    <version>2.2.0</version>
+                    <version>2.3.0</version>
                     <configuration>
                         <resourcesSets>
                             <resourcesSet>

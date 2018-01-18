@@ -27,6 +27,11 @@ import org.primefaces.context.RequestContext;
 @ApplicationScoped
 public class GFMonJSFLib implements Serializable {
 
+    /**
+     * Verzió lekérdezése a Maven által karbantartott versionInfo.properties állományból
+     *
+     * @return verzió String
+     */
     public String getVersion() {
         return VersionUtils.getModuleVersionStr(GFMonJSFLib.class);
     }
@@ -64,7 +69,7 @@ public class GFMonJSFLib implements Serializable {
      */
     public String logout() {
         FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
-        return GFMonUIConstants.JSF_START_URL + GFMonUIConstants.MAIN_PAGE + GFMonUIConstants.JSF_REDIRECT;
+        return "/login.xhtml?faces-redirect=true";
     }
 
     /**
