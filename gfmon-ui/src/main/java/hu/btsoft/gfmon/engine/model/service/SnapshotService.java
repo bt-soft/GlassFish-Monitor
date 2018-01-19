@@ -11,7 +11,7 @@
  */
 package hu.btsoft.gfmon.engine.model.service;
 
-import hu.btsoft.gfmon.engine.model.entity.snapshot.SnapshotBase;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SvrSnapshotBase;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Stateless
 @Slf4j
-public class SnapshotService extends ServiceBase<SnapshotBase> {
+public class SnapshotService extends ServiceBase<SvrSnapshotBase> {
 
     @PersistenceContext(unitName = "gfmon_PU")
     private EntityManager em;
@@ -40,7 +40,7 @@ public class SnapshotService extends ServiceBase<SnapshotBase> {
      * Kontruktor
      */
     public SnapshotService() {
-        super(SnapshotBase.class);
+        super(SvrSnapshotBase.class);
     }
 
     /**
@@ -62,7 +62,7 @@ public class SnapshotService extends ServiceBase<SnapshotBase> {
      *
      * @return törölt entitásrekordok száma
      */
-    private <T extends SnapshotBase> int deleteEntityOldRecord(Class<T> entityType, Date beforeDate) {
+    private <T extends SvrSnapshotBase> int deleteEntityOldRecord(Class<T> entityType, Date beforeDate) {
         CriteriaBuilder builder = em.getCriteriaBuilder();
         CriteriaDelete<T> delete = builder.createCriteriaDelete(entityType);
         Root<T> root = delete.from(entityType);
@@ -91,7 +91,7 @@ public class SnapshotService extends ServiceBase<SnapshotBase> {
         Date beforeDate = Date.from(before.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
         cnt = em.getMetamodel().getEntities().stream()
-                .filter((entity) -> (entity instanceof SnapshotBase)).map((entity) -> (SnapshotBase) entity)
+                .filter((entity) -> (entity instanceof SvrSnapshotBase)).map((entity) -> (SvrSnapshotBase) entity)
                 .map((snapshotEntity) -> deleteEntityOldRecord(snapshotEntity.getClass(), beforeDate))
                 .reduce(cnt, Integer::sum);
 

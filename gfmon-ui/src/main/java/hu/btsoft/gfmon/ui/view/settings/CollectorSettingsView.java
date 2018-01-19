@@ -12,7 +12,7 @@
 package hu.btsoft.gfmon.ui.view.settings;
 
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
-import hu.btsoft.gfmon.engine.model.entity.server.ServerCollDataUnitJoiner;
+import hu.btsoft.gfmon.engine.model.entity.server.ServerSvrCollDataUnitJoiner;
 import hu.btsoft.gfmon.engine.model.service.ServerService;
 import hu.btsoft.gfmon.ui.view.ViewBase;
 import java.util.List;
@@ -76,20 +76,20 @@ public class CollectorSettingsView extends ViewBase {
     }
 
     /**
-     * A kiválasztott szerver joiner tábláját lerendezzük a DCU-k path és adatnevei szerint
+     * A kiválasztott szerver joiner tábláját lerendezzük a szerverDCU-k path és adatnevei szerint
      */
     private void sortSelectedServerJoinersList() {
 
         selectedServer.getJoiners().sort((o1, o2) -> {
-            ServerCollDataUnitJoiner j1 = (ServerCollDataUnitJoiner) o1;
-            ServerCollDataUnitJoiner j2 = (ServerCollDataUnitJoiner) o2;
+            ServerSvrCollDataUnitJoiner j1 = (ServerSvrCollDataUnitJoiner) o1;
+            ServerSvrCollDataUnitJoiner j2 = (ServerSvrCollDataUnitJoiner) o2;
 
             //Először a Path szerint hasonlítjuk össze
-            int result = j1.getCollectorDataUnit().getRestPath().compareTo(j2.getCollectorDataUnit().getRestPath());
+            int result = j1.getSvrCollectorDataUnit().getRestPath().compareTo(j2.getSvrCollectorDataUnit().getRestPath());
 
             //Ha a Path azonos, akkor az adatnév szerint hasonlítunk
             if (result == 0) {
-                result = j1.getCollectorDataUnit().getDataName().compareTo(j2.getCollectorDataUnit().getDataName());
+                result = j1.getSvrCollectorDataUnit().getDataName().compareTo(j2.getSvrCollectorDataUnit().getDataName());
             }
 
             return result;

@@ -12,9 +12,9 @@
 package hu.btsoft.gfmon.engine.model.service;
 
 import hu.btsoft.gfmon.engine.model.RuntimeSequenceGenerator;
-import hu.btsoft.gfmon.engine.model.entity.server.CollectorDataUnit;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
-import hu.btsoft.gfmon.engine.model.entity.server.ServerCollDataUnitJoiner;
+import hu.btsoft.gfmon.engine.model.entity.server.ServerSvrCollDataUnitJoiner;
+import hu.btsoft.gfmon.engine.model.entity.server.SvrCollectorDataUnit;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,7 +37,7 @@ import org.apache.commons.lang3.StringUtils;
 public class ServerService extends ServiceBase<Server> {
 
     @EJB
-    private CollectorDataUnitService collectorDataUnitService;
+    private SvrCollectorDataUnitService svrCollectorDataUnitService;
 
     @PersistenceContext(unitName = "gfmon_PU")
     private EntityManager em;
@@ -67,7 +67,7 @@ public class ServerService extends ServiceBase<Server> {
      */
     public void addDefaultAllCollectorDataUnits(Server server, String createdBy) {
 
-        List<CollectorDataUnit> allCdus = collectorDataUnitService.findAll();
+        List<SvrCollectorDataUnit> allCdus = svrCollectorDataUnitService.findAll();
 
         if (allCdus != null && !allCdus.isEmpty()) {
 
@@ -84,7 +84,7 @@ public class ServerService extends ServiceBase<Server> {
             allCdus.forEach((cdu) -> {
 
                 //Létrehozuk a kapcsolótábla entitását
-                ServerCollDataUnitJoiner joiner = new ServerCollDataUnitJoiner(server, cdu, createdBy, Boolean.TRUE);
+                ServerSvrCollDataUnitJoiner joiner = new ServerSvrCollDataUnitJoiner(server, cdu, createdBy, Boolean.TRUE);
                 em.persist(joiner);
 
                 //Behuzalozzuk a szerverbe és le is mentjük

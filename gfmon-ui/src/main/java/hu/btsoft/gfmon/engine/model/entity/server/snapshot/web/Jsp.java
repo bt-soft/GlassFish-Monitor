@@ -1,0 +1,87 @@
+/*
+ *  ------------------------------------------------------------------------------------
+ *
+ *  GF Monitor project
+ *
+ *  Module:  gfmon-engine (gfmon-engine)
+ *  File:    Jsp.java
+ *  Created: 2017.12.27. 14:45:02
+ *
+ *  ------------------------------------------------------------------------------------
+ */
+package hu.btsoft.gfmon.engine.model.entity.server.snapshot.web;
+
+import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
+import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
+import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SvrSnapshotBase;
+import javax.persistence.Cacheable;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import org.eclipse.persistence.annotations.Customizer;
+
+/**
+ * JPA entitás
+ * REST PATH: monitoring/domain/server/web/jsp
+ *
+ * @author BT
+ */
+@Entity
+@Table(name = "SVR_WEB_JSP", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
+@Cacheable(false)
+@Data
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
+@Customizer(EntityColumnPositionCustomizer.class)
+public class Jsp extends SvrSnapshotBase {
+
+    /**
+     * • jspcount
+     *
+     * Number of active JSP pages
+     */
+    @ColumnPosition(position = 20)
+    private Long jspCount;
+
+    /**
+     * • jspcount - low watermark
+     */
+    @ColumnPosition(position = 21)
+    private Long jspCountLw;
+
+    /**
+     * • jspcount - low watermark
+     */
+    @ColumnPosition(position = 22)
+    private Long jspCountHw;
+
+    /**
+     * • jsperrorcount
+     *
+     * Total number of errors triggered by JSP page invocations
+     */
+    @ColumnPosition(position = 23)
+    private Long jspErrorCount;
+
+    /**
+     * • jspreloadedcount
+     *
+     * Total number of JSP pages that were reloaded
+     */
+    @ColumnPosition(position = 24)
+    private Long jspReloadedCount;
+
+    /**
+     * • totaljspcount
+     *
+     * Total number of JSP pages ever loaded
+     */
+    @ColumnPosition(position = 25)
+    private Long totalJspCount;
+
+}

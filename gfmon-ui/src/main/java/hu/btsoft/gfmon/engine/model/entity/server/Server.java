@@ -14,8 +14,9 @@ package hu.btsoft.gfmon.engine.model.entity.server;
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.crypt.CryptUtil;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
-import hu.btsoft.gfmon.engine.model.entity.ModifiableEntityBase;
 import hu.btsoft.gfmon.corelib.network.NetworkUtils;
+import hu.btsoft.gfmon.engine.model.entity.ModifiableEntityBase;
+import hu.btsoft.gfmon.engine.model.entity.application.Application;
 import java.util.List;
 import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
@@ -61,7 +62,7 @@ import org.apache.commons.lang3.StringUtils;
 })
 @Data
 @ToString(callSuper = true, of = {"hostName", "ipAddress", "portNumber", "active"})
-@EqualsAndHashCode(callSuper = true, exclude = "joiners")
+@EqualsAndHashCode(callSuper = true, exclude = {"joiners", "applications"})
 @NoArgsConstructor
 @Slf4j
 public class Server extends ModifiableEntityBase {
@@ -148,10 +149,17 @@ public class Server extends ModifiableEntityBase {
     /**
      * A szerver mérendő adatai
      * - eager: mindig kell -> mindig felolvassuk
-     * - cascade: ha a szervert töröljük, akkor törlődjönenek a CollectorDataUnit-ok is
+     * - cascade: ha a szervert töröljük, akkor törlődjönenek a DCU-k is
      */
     @OneToMany(mappedBy = "server", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ServerCollDataUnitJoiner> joiners;
+    private List<ServerSvrCollDataUnitJoiner> joiners;
+
+    /**
+     * A szerveren miylen alkalmazásk vannak?
+     * - cascade: ha a szervert töröljük, akkor törlődjönenek az alkalmazások is
+     */
+    @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Application> applications;
 
     /**
      * A kódolatlan jelszó

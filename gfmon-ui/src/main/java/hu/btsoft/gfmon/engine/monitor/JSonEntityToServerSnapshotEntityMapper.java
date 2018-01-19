@@ -11,7 +11,7 @@
  */
 package hu.btsoft.gfmon.engine.monitor;
 
-import hu.btsoft.gfmon.engine.model.entity.snapshot.SnapshotBase;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SvrSnapshotBase;
 import hu.btsoft.gfmon.corelib.reflection.ReflectionUtils;
 import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
 import hu.btsoft.gfmon.engine.monitor.collector.MonitorValueDto;
@@ -118,7 +118,7 @@ public class JSonEntityToServerSnapshotEntityMapper {
      * @param jpaEntityRef JPA entitás referenciája
      * @param dto          a mérés értéke
      */
-    private void fieldMapper(SnapshotBase jpaEntityRef, MonitorValueDto dto) {
+    private void fieldMapper(SvrSnapshotBase jpaEntityRef, MonitorValueDto dto) {
 
         try {
 
@@ -189,9 +189,9 @@ public class JSonEntityToServerSnapshotEntityMapper {
      * @param valuesList       mérési eredmények
      * @param snapshotEntities Snapshot JPA entitások halmaza, ebbe gyűjtjük a lementendő JPA entitásokat
      */
-    void map(List<MonitorValueDto> valuesList, Set<SnapshotBase> snapshotEntities) {
+    void map(List<MonitorValueDto> valuesList, Set<SvrSnapshotBase> snapshotEntities) {
 
-        SnapshotBase snapshotEntity = null;
+        SvrSnapshotBase snapshotEntity = null;
 
         //Végigmegyünk az összes mért JSon entitáson
         for (MonitorValueDto dto : valuesList) {
@@ -200,12 +200,12 @@ public class JSonEntityToServerSnapshotEntityMapper {
             String path = dto.getPath();
 
             //A JPA entitás típusát attól függően hozzuk létre, hogy mely uri-ról származik a mérés
-            Class<? extends SnapshotBase> jpaEntityClass = MonitorPathToJpaEntityClassMap.getJpaEntityClass(path);
+            Class<? extends SvrSnapshotBase> jpaEntityClass = MonitorPathToJpaEntityClassMap.getJpaEntityClass(path);
 
             if (jpaEntityClass != null) {
                 try {
                     if (snapshotEntity == null) {
-                        snapshotEntity = (SnapshotBase) jpaEntityClass.newInstance();
+                        snapshotEntity = (SvrSnapshotBase) jpaEntityClass.newInstance();
                     }
 
                     //DTO -> JPA entitás map

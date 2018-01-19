@@ -12,39 +12,24 @@
 package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.cdi.CdiUtils;
-import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
-import hu.btsoft.gfmon.engine.model.entity.server.CollectorDataUnit;
-import hu.btsoft.gfmon.engine.model.entity.server.Server;
-import hu.btsoft.gfmon.engine.model.entity.snapshot.SnapshotBase;
-import hu.btsoft.gfmon.engine.model.service.CollectorDataUnitService;
-import hu.btsoft.gfmon.engine.model.service.ConfigService;
-import hu.btsoft.gfmon.engine.model.service.IConfigKeyNames;
-import hu.btsoft.gfmon.engine.model.service.ServerService;
-import hu.btsoft.gfmon.engine.model.service.SnapshotService;
 import hu.btsoft.gfmon.corelib.time.Elapsed;
+import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
+import hu.btsoft.gfmon.engine.model.entity.server.Server;
+import hu.btsoft.gfmon.engine.model.entity.server.SvrCollectorDataUnit;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SvrSnapshotBase;
+import hu.btsoft.gfmon.engine.model.service.IConfigKeyNames;
+import hu.btsoft.gfmon.engine.model.service.SnapshotService;
+import hu.btsoft.gfmon.engine.model.service.SvrCollectorDataUnitService;
 import hu.btsoft.gfmon.engine.monitor.management.ServerMonitoringServiceStatus;
-import hu.btsoft.gfmon.engine.security.SessionTokenAcquirer;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 import javax.ejb.DependsOn;
 import javax.ejb.EJB;
-import javax.ejb.EJBException;
-import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.ejb.Timeout;
-import javax.ejb.Timer;
-import javax.ejb.TimerConfig;
-import javax.ejb.TimerService;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.ProcessingException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * GF monitor vezérlő CDI bean
@@ -56,51 +41,41 @@ import org.apache.commons.lang3.StringUtils;
 @DependsOn("Bootstrapper")
 @Slf4j
 @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW) //A BEAN-be záródik a tranzakció
-public class ServerMonitorController {
+public class ServerMonitorController extends MonitorControllerBase {
 
-    private static final String DB_MODIFICATORY_USER = "monitor-controller";
-
-    @EJB
-    private ConfigService configService;
+    private static final String DB_MODIFICATORY_USER = "server-monitor-controller";
 
     @EJB
-    private ServerService serverService;
-
-    @EJB
-    private CollectorDataUnitService collectorDataUnitService;
+    private SvrCollectorDataUnitService svrCollectorDataUnitService;
 
     @EJB
     private SnapshotService snapshotService;
 
-    @Resource
-    private TimerService timerService;
-
-    private Timer timer;
-
     /**
-     * GFMon engine indítása
+     * Az adatbázisban módosítást végző user azonosítójának elkérése
+     *
+     * @return módosító user
      */
-    @PostConstruct
-    protected void init() {
-
-        if (!configService.getBoolean(IConfigKeyNames.AUTOSTART)) {
-            log.debug("Az automatikus indítás kikapcsolva");
-            return;
-        }
-
-        log.trace("GFMon Mérés indul");
-        startTimer();
+    @Override
+    public String getDbModificationUser() {
+        return DB_MODIFICATORY_USER;
     }
 
     /**
-     * Timer indítása
+     * A monitor kontrol Modul neve
+     *
+     * @return név
      */
-    public void startTimer() {
+    @Override
+    public String getControllerName() {
+        return "Server-Monitor";
+    }
 
-        if (isRunningTimer()) {
-            log.warn("A Timer ({}) már fut", timer);
-            return;
-        }
+    /**
+     * Timer indítása előtti lépések
+     */
+    @Override
+    protected void beforeStartTimer() {
 
         //Runtime értékek törlése az adatbázisból
         serverService.clearRuntimeValuesAndSave(DB_MODIFICATORY_USER);
@@ -114,110 +89,6 @@ public class ServerMonitorController {
 
         //Adatnevek táblájának felépítése
         this.checkCollectorDataUnits();
-
-        //Mérési periódusidő leszedése a konfigból
-        int sampleIntervalSec = configService.getInteger(IConfigKeyNames.SAMPLE_INTERVAL);
-
-        //Timer felhúzása
-        this.timer = this.timerService.createIntervalTimer(1_000, // késleltetés
-                sampleIntervalSec * 1_000, //intervallum
-                new TimerConfig("GFMon-Timer", false) //ne legyen perzisztens a timer!
-        );
-
-        log.trace("Timer felhúzva {} másodpercenként", sampleIntervalSec);
-    }
-
-    /**
-     * Timer leállítása
-     */
-    @PreDestroy
-    public void stopTimer() {
-
-        //Már áll a timer?
-        if (timer == null) {
-            return;
-        }
-
-        try {
-            this.timer.cancel();
-        } catch (IllegalStateException | EJBException e) {
-            log.error("Nem állítható le a Timer: {}", this.timer, e);
-        } finally {
-            this.timer = null;
-        }
-
-    }
-
-    /**
-     * Timer újraindítása
-     */
-    public void restartTimer() {
-        stopTimer();
-        startTimer();
-    }
-
-    /**
-     * A timer fut?
-     *
-     * @return
-     */
-    public boolean isRunningTimer() {
-        return (this.timer != null);
-    }
-
-    /**
-     * Bejelentkezés a szerverbe
-     *
-     * @param server szerver entitás
-     *
-     * @return true -> sikeres bejelentkezés
-     */
-    private boolean acquireSessionToken(Server server) {
-
-        //Van már sessionToken:
-        if (!StringUtils.isEmpty(server.getSessionToken())) {
-            return true;
-        }
-
-        String url = server.getUrl();
-        String userName = server.getUserName();
-        String plainPassword = server.getPlainPassword();
-
-        //ha még nincs SessionToken, akkor csinálunk egyet
-        try {
-            //Mivel egy @Singleton Bean-ban vagyunk, emiatt kézzel lookupOne-oljuk a CDI Bean-t, hogy ne fogjon le egy Rest kliesnt állandó jelleggel
-            SessionTokenAcquirer sessionTokenAcquirer = CdiUtils.lookupOne(SessionTokenAcquirer.class);
-
-            String sessionToken = sessionTokenAcquirer.getSessionToken(url, userName, plainPassword);
-
-            server.setSessionToken(sessionToken);
-
-        } catch (Exception e) {
-
-            String logMsg;
-            String dbMsg;
-            if (e instanceof NotAuthorizedException) {
-                logMsg = "A(z) '{}' szerverbe nem lehet bejelnetkezni!";
-                dbMsg = "Nem lehet bejelentkezni!";
-
-            } else if (e instanceof ProcessingException) {
-                logMsg = "A(z) '{}' szerver nem érhető el!";
-                dbMsg = "A szerver nem érhető el!";
-
-            } else {
-                logMsg = String.format("A(z) '{}' szerver monitorozása ismeretlen hibára futott: %s", e.getCause().getMessage());
-                dbMsg = "Ismeretlen hiba: " + e.getCause().getMessage();
-            }
-
-            log.error(logMsg, server.getUrl());
-
-            //Beírjuk az üzenetet az adatbázisba is
-            serverService.updateAdditionalMessage(server, DB_MODIFICATORY_USER, dbMsg);
-
-            return false;
-        }
-
-        return true;
     }
 
     /**
@@ -225,7 +96,7 @@ public class ServerMonitorController {
      */
     private void checkCollectorDataUnits() {
 
-        if (collectorDataUnitService.count() > 1) {
+        if (svrCollectorDataUnitService.count() > 1) {
             log.info("Az 'adatnevek' tábla már OK");
             return;
         }
@@ -251,14 +122,14 @@ public class ServerMonitorController {
 
         //Ha nem sikerült semelyik szervertől sem kigyűjteni az adatokat
         if (dataUnits == null) {
-            log.warn("Nem gyűjthető ki a monitor adatnevek!");
+            log.warn("Nem gyűjthető ki a szerver monitor adatnevek!");
             return;
         }
 
         //Végigmegyünk az összes adatneven és jól beírjuk az adatbázisba őket
         for (DataUnitDto dto : dataUnits) {
-            CollectorDataUnit cdu = new CollectorDataUnit(dto.getRestPath(), dto.getEntityName(), dto.getDataName(), dto.getUnit(), dto.getDescription());
-            collectorDataUnitService.save(cdu, DB_MODIFICATORY_USER);
+            SvrCollectorDataUnit cdu = new SvrCollectorDataUnit(dto.getRestPath(), dto.getEntityName(), dto.getDataName(), dto.getUnit(), dto.getDescription());
+            svrCollectorDataUnitService.save(cdu, DB_MODIFICATORY_USER);
         }
 
         log.info("Adatnevek felépítése OK, adatnevek: {}db, elapsed: {}", dataUnits.size(), Elapsed.getElapsedNanoStr(start));
@@ -267,8 +138,8 @@ public class ServerMonitorController {
     /**
      * A monitorozási mintavétel indítása
      */
-    @Timeout
-    protected void timeOut() {
+    @Override
+    protected void startMonitoring() {
 
         long start = Elapsed.nowNano();
 
@@ -329,7 +200,7 @@ public class ServerMonitorController {
 
             log.trace("Adatgyűjtés indul: {}", server.getUrl());
 
-            Set<SnapshotBase> snapshots = snapshotProvider.fetchSnapshot(server);
+            Set<SvrSnapshotBase> snapshots = snapshotProvider.fetchSnapshot(server);
             checkedServerCnt++;
 
             //Töröljük a kieginfót, ha van
@@ -342,7 +213,7 @@ public class ServerMonitorController {
 
             //JPA mentés
             snapshots.stream()
-                    //.parallel()  nem jó ötlet a paralele -> lock hiba lesz tőle
+                    //.parallel()  nem jó ötlet a paralel -> lock hiba lesz tőle
                     .map((snapshot) -> {
                         //Beállítjuk, hogy melyik szerver mérési ereménye ez a pillanatfelvétel
                         snapshot.setServer(server);
@@ -364,12 +235,11 @@ public class ServerMonitorController {
     }
 
     /**
-     * Automatikus takarítás minden nap éjfélkor fut le
+     * Rendszeres napi tisztítás az adatbázisban
      */
-    @Schedule(hour = "00", minute = "00", second = "00")
-    public void doPeriodicCleanup() {
-
-        log.info("Mérési adatok pucolása indul");
+    @Override
+    protected void dailyCleanUp() {
+        log.info("Szerver mérési adatok pucolása indul");
 
         long start = Elapsed.nowNano();
 
@@ -379,7 +249,7 @@ public class ServerMonitorController {
         //Összes régi rekord törlése
         int deletedRecords = snapshotService.deleteOldRecords(keepDays);
 
-        log.info("Adatok pucolása OK, rekord: {}, elapsed: {}", deletedRecords, Elapsed.getElapsedNanoStr(start));
+        log.info("Szerver mérési adatok pucolása OK, törölt rekord: {}, elapsed: {}", deletedRecords, Elapsed.getElapsedNanoStr(start));
     }
 
 }

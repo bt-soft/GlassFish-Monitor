@@ -13,9 +13,9 @@ package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
-import hu.btsoft.gfmon.engine.model.entity.server.CollectorDataUnit;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
-import hu.btsoft.gfmon.engine.model.entity.snapshot.SnapshotBase;
+import hu.btsoft.gfmon.engine.model.entity.server.SvrCollectorDataUnit;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SvrSnapshotBase;
 import hu.btsoft.gfmon.engine.monitor.collector.ICollectMonitoredData;
 import hu.btsoft.gfmon.engine.monitor.collector.MonitorValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.server.RestDataCollector;
@@ -85,11 +85,11 @@ public class ServerSnapshotProvider {
      *
      * @return Snapshot példányok halmaza, az adatgyűjtés eredménye (új entitás)
      */
-    public Set<SnapshotBase> fetchSnapshot(Server server) {
+    public Set<SvrSnapshotBase> fetchSnapshot(Server server) {
 
         long start = Elapsed.nowNano();
 
-        Set<SnapshotBase> snapshots = null;
+        Set<SvrSnapshotBase> snapshots = null;
 
         //Kigyűjtjük a szerver beállításaiban található monitorozandó path-okat és adatneveket
         //
@@ -102,10 +102,10 @@ public class ServerSnapshotProvider {
         if (server.getJoiners() != null) {
             server.getJoiners().forEach((joiner) -> {
 
-                CollectorDataUnit dcu = joiner.getCollectorDataUnit();
+                SvrCollectorDataUnit svrDcu = joiner.getSvrCollectorDataUnit();
 
                 //A kollektorok Path-jai
-                String path = dcu.getRestPath();
+                String path = svrDcu.getRestPath();
                 serverMonitorablePaths.add(path);
 
                 if (!collectedDatatNamesMap.containsKey(path)) {
@@ -115,7 +115,7 @@ public class ServerSnapshotProvider {
 
                 //Ha kell gyűjteni az adatnevet, akkor megjegyezzük
                 if (Objects.equals(Boolean.TRUE, joiner.getActive())) {
-                    collectedDatatNames.add(dcu.getDataName());
+                    collectedDatatNames.add(svrDcu.getDataName());
                 }
             });
         }

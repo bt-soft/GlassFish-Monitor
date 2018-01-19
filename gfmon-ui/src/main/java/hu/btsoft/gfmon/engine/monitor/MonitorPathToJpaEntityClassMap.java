@@ -11,22 +11,22 @@
  */
 package hu.btsoft.gfmon.engine.monitor;
 
-import hu.btsoft.gfmon.engine.model.entity.snapshot.SnapshotBase;
-import hu.btsoft.gfmon.engine.model.entity.snapshot.server.httpservice.HttpServiceRequest;
-import hu.btsoft.gfmon.engine.model.entity.snapshot.server.jvm.JvmMemory;
-import hu.btsoft.gfmon.engine.model.entity.snapshot.server.jvm.ThreadSystem;
-import hu.btsoft.gfmon.engine.model.entity.snapshot.server.network.ConnectionQueue;
-import hu.btsoft.gfmon.engine.model.entity.snapshot.server.network.HttpListener1ConnectionQueue;
-import hu.btsoft.gfmon.engine.model.entity.snapshot.server.network.HttpListener1KeepAlive;
-import hu.btsoft.gfmon.engine.model.entity.snapshot.server.network.HttpListener1ThreadPool;
-import hu.btsoft.gfmon.engine.model.entity.snapshot.server.network.HttpListener2ConnectionQueue;
-import hu.btsoft.gfmon.engine.model.entity.snapshot.server.network.HttpListener2KeepAlive;
-import hu.btsoft.gfmon.engine.model.entity.snapshot.server.network.HttpListener2ThreadPool;
-import hu.btsoft.gfmon.engine.model.entity.snapshot.server.taservice.TransActionService;
-import hu.btsoft.gfmon.engine.model.entity.snapshot.server.web.Jsp;
-import hu.btsoft.gfmon.engine.model.entity.snapshot.server.web.Request;
-import hu.btsoft.gfmon.engine.model.entity.snapshot.server.web.Servlet;
-import hu.btsoft.gfmon.engine.model.entity.snapshot.server.web.Session;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SvrSnapshotBase;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.httpservice.HttpServiceRequest;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.jvm.JvmMemory;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.jvm.ThreadSystem;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.network.ConnectionQueue;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.network.HttpListener1ConnectionQueue;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.network.HttpListener1KeepAlive;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.network.HttpListener1ThreadPool;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.network.HttpListener2ConnectionQueue;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.network.HttpListener2KeepAlive;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.network.HttpListener2ThreadPool;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.taservice.TransActionService;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.web.Jsp;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.web.Request;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.web.Servlet;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.web.Session;
 import hu.btsoft.gfmon.engine.monitor.collector.server.httpservice.HttpServiceRequestCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.server.jvm.MemoryColletor;
 import hu.btsoft.gfmon.engine.monitor.collector.server.jvm.ThreadSystemCollector;
@@ -59,9 +59,9 @@ public class MonitorPathToJpaEntityClassMap {
      *
      * @return JPA entitás osztály típus
      */
-    public static Class<? extends SnapshotBase> getJpaEntityClass(String path) {
+    public static Class<? extends SvrSnapshotBase> getJpaEntityClass(String path) {
 
-        Class<? extends SnapshotBase> clazz = null;
+        Class<? extends SvrSnapshotBase> clazz = null;
 
         //A JPA entitás típusát attól függően azonosítjuk, hogy mely path-ról származik a mérés
         switch (path) {
