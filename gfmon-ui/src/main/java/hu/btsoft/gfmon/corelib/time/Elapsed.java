@@ -36,73 +36,82 @@ public class Elapsed {
     }
 
     /**
+     * Eltelt idő ns -> String
+     *
+     * @param elapsedNano eltelt idő nanosec-ben
+     * @return stringesen
+     */
+    private static String getNanoStr(long elapsedNano) {
+
+        StringBuilder sb = new StringBuilder();
+
+        //Hetek
+        int cnt = (int) (elapsedNano / WEEK_NANO);
+        if (cnt > 0L) {
+            sb.append(cnt).append("w");
+        }
+
+        //Napok
+        elapsedNano = elapsedNano % WEEK_NANO;
+        cnt = (int) (elapsedNano / DAY_NANO);
+        if (cnt > 0) {
+            sb.append(" ").append(cnt).append("d");
+        }
+
+        //Órák
+        elapsedNano = elapsedNano % DAY_NANO;
+        cnt = (int) (elapsedNano / HOUR_NANO);
+        if (cnt > 0) {
+            sb.append(" ").append(cnt).append("h");
+        }
+
+        //Percek
+        elapsedNano = elapsedNano % HOUR_NANO;
+        cnt = (int) (elapsedNano / MIN_NANO);
+        if (cnt > 0) {
+            sb.append(" ").append(cnt).append("m");
+        }
+
+        //Másodpercek
+        elapsedNano = elapsedNano % MIN_NANO;
+        cnt = (int) (elapsedNano / SEC_NANO);
+        if (cnt > 0) {
+            sb.append(" ").append(cnt).append("s");
+        }
+
+        //Ezred másodpercek
+        elapsedNano = elapsedNano % SEC_NANO;
+        cnt = (int) (elapsedNano / MILISEC_NANO);
+        if (cnt > 0) {
+            sb.append(" ").append(cnt).append("ms");
+        }
+
+        //Mikro
+        elapsedNano = elapsedNano % MILISEC_NANO;
+        cnt = (int) (elapsedNano / MICROSEC_NANO);
+        if (cnt > 0) {
+            sb.append(" ").append(cnt).append("us");
+        }
+
+        //Nano
+        elapsedNano = elapsedNano % MICROSEC_NANO;
+        if (elapsedNano > 0) {
+            sb.append(" ").append(elapsedNano).append("ns");
+        }
+
+        return sb.toString();
+
+    }
+
+    /**
      * Eltelt idő sztringesen
      *
      * @param startNano a kezdő idő
      *
      * @return szövegesen az eltelt idő
      */
-    public static String getNanoStr(long startNano) {
-
-        StringBuilder sb = new StringBuilder();
-
-        long elapsednano = nowNano() - startNano;
-
-        //Hetek
-        int cnt = (int) (elapsednano / WEEK_NANO);
-        if (cnt > 0L) {
-            sb.append(cnt).append("w");
-        }
-
-        //Napok
-        elapsednano = elapsednano % WEEK_NANO;
-        cnt = (int) (elapsednano / DAY_NANO);
-        if (cnt > 0) {
-            sb.append(" ").append(cnt).append("d");
-        }
-
-        //Órák
-        elapsednano = elapsednano % DAY_NANO;
-        cnt = (int) (elapsednano / HOUR_NANO);
-        if (cnt > 0) {
-            sb.append(" ").append(cnt).append("h");
-        }
-
-        //Percek
-        elapsednano = elapsednano % HOUR_NANO;
-        cnt = (int) (elapsednano / MIN_NANO);
-        if (cnt > 0) {
-            sb.append(" ").append(cnt).append("m");
-        }
-
-        //Másodpercek
-        elapsednano = elapsednano % MIN_NANO;
-        cnt = (int) (elapsednano / SEC_NANO);
-        if (cnt > 0) {
-            sb.append(" ").append(cnt).append("s");
-        }
-
-        //Ezred másodpercek
-        elapsednano = elapsednano % SEC_NANO;
-        cnt = (int) (elapsednano / MILISEC_NANO);
-        if (cnt > 0) {
-            sb.append(" ").append(cnt).append("ms");
-        }
-
-        //Mikro
-        elapsednano = elapsednano % MILISEC_NANO;
-        cnt = (int) (elapsednano / MICROSEC_NANO);
-        if (cnt > 0) {
-            sb.append(" ").append(cnt).append("us");
-        }
-
-        //Nano
-        elapsednano = elapsednano % MICROSEC_NANO;
-        if (elapsednano > 0) {
-            sb.append(" ").append(elapsednano).append("ns");
-        }
-
-        return sb.toString();
+    public static String getElapsedNanoStr(long startNano) {
+        return getNanoStr(nowNano() - startNano);
     }
 
     /**
@@ -113,51 +122,6 @@ public class Elapsed {
      * @return szövegesen az eltelt idő
      */
     public static String getMilliStr(long elapsedMillisec) {
-
-        StringBuilder sb = new StringBuilder();
-
-        //Hetek
-        int cnt = (int) (elapsedMillisec / WEEK_NANO);
-        if (cnt > 0L) {
-            sb.append(cnt).append("w");
-        }
-
-        //Napok
-        elapsedMillisec = elapsedMillisec % WEEK_NANO;
-        cnt = (int) (elapsedMillisec / DAY_NANO);
-        if (cnt > 0) {
-            sb.append(" ").append(cnt).append("d");
-        }
-
-        //Órák
-        elapsedMillisec = elapsedMillisec % DAY_NANO;
-        cnt = (int) (elapsedMillisec / HOUR_NANO);
-        if (cnt > 0) {
-            sb.append(" ").append(cnt).append("h");
-        }
-
-        //Percek
-        elapsedMillisec = elapsedMillisec % HOUR_NANO;
-        cnt = (int) (elapsedMillisec / MIN_NANO);
-        if (cnt > 0) {
-            sb.append(" ").append(cnt).append("m");
-        }
-
-        //Másodpercek
-        elapsedMillisec = elapsedMillisec % MIN_NANO;
-        cnt = (int) (elapsedMillisec / SEC_NANO);
-        if (cnt > 0) {
-            sb.append(" ").append(cnt).append("s");
-        }
-
-        //Ezred másodpercek
-        elapsedMillisec = elapsedMillisec % SEC_NANO;
-        if (elapsedMillisec > 0) {
-            sb.append(" ").append(elapsedMillisec).append("ms");
-        }
-
-        return sb.toString();
-
+        return getNanoStr(elapsedMillisec * 1_000 * 1_000);
     }
-
 }

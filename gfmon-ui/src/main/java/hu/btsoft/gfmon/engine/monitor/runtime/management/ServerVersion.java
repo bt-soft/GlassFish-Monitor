@@ -48,15 +48,12 @@ public class ServerVersion extends ManagementBase {
             return null;
         }
 
-        //entity leszedése
-        JsonObject jsonValueEntity = extraProperties.getJsonObject("entity");
-
         Map<String, String> result = new HashMap<>();
 
         //Értékek leszedése
-        result.put("version", jsonValueEntity.getJsonString("version").getString());
-        result.put("version-number", jsonValueEntity.getJsonString("version-number").getString());
-        result.put("full-version", jsonValueEntity.getJsonString("full-version").getString());
+        result.put("version", extraProperties.getJsonString("version").getString());
+        result.put("version-number", extraProperties.getJsonString("version-number").getString());
+        result.put("full-version", extraProperties.getJsonString("full-version").getString());
 
         return result;
     }

@@ -75,6 +75,20 @@
                 <h:outputText value="#{settingsView.selectedServer.modifiedBy}"/>
 
 
+
+            </p:panelGrid>
+
+
+            <br/>
+
+            <p:panelGrid columns="2" styleClass="noBorderPanelGrid" columnClasses="viewDlgTblPrompt, viewDlgTblValue" >
+
+                <h:outputText value="Verzió" />
+                <h:outputText value="#{settingsView.getSelectedServerVersion()}"/>
+
+                <h:outputText value="Futási idő" />
+                <h:outputText value="#{settingsView.getSelectedServerUptime()}"/>
+
             </p:panelGrid>
 
 

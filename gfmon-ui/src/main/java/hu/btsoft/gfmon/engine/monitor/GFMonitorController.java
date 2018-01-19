@@ -261,7 +261,7 @@ public class GFMonitorController {
             collectorDataUnitService.save(cdu, DB_MODIFICATORY_USER);
         }
 
-        log.info("Adatnevek felépítése OK, adatnevek: {}db, elapsed: {}", dataUnits.size(), Elapsed.getNanoStr(start));
+        log.info("Adatnevek felépítése OK, adatnevek: {}db, elapsed: {}", dataUnits.size(), Elapsed.getElapsedNanoStr(start));
     }
 
     /**
@@ -360,7 +360,7 @@ public class GFMonitorController {
             snapshotService.flush();
         }
 
-        log.trace("Monitor {} db szerverre, elapsed: {}", checkedServerCnt, Elapsed.getNanoStr(start));
+        log.trace("Monitor {} db szerverre, elapsed: {}", checkedServerCnt, Elapsed.getElapsedNanoStr(start));
     }
 
     /**
@@ -379,7 +379,7 @@ public class GFMonitorController {
         //Összes régi rekord törlése
         int deletedRecords = snapshotService.deleteOldRecords(keepDays);
 
-        log.info("Adatok pucolása OK, rekord: {}, elapsed: {}", deletedRecords, Elapsed.getNanoStr(start));
+        log.info("Adatok pucolása OK, rekord: {}, elapsed: {}", deletedRecords, Elapsed.getElapsedNanoStr(start));
     }
 
 }

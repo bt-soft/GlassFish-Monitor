@@ -13,6 +13,7 @@ package hu.btsoft.gfmon.engine.monitor.runtime.management;
 
 import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
 import hu.btsoft.gfmon.engine.rest.GFMonitorRestClient;
+import java.io.Serializable;
 import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.ws.rs.client.Client;
@@ -28,7 +29,7 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author BT
  */
-public abstract class ManagementBase {
+public abstract class ManagementBase implements Serializable {
 
     @Inject
     @GFMonitorRestClient

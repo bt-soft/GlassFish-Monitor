@@ -17,14 +17,18 @@ import hu.btsoft.gfmon.corelib.model.entity.server.Server;
 import hu.btsoft.gfmon.corelib.model.service.ConfigService;
 import hu.btsoft.gfmon.corelib.model.service.IConfigKeyNames;
 import hu.btsoft.gfmon.corelib.model.service.ServerService;
+import hu.btsoft.gfmon.engine.monitor.runtime.management.ServerUptime;
+import hu.btsoft.gfmon.engine.monitor.runtime.management.ServerVersion;
 import hu.btsoft.gfmon.ui.view.ViewBase;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
 import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.PersistenceException;
 import lombok.Getter;
@@ -43,6 +47,12 @@ import org.primefaces.context.RequestContext;
 @ViewScoped
 @Slf4j
 public class SettingsView extends ViewBase {
+
+    @Inject
+    private ServerVersion serverVersion;
+
+    @Inject
+    private ServerUptime serverUptime;
 
     // --- Config -----------------------------------
     @EJB
@@ -337,6 +347,48 @@ public class SettingsView extends ViewBase {
         addJsfMessage("growl", FacesMessage.SEVERITY_INFO, "A szerver törlése OK");
         underModifyProcess = false;
         settingsDataChanged = true;
+    }
+
+    /**
+     * A kiválasztott szerver verzió információinak elkérése
+     *
+     * @return verzió info
+     */
+    public String getSelectedServerVersion() {
+
+        if (selectedServer == null) {
+            return null;
+        }
+        if (StringUtils.isEmpty(selectedServer.getSessionToken())) {
+            return "Még nincs adat";
+        }
+        Map<String, String> serverVersionInfo = serverVersion.getServerVersionInfo(selectedServer.getSimpleUrl(), selectedServer.getSessionToken());
+        if (serverVersionInfo != null) {
+            String versionStr = serverVersionInfo.get("full-version");
+            if (!StringUtils.isEmpty(versionStr)) {
+                return versionStr;
+            }
+        }
+
+        return "Nem kérdezhető le";
+    }
+
+    /**
+     * A kiválasztott szerver uptime információinak elkérése
+     *
+     * @return uptime info
+     */
+    public String getSelectedServerUptime() {
+
+        if (selectedServer == null) {
+            return null;
+        }
+        if (StringUtils.isEmpty(selectedServer.getSessionToken())) {
+            return "Még nincs adat";
+        }
+        String uptimeStr = serverUptime.getServerUptime(selectedServer.getSimpleUrl(), selectedServer.getSessionToken());
+
+        return StringUtils.isEmpty(uptimeStr) ? "Nem kérdezhető le" : uptimeStr;
     }
 
 }

@@ -163,7 +163,7 @@ public class SnapshotProvider {
             jsonEntityToSnapsotModelMapper.map(valuesList, snapshots);
         }
 
-        log.trace("server url: {}, elapsed: {}", server.getUrl(), Elapsed.getNanoStr(start));
+        log.trace("server url: {}, elapsed: {}", server.getUrl(), Elapsed.getElapsedNanoStr(start));
 
         return snapshots;
     }

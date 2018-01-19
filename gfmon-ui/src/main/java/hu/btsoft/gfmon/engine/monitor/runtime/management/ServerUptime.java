@@ -23,7 +23,7 @@ import javax.json.JsonObject;
  */
 public class ServerUptime extends ManagementBase {
 
-    private static final String SUB_URL = "management/domain/uptime";
+    private static final String SUB_URL = "/management/domain/uptime";
 
     /**
      * GF Szerver verzió adatok kigyűjtése
@@ -33,7 +33,7 @@ public class ServerUptime extends ManagementBase {
      *
      * @return A GF példány verzió adatai
      */
-    public String getServerVersionInfo(String simpleUrl, String sessionToken) {
+    public String getServerUptime(String simpleUrl, String sessionToken) {
 
         //Válasz leszedése
         JsonObject jsonObject = super.getJsonObject(simpleUrl, SUB_URL, sessionToken);
@@ -48,7 +48,8 @@ public class ServerUptime extends ManagementBase {
         }
 
         //Értékek leszedése
-        return Elapsed.getMilliStr(properties.getJsonNumber("milliseconds").longValue());
+        String strMs = properties.getJsonString("milliseconds").getString();
+        return Elapsed.getMilliStr(Long.parseLong(strMs));
 
     }
 }
