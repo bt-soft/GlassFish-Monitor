@@ -11,8 +11,8 @@
  */
 package hu.btsoft.gfmon.engine.monitor.collector;
 
-import hu.btsoft.gfmon.corelib.model.dto.DataUnitDto;
-import hu.btsoft.gfmon.engine.monitor.ICollectMonitoredData;
+import hu.btsoft.gfmon.engine.monitor.collector.server.RestDataCollector;
+import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
 import hu.btsoft.gfmon.engine.monitor.MonitorPathToJpaEntityClassMap;
 import hu.btsoft.gfmon.engine.monitor.collector.types.ValueUnitType;
 import java.util.Date;

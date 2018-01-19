@@ -11,9 +11,9 @@
  */
 package hu.btsoft.gfmon.ui.view.settings;
 
-import hu.btsoft.gfmon.corelib.model.entity.server.Server;
-import hu.btsoft.gfmon.corelib.model.entity.server.ServerCollDataUnitJoiner;
-import hu.btsoft.gfmon.corelib.model.service.ServerService;
+import hu.btsoft.gfmon.engine.model.entity.server.Server;
+import hu.btsoft.gfmon.engine.model.entity.server.ServerCollDataUnitJoiner;
+import hu.btsoft.gfmon.engine.model.service.ServerService;
 import hu.btsoft.gfmon.ui.view.ViewBase;
 import java.util.List;
 import java.util.Objects;

@@ -11,14 +11,14 @@
  */
 package hu.btsoft.gfmon.ui.view.settings;
 
-import hu.btsoft.gfmon.corelib.model.RuntimeSequenceGenerator;
-import hu.btsoft.gfmon.corelib.model.entity.Config;
-import hu.btsoft.gfmon.corelib.model.entity.server.Server;
-import hu.btsoft.gfmon.corelib.model.service.ConfigService;
-import hu.btsoft.gfmon.corelib.model.service.IConfigKeyNames;
-import hu.btsoft.gfmon.corelib.model.service.ServerService;
-import hu.btsoft.gfmon.engine.monitor.runtime.management.ServerUptime;
-import hu.btsoft.gfmon.engine.monitor.runtime.management.ServerVersion;
+import hu.btsoft.gfmon.engine.model.RuntimeSequenceGenerator;
+import hu.btsoft.gfmon.engine.model.entity.Config;
+import hu.btsoft.gfmon.engine.model.entity.server.Server;
+import hu.btsoft.gfmon.engine.model.service.ConfigService;
+import hu.btsoft.gfmon.engine.model.service.IConfigKeyNames;
+import hu.btsoft.gfmon.engine.model.service.ServerService;
+import hu.btsoft.gfmon.engine.monitor.management.ServerUptime;
+import hu.btsoft.gfmon.engine.monitor.management.ServerVersion;
 import hu.btsoft.gfmon.ui.view.ViewBase;
 import java.net.InetAddress;
 import java.net.UnknownHostException;

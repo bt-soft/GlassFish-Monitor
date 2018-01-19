@@ -38,170 +38,181 @@
 
             <bt:disablePanel disabled="#{not isAdmin}">
 
-                <h:outputText value="Monitorozott szerverek" styleClass="sub-category-header-text"/>
-                <p:panel id="tableButtonsPanelGrid" style="background: transparent; border: none;">
+                <p:panel>
+                    <h:outputText value="Működés" styleClass="sub-category-header-text" />
 
-                    <p:commandButton id="refreshBtn"
-                                     value="Frissít"
-                                     title="Szerver lista frissítése"
-                                     icon="fa fa-refresh"
-
-                                     actionListener="#{settingsView.refreshServers()}"
-
-                                     onstart="PF('blockUI').block();"
-                                     oncomplete="PF('blockUI').unblock();"
-
-                                     update="tableButtonsPanelGrid serversTable"
-                                     />
-
-                    <p:commandButton id="viewBtn"
-                                     value="Részletek"
-                                     title="A kiválasztott szerver részleteinek megtekintése"
-                                     icon="fa fa-id-card-o"
-                                     disabled="#{empty settingsView.selectedServer}"
-                                     onstart="GfMon.updateAndShowDialog('settingsForm:viewBtn', 'settingsForm', 'viewServerDetailsDlg');"
-                                     />
-
-                    <p:commandButton id="newBtn"
-                                     value="Új"
-                                     title="Új szerver felvétele a listába"
-                                     icon="fa fa-plus"
-
-                                     actionListener="#{settingsView.newServerBegin()}"
-
-                                     onsuccess="GfMon.updateAndShowDialog('settingsForm:newBtn', 'settingsForm', 'editServerDetailsDlg');"
-                                     />
-
-                    <p:commandButton id="editBtn"
-                                     value="Módosítás"
-                                     title="A kiválasztott szerver adatainak módosítása"
-                                     icon="fa fa-pencil"
-                                     disabled="#{empty settingsView.selectedServer}"
-
-                                     actionListener="#{settingsView.modifyBegin()}"
-
-                                     onsuccess="GfMon.updateAndShowDialog('settingsForm:editBtn', 'settingsForm', 'editServerDetailsDlg');"
-                                     />
-
-                    <p:commandButton id="deleteBtn"
-                                     value="Törlés"
-                                     title="A kiválasztott szerver törlése a listából"
-                                     icon="fa fa-trash"
-                                     disabled="#{empty settingsView.selectedServer}"
-
-                                     actionListener="#{settingsView.delete()}"
-
-                                     update="tableButtonsPanelGrid serversTable"
-                                     >
-                        <p:confirm header="Törlés"
-                                   message="Biztosan törölni kívánja a(z) '#{settingsView.selectedServer.url}' szervert a listából?"
-                                   icon="fa fa-question-circle-o"
-                                   />
-                    </p:commandButton>
+                    <h:panelGrid columns="8" cellpadding="10">
+                        <h:outputLabel value="Automatikus indítás: " />
+                        <p:inputSwitch value="#{settingsView.configAutoStart}" offLabel="ki" onLabel="be"/>
 
 
+                        <h:outputLabel value="Mintavétel [mp]: "/>
+                        <p:spinner  value="#{settingsView.configSampleInterval}" min="10" max="300" stepFactor="5" size="1" />
 
-                    <p:commandButton value="Beállítások mentése"
-                                     icon="fa fa-save"
-                                     title="Beállítások mentése az adatbázisba"
-                                     actionListener="#{settingsView.saveSettings()}"
 
-                                     disabled="#{not settingsView.settingsDataChanged}"
-
-                                     update="@form :growl"
-                                     style="float: right"
-                                     />
-
+                        <h:outputLabel value="Megőrzendő napok száma [db]: "/>
+                        <p:spinner  value="#{settingsView.configSampleDataKeepDays}" min="10" max="300" stepFactor="1" size="1" />
+                    </h:panelGrid>
                 </p:panel>
-
-                <p:dataTable id="serversTable"
-                             value="#{settingsView.servers}"
-                             var="server"
-
-                             disabledTextSelection="false"
-
-                             selectionMode="single"
-                             selection="#{settingsView.selectedServer}"
-
-                             rowIndexVar="rowNdx"
-                             rowKey="#{server.url}"
-
-                             emptyMessage="Nincs monitorozott szerver"
-                             >
-
-
-                    <p:ajax event="rowSelect"  update="settingsForm:tableButtonsPanelGrid :growl" />
-                    <p:ajax event="rowUnselect"  update="settingsForm:tableButtonsPanelGrid :growl" />
-
-                    <p:column headerText="No#"
-                              styleClass="alignCenter"
-                              style="width: 1.5em">
-                        <h:outputText value="#{rowNdx + 1}" />
-                    </p:column>
-
-
-                    <p:column headerText="DB id"
-                              rendered="#{isDeveloperMode}"
-                              styleClass="alignCenter"
-                              style="width: 3em"
-                              >
-                        <h:outputText value="#{server.id}"/>
-                    </p:column>
-
-                    <p:column headerText="DB ver"
-                              rendered="#{isDeveloperMode}"
-                              styleClass="alignCenter"
-                              style="width: 3em"
-                              >
-                        <h:outputText value="#{server.optLockVersion}"/>
-                    </p:column>
-
-                    <p:column headerText="RT Seq"
-                              rendered="#{isDeveloperMode}"
-                              styleClass="alignCenter"
-                              style="width: 3em"
-                              >
-                        <h:outputText value="#{server.runtimeSeqId}"/>
-                    </p:column>
-
-                    <p:column headerText="Aktív"
-                              styleClass="alignCenter"
-                              style="width: 3em"
-                              >
-                        <i class="fa #{server.active ? 'fa-check-square-o' : 'fa-square-o'}" aria-hidden="true"/>
-                    </p:column>
-
-                    <p:column headerText="URL">
-                        <h:outputText value="#{server.url}"/>
-                    </p:column>
-
-                    <p:column headerText="Leírás">
-                        <h:outputText value="#{server.description}"/>
-                    </p:column>
-
-                    <p:column headerText="KiegInfó">
-                        <h:outputText value="#{server.additionalInformation}"/>
-                    </p:column>
-
-                </p:dataTable>
 
 
                 <br/>
 
-                <h:outputText value="Működés" styleClass="sub-category-header-text" />
+                <p:panel>
+                    <h:outputText value="Monitorozott szerverek" styleClass="sub-category-header-text"/>
+                    <p:panel id="tableButtonsPanelGrid" style="background: transparent; border: none;">
 
-                <h:panelGrid columns="8" cellpadding="10">
-                    <h:outputLabel value="Automatikus indítás: " />
-                    <p:inputSwitch value="#{settingsView.configAutoStart}" offLabel="ki" onLabel="be"/>
+                        <p:commandButton id="refreshBtn"
+                                         value="Frissít"
+                                         title="Szerver lista frissítése"
+                                         icon="fa fa-refresh"
+
+                                         actionListener="#{settingsView.refreshServers()}"
+
+                                         onstart="PF('blockUI').block();"
+                                         oncomplete="PF('blockUI').unblock();"
+
+                                         update="tableButtonsPanelGrid serversTable"
+                                         />
+
+                        <p:commandButton id="viewBtn"
+                                         value="Részletek"
+                                         title="A kiválasztott szerver részleteinek megtekintése"
+                                         icon="fa fa-id-card-o"
+                                         disabled="#{empty settingsView.selectedServer}"
+                                         onstart="GfMon.updateAndShowDialog('settingsForm:viewBtn', 'settingsForm', 'viewServerDetailsDlg');"
+                                         />
+
+                        <p:commandButton id="newBtn"
+                                         value="Új"
+                                         title="Új szerver felvétele a listába"
+                                         icon="fa fa-plus"
+
+                                         actionListener="#{settingsView.newServerBegin()}"
+
+                                         onsuccess="GfMon.updateAndShowDialog('settingsForm:newBtn', 'settingsForm', 'editServerDetailsDlg');"
+                                         />
+
+                        <p:commandButton id="editBtn"
+                                         value="Módosítás"
+                                         title="A kiválasztott szerver adatainak módosítása"
+                                         icon="fa fa-pencil"
+                                         disabled="#{empty settingsView.selectedServer}"
+
+                                         actionListener="#{settingsView.modifyBegin()}"
+
+                                         onsuccess="GfMon.updateAndShowDialog('settingsForm:editBtn', 'settingsForm', 'editServerDetailsDlg');"
+                                         />
+
+                        <p:commandButton id="deleteBtn"
+                                         value="Törlés"
+                                         title="A kiválasztott szerver törlése a listából"
+                                         icon="fa fa-trash"
+                                         disabled="#{empty settingsView.selectedServer}"
+
+                                         actionListener="#{settingsView.delete()}"
+
+                                         update="tableButtonsPanelGrid serversTable"
+                                         >
+                            <p:confirm header="Törlés"
+                                       message="Biztosan törölni kívánja a(z) '#{settingsView.selectedServer.url}' szervert a listából?"
+                                       icon="fa fa-question-circle-o"
+                                       />
+                        </p:commandButton>
 
 
-                    <h:outputLabel value="Mintavétel [mp]: "/>
-                    <p:spinner  value="#{settingsView.configSampleInterval}" min="10" max="300" stepFactor="5" size="1" />
+
+                        <p:commandButton value="Beállítások mentése"
+                                         icon="fa fa-save"
+                                         title="Beállítások mentése az adatbázisba"
+                                         actionListener="#{settingsView.saveSettings()}"
+
+                                         disabled="#{not settingsView.settingsDataChanged}"
+
+                                         update="@form :growl"
+                                         style="float: right"
+                                         />
+
+                    </p:panel>
+
+                    <p:dataTable id="serversTable"
+                                 value="#{settingsView.servers}"
+                                 var="server"
+
+                                 disabledTextSelection="false"
+
+                                 selectionMode="single"
+                                 selection="#{settingsView.selectedServer}"
+
+                                 rowIndexVar="rowNdx"
+                                 rowKey="#{server.url}"
+
+                                 emptyMessage="Nincs monitorozott szerver"
+                                 >
 
 
-                    <h:outputLabel value="Megőrzendő napok száma [db]: "/>
-                    <p:spinner  value="#{settingsView.configSampleDataKeepDays}" min="10" max="300" stepFactor="1" size="1" />
-                </h:panelGrid>
+                        <p:ajax event="rowSelect"  update="settingsForm:tableButtonsPanelGrid :growl" />
+                        <p:ajax event="rowUnselect"  update="settingsForm:tableButtonsPanelGrid :growl" />
+
+                        <p:column headerText="No#"
+                                  styleClass="alignCenter"
+                                  style="width: 1.5em">
+                            <h:outputText value="#{rowNdx + 1}" />
+                        </p:column>
+
+
+                        <p:column headerText="DB id"
+                                  rendered="#{isDeveloperMode}"
+                                  styleClass="alignCenter"
+                                  style="width: 3em"
+                                  >
+                            <h:outputText value="#{server.id}"/>
+                        </p:column>
+
+                        <p:column headerText="DB ver"
+                                  rendered="#{isDeveloperMode}"
+                                  styleClass="alignCenter"
+                                  style="width: 3em"
+                                  >
+                            <h:outputText value="#{server.optLockVersion}"/>
+                        </p:column>
+
+                        <p:column headerText="RT Seq"
+                                  rendered="#{isDeveloperMode}"
+                                  styleClass="alignCenter"
+                                  style="width: 3em"
+                                  >
+                            <h:outputText value="#{server.runtimeSeqId}"/>
+                        </p:column>
+
+                        <p:column headerText="Aktív"
+                                  styleClass="alignCenter"
+                                  style="width: 3em"
+                                  >
+                            <i class="fa #{server.active ? 'fa-check-square-o' : 'fa-square-o'}" aria-hidden="true"/>
+                        </p:column>
+
+                        <p:column headerText="URL">
+                            <h:outputText value="#{server.url}"/>
+                        </p:column>
+
+                        <p:column headerText="Leírás">
+                            <h:outputText value="#{server.description}"/>
+                        </p:column>
+
+                        <p:column headerText="KiegInfó">
+                            <h:outputText value="#{server.additionalInformation}"/>
+                        </p:column>
+
+                    </p:dataTable>
+
+
+                    <br/>
+
+                    <h:outputText value="Monitorozott Alkalmazások" styleClass="sub-category-header-text"/>
+
+
+                </p:panel>
 
 
 

@@ -11,12 +11,12 @@
  */
 package hu.btsoft.gfmon.engine.config;
 
-import hu.btsoft.gfmon.corelib.model.entity.Config;
-import hu.btsoft.gfmon.corelib.model.entity.ConfigValueType;
-import hu.btsoft.gfmon.corelib.model.entity.server.Server;
-import hu.btsoft.gfmon.corelib.model.service.ConfigService;
-import hu.btsoft.gfmon.corelib.model.service.IConfigKeyNames;
-import hu.btsoft.gfmon.corelib.model.service.ServerService;
+import hu.btsoft.gfmon.engine.model.entity.Config;
+import hu.btsoft.gfmon.engine.model.entity.ConfigValueType;
+import hu.btsoft.gfmon.engine.model.entity.server.Server;
+import hu.btsoft.gfmon.engine.model.service.ConfigService;
+import hu.btsoft.gfmon.engine.model.service.IConfigKeyNames;
+import hu.btsoft.gfmon.engine.model.service.ServerService;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
