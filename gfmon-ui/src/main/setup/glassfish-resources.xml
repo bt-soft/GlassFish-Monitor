@@ -26,7 +26,7 @@
         <property name="PortNumber" value="1527"></property>
         <property name="serverName" value="localhost"></property>
         <property name="connectionAttributes" value=";create=true"></property>
-        <property name="DatabaseName" value="gfmon-engine-db"></property>
+        <property name="DatabaseName" value="gfmon-db"></property>
     </jdbc-connection-pool>
 
 </resources>

@@ -8,11 +8,11 @@
     </parent>
 
     <groupId>hu.btsoft.gfmon</groupId>
-    <artifactId>gfmon-ui</artifactId>
+    <artifactId>gfmon</artifactId>
     <version>0.0.1</version>
     <packaging>war</packaging>
 
-    <name>gfmon-ui</name>
+    <name>gfmon</name>
     <description>GlassFish Monitor - REST Monitor UI</description>
     <url>${child.url}</url>
 
@@ -25,13 +25,6 @@
     </properties>
 
     <dependencies>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>gfmon-corelib</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
 
         <!-- @Getter/@Setter/@Data/@Slf4j/... -->
         <dependency>
@@ -47,6 +40,28 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!-- any utils -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+
+        <!-- config -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-configuration2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+        </dependency>
+
+        <!-- Semantic versioning -->
+        <dependency>
+            <groupId>com.github.zafarkhaja</groupId>
+            <artifactId>java-semver</artifactId>
         </dependency>
 
         <!-- PrimeFaces -->
@@ -65,6 +80,12 @@
             <artifactId>modelmapper</artifactId>
         </dependency>
 
+        <!-- JPA API -->
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>eclipselink</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <!--
              EclipseLink logoláshoz:

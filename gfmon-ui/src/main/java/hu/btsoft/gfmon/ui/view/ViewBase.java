@@ -11,7 +11,7 @@
  */
 package hu.btsoft.gfmon.ui.view;
 
-import hu.btsoft.gfmon.core.jsf.GFMonJSFLib;
+import hu.btsoft.gfmon.ui.jsf.GFMonJSFLib;
 import java.io.Serializable;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
