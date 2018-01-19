@@ -223,8 +223,7 @@ public class SettingsView extends ViewBase {
     }
 
     /**
-     * Az aktuálisan editált editedServer host neve alapján kitalálja az IP címet
-     * és beírja az editedServer példányba
+     * Az aktuálisan editált editedServer host neve alapján kitalálja az IP címet és beírja az editedServer példányba
      */
     public void fillIpByHostName() {
         //Ha nincs kitöltve a host
@@ -244,13 +243,11 @@ public class SettingsView extends ViewBase {
     }
 
     /**
-     * Az új szerver duplikált?
-     * (hostName + IpAddress + portNumber)
+     * Az új szerver duplikált? (hostName + IpAddress + portNumber)
      *
      * @param newServer új szerver adatok
      *
-     * @return true -> duplikált
-     *         false -> valóban új szerver
+     * @return true -> duplikált false -> valóban új szerver
      */
     private boolean isDuplicateNewServer(Server newServer) {
 
