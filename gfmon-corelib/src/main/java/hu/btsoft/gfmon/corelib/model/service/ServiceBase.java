@@ -65,11 +65,11 @@ public abstract class ServiceBase<T extends EntityBase> {
      * Entitás mentése/módosítása userrel
      *
      * @param entity entitás
-     * @param user   módosító user
+     * @param user módosító user
      *
      * @throws ConstraintViolationException validációs hiba
-     * @throws PersistenceException         JPA hiba
-     * @throws DatabaseException            DB hiba
+     * @throws PersistenceException JPA hiba
+     * @throws DatabaseException DB hiba
      */
     public void save(T entity, String user) throws RuntimeException {
 
@@ -102,8 +102,8 @@ public abstract class ServiceBase<T extends EntityBase> {
      * @param entity entitás példány
      *
      * @throws ConstraintViolationException validációs hiba
-     * @throws PersistenceException         JPA hiba
-     * @throws DatabaseException            DB hiba
+     * @throws PersistenceException JPA hiba
+     * @throws DatabaseException DB hiba
      */
     public void save(T entity) throws RuntimeException {
 
@@ -147,7 +147,7 @@ public abstract class ServiceBase<T extends EntityBase> {
      * @param entity entitás példány
      *
      * @throws PersistenceException JPA hiba
-     * @throws DatabaseException    DB hiba
+     * @throws DatabaseException DB hiba
      */
     public void remove(T entity) throws RuntimeException {
 
@@ -172,8 +172,7 @@ public abstract class ServiceBase<T extends EntityBase> {
     }
 
     /**
-     * Entitás betöltése az adatbázisból
-     * (Ha a memóriában entitásban változás történt, akor az most elveszik, az adatbázis állapota lesz a nyerő)
+     * Entitás betöltése az adatbázisból (Ha a memóriában entitásban változás történt, akor az most elveszik, az adatbázis állapota lesz a nyerő)
      *
      * @param entiy entitás példány
      */
@@ -241,6 +240,7 @@ public abstract class ServiceBase<T extends EntityBase> {
 
         try {
             count();
+            return true;
         } catch (Exception e) {
             //log.error(e);
         }
