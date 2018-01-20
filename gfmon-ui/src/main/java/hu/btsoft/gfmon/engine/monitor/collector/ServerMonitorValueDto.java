@@ -4,7 +4,7 @@
  *  GF Monitor project
  *
  *  Module:  gfmon-engine (gfmon-engine)
- *  File:    MonitorValueDto.java
+ *  File:    ServerMonitorValueDto.java
  *  Created: 2017.12.24. 17:00:03
  *
  *  ------------------------------------------------------------------------------------
@@ -21,7 +21,7 @@ import lombok.Data;
  * @author BT
  */
 @Data
-public class MonitorValueDto {
+public class ServerMonitorValueDto {
 
     /**
      * Milyen path-on mértük?
@@ -48,11 +48,6 @@ public class MonitorValueDto {
      */
     private String name;
 
-    /**
-     * A mért érték leírása
-     */
-//    private String description;
-//
     /**
      * A mért érték darabszáma
      */

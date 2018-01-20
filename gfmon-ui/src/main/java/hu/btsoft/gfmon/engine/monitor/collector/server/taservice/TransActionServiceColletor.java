@@ -11,14 +11,14 @@
  */
 package hu.btsoft.gfmon.engine.monitor.collector.server.taservice;
 
-import hu.btsoft.gfmon.engine.monitor.collector.CollectorBase;
+import hu.btsoft.gfmon.engine.monitor.collector.ServerCollectorBase;
 
 /**
  * TransAction Service adatok gyűjtése
  *
  * @author BT
  */
-public class TransActionServiceColletor extends CollectorBase {
+public class TransActionServiceColletor extends ServerCollectorBase {
 
     public static final String PATH = "transaction-service";
 

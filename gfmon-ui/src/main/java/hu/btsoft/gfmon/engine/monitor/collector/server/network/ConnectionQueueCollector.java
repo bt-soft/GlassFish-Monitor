@@ -11,14 +11,14 @@
  */
 package hu.btsoft.gfmon.engine.monitor.collector.server.network;
 
-import hu.btsoft.gfmon.engine.monitor.collector.CollectorBase;
+import hu.btsoft.gfmon.engine.monitor.collector.ServerCollectorBase;
 
 /**
  * Network Connection Queue adatok gyűjtése
  *
  * @author BT
  */
-public class ConnectionQueueCollector extends CollectorBase {
+public class ConnectionQueueCollector extends ServerCollectorBase {
 
     public static final String PATH = "network/connection-queue";
 

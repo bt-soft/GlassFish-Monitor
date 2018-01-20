@@ -16,9 +16,9 @@ import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.entity.server.SvrCollectorDataUnit;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SvrSnapshotBase;
-import hu.btsoft.gfmon.engine.monitor.collector.ICollectMonitoredData;
-import hu.btsoft.gfmon.engine.monitor.collector.MonitorValueDto;
-import hu.btsoft.gfmon.engine.monitor.collector.server.RestDataCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.ICollectServerMonitoredData;
+import hu.btsoft.gfmon.engine.monitor.collector.ServerMonitorValueDto;
+import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -42,7 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ServerSnapshotProvider {
 
     @Inject
-    private Instance<ICollectMonitoredData> dataCollectors;
+    private Instance<ICollectServerMonitoredData> serverCollectors;
 
     @Inject
     private RestDataCollector restDataCollector;
@@ -62,7 +62,7 @@ public class ServerSnapshotProvider {
         List<DataUnitDto> result = null;
 
         //Végigmegyünk az összes adatgyűjtőn
-        for (ICollectMonitoredData collector : dataCollectors) {
+        for (ICollectServerMonitoredData collector : serverCollectors) {
 
             List<DataUnitDto> collectDataUnits = collector.collectDataUnits(restDataCollector, server.getSimpleUrl(), server.getSessionToken());
 
@@ -121,7 +121,7 @@ public class ServerSnapshotProvider {
         }
 
         //Végigmegyünk az összes adatgyűjtőn
-        for (ICollectMonitoredData collector : dataCollectors) {
+        for (ICollectServerMonitoredData collector : serverCollectors) {
 
             //meg kell hívni ezt az adatgyűjtőt?
             if (!serverMonitorablePaths.contains(collector.getPath())) {
@@ -139,7 +139,7 @@ public class ServerSnapshotProvider {
 
             //Az adott kollektor adatainak lekérése
             log.trace("A(z) '{}' szerveren a(z) '{}' adatgyűjtő futtatása", server.getUrl(), collector.getPath());
-            List<MonitorValueDto> valuesList = collector.execute(restDataCollector, server.getSimpleUrl(), server.getSessionToken(), collectedDatatNames);
+            List<ServerMonitorValueDto> valuesList = collector.execute(restDataCollector, server.getSimpleUrl(), server.getSessionToken(), collectedDatatNames);
 
             //Üres a mért eredmények Map-je
             if (valuesList == null || valuesList.isEmpty()) {

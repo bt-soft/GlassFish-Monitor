@@ -22,6 +22,7 @@ import hu.btsoft.gfmon.engine.monitor.management.ServerVersion;
 import hu.btsoft.gfmon.ui.view.ViewBase;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
@@ -78,6 +79,9 @@ public class SettingsView extends ViewBase {
 
     @Getter
     private List<Server> servers;
+
+    //Az adatbázisból törlendő szerverek listája
+    private List<Server> deleteServersFromDb = new LinkedList<>();
 
     /**
      * A táblázatban kiválasztott szerver (viewDetail)
@@ -143,10 +147,12 @@ public class SettingsView extends ViewBase {
         configSampleDataKeepDays = null;
 
         servers = null;
-        selectedServer = null;
+        //selectedServer = null;
         editedServer = null;
         editServerDialogHeaderText = null;
         settingsDataChanged = false;
+
+        deleteServersFromDb.clear();
     }
 
     /**
@@ -204,8 +210,16 @@ public class SettingsView extends ViewBase {
                 configService.save(config, currentUser);
             });
 
+            //Szerver tényleges törlése
+            if (deleteServersFromDb != null && !deleteServersFromDb.isEmpty()) {
+                deleteServersFromDb.forEach((Server server) -> {
+                    serverService.remove(server);
+                });
+            }
+
             //Szerverek mentése
             servers.forEach((Server server) -> {
+
                 //A JSF "" string lecserélése null-ra
                 if (StringUtils.isEmpty(server.getUserName())) {
                     server.setUserName(null);
@@ -217,6 +231,8 @@ public class SettingsView extends ViewBase {
                     //Default esetben mindent mérjünk rajta!
                     serverService.addDefaultAllCollectorDataUnits(server, currentUser);
                 }
+
+                //Szerver mentése, az alkalmazások update automatikusan megtörténik
                 serverService.save(server, currentUser);
             });
 
@@ -273,7 +289,7 @@ public class SettingsView extends ViewBase {
      * Új szerver felvételének megkezdése
      */
     public void newServerBegin() {
-        editedServer = new Server("localhost", 4848, "Local GlassFish", null, null, true);
+        editedServer = new Server("localhost", 4848, "Local GlassFish", null, null, ".*", true);
         editedServer.setRuntimeSeqId(RuntimeSequenceGenerator.getNextLong());
         selectedServer = null;
         editServerDialogHeaderText = "Új szerver felvétele";
@@ -293,11 +309,9 @@ public class SettingsView extends ViewBase {
             return;
         }
 
-        boolean isNewServer = editedServer.getId() == null;
-
         //Ez egy módosítás?
         if (underModifyProcess && selectedServer != null) {
-            servers.remove(selectedServer); //A korábbi szerver példányt töröljük a litából
+            servers.remove(selectedServer); //A korábbi szerver példányt töröljük a listából
         }
 
         //Mentjük a változtatást
@@ -343,10 +357,17 @@ public class SettingsView extends ViewBase {
      */
     public void delete() {
         servers.remove(selectedServer); //A kiválasztot szerver példányt töröljük a listából
+
+        //Ha a szerver szerepel már az adatbázisban, akkor egy külön listában vezetjük
+        if (selectedServer.getId() != null) {
+            deleteServersFromDb.add(selectedServer);
+        }
+
         selectedServer = null;
         addJsfMessage("growl", FacesMessage.SEVERITY_INFO, "A szerver törlése OK");
         underModifyProcess = false;
         settingsDataChanged = true;
+
     }
 
     /**

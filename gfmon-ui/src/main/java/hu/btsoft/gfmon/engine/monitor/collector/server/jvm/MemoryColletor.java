@@ -11,14 +11,14 @@
  */
 package hu.btsoft.gfmon.engine.monitor.collector.server.jvm;
 
-import hu.btsoft.gfmon.engine.monitor.collector.CollectorBase;
+import hu.btsoft.gfmon.engine.monitor.collector.ServerCollectorBase;
 
 /**
  * JVM/Memory adatok gyűjtése
  *
  * @author BT
  */
-public class MemoryColletor extends CollectorBase {
+public class MemoryColletor extends ServerCollectorBase {
 
     public static final String PATH = "jvm/memory";
 

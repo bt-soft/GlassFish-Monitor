@@ -56,14 +56,14 @@ public abstract class MonitorControllerBase {
      *
      * @return módosító user
      */
-    public abstract String getDbModificationUser();
+    protected abstract String getDbModificationUser();
 
     /**
      * Az adatbázisban módosítást végző user azonosítójának elkérése
      *
      * @return módosító user
      */
-    public abstract String getControllerName();
+    protected abstract String getControllerName();
 
     /**
      * GFMon engine indítása
@@ -237,14 +237,14 @@ public abstract class MonitorControllerBase {
     @Schedule(hour = "00", minute = "00", second = "00")
     protected void doDailyPeriodicCleanup() {
         try {
-            dailyCleanUp();
+            dailyJob();
         } catch (Exception e) {
             log.error(String.format("GFMon {} modul: Hiba a napi takarítás közben", getControllerName()), e);
         }
     }
 
     /**
-     * Rendszeres napi tisztítás az adatbázisban
+     * Rendszeres napi karbantartás az adatbázisban
      */
-    protected abstract void dailyCleanUp();
+    protected abstract void dailyJob();
 }

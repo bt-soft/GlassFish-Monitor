@@ -11,6 +11,7 @@
  */
 package hu.btsoft.gfmon.engine.monitor.management;
 
+import hu.btsoft.gfmon.engine.monitor.IndependentRestClientBase;
 import java.util.HashSet;
 import java.util.Set;
 import javax.json.JsonObject;
@@ -22,7 +23,7 @@ import javax.json.JsonObject;
  *
  * @author BT
  */
-public class ServerMonitoringServiceStatus extends ManagementBase {
+public class ServerMonitoringServiceStatus extends IndependentRestClientBase {
 
     private static final String SUB_URL = "/management/domain/configs/config/server-config/monitoring-service/module-monitoring-levels";
 

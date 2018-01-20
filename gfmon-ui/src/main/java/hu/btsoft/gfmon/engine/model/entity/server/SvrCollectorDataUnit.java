@@ -17,6 +17,7 @@ import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.EntityBase;
 import java.util.List;
 import javax.persistence.Cacheable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -112,7 +113,7 @@ public class SvrCollectorDataUnit extends EntityBase {
     /**
      * A visszairány a szerverhez
      */
-    @OneToMany(mappedBy = "svrCollectorDataUnit", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "svrCollectorDataUnit", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ServerSvrCollDataUnitJoiner> joiners;
 
     /**

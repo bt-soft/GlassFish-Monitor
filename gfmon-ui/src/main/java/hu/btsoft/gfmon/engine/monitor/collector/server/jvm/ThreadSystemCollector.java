@@ -11,14 +11,14 @@
  */
 package hu.btsoft.gfmon.engine.monitor.collector.server.jvm;
 
-import hu.btsoft.gfmon.engine.monitor.collector.CollectorBase;
+import hu.btsoft.gfmon.engine.monitor.collector.ServerCollectorBase;
 
 /**
  * JVM thread adatgyűjtő
  *
  * @author BT
  */
-public class ThreadSystemCollector extends CollectorBase {
+public class ThreadSystemCollector extends ServerCollectorBase {
 
     public static final String PATH = "jvm/thread-system";
 

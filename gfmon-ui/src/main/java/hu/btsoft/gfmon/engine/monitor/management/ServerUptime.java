@@ -11,6 +11,7 @@
  */
 package hu.btsoft.gfmon.engine.monitor.management;
 
+import hu.btsoft.gfmon.engine.monitor.IndependentRestClientBase;
 import hu.btsoft.gfmon.corelib.time.Elapsed;
 import javax.json.JsonObject;
 
@@ -21,7 +22,7 @@ import javax.json.JsonObject;
  *
  * @author BT
  */
-public class ServerUptime extends ManagementBase {
+public class ServerUptime extends IndependentRestClientBase {
 
     private static final String SUB_URL = "/management/domain/uptime";
 

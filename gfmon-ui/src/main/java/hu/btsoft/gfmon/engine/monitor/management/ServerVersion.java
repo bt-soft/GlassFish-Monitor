@@ -11,6 +11,7 @@
  */
 package hu.btsoft.gfmon.engine.monitor.management;
 
+import hu.btsoft.gfmon.engine.monitor.IndependentRestClientBase;
 import java.util.HashMap;
 import java.util.Map;
 import javax.json.JsonObject;
@@ -22,7 +23,7 @@ import javax.json.JsonObject;
  *
  * @author BT
  */
-public class ServerVersion extends ManagementBase {
+public class ServerVersion extends IndependentRestClientBase {
 
     private static final String SUB_URL = "/management/domain/version";
 

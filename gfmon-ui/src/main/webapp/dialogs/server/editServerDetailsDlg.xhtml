@@ -6,7 +6,7 @@
                 xmlns:p="http://primefaces.org/ui"
                 xmlns:pe="http://primefaces.org/ui/extensions"
 
-                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+                >
 
     <p:dialog id="editServerDetailsDlg"
               widgetVar="editServerDetailsDlg"
@@ -46,6 +46,9 @@
 
                 <h:outputLabel value="Port" />
                 <p:inputNumber id="port" value="#{settingsView.editedServer.portNumber}" onfocus="this.select();" required="true" thousandSeparator="" inputStyle="" decimalPlaces="0"/>
+
+                <h:outputLabel value="App regExp filter" />
+                <p:inputText value="#{settingsView.editedServer.regExpFilter}"/>
 
                 <h:outputLabel value="User" />
                 <p:inputText id="user" value="#{settingsView.editedServer.userName}" onfocus="this.select();">

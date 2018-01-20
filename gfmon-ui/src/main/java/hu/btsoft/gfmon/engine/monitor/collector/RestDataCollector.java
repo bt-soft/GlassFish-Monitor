@@ -9,7 +9,7 @@
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.monitor.collector.server;
+package hu.btsoft.gfmon.engine.monitor.collector;
 
 import hu.btsoft.gfmon.engine.rest.RestDataCollectorBase;
 import javax.ws.rs.core.Response;

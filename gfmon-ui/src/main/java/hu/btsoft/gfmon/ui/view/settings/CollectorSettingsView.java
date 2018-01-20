@@ -58,7 +58,7 @@ public class CollectorSettingsView extends ViewBase {
         if (servers != null && !servers.isEmpty()) {
             selectedServer = servers.get(0); //kiválasztjuk az elsőt
             selectedServerId = selectedServer.getId();
-            sortSelectedServerJoinersList();
+            this.sortSelectedServerJoinersList();
         }
     }
 
@@ -72,11 +72,15 @@ public class CollectorSettingsView extends ViewBase {
                 .findAny()
                 .orElse(null);
 
-        sortSelectedServerJoinersList();
+        this.sortSelectedServerJoinersList();
     }
 
     /**
      * A kiválasztott szerver joiner tábláját lerendezzük a szerverDCU-k path és adatnevei szerint
+     *
+     * Mivel kapcsolótábla van a Server és a DCU között, így a szerver DCU listájánál nincs a kezünkben a mező
+     * amivel kiadhatnánk a JPA @OrderBy("jpaProperty DESC") annotációt.
+     * Emiatt kézzel rendezünk
      */
     private void sortSelectedServerJoinersList() {
 

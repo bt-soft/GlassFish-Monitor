@@ -11,14 +11,14 @@
  */
 package hu.btsoft.gfmon.engine.monitor.collector.server.web;
 
-import hu.btsoft.gfmon.engine.monitor.collector.CollectorBase;
+import hu.btsoft.gfmon.engine.monitor.collector.ServerCollectorBase;
 
 /**
  * WEB/session adatok gyűjtése
  *
  * @author BT
  */
-public class SessionCollector extends CollectorBase {
+public class SessionCollector extends ServerCollectorBase {
 
     public static final String PATH = "web/session";
 

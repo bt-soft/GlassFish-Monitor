@@ -88,8 +88,17 @@ public class DefaultConfigCreator {
             // Az itt megadott szervereknél a gyűjtendő adatok listáját ( List<CollectorDataUnit> ) a GFMonitorController az első mérés során állítja be
             // Alapesetben minden Entitás-t összegyűjt, amit a UI felületen a szerver mért adatainak beállításánál lehet testre szabni
             //
-            Server server = new Server("localhost", 4848, "Lokális GlassFish Admin", null /*user*/, null /*passwd*/, true /*enabled*/);
-//            Server server = new Server("localhost", 4848, "Lokális GlassFish Admin", "admin" /*user*/, "admin" /*passwd*/, true /*enabled*/);
+            Server server = new Server("localhost",
+                    4848,
+                    "Lokális GlassFish Admin",
+                    null //user,
+                    ,
+                     null //passwd
+                    ,
+                     ".*" //regExpFilter
+                    ,
+                     true //enabled
+            );
 
             serverService.save(server, DEF_USERNAME);
         }

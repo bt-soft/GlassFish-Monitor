@@ -62,7 +62,7 @@ public class ServerService extends ServiceBase<Server> {
     /**
      * Az összes ismert DataCollectorUnit hozzáadása a aszerverhez
      *
-     * @param server szerver példány
+     * @param server    szerver példány
      * @param createdBy létrehozó user
      */
     public void addDefaultAllCollectorDataUnits(Server server, String createdBy) {
@@ -99,7 +99,8 @@ public class ServerService extends ServiceBase<Server> {
     }
 
     /**
-     * Összes szerver lekérdezése A rendezés miatt nem az ös findAll() metódusát használjuk
+     * Összes szerver lekérdezése
+     * A rendezés miatt nem az ös findAll() metódusát használjuk
      *
      * @return az összes szerver listája
      */
@@ -124,7 +125,10 @@ public class ServerService extends ServiceBase<Server> {
     }
 
     /**
-     * A futási idejű Entitás értékekek törlése - Lekéri az összes entitást az adatbázisból - Törli a runtime értékeket - majd visszamenti az adatbázisba
+     * A futási idejű Entitás értékekek törlése
+     * - Lekéri az összes entitást az adatbázisból
+     * - Törli a runtime értékeket
+     * - majd visszamenti az adatbázisba
      *
      * (pl.: sessionToken, readyForMonitoring, stb..)
      *
@@ -161,8 +165,8 @@ public class ServerService extends ServiceBase<Server> {
     /**
      * Kieginfó módosítása
      *
-     * @param entity Server entitás
-     * @param modifier módosító user
+     * @param entity            Server entitás
+     * @param modifier          módosító user
      * @param additionalMessage az adatbázisba írandó kieginfo
      */
     public void updateAdditionalMessage(Server entity, String modifier, String additionalMessage) {
@@ -181,7 +185,7 @@ public class ServerService extends ServiceBase<Server> {
     /**
      * Kieginfo törlése
      *
-     * @param entity Server entitás
+     * @param entity   Server entitás
      * @param modifier módosító user
      */
     public void clearAdditionalMessage(Server entity, String modifier) {
@@ -200,7 +204,7 @@ public class ServerService extends ServiceBase<Server> {
      * Szerver entitás + DCU update
      *
      * @param server entitás
-     * @param user létrehozó/módosító user
+     * @param user   létrehozó/módosító user
      *
      * @throws RuntimeException ha hiba van
      */

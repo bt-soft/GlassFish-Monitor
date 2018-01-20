@@ -4,14 +4,13 @@
  *  GF Monitor project
  *
  *  Module:  gfmon-engine (gfmon-engine)
- *  File:    CollectorBase.java
+ *  File:    ServerCollectorBase.java
  *  Created: 2017.12.24. 17:21:48
  *
  *  ------------------------------------------------------------------------------------
  */
 package hu.btsoft.gfmon.engine.monitor.collector;
 
-import hu.btsoft.gfmon.engine.monitor.collector.server.RestDataCollector;
 import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
 import hu.btsoft.gfmon.engine.monitor.MonitorPathToJpaEntityClassMap;
 import hu.btsoft.gfmon.engine.monitor.collector.types.ValueUnitType;
@@ -30,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author BT
  */
 @Slf4j
-public abstract class CollectorBase implements ICollectMonitoredData {
+public abstract class ServerCollectorBase implements ICollectServerMonitoredData {
 
     /**
      * Timestamp -> Date konverzió
@@ -63,13 +62,13 @@ public abstract class CollectorBase implements ICollectMonitoredData {
      *
      * @return értékek listája
      */
-    protected List<MonitorValueDto> fetchValues(JsonObject entities, Set<String> collectedDatatNames) {
+    protected List<ServerMonitorValueDto> fetchValues(JsonObject entities, Set<String> collectedDatatNames) {
 
         if (entities == null) {
             return null;
         }
 
-        List<MonitorValueDto> result = new LinkedList<>();
+        List<ServerMonitorValueDto> result = new LinkedList<>();
 
         //Végigmegyünk az entitásokon
         for (String entityName : entities.keySet()) {
@@ -96,7 +95,7 @@ public abstract class CollectorBase implements ICollectMonitoredData {
                 valueUnitType = ValueUnitType.COUNT_CURLWHW;
             }
 
-            MonitorValueDto dto = new MonitorValueDto();
+            ServerMonitorValueDto dto = new ServerMonitorValueDto();
 
             dto.setUnit(valueUnitType);
             dto.setLastSampleTime(long2Date(jsonValueEntity.getJsonNumber("lastsampletime").longValue()));
@@ -150,7 +149,7 @@ public abstract class CollectorBase implements ICollectMonitoredData {
      * @return Json entitás - értékek Lista
      */
     @Override
-    public List<MonitorValueDto> execute(RestDataCollector restDataCollector, String simpleUrl, String sessionToken, Set<String> collectedDatatNames) {
+    public List<ServerMonitorValueDto> execute(RestDataCollector restDataCollector, String simpleUrl, String sessionToken, Set<String> collectedDatatNames) {
 
         //Ha nem kell ebből az adatgyűjtőből semmi adat, akkor meg sem hívjuk;
         if (collectedDatatNames == null) {

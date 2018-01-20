@@ -72,7 +72,7 @@
                                          onstart="PF('blockUI').block();"
                                          oncomplete="PF('blockUI').unblock();"
 
-                                         update="tableButtonsPanelGrid serversTable"
+                                         update="tableButtonsPanelGrid serversTable appsTable"
                                          />
 
                         <p:commandButton id="viewBtn"
@@ -112,7 +112,7 @@
 
                                          actionListener="#{settingsView.delete()}"
 
-                                         update="tableButtonsPanelGrid serversTable"
+                                         update="tableButtonsPanelGrid serversTable appsTable"
                                          >
                             <p:confirm header="Törlés"
                                        message="Biztosan törölni kívánja a(z) '#{settingsView.selectedServer.url}' szervert a listából?"
@@ -127,11 +127,12 @@
                                          title="Beállítások mentése az adatbázisba"
                                          actionListener="#{settingsView.saveSettings()}"
 
-                                         disabled="#{not settingsView.settingsDataChanged}"
+
 
                                          update="@form :growl"
                                          style="float: right"
                                          />
+                        <!--disabled="#{not settingsView.settingsDataChanged}"-->
 
                     </p:panel>
 
@@ -151,8 +152,8 @@
                                  >
 
 
-                        <p:ajax event="rowSelect"  update="settingsForm:tableButtonsPanelGrid :growl" />
-                        <p:ajax event="rowUnselect"  update="settingsForm:tableButtonsPanelGrid :growl" />
+                        <p:ajax event="rowSelect"  update="settingsForm:tableButtonsPanelGrid settingsForm:appsTable :growl" />
+                        <p:ajax event="rowUnselect"  update="settingsForm:tableButtonsPanelGrid settingsForm:appsTable :growl" />
 
                         <p:column headerText="No#"
                                   styleClass="alignCenter"
@@ -196,6 +197,10 @@
                             <h:outputText value="#{server.url}"/>
                         </p:column>
 
+                        <p:column headerText="App RexExp filter">
+                            <h:outputText value="#{server.regExpFilter}"/>
+                        </p:column>
+
                         <p:column headerText="Leírás">
                             <h:outputText value="#{server.description}"/>
                         </p:column>
@@ -210,7 +215,120 @@
                     <br/>
 
                     <h:outputText value="Monitorozott Alkalmazások" styleClass="sub-category-header-text"/>
+                    <p:dataTable id="appsTable"
+                                 widgetVar="appsTable"
 
+                                 value="#{settingsView.selectedServer.applications}"
+                                 var="app"
+
+                                 scrollable="true"
+                                 scrollHeight="600"
+
+                                 multiViewState="false"
+                                 disabledTextSelection="false"
+
+                                 editable="true"
+                                 editMode="cell"
+
+                                 rowIndexVar="rowNdx"
+                                 rowKey="#{app.id}"
+
+                                 emptyMessage="Nincs Adat"
+                                 >
+
+                        <p:column headerText="No#"
+                                  styleClass="alignCenter"
+                                  style="width: 1.5em">
+                            <h:outputText value="#{rowNdx + 1}" />
+                        </p:column>
+
+                        <!--
+                        <p:column headerText="id"
+                                  style="width: 4em"
+                                  rendered="#{isDeveloperMode}">
+                            <h:outputText value="#{app.id}" />
+                        </p:column>
+                        <p:column headerText="srvId"
+                                  style="width: 4em"
+                                  rendered="#{isDeveloperMode}">
+                            <h:outputText value="#{app.server.id}" />
+                        </p:column>
+                        -->
+
+                        <p:column headerText="Short App Name"
+                                  style="width: 15em"
+                                  sortBy="#{app.appShortName}"
+                                  filterBy="#{app.appShortName}"
+                                  filterStyle="width: 10em; font-size: 0.6em"
+                                  filterMatchMode="contains"
+                                  >
+                            <h:outputText value="#{app.appShortName}" />
+                        </p:column>
+
+                        <p:column headerText="Real App Name"
+                                  style="width: 15em"
+                                  sortBy="#{app.appRealName}"
+                                  filterBy="#{app.appRealName}"
+                                  filterStyle="width: 10em; font-size: 0.6em"
+                                  filterMatchMode="contains"
+                                  >
+                            <h:outputText value="#{app.appRealName}" />
+                        </p:column>
+
+                        <p:column headerText="Moni.Eng"
+                                  styleClass="alignCenter"
+                                  style="width: 4em"
+                                  >
+                            <p:cellEditor>
+                                <f:facet name="output">
+                                    <p:selectBooleanCheckbox value="#{app.active}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <h:inputHidden value="#{app.active}" />
+                                    <h:selectBooleanCheckbox value="#{app.active}" onclick="$(this).prev().val(this.checked)" />
+                                </f:facet>
+
+                            </p:cellEditor>
+                        </p:column>
+
+                        <p:column headerText="ContextRoot">
+                            <h:outputText value="#{app.contextRoot}" />
+                        </p:column>
+                        <p:column headerText="Engedélyezve"
+                                  style="width: 6em"
+                                  styleClass="alignCenter">
+                            <p:selectBooleanCheckbox value="#{app.enabled}"/>
+                        </p:column>
+                        <p:column headerText="Leírás">
+                            <h:outputText value="#{app.description}"/>
+                        </p:column>
+
+                        <p:column headerText="Létrehozva" >
+                            <h:outputText value="#{app.createdDate}">
+                                <f:convertDateTime pattern="yyyy.MM.dd HH:mm:ss"
+                                                   timeZone="Europe/Budapest"
+                                                   locale="hu_HU"/>
+                            </h:outputText>
+                        </p:column>
+
+                        <p:column headerText="Létrehozó">
+                            <h:outputText value="#{app.createdBy}"/>
+                        </p:column>
+
+                        <p:column headerText="Módosítva">
+                            <h:outputText value="#{app.modifiedDate}">
+                                <f:convertDateTime pattern="yyyy.MM.dd HH:mm:ss"
+                                                   timeZone="Europe/Budapest"
+                                                   locale="hu_HU"/>
+                            </h:outputText>
+                        </p:column>
+
+                        <p:column headerText="Módosító" >
+                            <h:outputText value="#{app.modifiedBy}"/>
+                        </p:column>
+
+
+                    </p:dataTable>
 
                 </p:panel>
 

@@ -11,14 +11,14 @@
  */
 package hu.btsoft.gfmon.engine.monitor.collector.server.httpservice;
 
-import hu.btsoft.gfmon.engine.monitor.collector.CollectorBase;
+import hu.btsoft.gfmon.engine.monitor.collector.ServerCollectorBase;
 
 /**
  * http request adatok gyűjtése
  *
  * @author BT
  */
-public class HttpServiceRequestCollector extends CollectorBase {
+public class HttpServiceRequestCollector extends ServerCollectorBase {
 
     public static final String PATH = "server/http-service/server/request";
 

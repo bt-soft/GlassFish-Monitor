@@ -17,6 +17,21 @@ import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.network.NetworkUtils;
 import hu.btsoft.gfmon.engine.model.entity.ModifiableEntityBase;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.httpservice.HttpServiceRequest;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.jvm.JvmMemory;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.jvm.ThreadSystem;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.network.ConnectionQueue;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.network.HttpListener1ConnectionQueue;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.network.HttpListener1KeepAlive;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.network.HttpListener1ThreadPool;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.network.HttpListener2ConnectionQueue;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.network.HttpListener2KeepAlive;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.network.HttpListener2ThreadPool;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.taservice.TransActionService;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.web.Jsp;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.web.Request;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.web.Servlet;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.web.Session;
 import java.util.List;
 import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
@@ -26,6 +41,7 @@ import javax.persistence.FetchType;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.PostLoad;
 import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
@@ -62,7 +78,11 @@ import org.apache.commons.lang3.StringUtils;
 })
 @Data
 @ToString(callSuper = true, of = {"hostName", "ipAddress", "portNumber", "active"})
-@EqualsAndHashCode(callSuper = true, exclude = {"joiners", "applications"})
+@EqualsAndHashCode(callSuper = true /*
+         * , exclude = {"joiners", "applications"}
+         */,
+         of = {"active", "hostName", "ipAddress", "portNumber"})
+
 @NoArgsConstructor
 @Slf4j
 public class Server extends ModifiableEntityBase {
@@ -102,24 +122,32 @@ public class Server extends ModifiableEntityBase {
     private int portNumber;
 
     /**
+     * Alkalmazások regExp szűrője
+     */
+    @NotNull(message = "A regExpFilter nem lehet null")
+    @Column(length = 80, nullable = false)
+    @ColumnPosition(position = 14)
+    private String regExpFilter;
+
+    /**
      * UserName
      */
     @Column(length = 80, nullable = true)
-    @ColumnPosition(position = 14)
+    @ColumnPosition(position = 15)
     private String userName;
 
     /**
      * UserName
      */
     @Column(name = "PASSWD", length = 80, nullable = true)
-    @ColumnPosition(position = 15)
+    @ColumnPosition(position = 16)
     private String encPasswd;
 
     /**
      * Leírás
      */
     @Size(max = 255, message = "A description mező hossza maximum {max} lehet")
-    @ColumnPosition(position = 16)
+    @ColumnPosition(position = 17)
     private String description;
 
     /**
@@ -127,7 +155,7 @@ public class Server extends ModifiableEntityBase {
      * (pl.: miért lett tiltva a szerver monitorozása, stb...)
      */
     @Column(name = "ADDITIONAL_INFO", nullable = true)
-    @ColumnPosition(position = 17)
+    @ColumnPosition(position = 18)
     private String additionalInformation;
 
     /**
@@ -135,7 +163,7 @@ public class Server extends ModifiableEntityBase {
      * Induláskor töröljük
      */
     @Column(name = "TMP_SESSION_TOKEN", nullable = true)
-    @ColumnPosition(position = 18)
+    @ColumnPosition(position = 19)
     private String sessionToken;
 
     /**
@@ -143,7 +171,7 @@ public class Server extends ModifiableEntityBase {
      * Induláskor töröljük
      */
     @Column(name = "TMP_MONSVCE_RDY", nullable = true)
-    @ColumnPosition(position = 19)
+    @ColumnPosition(position = 20)
     private Boolean monitoringServiceReady;
 
     /**
@@ -158,8 +186,55 @@ public class Server extends ModifiableEntityBase {
      * A szerveren miylen alkalmazásk vannak?
      * - cascade: ha a szervert töröljük, akkor törlődjönenek az alkalmazások is
      */
+    @OrderBy("appRealName DESC")
     @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Application> applications;
+
+    //-- Mérési eredmények
+    @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HttpServiceRequest> httpServiceRequests;
+
+    @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<JvmMemory> jvmMemories;
+
+    @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ThreadSystem> chreadSystems;
+
+    @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ConnectionQueue> connectionQueues;
+
+    @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HttpListener1ConnectionQueue> httpListener1ConnectionQueues;
+
+    @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HttpListener1KeepAlive> httpListener1KeepAlives;
+
+    @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HttpListener1ThreadPool> httpListener1ThreadPools;
+
+    @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HttpListener2ConnectionQueue> httpListener2ConnectionQueues;
+
+    @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HttpListener2KeepAlive> httpListener2KeepAlives;
+
+    @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HttpListener2ThreadPool> httpListener2ThreadPools;
+
+    @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TransActionService> transActionServices;
+
+    @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Jsp> jsps;
+
+    @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Request> requests;
+
+    @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Servlet> servlets;
+
+    @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Session> sessions;
 
     /**
      * A kódolatlan jelszó
@@ -176,14 +251,16 @@ public class Server extends ModifiableEntityBase {
      * @param description   leírása
      * @param userName      a monitorozó user
      * @param plainPassword kódolatlan jelszava
+     * @param regExpFilter  alkalmazások reguláris kifejezés filtere
      * @param active        monitorozás aktív rá?
      */
-    public Server(String hostName, int portNumber, String description, String userName, String plainPassword, boolean active) {
+    public Server(String hostName, int portNumber, String description, String userName, String plainPassword, String regExpFilter, boolean active) {
         this.hostName = hostName;
         this.portNumber = portNumber;
         this.description = description;
         this.userName = userName;
         this.plainPassword = plainPassword;
+        this.regExpFilter = regExpFilter;
         this.active = active;
 
         this.ipAddress = NetworkUtils.getIpAddressByHostName(hostName);

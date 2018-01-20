@@ -4,12 +4,12 @@
  *  GF Monitor project
  *
  *  Module:  gfmon-engine (gfmon-engine)
- *  File:    ManagementBase.java
+ *  File:    IndependentRestClientBase.java
  *  Created: 2018.01.19. 9:51:03
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.monitor.management;
+package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
 import hu.btsoft.gfmon.engine.rest.GFMonitorRestClient;
@@ -25,11 +25,11 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * /management adatok ős osztálya
+ * Önálló REST kliens ős osztály
  *
  * @author BT
  */
-public abstract class ManagementBase implements Serializable {
+public abstract class IndependentRestClientBase implements Serializable {
 
     @Inject
     @GFMonitorRestClient
@@ -38,9 +38,10 @@ public abstract class ManagementBase implements Serializable {
     /**
      * A megadott subUrl-ről leszedi a válasz JSonObject-et
      *
-     * @param simpleUrl szerver url
-     * @param subUrl sub url
+     * @param simpleUrl    szerver url
+     * @param subUrl       sub url
      * @param sessionToken session token
+     *
      * @return válast jsonjObject
      */
     protected JsonObject getJsonObject(String simpleUrl, String subUrl, String sessionToken) {

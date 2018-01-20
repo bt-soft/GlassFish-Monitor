@@ -82,8 +82,9 @@ public class ServerSvrCollDataUnitJoiner implements Serializable {
 
     /**
      * CDU
+     * Itt nem szabad kiadni a "cascade = CascadeType.ALL"-t mert végigtörli az összes mértékegységet is :)
      */
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "SVRCDU_ID", referencedColumnName = "ID")
     private SvrCollectorDataUnit svrCollectorDataUnit;
 
@@ -130,7 +131,9 @@ public class ServerSvrCollDataUnitJoiner implements Serializable {
     private Long optLockVersion;
 
     /**
-     * Eredeti DB érték Az adatbázisból való felolvasáss után beállítjuk Ezzel tudjuk detektálni, hogy változott-e az értéke az adatbázishoz képest?
+     * Eredeti DB érték
+     * Az adatbázisból való felolvasáss után beállítjuk.
+     * Ezzel tudjuk detektálni, hogy változott-e az értéke az adatbázishoz képest?
      */
     @Transient
     private Boolean activeDbValue;

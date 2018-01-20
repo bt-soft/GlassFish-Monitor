@@ -4,7 +4,7 @@
  *  GF Monitor project
  *
  *  Module:  gfmon-engine (gfmon-engine)
- *  File:    ICollectMonitoredData.java
+ *  File:    ICollectServerMonitoredData.java
  *  Created: 2017.12.25. 11:02:43
  *
  *  ------------------------------------------------------------------------------------
@@ -12,7 +12,6 @@
 package hu.btsoft.gfmon.engine.monitor.collector;
 
 import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
-import hu.btsoft.gfmon.engine.monitor.collector.server.RestDataCollector;
 import java.util.List;
 import java.util.Set;
 
@@ -21,7 +20,7 @@ import java.util.Set;
  *
  * @author BT
  */
-public interface ICollectMonitoredData {
+public interface ICollectServerMonitoredData {
 
     /**
      * Az adatgyűjtést a szerver URL-jéhez képest melyik uri-n kell elvégezni? pl.: "server/http-service/server/request"
@@ -51,6 +50,6 @@ public interface ICollectMonitoredData {
      *
      * @return adatgyűjtés eredménye (JSon entitás - értékek Lista)
      */
-    List<MonitorValueDto> execute(RestDataCollector restDataCollector, String simpleUrl, String sessionToken, Set<String> collectedDatatNames);
+    List<ServerMonitorValueDto> execute(RestDataCollector restDataCollector, String simpleUrl, String sessionToken, Set<String> collectedDatatNames);
 
 }

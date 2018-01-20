@@ -45,8 +45,7 @@ import lombok.extern.slf4j.Slf4j;
         uniqueConstraints = @UniqueConstraint(columnNames = {"APP_SHORT_NAME", "APP_REAL_NAME"})
 )
 @NamedQueries({
-    @NamedQuery(name = "Server.findAll", query = "SELECT s FROM Server s ORDER BY s.hostName, s.portNumber"), //
-    @NamedQuery(name = "Server.findAllActive", query = "SELECT s FROM Server s WHERE s.active = true ORDER BY s.hostName, s.portNumber"), //
+    @NamedQuery(name = "Application.findByServerId", query = "SELECT a FROM Application a WHERE a.server.id = :serverId"), //
 })
 @Data
 @ToString(callSuper = true)
@@ -56,7 +55,8 @@ import lombok.extern.slf4j.Slf4j;
 public class Application extends ModifiableEntityBase {
 
     /**
-     * Az alkalmazás rövid neve pl.: gf-mon
+     * Az alkalmazás rövid neve
+     * (verziószám és classifier nélkül)
      */
     @NotNull(message = "Az appShortName nem lehet null")
     @Size(min = 5, max = 255, message = "Az appShortName mező hossza {min} és {max} között lehet")
@@ -74,10 +74,126 @@ public class Application extends ModifiableEntityBase {
     private String appRealName;
 
     /**
+     * A monitorozás aktív erre az alkalmazásra?
+     */
+    @Column(nullable = false)
+    @ColumnPosition(position = 13)
+    private Boolean active;
+
+//    /**
+//     * Eredeti DB érték
+//     * Az adatbázisból való felolvasáss után beállítjuk.
+//     * Ezzel tudjuk detektálni, hogy változott-e az értéke az adatbázishoz képest?
+//     */
+//    @Transient
+//    private Boolean activeDbValue;
+    /**
      * Az alkalmazás melyik szerveren van?
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SVR_ID", referencedColumnName = "ID", nullable = false)
-    @ColumnPosition(position = 13)
+    @ColumnPosition(position = 14)
     private Server server;
+
+    //---- Glassfish descriptoból jövő adatok /management/domain/applications/application/{appRealName}
+    /**
+     * Az alkalmatzás engedélyezett?
+     */
+    @Column(nullable = false)
+    @ColumnPosition(position = 15)
+    private boolean enabled;
+
+    /**
+     * Context Root
+     */
+    @Column(length = 128)
+    @ColumnPosition(position = 16)
+    private String contextRoot;
+
+    /**
+     * Az alkalmazás leírása
+     */
+    @Column(length = 256)
+    @ColumnPosition(position = 17)
+    private String description;
+
+    /**
+     * Konstruktor
+     *
+     * @param appRealName alkalmazás tényleges neve
+     * @param active      monitorzásra aktív?
+     * @param server      melyik szerveren van?
+     */
+    public Application(String appRealName, boolean active, Server server) {
+        this.appRealName = appRealName;
+        this.active = active;
+        this.server = server;
+    }
+
+    /**
+     * Konstruktor
+     *
+     * @param appShortName alkalmazás rövid neve (verziószám és classifier nélkül)
+     * @param appRealName  alkalmazás tényleges neve
+     * @param active       monitorzásra aktív?
+     * @param server       melyik szerveren van?
+     */
+    public Application(String appShortName, String appRealName, boolean active, Server server) {
+        this.appShortName = appShortName;
+        this.appRealName = appRealName;
+        this.active = active;
+        this.server = server;
+    }
+
+//    /**
+//     * A programok módosítása csak a szerveren keresztül történik
+//     * Ha a szervernek van módosító adata, akkor onnan átvesszük
+//     */
+//    @Override
+//    protected void preUpdate() {
+//        cloneServerModifier();
+//        super.preUpdate();
+//    }
+//
+//    /**
+//     * A programok módosítása csak a szerveren keresztül történik
+//     * Ha a szervernek van módosító adata, akkor onnan átvesszük
+//     */
+//    @Override
+//    protected void prePersist() {
+//        cloneServerModifier();
+//        super.prePersist();
+//    }
+//
+//    /**
+//     * Ha a szervernek van módosító adata, akkor onnan átvesszük
+//     */
+//    private void cloneServerModifier() {
+//        if (super.getModifiedDate() == null && server.getModifiedDate() != null) {
+//            super.setModifiedDate(server.getModifiedDate());
+//        }
+//        if (super.getModifiedBy() == null && server.getModifiedBy() != null) {
+//            super.setModifiedBy(server.getModifiedBy());
+//        }
+//    }
+    //----------------------
+    /**
+     * Rövid név képzése
+     *
+     * @param _appRealName az alkalmazás hosszú neve
+     */
+    public static String createAppShortName(String _appRealName) {
+
+        //Képezzük a rövid nevet
+//                Pattern pattern = Pattern.compile(server.getRegExpFilter());
+//                String appShortName = "";
+//                Matc_her matcher = pattern.matcher(appRealName);
+//                if (matcher.matches() && matcher.groupCount() >= 1) {
+//                    appShortName = matcher.group(1);
+//                }
+//
+//TODO: majd ha tudom képezni vhogy :(
+//
+        return _appRealName;
+    }
 }

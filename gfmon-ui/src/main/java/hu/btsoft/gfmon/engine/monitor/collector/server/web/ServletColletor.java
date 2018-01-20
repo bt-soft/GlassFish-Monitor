@@ -11,14 +11,14 @@
  */
 package hu.btsoft.gfmon.engine.monitor.collector.server.web;
 
-import hu.btsoft.gfmon.engine.monitor.collector.CollectorBase;
+import hu.btsoft.gfmon.engine.monitor.collector.ServerCollectorBase;
 
 /**
  * WEB/Servlet adatok gyűjtése
  *
  * @author BT
  */
-public class ServletColletor extends CollectorBase {
+public class ServletColletor extends ServerCollectorBase {
 
     public static final String PATH = "web/servlet";
 
