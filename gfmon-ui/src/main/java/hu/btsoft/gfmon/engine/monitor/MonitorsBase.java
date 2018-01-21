@@ -4,7 +4,7 @@
  *  GF Monitor project
  *
  *  Module:  gfmon (gfmon)
- *  File:    MonitorControllerBase.java
+ *  File:    MonitorsBase.java
  *  Created: 2018.01.19. 19:59:57
  *
  *  ------------------------------------------------------------------------------------
@@ -28,7 +28,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author BT
  */
 @Slf4j
-public abstract class MonitorControllerBase {
+public abstract class MonitorsBase {
 
     @Inject
     SessionTokenAcquirer sessionTokenAcquirer;

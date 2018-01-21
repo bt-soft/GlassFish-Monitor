@@ -4,7 +4,7 @@
  *  GF Monitor project
  *
  *  Module:  gfmon (gfmon)
- *  File:    MonitorController.java
+ *  File:    GlassFishMonitorController.java
  *  Created: 2018.01.21. 9:42:45
  *
  *  ------------------------------------------------------------------------------------
@@ -36,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 @Startup
 @DependsOn("Bootstrapper")
 @Slf4j
-public class MonitorController {
+public class GlassFishMonitorController {
 
     @EJB
     protected ConfigService configService;

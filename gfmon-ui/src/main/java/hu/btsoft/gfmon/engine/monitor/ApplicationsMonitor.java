@@ -37,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 @Stateless
 @Slf4j
 @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW) //A BEAN-be záródik a tranzakció
-public class ApplicationsMonitor extends MonitorControllerBase {
+public class ApplicationsMonitor extends MonitorsBase {
 
     private static final String DB_MODIFICATOR_USER = "app-mon-ctrl";
 

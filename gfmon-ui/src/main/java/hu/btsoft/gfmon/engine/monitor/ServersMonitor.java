@@ -19,8 +19,8 @@ import hu.btsoft.gfmon.engine.model.entity.server.SvrCollectorDataUnit;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SvrSnapshotBase;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
 import hu.btsoft.gfmon.engine.model.service.IConfigKeyNames;
-import hu.btsoft.gfmon.engine.model.service.SnapshotService;
 import hu.btsoft.gfmon.engine.model.service.SvrCollectorDataUnitService;
+import hu.btsoft.gfmon.engine.model.service.SvrSnapshotService;
 import hu.btsoft.gfmon.engine.monitor.management.ServerMonitoringServiceStatus;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +28,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -38,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 @Stateless
 @Slf4j
 @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW) //A BEAN-be záródik a tranzakció
-public class ServersMonitor extends MonitorControllerBase {
+public class ServersMonitor extends MonitorsBase {
 
     private static final String DB_MODIFICATOR_USER = "svr-mon-ctrl";
 
@@ -49,7 +50,10 @@ public class ServersMonitor extends MonitorControllerBase {
     private SvrCollectorDataUnitService svrCollectorDataUnitService;
 
     @EJB
-    private SnapshotService snapshotService;
+    private SvrSnapshotService svrSnapshotService;
+
+    @Inject
+    private ServerSnapshotProvider serverSnapshotProvider;
 
     /**
      * Az adatbázisban módosítást végző user azonosítójának elkérése
@@ -197,9 +201,6 @@ public class ServersMonitor extends MonitorControllerBase {
 
         long start = Elapsed.nowNano();
 
-        //Mivel egy @Singleton Bean-ban vagyunk, emiatt kézzel lookupOne-oljuk a CDI Bean-t, hogy ne fogjon le egy Rest kliesnt állandó jelleggel
-        ServerSnapshotProvider serverSnapshotProvider = CdiUtils.lookupOne(ServerSnapshotProvider.class);
-
         //Szerverek ellenőrzése
         this.checkAndPrepareServers();
 
@@ -235,14 +236,14 @@ public class ServersMonitor extends MonitorControllerBase {
                     })
                     .map((snapshot) -> {
                         //lementjük az adatbázisba
-                        snapshotService.save(snapshot);
+                        svrSnapshotService.save(snapshot);
                         return snapshot;
                     }).forEachOrdered((snapshot) -> {
                 ///////////////////////////////////////////////////log.trace("Snapshot: {}", snapshot);
             });
 
             //Kiíratjuk a változásokat az adatbázisba
-            snapshotService.flush();
+            svrSnapshotService.flush();
         }
 
         log.trace("Monitor {} db szerverre, elapsed: {}", measuredServerCnt, Elapsed.getElapsedNanoStr(start));
@@ -261,7 +262,7 @@ public class ServersMonitor extends MonitorControllerBase {
         log.info("Szerver mérési adatok pucolása indul, keepDays: {}", keepDays);
 
         //Összes régi rekord törlése
-        int deletedRecords = snapshotService.deleteOldRecords(keepDays);
+        int deletedRecords = svrSnapshotService.deleteOldRecords(keepDays);
 
         log.info("Szerver mérési adatok pucolása OK, törölt rekord: {}, elapsed: {}", deletedRecords, Elapsed.getElapsedNanoStr(start));
     }

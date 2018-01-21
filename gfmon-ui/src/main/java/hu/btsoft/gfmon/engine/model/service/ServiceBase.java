@@ -13,12 +13,18 @@ package hu.btsoft.gfmon.engine.model.service;
 
 import hu.btsoft.gfmon.engine.model.entity.EntityBase;
 import hu.btsoft.gfmon.engine.model.entity.ModifiableEntityBase;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -66,11 +72,11 @@ public abstract class ServiceBase<T extends EntityBase> {
      * Entitás mentése/módosítása userrel
      *
      * @param entity entitás
-     * @param user módosító user
+     * @param user   módosító user
      *
      * @throws ConstraintViolationException validációs hiba
-     * @throws PersistenceException JPA hiba
-     * @throws DatabaseException DB hiba
+     * @throws PersistenceException         JPA hiba
+     * @throws DatabaseException            DB hiba
      */
     public void save(T entity, String user) throws RuntimeException {
 
@@ -103,8 +109,8 @@ public abstract class ServiceBase<T extends EntityBase> {
      * @param entity entitás példány
      *
      * @throws ConstraintViolationException validációs hiba
-     * @throws PersistenceException JPA hiba
-     * @throws DatabaseException DB hiba
+     * @throws PersistenceException         JPA hiba
+     * @throws DatabaseException            DB hiba
      */
     public void save(T entity) throws RuntimeException {
 
@@ -148,7 +154,7 @@ public abstract class ServiceBase<T extends EntityBase> {
      * @param entity entitás példány
      *
      * @throws PersistenceException JPA hiba
-     * @throws DatabaseException DB hiba
+     * @throws DatabaseException    DB hiba
      */
     public void remove(T entity) throws RuntimeException {
 
@@ -249,6 +255,51 @@ public abstract class ServiceBase<T extends EntityBase> {
         }
 
         return false;
+    }
+
+    /**
+     * Adott entitás régi rekordjainak törlése
+     *
+     * @param entityType entitás class
+     * @param beforeDate ennél régeddieket törölje
+     *
+     * @return törölt entitásrekordok száma
+     */
+    private int deleteEntityOldRecord(Class<T> entityType, Date beforeDate) {
+        CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
+        CriteriaDelete<T> delete = builder.createCriteriaDelete(entityType);
+        Root<T> root = delete.from(entityType);
+
+        Predicate predicate = builder.lessThanOrEqualTo(root.<Date>get("createdDate"), beforeDate);
+        delete.where(predicate);
+
+        int cnt = getEntityManager().createQuery(delete).executeUpdate();
+
+        log.trace("Entitás: {}, törölt rekordok száma: {}", entityType.getSimpleName(), cnt);
+
+        return cnt;
+    }
+
+    /**
+     * régi rekordok törlése
+     *
+     * @param concreateEntityType törlendő entitás class
+     * @param keepDays            a törlendő rekordok keletkezési dátuma ennél a napnál régebbi
+     *
+     * @return összes törölt rekordok száma
+     */
+    public int deleteOldRecords(Class<T> concreateEntityType, int keepDays) {
+
+        int cnt = 0;
+        LocalDate before = LocalDate.now().minusDays(keepDays);
+        Date beforeDate = Date.from(before.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        cnt = getEntityManager().getMetamodel().getEntities().stream()
+                .filter((entity) -> (entity.getClass().isInstance(concreateEntityType)))
+                .map((e) -> this.deleteEntityOldRecord(concreateEntityType, beforeDate))
+                .reduce(cnt, Integer::sum);
+
+        return cnt;
     }
 
 }
