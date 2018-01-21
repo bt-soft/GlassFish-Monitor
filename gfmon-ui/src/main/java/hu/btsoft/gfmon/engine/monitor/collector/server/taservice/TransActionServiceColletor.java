@@ -11,7 +11,7 @@
  */
 package hu.btsoft.gfmon.engine.monitor.collector.server.taservice;
 
-import hu.btsoft.gfmon.engine.monitor.collector.ServerCollectorBase;
+import hu.btsoft.gfmon.engine.monitor.collector.server.ServerCollectorBase;
 
 /**
  * TransAction Service adatok gyűjtése

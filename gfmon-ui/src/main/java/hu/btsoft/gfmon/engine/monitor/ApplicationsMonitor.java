@@ -12,12 +12,15 @@
 package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.time.Elapsed;
+import hu.btsoft.gfmon.engine.model.entity.application.AppSnapshotBase;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.service.ApplicationService;
+import hu.btsoft.gfmon.engine.model.service.ApplicationSnapshotService;
 import hu.btsoft.gfmon.engine.monitor.management.ServerApplications;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -46,6 +49,12 @@ public class ApplicationsMonitor extends MonitorsBase {
 
     @Inject
     private ServerApplications serverApplications;
+
+    @Inject
+    private ApplicationSnapshotProvider applicationSnapshotProvider;
+
+    @EJB
+    private ApplicationSnapshotService applicationSnapshotService;
 
     /**
      * Az adatbázisban módosítást végző user azonosítójának elkérése
@@ -168,8 +177,39 @@ public class ApplicationsMonitor extends MonitorsBase {
     public void startMonitoring() {
         long start = Elapsed.nowNano();
 
-        log.trace("Monitor {}, elapsed: {}", Elapsed.getElapsedNanoStr(start));
+        int measuredServerCnt = 0;
+        for (Server server : serverService.findAllActiveServer()) {
 
+            Set<AppSnapshotBase> applicationSnapshots = applicationSnapshotProvider.fetchSnapshot(server);
+            measuredServerCnt++;
+
+            if (applicationSnapshots == null || applicationSnapshots.isEmpty()) {
+                log.warn("Nincsenek menthető alkalmazás pillanatfelvételek!");
+                return;
+            }
+
+            //JPA mentés
+            applicationSnapshots.stream()
+                    //.parallel()  nem jó ötlet a paralel -> lock hiba lesz tőle
+                    .map((snapshot) -> {
+                        //Beállítjuk, hogy melyik szerver mérési ereménye ez a pillanatfelvétel
+                        //snapshot.setServer(server);
+                        return snapshot;
+                    })
+                    .map((snapshot) -> {
+                        //lementjük az adatbázisba
+                        applicationSnapshotService.save(snapshot);
+                        return snapshot;
+                    }).forEachOrdered((snapshot) -> {
+                log.trace("Application Snapshot: {}", snapshot);
+            });
+
+            //Kiíratjuk a változásokat az adatbázisba
+            applicationSnapshotService.flush();
+
+        }
+
+        log.trace("Alkalmazás adatok kigyűjtve {} db szerverre, elapsed: {}", measuredServerCnt, Elapsed.getElapsedNanoStr(start));
     }
 
     /**

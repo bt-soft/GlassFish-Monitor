@@ -49,11 +49,11 @@ public class ServersMonitor extends MonitorsBase {
     @EJB
     private SvrCollectorDataUnitService svrCollectorDataUnitService;
 
-    @EJB
-    private SvrSnapshotService svrSnapshotService;
-
     @Inject
     private ServerSnapshotProvider serverSnapshotProvider;
+
+    @EJB
+    private SvrSnapshotService svrSnapshotService;
 
     /**
      * Az adatbázisban módosítást végző user azonosítójának elkérése
@@ -218,11 +218,11 @@ public class ServersMonitor extends MonitorsBase {
             Set<SvrSnapshotBase> serverSnapshots = serverSnapshotProvider.fetchSnapshot(server);
             measuredServerCnt++;
 
-            //Töröljük a kieginfót, ha van
+            //Sikerült a bejelentkezés -> töröljük a kieginfót, ha van
             serverService.clearAdditionalMessage(server, DB_MODIFICATOR_USER);
 
             if (serverSnapshots == null || serverSnapshots.isEmpty()) {
-                log.warn("Nincsenek menthető pillanatfelvételek!");
+                log.warn("Nincsenek menthető szerver pillanatfelvételek!");
                 return;
             }
 
@@ -239,14 +239,14 @@ public class ServersMonitor extends MonitorsBase {
                         svrSnapshotService.save(snapshot);
                         return snapshot;
                     }).forEachOrdered((snapshot) -> {
-                ///////////////////////////////////////////////////log.trace("Snapshot: {}", snapshot);
+                ///////////////////////////////////////////////////log.trace("Server Snapshot: {}", snapshot);
             });
 
             //Kiíratjuk a változásokat az adatbázisba
             svrSnapshotService.flush();
         }
 
-        log.trace("Monitor {} db szerverre, elapsed: {}", measuredServerCnt, Elapsed.getElapsedNanoStr(start));
+        log.trace("Szerver adatok kigyűjtve {} db szerverre, elapsed: {}", measuredServerCnt, Elapsed.getElapsedNanoStr(start));
     }
 
     /**

@@ -11,10 +11,10 @@
  */
 package hu.btsoft.gfmon.engine.monitor;
 
-import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SvrSnapshotBase;
 import hu.btsoft.gfmon.corelib.reflection.ReflectionUtils;
 import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
-import hu.btsoft.gfmon.engine.monitor.collector.ServerMonitorValueDto;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SvrSnapshotBase;
+import hu.btsoft.gfmon.engine.monitor.collector.server.ServerMonitorValueDto;
 import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.HashSet;
@@ -189,7 +189,7 @@ public class JSonEntityToServerSnapshotEntityMapper {
      * @param valuesList       mérési eredmények
      * @param snapshotEntities Snapshot JPA entitások halmaza, ebbe gyűjtjük a lementendő JPA entitásokat
      */
-    void map(List<ServerMonitorValueDto> valuesList, Set<SvrSnapshotBase> snapshotEntities) {
+    public void map(List<ServerMonitorValueDto> valuesList, Set<SvrSnapshotBase> snapshotEntities) {
 
         SvrSnapshotBase snapshotEntity = null;
 

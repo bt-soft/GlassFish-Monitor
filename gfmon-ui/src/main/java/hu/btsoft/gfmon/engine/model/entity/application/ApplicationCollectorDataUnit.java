@@ -22,7 +22,6 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.eclipse.persistence.annotations.Customizer;
@@ -40,7 +39,7 @@ import org.eclipse.persistence.annotations.Customizer;
         })
 @Data
 @ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true, exclude = "joiners")
+//@EqualsAndHashCode(callSuper = true, exclude = "joiners")
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
 public class ApplicationCollectorDataUnit extends EntityBase {

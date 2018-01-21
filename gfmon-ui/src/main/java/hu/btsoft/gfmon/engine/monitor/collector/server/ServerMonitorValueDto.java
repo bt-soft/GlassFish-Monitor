@@ -9,7 +9,7 @@
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.monitor.collector;
+package hu.btsoft.gfmon.engine.monitor.collector.server;
 
 import hu.btsoft.gfmon.engine.monitor.collector.types.ValueUnitType;
 import java.util.Date;
@@ -67,5 +67,4 @@ public class ServerMonitorValueDto {
      * A mért érték legnagyobb értéke
      */
     private Long highWatermark;
-
 }

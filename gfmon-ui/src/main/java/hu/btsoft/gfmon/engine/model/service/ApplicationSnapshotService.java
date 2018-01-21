@@ -11,7 +11,7 @@
  */
 package hu.btsoft.gfmon.engine.model.service;
 
-import hu.btsoft.gfmon.engine.model.entity.application.ApplicationSnapshotBase;
+import hu.btsoft.gfmon.engine.model.entity.application.AppSnapshotBase;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Stateless
 @Slf4j
-public class ApplicationSnapshotService extends ServiceBase<ApplicationSnapshotBase> {
+public class ApplicationSnapshotService extends ServiceBase<AppSnapshotBase> {
 
     @PersistenceContext(unitName = "gfmon_PU")
     private EntityManager em;
@@ -33,7 +33,7 @@ public class ApplicationSnapshotService extends ServiceBase<ApplicationSnapshotB
      * Kontruktor
      */
     public ApplicationSnapshotService() {
-        super(ApplicationSnapshotBase.class);
+        super(AppSnapshotBase.class);
     }
 
     /**
@@ -54,7 +54,7 @@ public class ApplicationSnapshotService extends ServiceBase<ApplicationSnapshotB
      * @return összes törölt rekordok száma
      */
     public int deleteOldRecords(int keepDays) {
-        return super.deleteOldRecords(ApplicationSnapshotBase.class, keepDays);
+        return super.deleteOldRecords(AppSnapshotBase.class, keepDays);
 
     }
 

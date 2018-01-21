@@ -11,7 +11,7 @@
  */
 package hu.btsoft.gfmon.engine.monitor.collector.server.jvm;
 
-import hu.btsoft.gfmon.engine.monitor.collector.ServerCollectorBase;
+import hu.btsoft.gfmon.engine.monitor.collector.server.ServerCollectorBase;
 
 /**
  * JVM thread adatgyűjtő

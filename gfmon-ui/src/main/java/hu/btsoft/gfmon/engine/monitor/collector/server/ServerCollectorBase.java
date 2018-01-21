@@ -9,12 +9,11 @@
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.monitor.collector;
+package hu.btsoft.gfmon.engine.monitor.collector.server;
 
-import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
-import hu.btsoft.gfmon.engine.monitor.MonitorPathToJpaEntityClassMap;
+import hu.btsoft.gfmon.engine.monitor.collector.CollectorBase;
+import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.types.ValueUnitType;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -24,34 +23,12 @@ import javax.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * A GF REST interfészén kereztül adatokat gyűjtő kollektorok ős osztálya
+ * A GF REST interfészén keresztül adatokat gyűjtő kollektorok ős osztálya
  *
  * @author BT
  */
 @Slf4j
-public abstract class ServerCollectorBase implements ICollectServerMonitoredData {
-
-    /**
-     * Timestamp -> Date konverzió
-     *
-     * @param value dátum timestamp formátumban
-     *
-     * @return java Date objektum vagy null
-     */
-    private Date long2Date(long value) {
-
-        if (value == -1) {
-            return null;
-        }
-
-        Date result = null;
-        try {
-            result = new Date(value);
-        } catch (Exception e) {
-            log.warn("Dátum konverziós hiba: {}", value, e);
-        }
-        return result;
-    }
+public abstract class ServerCollectorBase extends CollectorBase implements IServerCollector {
 
     /**
      * A REST válaszokból kinyeri az értékeket
@@ -162,55 +139,4 @@ public abstract class ServerCollectorBase implements ICollectServerMonitoredData
         return this.fetchValues(entities, collectedDatatNames);
     }
 
-//<editor-fold defaultstate="collapsed" desc="Adatnevek + mértékegysége + leírás kigyűjtése">
-    /**
-     * A REST válaszokból kinyeri az adatneveket és leírásukat
-     *
-     * @param entities JSon entitás
-     *
-     * @return adatneves leírása
-     */
-    protected List<DataUnitDto> fetchDataUnits(JsonObject entities) {
-
-        if (entities == null) {
-            return null;
-        }
-
-        List<DataUnitDto> result = new LinkedList<>();
-
-        //Végigmegyünk az entitásokon
-        entities.keySet().stream().map((entityName) -> entities.getJsonObject(entityName)).map((jsonValueEntity) -> {
-            DataUnitDto dto = new DataUnitDto();
-            dto.setRestPath(this.getPath());
-            Class entityClass = MonitorPathToJpaEntityClassMap.getJpaEntityClass(this.getPath());
-            dto.setEntityName(entityClass != null ? entityClass.getSimpleName() : "unknown");
-            dto.setDataName(jsonValueEntity.getJsonString("name").getString());
-            dto.setUnit(jsonValueEntity.getJsonString("unit").getString());
-            dto.setDescription(jsonValueEntity.getJsonString("description").getString());
-            return dto;
-        }).forEachOrdered((dto) -> {
-            result.add(dto);
-        });
-
-        return result;
-
-    }
-
-    /**
-     * A mért adatok neve/mértékegysége/leírása lista
-     *
-     * @param restDataCollector REST Data Collector példány
-     * @param simpleUrl         A GF szerver url-je
-     * @param sessionToken      GF session token
-     *
-     * @return mért adatok leírásának listája
-     */
-    @Override
-    public List<DataUnitDto> collectDataUnits(RestDataCollector restDataCollector, String simpleUrl, String sessionToken) {
-        Response response = restDataCollector.getMonitorResponse(this.getPath(), simpleUrl, sessionToken);
-        JsonObject entities = restDataCollector.getJsonEntities(response);
-
-        return this.fetchDataUnits(entities);
-    }
-//</editor-fold>
 }

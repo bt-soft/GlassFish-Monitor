@@ -4,7 +4,7 @@
  *  GF Monitor project
  *
  *  Module:  gfmon-engine (gfmon-engine)
- *  File:    ApplicationSnapshotBase.java
+ *  File:    AppSnapshotBase.java
  *  Created: 2017.12.26. 15:08:12
  *
  *  ------------------------------------------------------------------------------------
@@ -33,7 +33,7 @@ import org.eclipse.persistence.annotations.Customizer;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-public abstract class ApplicationSnapshotBase extends EntityBase {
+public abstract class AppSnapshotBase extends EntityBase {
 
     /**
      * A mérés melyik alkalmazáshoz tartozik?

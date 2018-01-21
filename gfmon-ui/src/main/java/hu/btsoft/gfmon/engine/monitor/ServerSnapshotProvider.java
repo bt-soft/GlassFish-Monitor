@@ -16,9 +16,8 @@ import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.entity.server.SvrCollectorDataUnit;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SvrSnapshotBase;
-import hu.btsoft.gfmon.engine.monitor.collector.ICollectServerMonitoredData;
-import hu.btsoft.gfmon.engine.monitor.collector.ServerMonitorValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.server.ServerMonitorValueDto;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -29,12 +28,14 @@ import java.util.Set;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import hu.btsoft.gfmon.engine.monitor.collector.server.IServerCollector;
 
 /**
- * Egy GF szerver monitorozását elvégző CDI bean
+ * Egy GF szerver összes szerver monitoradatát begyűjtő CDI bean
  *
- * - Paraméterként megkapja a monitorozando GF adatait - Jól meg is nézegeti a GF REST interfészén keresztül a szükséges adatokat - Közben gyűjti az egyes mért
- * adatok nevét/mértékegységét/leírását az adatbázisba (a CollectorDataUnit entitás segítségével)
+ * - Paraméterként megkapja a monitorozando GF szerver adatait
+ * - Jól meg is nézegeti a GF REST interfészén keresztül a szükséges adatokat
+ * - Közben gyűjti az egyes mért adatok nevét/mértékegységét/leírását az adatbázisba (a CollectorDataUnit entitás segítségével)
  *
  * @author BT
  */
@@ -42,7 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ServerSnapshotProvider {
 
     @Inject
-    private Instance<ICollectServerMonitoredData> serverCollectors;
+    private Instance<IServerCollector> serverCollectors;
 
     @Inject
     private RestDataCollector restDataCollector;
@@ -62,7 +63,7 @@ public class ServerSnapshotProvider {
         List<DataUnitDto> result = null;
 
         //Végigmegyünk az összes adatgyűjtőn
-        for (ICollectServerMonitoredData collector : serverCollectors) {
+        for (IServerCollector collector : serverCollectors) {
 
             List<DataUnitDto> collectDataUnits = collector.collectDataUnits(restDataCollector, server.getSimpleUrl(), server.getSessionToken());
 
@@ -79,11 +80,11 @@ public class ServerSnapshotProvider {
     }
 
     /**
-     * Az összes kollentor adatait összegyűjti, majd egy új Snapshot entitásba rakja az eredményeket
+     * Az összes szerver kollentor adatait összegyűjti, majd egy új szerver Snapshot entitásba rakja az eredményeket
      *
      * @param server a monitorozandó Server entitása
      *
-     * @return Snapshot példányok halmaza, az adatgyűjtés eredménye (új entitás)
+     * @return szerver Snapshot példányok halmaza, az adatgyűjtés eredménye (new/detach entitás)
      */
     public Set<SvrSnapshotBase> fetchSnapshot(Server server) {
 
@@ -121,7 +122,7 @@ public class ServerSnapshotProvider {
         }
 
         //Végigmegyünk az összes adatgyűjtőn
-        for (ICollectServerMonitoredData collector : serverCollectors) {
+        for (IServerCollector collector : serverCollectors) {
 
             //meg kell hívni ezt az adatgyűjtőt?
             if (!serverMonitorablePaths.contains(collector.getPath())) {

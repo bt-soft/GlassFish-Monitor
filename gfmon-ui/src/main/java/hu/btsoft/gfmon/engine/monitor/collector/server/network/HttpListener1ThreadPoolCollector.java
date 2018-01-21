@@ -11,7 +11,7 @@
  */
 package hu.btsoft.gfmon.engine.monitor.collector.server.network;
 
-import hu.btsoft.gfmon.engine.monitor.collector.ServerCollectorBase;
+import hu.btsoft.gfmon.engine.monitor.collector.server.ServerCollectorBase;
 
 /**
  * HTTP Listener (network/http-listener-1) thread-pool adatok gyűjtése
