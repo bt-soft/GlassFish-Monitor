@@ -236,6 +236,60 @@ public class ServerMonitorController extends MonitorControllerBase {
     }
 
     /**
+     * Végigmegy az összes szerveren és megnézi, hogy:
+     * - be lehet-e jelentkezni?
+     * - - Ha nem akkor letiltja
+     * - Be van-e kapcsolva a module-monitoring-levels szolgáltatása?
+     * - - Ha nem, akkor letiltja
+     * - Ha nincs a szerverhez rendel CDU, akkor most megteszi
+     */
+    private void checkAndPrepareServers() {
+
+        //Mivel egy @Singleton Bean-ban vagyunk, emiatt kézzel lookupOne-oljuk a CDI Bean-t, hogy ne fogjon le egy Rest kliesnt állandó jelleggel
+        ServerMonitoringServiceStatus serverMonitoringServiceStatus = CdiUtils.lookupOne(ServerMonitoringServiceStatus.class);
+
+        serverService.findAllActiveServer().stream()
+                .filter((server) -> !(!super.acquireSessionToken(server))) // Ha nem sikerül bejelentkezni, akkor letiltjuk és jöhet a következő szerver
+                .filter((server) -> (server.getMonitoringServiceReady() == null || !server.getMonitoringServiceReady())) //Csak az akív szerevekkel foglalkozunk
+                .map((server) -> {
+
+                    // A monitorozandó GF példányok MonitoringService (module-monitoring-levels) ellenőrzése
+                    Set<String> monitorableModules = serverMonitoringServiceStatus.checkMonitorStatus(server.getSimpleUrl(), server.getSessionToken());
+
+                    // Amely szervernek nincs engedélyezve egyetlen monitorozható modulja sem, azt jól inaktívvá tesszük
+                    if (monitorableModules == null) {
+
+                        //letiltjuk
+                        server.setActive(false);
+
+                        //Beírjuk az üzenetet az adatbázisba is
+                        String kieginfo = "A szerver MonitoringService szolgáltatása nincs engedélyezve, emiatt a monitorozása le lett tiltva!";
+                        serverService.updateAdditionalMessage(server, DB_MODIFICATOR_USER, kieginfo);
+
+                        //logot is írunk
+                        log.warn("{}: {}", server.getUrl(), kieginfo);
+
+                    } else {
+                        //Megjegyezzük, hogy a szerver moitorozható
+                        server.setMonitoringServiceReady(true);
+                        log.trace("A(z) {} szerver monitorozható moduljai: {}", server.getUrl(), monitorableModules);
+                    }
+                    return server;
+                }).map((server) -> {
+            //Az első indításkort még nem tudjuk, hogy a GF példányról milyen patháon milyen adatneveket lehet gyűjteni
+            //Emiatt a DefaultConfigCreator-ban létrehozott szervereknél itt kapcsoljuk be a gyűjtendő adatneveket
+            if (server.getJoiners() == null || server.getJoiners().isEmpty()) {
+                //Mindent mérjünk rajta!
+                serverService.addDefaultAllCollectorDataUnits(server, DB_MODIFICATOR_USER);
+            }
+            return server;
+        }).forEachOrdered((server) -> {
+            //lementjük az adatbázisba a szerver megváltozott állapotát
+            serverService.save(server);
+        });
+    }
+
+    /**
      * A monitorozási mintavétel indítása
      */
     @Override
@@ -246,62 +300,22 @@ public class ServerMonitorController extends MonitorControllerBase {
         //Mivel egy @Singleton Bean-ban vagyunk, emiatt kézzel lookupOne-oljuk a CDI Bean-t, hogy ne fogjon le egy Rest kliesnt állandó jelleggel
         ServerSnapshotProvider serverSnapshotProvider = CdiUtils.lookupOne(ServerSnapshotProvider.class);
 
-        int checkedServerCnt = 0;
+        //Szerverek ellenőrzése
+        this.checkAndPrepareServers();
+
+        int measuredServerCnt = 0;
         for (Server server : serverService.findAllActiveServer()) {
 
-            if (!super.acquireSessionToken(server)) {
-                // nem sikerült bejelentkezni -> letiltjuk és jöhet a következő szerver
+            //Ha nincs mit monitorozini rajta, akkor már nem foglalkozunk vele tovább,
+            // majd visszabillenthető a státusza a UI felületről
+            if (!server.getMonitoringServiceReady()) {
                 continue;
-            }
-
-            //Ha még nem tudjuk, hogy az adott szerveren be van-e kapcsolva a MonitoringService
-            if (server.getMonitoringServiceReady() == null || !server.getMonitoringServiceReady()) {
-
-                //Mivel egy @Singleton Bean-ban vagyunk, emiatt kézzel lookupOne-oljuk a CDI Bean-t, hogy ne fogjon le egy Rest kliesnt állandó jelleggel
-                ServerMonitoringServiceStatus serverMonitoringServiceStatus = CdiUtils.lookupOne(ServerMonitoringServiceStatus.class);
-
-                // A monitorozandó GF példányok MonitoringService (module-monitoring-levels) ellenőrzése
-                Set<String> monitorableModules = serverMonitoringServiceStatus.checkMonitorStatus(server.getSimpleUrl(), server.getSessionToken());
-
-                // Amely szervernek nincs engedélyezve egyetlen monitorozható modulja sem, azt jól inaktívvá tesszük
-                if (monitorableModules == null) {
-
-                    //letiltjuk
-                    server.setActive(false);
-
-                    //Beírjuk az üzenetet az adatbázisba is
-                    String kieginfo = "A szerver MonitoringService szolgáltatása nincs engedélyezve, emiatt a monitorozása le lett tiltva!";
-                    serverService.updateAdditionalMessage(server, DB_MODIFICATOR_USER, kieginfo);
-
-                    //logot is írunk
-                    log.warn("{}: {}", server.getUrl(), kieginfo);
-
-                } else {
-                    //Megjegyezzük, hogy a szerver moitorozható
-                    server.setMonitoringServiceReady(true);
-                    log.trace("A(z) {} szerver monitorozható moduljai: {}", server.getUrl(), monitorableModules);
-                }
-
-                //Az első indításkort még nem tudjuk, hogy a GF példányról milyen patháon milyen adatneveket lehet gyűjteni
-                //Emiatt a DefaultConfigCreator-ban létrehozott szervereknél itt kapcsoljuk be a gyűjtendő adatneveket
-                if (server.getJoiners() == null || server.getJoiners().isEmpty()) {
-                    //Mindent mérjünk rajta!
-                    serverService.addDefaultAllCollectorDataUnits(server, DB_MODIFICATOR_USER);
-                }
-
-                //lementjük az adatbázisba a szerver megváltozott állapotát
-                serverService.save(server);
-
-                //Ha incs mit monitorozini rajta, akkor már nem foglalkozunk vele tovább, majd visszabillenthető a státusza a UI felületről
-                if (!server.getMonitoringServiceReady()) {
-                    continue;
-                }
             }
 
             log.trace("Adatgyűjtés indul: {}", server.getUrl());
 
             Set<SvrSnapshotBase> serverSnapshots = serverSnapshotProvider.fetchSnapshot(server);
-            checkedServerCnt++;
+            measuredServerCnt++;
 
             //Töröljük a kieginfót, ha van
             serverService.clearAdditionalMessage(server, DB_MODIFICATOR_USER);
@@ -331,9 +345,10 @@ public class ServerMonitorController extends MonitorControllerBase {
             snapshotService.flush();
         }
 
-        log.trace("Monitor {} db szerverre, elapsed: {}", checkedServerCnt, Elapsed.getElapsedNanoStr(start));
+        log.trace("Monitor {} db szerverre, elapsed: {}", measuredServerCnt, Elapsed.getElapsedNanoStr(start));
     }
 
+//<editor-fold defaultstate="collapsed" desc="Napi karbantartások">
     /**
      * Régi rekordok törlése
      */
@@ -363,4 +378,5 @@ public class ServerMonitorController extends MonitorControllerBase {
         //Körülnézük az alkalmazások környékén
         manageApplications();
     }
+//</editor-fold>
 }

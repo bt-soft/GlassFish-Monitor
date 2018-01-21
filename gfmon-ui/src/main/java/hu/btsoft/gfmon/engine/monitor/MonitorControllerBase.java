@@ -166,7 +166,7 @@ public abstract class MonitorControllerBase {
      */
     protected boolean acquireSessionToken(Server server) {
 
-        //Van már sessionToken:
+        //Van már sessionToken
         if (!StringUtils.isEmpty(server.getSessionToken())) {
             return true;
         }
