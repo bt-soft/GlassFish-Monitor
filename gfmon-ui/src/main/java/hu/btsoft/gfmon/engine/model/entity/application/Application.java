@@ -46,6 +46,7 @@ import lombok.extern.slf4j.Slf4j;
 )
 @NamedQueries({
     @NamedQuery(name = "Application.findByServerId", query = "SELECT a FROM Application a WHERE a.server.id = :serverId ORDER BY a.appRealName"), //
+    @NamedQuery(name = "Application.findByServerIdAndAppShortName", query = "SELECT a FROM Application a WHERE a.server.id = :serverId AND a.appShortName = :appShortName"), //
 })
 @Data
 @ToString(callSuper = true)

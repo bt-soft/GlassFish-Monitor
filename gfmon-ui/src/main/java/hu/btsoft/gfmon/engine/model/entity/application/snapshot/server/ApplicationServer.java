@@ -71,7 +71,7 @@ public class ApplicationServer extends AppSnapshotBase {
      *
      */
     @ColumnPosition(position = 22)
-    private Long sctiveSessions;
+    private Long activeSessions;
 
     /**
      * • errorcount

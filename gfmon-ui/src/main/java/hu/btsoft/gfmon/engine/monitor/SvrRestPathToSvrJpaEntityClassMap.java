@@ -4,7 +4,7 @@
  *  GF Monitor project
  *
  *  Module:  gfmon-engine (gfmon-engine)
- *  File:    MonitorPathToJpaEntityClassMap.java
+ *  File:    SvrRestPathToSvrJpaEntityClassMap.java
  *  Created: 2018.01.06. 10:40:13
  *
  *  ------------------------------------------------------------------------------------
@@ -50,21 +50,21 @@ import lombok.extern.slf4j.Slf4j;
  * @author BT
  */
 @Slf4j
-public class MonitorPathToJpaEntityClassMap {
+public class SvrRestPathToSvrJpaEntityClassMap {
 
     /**
-     * Monitor path
+     * Monitor nakedPath alapján megállíptja, hogy milyen szerver adat entitást kell használni
      *
-     * @param path monitor path
+     * @param nakedPath monitor path
      *
-     * @return JPA entitás osztály típus
+     * @return JPA szerver adat entitás osztály típus
      */
-    public static Class<? extends SvrSnapshotBase> getJpaEntityClass(String path) {
+    public static Class<? extends SvrSnapshotBase> getJpaEntityClass(String nakedPath) {
 
         Class<? extends SvrSnapshotBase> clazz = null;
 
         //A JPA entitás típusát attól függően azonosítjuk, hogy mely path-ról származik a mérés
-        switch (path) {
+        switch (nakedPath) {
 
             case HttpServiceRequestCollector.PATH:
                 clazz = HttpServiceRequest.class;
@@ -127,7 +127,7 @@ public class MonitorPathToJpaEntityClassMap {
                 break;
 
             default:
-                log.error("A(z) '{}' monitor path-hoz nincs JPA entzitás osztály rendelve!", path);
+                log.error("A(z) '{}' monitor path-hoz nincs szerver JPA entitás osztály rendelve!", nakedPath);
         }
 
         return clazz;

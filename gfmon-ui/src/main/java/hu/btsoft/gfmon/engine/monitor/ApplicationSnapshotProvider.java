@@ -12,13 +12,13 @@
 package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.time.Elapsed;
-import hu.btsoft.gfmon.engine.model.entity.application.AppSnapshotBase;
+import hu.btsoft.gfmon.engine.model.entity.application.Application;
+import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
-import hu.btsoft.gfmon.engine.monitor.collector.CollectedValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.application.ApplicationsCollector;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,24 +40,38 @@ public class ApplicationSnapshotProvider {
      *
      * @return alkalmazás Snapshot példányok halmaza, az adatgyűjtés eredménye (new/detach entitás)
      */
-    public List<AppSnapshotBase> fetchSnapshot(Server server) {
+    public Set<AppSnapshotBase> fetchSnapshot(Server server) {
 
         long start = Elapsed.nowNano();
 
-        List<String> collectedAppRealNames = new LinkedList<>();
-        server.getApplications().forEach((app) -> {
-            if (app.getActive() != null && Objects.equals(app.getActive(), Boolean.TRUE)) {
-                collectedAppRealNames.add(app.getAppRealName());
-            }
-        });
+        Set<AppSnapshotBase> snapshots = null;
 
-        if (!collectedAppRealNames.isEmpty()) {
-            List<CollectedValueDto> result = applicationsCollector.execute(server.getSimpleUrl(), server.getSessionToken(), collectedAppRealNames);
+        //Véégigmegyünk a szerver alkalmazásain
+        for (Application app : server.getApplications()) {
+
+            //Ha monitorozásra akítív, akkor meghívjuk rá az adatgyűjtőt
+            if (app.getActive() != null && Objects.equals(app.getActive(), Boolean.TRUE)) {
+
+                Set<AppSnapshotBase> appSnapshots = applicationsCollector.start(server.getSimpleUrl(), server.getSessionToken(), app.getAppRealName());
+
+                if (appSnapshots != null && !appSnapshots.isEmpty()) {
+
+                    //Beállítjuk az összes pillanatfelvételen, hogy ez melyik alkalmazáshoz van rendelve
+                    appSnapshots.forEach((appSnapshot) -> {
+                        appSnapshot.setApplication(app);
+                    });
+
+                    if (snapshots == null) {
+                        snapshots = new LinkedHashSet<>();
+                    }
+                    snapshots.addAll(appSnapshots);
+                }
+            }
         }
 
         log.trace("server url: {}, elapsed: {}", server.getUrl(), Elapsed.getElapsedNanoStr(start));
 
-        return null;
+        return snapshots;
     }
 
 }

@@ -61,4 +61,21 @@ public class ApplicationService extends ServiceBase<Application> {
 
         return resultList;
     }
+
+    /**
+     * Az adott szerver adott alkalmazásának lekérdezése
+     *
+     * @param serverId     adott szerver id-je
+     * @param appShortName alkalmzás rövid neve
+     *
+     * @return alkalmazások listája
+     */
+    public Application findByServerIdAndAppShortName(Long serverId, String appShortName) {
+        Query query = em.createNamedQuery("Application.findByServerIdAndAppShortName");
+        query.setParameter("serverId", serverId);
+        query.setParameter("appShortName", appShortName);
+        Application result = (Application) query.getSingleResult();
+
+        return result;
+    }
 }

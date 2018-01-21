@@ -12,14 +12,15 @@
 package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.time.Elapsed;
-import hu.btsoft.gfmon.engine.model.entity.application.AppSnapshotBase;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
+import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.service.ApplicationService;
 import hu.btsoft.gfmon.engine.model.service.ApplicationSnapshotService;
 import hu.btsoft.gfmon.engine.monitor.management.ServerApplications;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -179,7 +180,7 @@ public class ApplicationsMonitor extends MonitorsBase {
         int measuredServerCnt = 0;
         for (Server server : serverService.findAllActiveServer()) {
 
-            List<AppSnapshotBase> applicationSnapshots = applicationSnapshotProvider.fetchSnapshot(server);
+            Set<AppSnapshotBase> applicationSnapshots = applicationSnapshotProvider.fetchSnapshot(server);
             measuredServerCnt++;
 
             if (applicationSnapshots == null || applicationSnapshots.isEmpty()) {
@@ -190,11 +191,6 @@ public class ApplicationsMonitor extends MonitorsBase {
             //JPA mentés
             applicationSnapshots.stream()
                     //.parallel()  nem jó ötlet a paralel -> lock hiba lesz tőle
-                    .map((snapshot) -> {
-                        //Beállítjuk, hogy melyik szerver mérési ereménye ez a pillanatfelvétel
-                        //snapshot.setServer(server);
-                        return snapshot;
-                    })
                     .map((snapshot) -> {
                         //lementjük az adatbázisba
                         applicationSnapshotService.save(snapshot);

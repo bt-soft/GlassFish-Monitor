@@ -23,7 +23,7 @@ public interface ICollectorBase {
     /**
      * Az adatgyűjtést a szerver URL-jéhez képest melyik uri-n kell elvégezni? pl.: "server/http-service/server/request"
      *
-     * @return path
+     * @return path monitorozott path
      */
     String getPath();
 

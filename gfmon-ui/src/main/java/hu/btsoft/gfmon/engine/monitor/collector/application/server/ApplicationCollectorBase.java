@@ -3,60 +3,57 @@
  *
  *  GF Monitor project
  *
- *  Module:  gfmon-engine (gfmon-engine)
- *  File:    ServerCollectorBase.java
- *  Created: 2017.12.24. 17:21:48
+ *  Module:  gfmon (gfmon)
+ *  File:    ApplicationCollectorBase.java
+ *  Created: 2018.01.21. 11:47:32
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.monitor.collector.server;
+package hu.btsoft.gfmon.engine.monitor.collector.application.server;
 
 import hu.btsoft.gfmon.engine.monitor.collector.CollectedValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.CollectorBase;
 import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.application.IAppServerCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.types.ValueUnitType;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * A GF REST interfészén keresztül adatokat gyűjtő kollektorok ős osztálya
+ * Alkalmazás adatgyűjtés ős osztály
+ *
+ * http://localhost:4848/monitoring/domain/server/applications/{appRealName}/???
  *
  * @author BT
  */
 @Slf4j
-public abstract class ServerCollectorBase extends CollectorBase implements IServerCollector {
+public abstract class ApplicationCollectorBase extends CollectorBase implements IAppServerCollector {
+
+    protected String appRealName;
 
     /**
      * A REST válaszokból kinyeri az értékeket
      * Csak a collectedDatatNames halmazban szereplő adatnevekkel foglalkozunk
      *
-     * @param entities            JSon entitás
-     * @param collectedDatatNames kigyűjtendő adatnevek halmaza
-     *
-     * @return értékek listája
+     * @return az összegyűjtött adatok listájának map-je a kategóriával/hellyel kulcsolva
      */
-    protected List<CollectedValueDto> fetchValues(JsonObject entities, Set<String> collectedDatatNames) {
+    private List<CollectedValueDto> fetchValues(JsonObject entities) {
 
         if (entities == null) {
             return null;
         }
 
-        List<CollectedValueDto> result = new LinkedList<>();
+        List<CollectedValueDto> resultList = new LinkedList<>();
 
         //Végigmegyünk az entitásokon
         for (String entityName : entities.keySet()) {
             JsonObject jsonValueEntity = entities.getJsonObject(entityName);
 
-            //Leszedjük az adatnevet és megvizsgáljuk, hogy kell-e gyűjteni egyáltalán ezt az adatnév értéket?
             String dataName = jsonValueEntity.getJsonString("name").getString();
-            if (!collectedDatatNames.contains(dataName)) {
-                continue;
-            }
 
             String unitName = jsonValueEntity.getJsonString("unit").getString();
             if (unitName == null) {
@@ -110,34 +107,32 @@ public abstract class ServerCollectorBase extends CollectorBase implements IServ
                     break;
             }
 
-            result.add(dto);
+            resultList.add(dto);
         }
 
-        return result;
+        return resultList;
     }
 
     /**
-     * REST JSon monitor adatok összegyűjtése
+     * Adatgyűjtés végrehajtása
      *
-     * @param restDataCollector  REST adatgyűjtó példány
-     * @param simpleUrl          a szerver url-je
-     * @param sessionToken       GF session token
-     * @param collectedDataNames kigyűjtendő adatnevek halmaza
+     * @param restDataCollector REST Data Collector példány
+     * @param simpleUrl         A GF szerver url-je
+     * @param appRealName       az alkalmazás igazi nevével
+     * @param sessionToken      GF session token
      *
-     * @return Json entitás - értékek Lista
+     * @return application új entitás snapshotok listája
+     *
      */
     @Override
-    public List<CollectedValueDto> execute(RestDataCollector restDataCollector, String simpleUrl, String sessionToken, Set<String> collectedDataNames) {
+    public List<CollectedValueDto> execute(RestDataCollector restDataCollector, String simpleUrl, String appRealName, String sessionToken) {
 
-        //Ha nem kell ebből az adatgyűjtőből semmi adat, akkor meg sem hívjuk;
-        if (collectedDataNames == null) {
-            return null;
-        }
+        this.appRealName = appRealName;
 
-        Response response = restDataCollector.getMonitorResponse(getPath(), simpleUrl, sessionToken);
-        JsonObject entities = restDataCollector.getJsonEntities(response);
+        Response response = restDataCollector.getMonitorResponse(this.getPathWithRealAppName(), simpleUrl, sessionToken);
+        JsonObject jsonEntities = restDataCollector.getJsonEntities(response);
 
-        return this.fetchValues(entities, collectedDataNames);
+        return this.fetchValues(jsonEntities);
     }
 
 }

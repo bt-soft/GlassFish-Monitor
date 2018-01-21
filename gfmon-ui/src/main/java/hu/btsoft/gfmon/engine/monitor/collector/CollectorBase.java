@@ -12,7 +12,7 @@
 package hu.btsoft.gfmon.engine.monitor.collector;
 
 import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
-import hu.btsoft.gfmon.engine.monitor.MonitorPathToJpaEntityClassMap;
+import hu.btsoft.gfmon.engine.monitor.SvrRestPathToSvrJpaEntityClassMap;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,7 +70,7 @@ public abstract class CollectorBase implements ICollectorBase {
                 .map((jsonValueEntity) -> {
                     DataUnitDto dto = new DataUnitDto();
                     dto.setRestPath(this.getPath());
-                    Class entityClass = MonitorPathToJpaEntityClassMap.getJpaEntityClass(this.getPath());
+                    Class entityClass = SvrRestPathToSvrJpaEntityClassMap.getJpaEntityClass(this.getPath());
                     dto.setEntityName(entityClass != null ? entityClass.getSimpleName() : "unknown");
                     dto.setDataName(jsonValueEntity.getJsonString("name").getString());
                     dto.setUnit(jsonValueEntity.getJsonString("unit").getString());
