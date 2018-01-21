@@ -14,49 +14,42 @@ package hu.btsoft.gfmon.engine.monitor;
 import hu.btsoft.gfmon.corelib.cdi.CdiUtils;
 import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
-import hu.btsoft.gfmon.engine.model.entity.application.Application;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.entity.server.SvrCollectorDataUnit;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SvrSnapshotBase;
-import hu.btsoft.gfmon.engine.model.service.ApplicationService;
+import hu.btsoft.gfmon.engine.model.service.ConfigService;
 import hu.btsoft.gfmon.engine.model.service.IConfigKeyNames;
 import hu.btsoft.gfmon.engine.model.service.SnapshotService;
 import hu.btsoft.gfmon.engine.model.service.SvrCollectorDataUnitService;
-import hu.btsoft.gfmon.engine.monitor.management.ServerApplications;
 import hu.btsoft.gfmon.engine.monitor.management.ServerMonitoringServiceStatus;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
-import javax.ejb.DependsOn;
 import javax.ejb.EJB;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
+import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * GF monitor vezérlő CDI bean
+ * GF szerver adatokat összegyűjtő SLSB
  *
  * @author BT
  */
-@Singleton
-@Startup
-@DependsOn("Bootstrapper")
+@Stateless
 @Slf4j
 @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW) //A BEAN-be záródik a tranzakció
-public class ServerMonitorController extends MonitorControllerBase {
+public class ServersMonitor extends MonitorControllerBase {
 
-    private static final String DB_MODIFICATOR_USER = "server-monitor-controller";
+    private static final String DB_MODIFICATOR_USER = "svr-mon-ctrl";
+
+    @EJB
+    protected ConfigService configService;
 
     @EJB
     private SvrCollectorDataUnitService svrCollectorDataUnitService;
 
     @EJB
     private SnapshotService snapshotService;
-
-    @EJB
-    private ApplicationService applicationService;
 
     /**
      * Az adatbázisban módosítást végző user azonosítójának elkérése
@@ -82,7 +75,7 @@ public class ServerMonitorController extends MonitorControllerBase {
      * Timer indítása előtti lépések
      */
     @Override
-    protected void beforeStartTimer() {
+    public void beforeStartTimer() {
 
         //Runtime értékek törlése az adatbázisból
         serverService.clearRuntimeValuesAndSave(DB_MODIFICATOR_USER);
@@ -96,9 +89,6 @@ public class ServerMonitorController extends MonitorControllerBase {
 
         //Adatnevek táblájának felépítése
         this.checkCollectorDataUnits();
-
-        //Alkalmazások lekérdezése és felépítése
-        this.manageApplications();
     }
 
     /**
@@ -143,96 +133,6 @@ public class ServerMonitorController extends MonitorControllerBase {
         }
 
         log.info("Adatnevek felépítése OK, adatnevek: {}db, elapsed: {}", dataUnits.size(), Elapsed.getElapsedNanoStr(start));
-    }
-
-    /**
-     * Alkalmazások listájának felépítése, ha szükséges
-     * - megnézi, hogy az App szerepel-e az adatbázisban (rövid név + hosszú név azonos-e a db-belivel)
-     *
-     * - Ha nem szerepel az adatbázisban:
-     * -- felveszi az alkalmazást az adatbázisba, de még nincs engedélyetve a monitorozása
-     *
-     * - Ha szerepel az adatbázisban:
-     * -- ellenőrzi, hogy a hosszú név azonos-e?
-     * --- ha azonos a hosszú név, akkor nem bántja, nem történt változás
-     * --- ha nem azonos a hosszú név, akkor törli a db-belit (mert új deploy történt) és felveszi az újat, a státusza azonos lesz a korábbi db-belivel
-     */
-    private void manageApplications() {
-
-        ServerApplications serverApplications = CdiUtils.lookupOne(ServerApplications.class);
-
-        //Végigmegyünk az összes szerveren
-        for (Server server : serverService.findAllActiveServer()) {
-
-            if (!super.acquireSessionToken(server)) {
-                // nem sikerült bejelentkezni -> letiltjuk és jöhet a következő szerver
-                continue;
-            }
-
-            //A szerver aktuális alkalmazás listája
-            List<Application> runtimeApps = serverApplications.getServerAplications(server.getSimpleUrl(), server.getSessionToken());
-
-            //A szerver eltárolt alkalmazás listája
-            List<Application> dbAppList = applicationService.findByServer(server.getId());
-
-            //Ha a szerveren nincs alkalmazás de az adatbázisban mégis van, akkor töröljük az adatbázsi beli adatokat
-            if ((runtimeApps == null || runtimeApps.isEmpty()) && (dbAppList != null && !dbAppList.isEmpty())) {
-                dbAppList.forEach((dbApp) -> {
-                    applicationService.remove(dbApp);
-                });
-                continue;
-            }
-
-            //Hasem a szerveren, sem az adatbázisban nincs alklamazás, akkor nem megyünk tovább
-            if (runtimeApps == null) {
-                continue;
-            }
-
-            //Végigmegyünk a jelenlegi alkalmazások listáján
-            for (Application runtimeApp : runtimeApps) {
-
-                //A rövid név alapján kikeressük az adatbázis listából az alkalmazást
-                Application existDbApp = null;
-                if (dbAppList != null) {
-                    for (Application dbApp : dbAppList) {
-                        if (dbApp.getAppShortName().equals(runtimeApp.getAppShortName())) {
-                            existDbApp = dbApp;
-                            break;
-                        }
-                    }
-                }
-
-                //Még azonos a hosszú név?
-                Boolean existDbAppActiveStatus = false;
-                if (existDbApp != null && !Objects.equals(existDbApp.getAppRealName(), runtimeApp.getAppRealName())) {
-                    //nem azonos!
-
-                    //Eltesszük az eredeti active státuszát, amjd ezzel hozunk létre új bejegyzést az új hosszú névvel
-                    existDbAppActiveStatus = existDbApp.getActive();
-                    if (existDbAppActiveStatus == null) {
-                        existDbAppActiveStatus = false;
-                    }
-
-                    //töröljük az adatbázisból!
-                    applicationService.remove(existDbApp);
-                    existDbApp = null;
-                }
-
-                //létező és nem változott a neve, nem érdekel tovább
-                if (existDbApp != null) {
-                    continue;
-                }
-
-                //Új az alkalmazás (vagy a réginek megváltozott a hosszú neve,  felvesszük az adatbázisba!
-                //Az új entitás alapja a runtime listából jövő alkalmazás adatai lesznek
-                Application newApp = new Application(runtimeApp.getAppShortName(), runtimeApp.getAppRealName(), existDbAppActiveStatus, server);
-                newApp.setContextRoot(runtimeApp.getContextRoot());
-                newApp.setDescription(runtimeApp.getDescription());
-                newApp.setEnabled(runtimeApp.isEnabled());
-
-                applicationService.save(newApp, DB_MODIFICATOR_USER);
-            }
-        }
     }
 
     /**
@@ -293,7 +193,7 @@ public class ServerMonitorController extends MonitorControllerBase {
      * A monitorozási mintavétel indítása
      */
     @Override
-    protected void startMonitoring() {
+    public void startMonitoring() {
 
         long start = Elapsed.nowNano();
 
@@ -348,35 +248,21 @@ public class ServerMonitorController extends MonitorControllerBase {
         log.trace("Monitor {} db szerverre, elapsed: {}", measuredServerCnt, Elapsed.getElapsedNanoStr(start));
     }
 
-//<editor-fold defaultstate="collapsed" desc="Napi karbantartások">
     /**
-     * Régi rekordok törlése
+     * Rendszeres napi karbantartás az adatbázisban
      */
-    private void cleanOldRecords() {
-        log.info("Szerver mérési adatok pucolása indul");
-
+    @Override
+    public void dailyJob() {
         long start = Elapsed.nowNano();
 
         //Megőrzendő napok száma
         Integer keepDays = configService.getInteger(IConfigKeyNames.SAMPLE_DATA_KEEP_DAYS);
+
+        log.info("Szerver mérési adatok pucolása indul, keepDays: {}", keepDays);
 
         //Összes régi rekord törlése
         int deletedRecords = snapshotService.deleteOldRecords(keepDays);
 
         log.info("Szerver mérési adatok pucolása OK, törölt rekord: {}, elapsed: {}", deletedRecords, Elapsed.getElapsedNanoStr(start));
     }
-
-    /**
-     * Rendszeres napi karbantartás az adatbázisban
-     */
-    @Override
-    protected void dailyJob() {
-
-        //Töröljük a régi rekordokat
-        cleanOldRecords();
-
-        //Körülnézük az alkalmazások környékén
-        manageApplications();
-    }
-//</editor-fold>
 }

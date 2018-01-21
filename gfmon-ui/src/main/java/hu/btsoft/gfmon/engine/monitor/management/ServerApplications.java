@@ -19,7 +19,7 @@ import java.util.Set;
 import javax.json.JsonObject;
 
 /**
- * A szerver alkalmlazás listájának lekérdezése
+ * A szerver alkalmazás listájának lekérdezése
  *
  * pl.:
  * http://localhost:4848/management/domain/applications/application

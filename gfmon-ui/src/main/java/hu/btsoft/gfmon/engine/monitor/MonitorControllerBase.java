@@ -11,22 +11,12 @@
  */
 package hu.btsoft.gfmon.engine.monitor;
 
-import hu.btsoft.gfmon.corelib.cdi.CdiUtils;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
-import hu.btsoft.gfmon.engine.model.service.ConfigService;
-import hu.btsoft.gfmon.engine.model.service.IConfigKeyNames;
 import hu.btsoft.gfmon.engine.model.service.ServerService;
 import hu.btsoft.gfmon.engine.security.SessionTokenAcquirer;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
+import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
-import javax.ejb.EJBException;
-import javax.ejb.Schedule;
-import javax.ejb.Timeout;
-import javax.ejb.Timer;
-import javax.ejb.TimerConfig;
-import javax.ejb.TimerService;
+import javax.inject.Inject;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.ProcessingException;
 import lombok.extern.slf4j.Slf4j;
@@ -40,16 +30,11 @@ import org.apache.commons.lang3.StringUtils;
 @Slf4j
 public abstract class MonitorControllerBase {
 
-    @EJB
-    protected ConfigService configService;
+    @Inject
+    SessionTokenAcquirer sessionTokenAcquirer;
 
     @EJB
     protected ServerService serverService;
-
-    @Resource
-    private TimerService timerService;
-
-    protected Timer timer;
 
     /**
      * Az adatbázisban módosítást végző user azonosítójának elkérése
@@ -66,95 +51,15 @@ public abstract class MonitorControllerBase {
     protected abstract String getControllerName();
 
     /**
-     * GFMon engine indítása
-     */
-    @PostConstruct
-    protected void init() {
-
-        if (!configService.getBoolean(IConfigKeyNames.AUTOSTART)) {
-            log.debug("GFMon {} modul: Az automatikus indítás kikapcsolva", getControllerName());
-            return;
-        }
-
-        log.trace("GFMon {} modul: mérés indul", getControllerName());
-        startTimer();
-    }
-
-    /**
-     * Timer indítása
-     */
-    public void startTimer() {
-
-        if (isRunningTimer()) {
-            log.warn("GFMon {} modul: a Timer ({}) már fut", getControllerName(), timer);
-            return;
-        }
-
-        //Leszármazott metódusának meghívása, ha van
-        beforeStartTimer();
-
-        //Mérési periódusidő leszedése a konfigból
-        int sampleIntervalSec = configService.getInteger(IConfigKeyNames.SAMPLE_INTERVAL);
-
-        //Timer felhúzása
-        this.timer = this.timerService.createIntervalTimer(1_000, // késleltetés
-                sampleIntervalSec * 1_000, //intervallum
-                new TimerConfig(String.format("GFMon-%s-Timer", getControllerName()), false) //ne legyen perzisztens a timer!
-        );
-
-        log.trace("GFMon {} modul: a timer felhúzva {} másodpercenként", getControllerName(), sampleIntervalSec);
-    }
-
-    /**
      * A timer indítása előtti események
      */
-    protected void beforeStartTimer() {
-    }
-
-    /**
-     * Timer leállítása
-     */
-    @PreDestroy
-    public void stopTimer() {
-
-        //Már áll a timer?
-        if (timer == null) {
-            return;
-        }
-
-        try {
-            this.timer.cancel();
-        } catch (IllegalStateException | EJBException e) {
-            log.error("GFMon {} modul: Nem állítható le a Timer: {}", getControllerName(), this.timer, e);
-        } finally {
-            this.timer = null;
-        }
-
-        //Leszármazott metódusának meghívása, ha van
-        afterStopTimer();
+    public void beforeStartTimer() {
     }
 
     /**
      * A timer leállítása utáni lépések
      */
-    protected void afterStopTimer() {
-    }
-
-    /**
-     * Timer újraindítása
-     */
-    public void restartTimer() {
-        stopTimer();
-        startTimer();
-    }
-
-    /**
-     * A timer fut?
-     *
-     * @return
-     */
-    public boolean isRunningTimer() {
-        return (this.timer != null);
+    public void afterStopTimer() {
     }
 
     /**
@@ -177,9 +82,6 @@ public abstract class MonitorControllerBase {
 
         //ha még nincs SessionToken, akkor csinálunk egyet
         try {
-            //Mivel egy @Singleton Bean-ban vagyunk, emiatt kézzel lookupOne-oljuk a CDI Bean-t, hogy ne fogjon le egy Rest kliesnt állandó jelleggel
-            SessionTokenAcquirer sessionTokenAcquirer = CdiUtils.lookupOne(SessionTokenAcquirer.class);
-
             String sessionToken = sessionTokenAcquirer.getSessionToken(url, userName, plainPassword);
 
             server.setSessionToken(sessionToken);
@@ -213,38 +115,14 @@ public abstract class MonitorControllerBase {
     }
 
     /**
-     * A monitorozási mintavétel indítása
-     */
-    @Timeout
-    protected void timeOut() {
-        try {
-            startMonitoring();
-        } catch (Exception e) {
-            log.error(String.format("GFMon {} modul: Hiba a napi monitorozott adatok begyűjtése közben", getControllerName()), e);
-        }
-    }
-
-    /**
      * Monitorozás indul
      */
-    protected void startMonitoring() {
-
-    }
-
-    /**
-     * Automatikus takarítás minden nap éjfélkor fut le
-     */
-    @Schedule(hour = "00", minute = "00", second = "00")
-    protected void doDailyPeriodicCleanup() {
-        try {
-            dailyJob();
-        } catch (Exception e) {
-            log.error(String.format("GFMon {} modul: Hiba a napi takarítás közben", getControllerName()), e);
-        }
-    }
+    public abstract void startMonitoring();
 
     /**
      * Rendszeres napi karbantartás az adatbázisban
      */
-    protected abstract void dailyJob();
+    @Asynchronous
+    public void dailyJob() {
+    }
 }

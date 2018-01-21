@@ -45,7 +45,7 @@ import lombok.extern.slf4j.Slf4j;
         uniqueConstraints = @UniqueConstraint(columnNames = {"APP_SHORT_NAME", "APP_REAL_NAME"})
 )
 @NamedQueries({
-    @NamedQuery(name = "Application.findByServerId", query = "SELECT a FROM Application a WHERE a.server.id = :serverId"), //
+    @NamedQuery(name = "Application.findByServerId", query = "SELECT a FROM Application a WHERE a.server.id = :serverId ORDER BY a.appRealName"), //
 })
 @Data
 @ToString(callSuper = true)
