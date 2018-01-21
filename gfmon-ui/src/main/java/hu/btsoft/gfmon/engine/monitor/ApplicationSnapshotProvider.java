@@ -34,7 +34,7 @@ public class ApplicationSnapshotProvider {
     private ApplicationsCollector applicationsCollector;
 
     /**
-     * Az összes alkalmazás kollentor adatait összegyűjti, majd egy új alkalmazás Snapshot entitásba rakja az eredményeket
+     * Az összes alkalmazás kollektor adatait összegyűjti, majd egy új alkalmazás Snapshot entitásba rakja az eredményeket
      *
      * @param server a monitorozandó Server entitása
      *
