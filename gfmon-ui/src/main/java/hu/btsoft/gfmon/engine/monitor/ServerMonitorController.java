@@ -363,5 +363,4 @@ public class ServerMonitorController extends MonitorControllerBase {
         //Körülnézük az alkalmazások környékén
         manageApplications();
     }
-
 }
