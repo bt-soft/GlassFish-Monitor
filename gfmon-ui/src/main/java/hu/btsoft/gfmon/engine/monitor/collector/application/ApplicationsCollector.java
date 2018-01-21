@@ -16,6 +16,7 @@ import hu.btsoft.gfmon.engine.monitor.collector.CollectorBase;
 import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -35,6 +36,7 @@ public class ApplicationsCollector extends CollectorBase {
 
     @Override
     public String getPath() {
+        //Itt nem használjuk
         return null;
     }
 
@@ -51,14 +53,21 @@ public class ApplicationsCollector extends CollectorBase {
         Response response = restDataCollector.getMonitorResponse(appPath, simpleUrl, sessionToken);
         Set<String> childResourcesKeys = restDataCollector.getChildResourcesKeys(response);
 
-        //Van "server" child?
-        List<CollectedValueDto> result = null;
-
-        if (childResourcesKeys != null && childResourcesKeys.contains("server")) {
-            result = appServerCollectors.get().execute(restDataCollector, simpleUrl, appRealName, sessionToken);
+        if (childResourcesKeys == null) {
+            return null;
         }
 
-        return result;
+        for (String key : childResourcesKeys) {
+            if ("server".equals(key)) {
+                //Server cuccok
+                Map<String, List<CollectedValueDto>> map = appServerCollectors.get().execute(restDataCollector, simpleUrl, appRealName, key, sessionToken);
+            } else {
+                //EJB cuccok
+
+            }
+        }
+
+        return null;
     }
 
     /**

@@ -11,13 +11,17 @@
  */
 package hu.btsoft.gfmon.engine.monitor.collector.application.server;
 
+import hu.btsoft.gfmon.corelib.json.JsonUtils;
 import hu.btsoft.gfmon.engine.monitor.collector.CollectedValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.CollectorBase;
 import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.application.IAppServerCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.types.ValueUnitType;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
@@ -32,35 +36,54 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AppServerCollector extends CollectorBase implements IAppServerCollector {
 
+    private String appRealName;
+    private String subPath;
+
     /**
      * Aktuális path az ősöknek
      */
     @Override
     public String getPath() {
-        return null;
+        return "applications/" + appRealName + "/" + subPath;
+    }
+
+    /**
+     * Map feltöltése, ha nem üres a lista
+     *
+     * @param map  mep
+     * @param key  kulcs
+     * @param list lista
+     *
+     * @return map
+     */
+    private Map<String, List<CollectedValueDto>> putMap(Map<String, List<CollectedValueDto>> map, String key, List<CollectedValueDto> list) {
+        if (list != null && !list.isEmpty()) {
+            if (map == null) {
+                map = new HashMap<>();
+            }
+            map.put(key, list);
+        }
+        return map;
     }
 
     /**
      * A REST válaszokból kinyeri az értékeket
      * Csak a collectedDatatNames halmazban szereplő adatnevekkel foglalkozunk
      *
-     * @param entities JSon entitás
-     *
-     * @return mért értékek listája
+     * @return az összegyűjtött adatok listájának map-je a kategóriával/hellyel kulcsolva
      */
-    protected List<CollectedValueDto> fetchValues(JsonObject entities) {
+    private Map<String, List<CollectedValueDto>> fetchValues(JsonObject entities, Map<String, List<CollectedValueDto>> resultMap, String mapKey) {
 
         if (entities == null) {
             return null;
         }
 
-        List<CollectedValueDto> result = new LinkedList<>();
+        List<CollectedValueDto> resultList = new LinkedList<>();
 
         //Végigmegyünk az entitásokon
         for (String entityName : entities.keySet()) {
             JsonObject jsonValueEntity = entities.getJsonObject(entityName);
 
-            //Leszedjük az adatnevet és megvizsgáljuk, hogy kell-e gyűjteni egyáltalán ezt az adatnév értéket?
             String dataName = jsonValueEntity.getJsonString("name").getString();
 
             String unitName = jsonValueEntity.getJsonString("unit").getString();
@@ -115,10 +138,10 @@ public class AppServerCollector extends CollectorBase implements IAppServerColle
                     break;
             }
 
-            result.add(dto);
+            resultList.add(dto);
         }
 
-        return result;
+        return putMap(resultMap, mapKey, resultList);
     }
 
     /**
@@ -126,20 +149,36 @@ public class AppServerCollector extends CollectorBase implements IAppServerColle
      *
      * @param restDataCollector REST Data Collector példány
      * @param simpleUrl         A GF szerver url-je
-     * @param appRealName       az alkalmazás igazi neve
+     * @param appRealName       az alkalmazás igazi nevével
+     * @param subPath           appRealName-t követő subpath (server, server/jsp, server/Faces Servlet, ...
      * @param sessionToken      GF session token
      *
-     * @return mért eredmények listája
+     * @return application új entitás snapshotok listája
      *
      */
     @Override
-    public List<CollectedValueDto> execute(RestDataCollector restDataCollector, String simpleUrl, String appRealName, String sessionToken) {
+    public Map<String, List<CollectedValueDto>> execute(RestDataCollector restDataCollector, String simpleUrl, String appRealName, String subPath, String sessionToken) {
 
-        String appPath = getPath() + appRealName;
-        Response response = restDataCollector.getMonitorResponse(appPath, simpleUrl, sessionToken);
-        JsonObject entities = restDataCollector.getJsonEntities(response);
+        this.appRealName = appRealName;
+        this.subPath = subPath;
+        Response response = restDataCollector.getMonitorResponse(getPath(), simpleUrl, sessionToken);
+        JsonObject extraProperties = restDataCollector.getExtraProperties(response);
 
-        return this.fetchValues(entities);
+        Map<String, List<CollectedValueDto>> resultMap = null;
+        resultMap = this.fetchValues(JsonUtils.getJsonEntities(extraProperties), resultMap, this.subPath);
+
+        //Megnézzük, hoghy vannak-e gyermek objektumok, és jól lekérdezzük őket
+        Set<String> childResourcesKeys = JsonUtils.getChildResourcesKeys(extraProperties);
+        if (childResourcesKeys != null && !childResourcesKeys.isEmpty()) {
+            for (String key : childResourcesKeys) {
+                this.subPath = subPath + "/" + key;
+                response = restDataCollector.getMonitorResponse(getPath(), simpleUrl, sessionToken);
+                extraProperties = restDataCollector.getExtraProperties(response);
+                resultMap = this.fetchValues(JsonUtils.getJsonEntities(extraProperties), resultMap, this.subPath);
+            }
+        }
+
+        return resultMap;
     }
 
 }

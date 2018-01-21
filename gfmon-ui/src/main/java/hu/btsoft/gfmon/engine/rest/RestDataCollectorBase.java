@@ -13,6 +13,8 @@ package hu.btsoft.gfmon.engine.rest;
 
 import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -196,7 +198,7 @@ public abstract class RestDataCollectorBase {
 
         JsonObject extraProperties = this.getExtraProperties(result);
         if (extraProperties != null) {
-            JsonObject jsonEntities = this.getJsonEntities(result);
+            JsonObject jsonEntities = extraProperties.getJsonObject("entity");
             if (jsonEntities != null) {
                 retVal = jsonEntities.getJsonObject(name);
             } else {
@@ -222,6 +224,29 @@ public abstract class RestDataCollectorBase {
         JsonObject childResources = getChildResources(result);
         return childResources != null ? childResources.keySet() : null;
     }
+
+    /**
+     * A childresources szintről leszedi a tömb kulcsait
+     *
+     * @param result JSO válasz
+     *
+     * @return tömb vagy null
+     */
+    public Map<String, String> getChildResourcesMap(Response result) {
+
+        JsonObject childResources = getChildResources(result);
+        if (childResources == null) {
+            return null;
+        }
+
+        Map<String, String> map = new LinkedHashMap<>();
+        childResources.keySet().forEach((key) -> {
+            map.put(key, childResources.getString(key));
+        });
+
+        return map;
+    }
+    //---------------------------------
 
     // </editor-fold>
     /**

@@ -29,14 +29,26 @@
 
     <ui:define name="content">
 
-        <h:outputText value="Általános beállítások" styleClass="category-header-text"/>
-        <br/>
-        <br/>
         <h:form id="settingsForm">
 
-
-
             <bt:disablePanel disabled="#{not isAdmin}">
+
+                <p:panel style="background: transparent; border: none;">
+                    <h:outputText value="Általános beállítások" styleClass="category-header-text"/>
+                    <p:commandButton value="Beállítások mentése"
+                                     icon="fa fa-save"
+                                     title="Beállítások mentése az adatbázisba"
+                                     actionListener="#{settingsView.saveSettings()}"
+                                     update="@form"
+                                     style="float: right"
+                                     />
+                    <!--disabled="#{not settingsView.settingsDataChanged}"-->
+                </p:panel>
+
+                <br/>
+                <br/>
+
+
 
                 <p:panel>
                     <h:outputText value="Működés" styleClass="sub-category-header-text" />
@@ -60,7 +72,7 @@
 
                 <p:panel>
                     <h:outputText value="Monitorozott szerverek" styleClass="sub-category-header-text"/>
-                    <p:panel id="tableButtonsPanelGrid" style="background: transparent; border: none;">
+                    <p:panel id="tableButtonsPanelGrid">
 
                         <p:commandButton id="refreshBtn"
                                          value="Frissít"
@@ -119,21 +131,6 @@
                                        icon="fa fa-question-circle-o"
                                        />
                         </p:commandButton>
-
-
-
-                        <p:commandButton value="Beállítások mentése"
-                                         icon="fa fa-save"
-                                         title="Beállítások mentése az adatbázisba"
-                                         actionListener="#{settingsView.saveSettings()}"
-
-
-
-                                         update="@form :growl"
-                                         style="float: right"
-                                         />
-                        <!--disabled="#{not settingsView.settingsDataChanged}"-->
-
                     </p:panel>
 
                     <p:dataTable id="serversTable"
@@ -244,7 +241,7 @@
                                      var="app"
 
                                      scrollable="true"
-                                     scrollHeight="600"
+                                     scrollHeight="150"
 
                                      multiViewState="false"
                                      disabledTextSelection="false"
@@ -352,10 +349,7 @@
 
                         </p:dataTable>
                     </p:panel>
-
                 </p:panel>
-
-
 
             </bt:disablePanel>
         </h:form>
