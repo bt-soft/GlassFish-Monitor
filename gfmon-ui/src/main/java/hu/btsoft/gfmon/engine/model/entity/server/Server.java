@@ -81,7 +81,7 @@ import org.apache.commons.lang3.StringUtils;
 @EqualsAndHashCode(callSuper = true /*
          * , exclude = {"joiners", "applications"}
          */,
-         of = {"active", "hostName", "ipAddress", "portNumber"})
+        of = {"active", "hostName", "ipAddress", "portNumber"})
 
 @NoArgsConstructor
 @Slf4j
@@ -177,17 +177,20 @@ public class Server extends ModifiableEntityBase {
     /**
      * A szerver mérendő adatai
      * - eager: mindig kell -> mindig felolvassuk
-     * - cascade: ha a szervert töröljük, akkor törlődjönenek a DCU-k is
+     * - cascade: update, merge menjen rájuk is, ha a szervert töröljük, akkor törlődjönenek az alkalmazások is
+     * - orphanRemoval: izomból törlés lesz
      */
     @OneToMany(mappedBy = "server", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ServerSvrCollDataUnitJoiner> joiners;
 
     /**
      * A szerveren miylen alkalmazásk vannak?
-     * - cascade: ha a szervert töröljük, akkor törlődjönenek az alkalmazások is
+     * - eager: mindig kell -> mindig felolvassuk
+     * - cascade: update, merge menjen rájuk is, ha a szervert töröljük, akkor törlődjönenek az alkalmazások is
+     * - orphanRemoval: izomból törlés lesz
      */
     @OrderBy("appRealName DESC")
-    @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "server", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Application> applications;
 
     //-- Mérési eredmények

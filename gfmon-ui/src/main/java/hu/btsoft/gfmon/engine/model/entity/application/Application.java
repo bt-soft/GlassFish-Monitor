@@ -14,8 +14,11 @@ package hu.btsoft.gfmon.engine.model.entity.application;
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.engine.model.entity.ModifiableEntityBase;
+import hu.btsoft.gfmon.engine.model.entity.application.snapshot.server.ApplicationServer;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
+import java.util.List;
 import javax.persistence.Cacheable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -23,6 +26,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
@@ -81,13 +85,6 @@ public class Application extends ModifiableEntityBase {
     @ColumnPosition(position = 13)
     private Boolean active;
 
-//    /**
-//     * Eredeti DB érték
-//     * Az adatbázisból való felolvasáss után beállítjuk.
-//     * Ezzel tudjuk detektálni, hogy változott-e az értéke az adatbázishoz képest?
-//     */
-//    @Transient
-//    private Boolean activeDbValue;
     /**
      * Az alkalmazás melyik szerveren van?
      */
@@ -118,6 +115,10 @@ public class Application extends ModifiableEntityBase {
     @ColumnPosition(position = 17)
     private String description;
 
+    //-- Mérési eredmények
+    @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ApplicationServer> applicationServers;
+
     /**
      * Konstruktor
      *
@@ -146,37 +147,6 @@ public class Application extends ModifiableEntityBase {
         this.server = server;
     }
 
-//    /**
-//     * A programok módosítása csak a szerveren keresztül történik
-//     * Ha a szervernek van módosító adata, akkor onnan átvesszük
-//     */
-//    @Override
-//    protected void preUpdate() {
-//        cloneServerModifier();
-//        super.preUpdate();
-//    }
-//
-//    /**
-//     * A programok módosítása csak a szerveren keresztül történik
-//     * Ha a szervernek van módosító adata, akkor onnan átvesszük
-//     */
-//    @Override
-//    protected void prePersist() {
-//        cloneServerModifier();
-//        super.prePersist();
-//    }
-//
-//    /**
-//     * Ha a szervernek van módosító adata, akkor onnan átvesszük
-//     */
-//    private void cloneServerModifier() {
-//        if (super.getModifiedDate() == null && server.getModifiedDate() != null) {
-//            super.setModifiedDate(server.getModifiedDate());
-//        }
-//        if (super.getModifiedBy() == null && server.getModifiedBy() != null) {
-//            super.setModifiedBy(server.getModifiedBy());
-//        }
-//    }
     //----------------------
     /**
      * Rövid név képzése
