@@ -15,7 +15,7 @@ import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.server.ApplicationServer;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.server.ApplicationServerChild;
 import hu.btsoft.gfmon.engine.monitor.collector.application.server.AppServerCollector;
-import hu.btsoft.gfmon.engine.monitor.collector.application.server.child.AppServerJspCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.application.server.child.AppServerChildJspCollector;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -44,7 +44,7 @@ public class AppRestPathToAppJpaEntityClassMap {
                 clazz = ApplicationServer.class;
                 break;
 
-            case AppServerJspCollector.PATH:
+            case AppServerChildJspCollector.PATH:
                 clazz = ApplicationServerChild.class;
                 break;
 

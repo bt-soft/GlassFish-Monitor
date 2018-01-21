@@ -4,7 +4,7 @@
  *  GF Monitor project
  *
  *  Module:  gfmon (gfmon)
- *  File:    AppServerJspCollector.java
+ *  File:    AppServerChildJspCollector.java
  *  Created: 2018.01.21. 17:13:23
  *
  *  ------------------------------------------------------------------------------------
@@ -16,7 +16,7 @@ package hu.btsoft.gfmon.engine.monitor.collector.application.server.child;
  *
  * @author BT
  */
-public class AppServerJspCollector /*extends ApplicationCollectorBase*/ {
+public class AppServerChildJspCollector /*extends ApplicationCollectorBase*/ {
 
     public static final String PATH = "applications/<appRealName>/server/jsp";
 
