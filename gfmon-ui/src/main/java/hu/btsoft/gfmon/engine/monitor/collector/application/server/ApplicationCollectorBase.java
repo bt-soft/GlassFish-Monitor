@@ -33,6 +33,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class ApplicationCollectorBase extends CollectorBase implements IAppServerCollector {
 
+    /**
+     * Az alkalmazás neve
+     */
     protected String appRealName;
 
     /**

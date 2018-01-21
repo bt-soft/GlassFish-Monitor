@@ -54,7 +54,7 @@ import lombok.extern.slf4j.Slf4j;
 })
 @Data
 @ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true, exclude = "server")
+@EqualsAndHashCode(callSuper = true, of = {"appShortName", "appRealName", "active"})
 @NoArgsConstructor
 @Slf4j
 public class Application extends ModifiableEntityBase {

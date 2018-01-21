@@ -15,12 +15,8 @@ import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
-import java.util.List;
 import javax.persistence.Cacheable;
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -198,10 +194,4 @@ public class ApplicationServer extends AppSnapshotBase {
      */
     @ColumnPosition(position = 36)
     private Long totalServletsLoaded;
-
-    /**
-     * Gyerek mérési eredmények
-     */
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "applicationServer", fetch = FetchType.LAZY)
-    private List<ApplicationServerChild> childs;
 }

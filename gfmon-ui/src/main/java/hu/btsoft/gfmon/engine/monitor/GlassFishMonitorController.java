@@ -63,7 +63,7 @@ public class GlassFishMonitorController {
             return;
         }
 
-        log.trace("GFMon {} modul: mérés indul");
+        log.trace("Mérés indul");
         startTimer();
     }
 

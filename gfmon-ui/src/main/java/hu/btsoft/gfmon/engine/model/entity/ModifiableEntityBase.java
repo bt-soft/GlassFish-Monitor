@@ -36,7 +36,7 @@ import org.eclipse.persistence.annotations.Customizer;
  */
 @MappedSuperclass
 @Data
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @Customizer(EntityColumnPositionCustomizer.class)
 public class ModifiableEntityBase extends EntityBase {

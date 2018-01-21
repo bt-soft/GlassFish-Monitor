@@ -35,7 +35,7 @@ public interface IAppServerCollector extends ICollectorBase {
      *
      * @param restDataCollector REST Data Collector példány
      * @param simpleUrl         A GF szerver url-je
-     * @param appRealName       az alkalmazás igazi nevével
+     * @param appRealName       Az alkalmazás igazi nevével
      * @param sessionToken      GF session token
      *
      * @return application új entitás snapshotok listája

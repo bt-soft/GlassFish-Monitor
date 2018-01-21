@@ -21,12 +21,19 @@ public class AppServerCollector extends ApplicationCollectorBase {
 
     /**
      * Aktuális path az ősöknek
+     *
+     * @return path
      */
     @Override
     public String getPath() {
         return PATH;
     }
 
+    /**
+     * Path igazi nével
+     *
+     * @return path
+     */
     @Override
     public String getPathWithRealAppName() {
         return PATH.replace("<appRealName>", appRealName);

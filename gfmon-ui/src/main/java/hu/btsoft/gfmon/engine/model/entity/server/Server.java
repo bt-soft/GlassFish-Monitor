@@ -78,11 +78,7 @@ import org.apache.commons.lang3.StringUtils;
 })
 @Data
 @ToString(callSuper = true, of = {"hostName", "ipAddress", "portNumber", "active"})
-@EqualsAndHashCode(callSuper = true /*
-         * , exclude = {"joiners", "applications"}
-         */,
-        of = {"active", "hostName", "ipAddress", "portNumber"})
-
+@EqualsAndHashCode(callSuper = true, of = {"active", "hostName", "ipAddress", "portNumber"})
 @NoArgsConstructor
 @Slf4j
 public class Server extends ModifiableEntityBase {

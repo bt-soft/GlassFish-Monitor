@@ -69,21 +69,27 @@ public class ApplicationsCollector extends CollectorBase {
         Set<AppSnapshotBase> snapshots = null;
 
         List<CollectedValueDto> valuesList = null;
+
         for (String key : childResourcesKeys) {
+
             if ("server".equals(key)) {
                 //Server path cuccok
                 valuesList = appServerCollectors.get().execute(restDataCollector, simpleUrl, appRealName, sessionToken);
 
-//        //Megnézzük, hoghy vannak-e gyermek objektumok, és jól lekérdezzük őket
-//        Set<String> childResourcesKeys = JsonUtils.getChildResourcesKeys(extraProperties);
-//        if (childResourcesKeys != null && !childResourcesKeys.isEmpty()) {
-//            for (String key : childResourcesKeys) {
-//                this.subPath = subPath + "/" + key;
-//                response = restDataCollector.getMonitorResponse(this.getPathWithRealAppName(), simpleUrl, sessionToken);
-//                extraProperties = restDataCollector.getExtraProperties(response);
-//                resultMap = this.fetchValues(JsonUtils.getJsonEntities(extraProperties), resultMap, this.subPath);
-//            }
-//        }
+                //Megnézzük, hogy vannak-e gyermek objektumok, és jól lekérdezzük őket
+                appPath = String.format("/applications/%s/server", appRealName);
+                response = restDataCollector.getMonitorResponse(appPath, simpleUrl, sessionToken);
+                childResourcesKeys = restDataCollector.getChildResourcesKeys(response);
+                if (childResourcesKeys != null && !childResourcesKeys.isEmpty()) {
+                    for (String childResourcesKey : childResourcesKeys) {
+
+                        if ("jsp".equals(key)) {
+//TODO: folytatni!!
+                        }
+
+                    }
+                }
+
             } else {
                 //EJB cuccok
 

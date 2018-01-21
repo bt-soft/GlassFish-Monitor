@@ -31,7 +31,7 @@ import org.eclipse.persistence.annotations.Customizer;
  */
 @MappedSuperclass
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = "application")
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
 public abstract class AppSnapshotBase extends EntityBase {

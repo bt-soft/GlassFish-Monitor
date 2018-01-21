@@ -14,12 +14,13 @@ package hu.btsoft.gfmon.engine.model.entity.application.snapshot.server;
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
-import hu.btsoft.gfmon.engine.model.entity.EntityBase;
+import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
+import hu.btsoft.gfmon.engine.monitor.collector.types.AppServerChildType;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -45,7 +46,7 @@ import org.eclipse.persistence.annotations.Customizer;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-public class ApplicationServerChild extends EntityBase {
+public class ApplicationServerChild extends AppSnapshotBase {
 
     /**
      * A gyerek mérés neve
@@ -56,11 +57,12 @@ public class ApplicationServerChild extends EntityBase {
      * default
      * jsp
      */
-    @NotNull(message = "Az appServerChildName nem lehet null")
-    @Size(min = 5, max = 50, message = "Az appServerChildName mező hossza {min} és {max} között lehet")
-    @Column(name = "APP_SERVER_CHILD_NAME", length = 255, nullable = false)
+    @NotNull(message = "Az appSvrChildType nem lehet null")
+    @Size(min = 5, max = 50, message = "Az appSvrChildType mező hossza {min} és {max} között lehet")
+    @Column(name = "APP_SVR_CHILD_TYPE", length = 255, nullable = false)
     @ColumnPosition(position = 21)
-    private String appServerChildName;
+    @Enumerated(EnumType.STRING)
+    private AppServerChildType appSvrChildType;
 
     /**
      * • errorcount
@@ -101,11 +103,4 @@ public class ApplicationServerChild extends EntityBase {
      */
     @ColumnPosition(position = 25)
     private Long ServiceTime;
-
-    /**
-     * Ez a gyerek mérés melyik Application Server méréshez tartozik?
-     */
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "APP_SERVER_ID", referencedColumnName = "ID", nullable = false)
-    private ApplicationServer applicationServer;
 }
