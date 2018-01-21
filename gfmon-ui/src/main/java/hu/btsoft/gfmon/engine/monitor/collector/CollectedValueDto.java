@@ -4,12 +4,12 @@
  *  GF Monitor project
  *
  *  Module:  gfmon-engine (gfmon-engine)
- *  File:    ServerMonitorValueDto.java
+ *  File:    CollectedValueDto.java
  *  Created: 2017.12.24. 17:00:03
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.monitor.collector.server;
+package hu.btsoft.gfmon.engine.monitor.collector;
 
 import hu.btsoft.gfmon.engine.monitor.collector.types.ValueUnitType;
 import java.util.Date;
@@ -21,7 +21,7 @@ import lombok.Data;
  * @author BT
  */
 @Data
-public class ServerMonitorValueDto {
+public class CollectedValueDto {
 
     /**
      * Milyen path-on mértük?

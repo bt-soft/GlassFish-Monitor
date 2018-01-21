@@ -20,7 +20,6 @@ import hu.btsoft.gfmon.engine.model.service.ApplicationSnapshotService;
 import hu.btsoft.gfmon.engine.monitor.management.ServerApplications;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -180,7 +179,7 @@ public class ApplicationsMonitor extends MonitorsBase {
         int measuredServerCnt = 0;
         for (Server server : serverService.findAllActiveServer()) {
 
-            Set<AppSnapshotBase> applicationSnapshots = applicationSnapshotProvider.fetchSnapshot(server);
+            List<AppSnapshotBase> applicationSnapshots = applicationSnapshotProvider.fetchSnapshot(server);
             measuredServerCnt++;
 
             if (applicationSnapshots == null || applicationSnapshots.isEmpty()) {

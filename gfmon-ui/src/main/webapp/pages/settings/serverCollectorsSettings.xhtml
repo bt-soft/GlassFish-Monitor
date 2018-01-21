@@ -62,14 +62,14 @@
                                          title="Minden gyűjtendő adatnév aktív"
                                          onstart="PF('blockUI').block();"
                                          oncomplete="PF('blockUI').unblock();"
-                                         actionListener="#{collectorSettingsView.allActiveFlagSetter(true)}"
+                                         actionListener="#{collectorSettingsView.toggleAllDcuActiveFlag(true)}"
                                          update="@form :growl"
                                          />
 
                         <p:commandButton value="Összes inaktív"
                                          icon="fa fa-square-o"
                                          title="Minden gyűjtendő adatnév inaktív"
-                                         actionListener="#{collectorSettingsView.allActiveFlagSetter(false)}"
+                                         actionListener="#{collectorSettingsView.toggleAllDcuActiveFlag(false)}"
                                          onstart="PF('blockUI').block();"
                                          oncomplete="PF('blockUI').unblock();"
                                          update="@form :growl"

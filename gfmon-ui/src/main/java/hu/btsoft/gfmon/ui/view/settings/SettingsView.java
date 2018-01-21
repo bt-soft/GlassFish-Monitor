@@ -412,4 +412,16 @@ public class SettingsView extends ViewBase {
         return StringUtils.isEmpty(uptimeStr) ? "Nem kérdezhető le" : uptimeStr;
     }
 
+    /**
+     * A kiválasztott szerver összes alkalmazás adatának aktív flagjának állítgatása
+     *
+     * @param newActiveFlag 'true'/'false'
+     */
+    public void toggleAllAppActiveFlag(boolean newActiveFlag) {
+
+        selectedServer.getApplications()
+                .forEach((app) -> {
+                    app.setActive(newActiveFlag);
+                });
+    }
 }

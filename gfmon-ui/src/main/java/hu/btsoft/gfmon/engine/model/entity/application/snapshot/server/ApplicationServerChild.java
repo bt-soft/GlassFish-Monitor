@@ -30,7 +30,7 @@ import lombok.ToString;
 import org.eclipse.persistence.annotations.Customizer;
 
 /**
- * Alkalmazás szerver JSP adatai
+ * Alkalmazás szerver (jsp|defaul|server|FacesServlet|ThemeServlet) adatai
  *
  * pl.:
  * http://localhost:4848/monitoring/domain/server/applications/{appname}/server/(jsp|defaul|server|FacesServlet|ThemeServlet)

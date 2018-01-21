@@ -14,9 +14,11 @@ package hu.btsoft.gfmon.engine.monitor;
 import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.model.entity.application.AppSnapshotBase;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
-import hu.btsoft.gfmon.engine.monitor.collector.application.IApplicationCollector;
-import java.util.Set;
-import javax.enterprise.inject.Instance;
+import hu.btsoft.gfmon.engine.monitor.collector.CollectedValueDto;
+import hu.btsoft.gfmon.engine.monitor.collector.application.ApplicationsCollector;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ApplicationSnapshotProvider {
 
     @Inject
-    private Instance<IApplicationCollector> applicationCollectors;
+    private ApplicationsCollector applicationsCollector;
 
     /**
      * Az összes alkalmazás kollentor adatait összegyűjti, majd egy új alkalmazás Snapshot entitásba rakja az eredményeket
@@ -38,20 +40,24 @@ public class ApplicationSnapshotProvider {
      *
      * @return alkalmazás Snapshot példányok halmaza, az adatgyűjtés eredménye (new/detach entitás)
      */
-    public Set<AppSnapshotBase> fetchSnapshot(Server server) {
+    public List<AppSnapshotBase> fetchSnapshot(Server server) {
 
         long start = Elapsed.nowNano();
 
-        Set<AppSnapshotBase> snapshots = null;
+        List<String> collectedAppRealNames = new LinkedList<>();
+        server.getApplications().forEach((app) -> {
+            if (app.getActive() != null && Objects.equals(app.getActive(), Boolean.TRUE)) {
+                collectedAppRealNames.add(app.getAppRealName());
+            }
+        });
 
-        //Végigmegyünk az összes adatgyűjtőn
-        for (IApplicationCollector collector : applicationCollectors) {
-
+        if (!collectedAppRealNames.isEmpty()) {
+            List<CollectedValueDto> result = applicationsCollector.execute(server.getSimpleUrl(), server.getSessionToken(), collectedAppRealNames);
         }
 
         log.trace("server url: {}, elapsed: {}", server.getUrl(), Elapsed.getElapsedNanoStr(start));
 
-        return snapshots;
+        return null;
     }
 
 }

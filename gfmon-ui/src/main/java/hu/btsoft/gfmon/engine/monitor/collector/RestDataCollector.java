@@ -15,7 +15,7 @@ import hu.btsoft.gfmon.engine.rest.RestDataCollectorBase;
 import javax.ws.rs.core.Response;
 
 /**
- * Moitorozott adatok
+ * Monitorozott adatok REST begyűjtése
  *
  * @author BT
  */

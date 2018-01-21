@@ -17,7 +17,7 @@ import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.entity.server.SvrCollectorDataUnit;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SvrSnapshotBase;
 import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
-import hu.btsoft.gfmon.engine.monitor.collector.server.ServerMonitorValueDto;
+import hu.btsoft.gfmon.engine.monitor.collector.CollectedValueDto;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -140,7 +140,7 @@ public class ServerSnapshotProvider {
 
             //Az adott kollektor adatainak lekérése
             log.trace("A(z) '{}' szerveren a(z) '{}' adatgyűjtő futtatása", server.getUrl(), collector.getPath());
-            List<ServerMonitorValueDto> valuesList = collector.execute(restDataCollector, server.getSimpleUrl(), server.getSessionToken(), collectedDatatNames);
+            List<CollectedValueDto> valuesList = collector.execute(restDataCollector, server.getSimpleUrl(), server.getSessionToken(), collectedDatatNames);
 
             //Üres a mért eredmények Map-je
             if (valuesList == null || valuesList.isEmpty()) {

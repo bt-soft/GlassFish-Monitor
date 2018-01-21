@@ -14,7 +14,7 @@ package hu.btsoft.gfmon.engine.monitor;
 import hu.btsoft.gfmon.corelib.reflection.ReflectionUtils;
 import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SvrSnapshotBase;
-import hu.btsoft.gfmon.engine.monitor.collector.server.ServerMonitorValueDto;
+import hu.btsoft.gfmon.engine.monitor.collector.CollectedValueDto;
 import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.HashSet;
@@ -118,7 +118,7 @@ public class JSonEntityToServerSnapshotEntityMapper {
      * @param jpaEntityRef JPA entitás referenciája
      * @param dto          a mérés értéke
      */
-    private void fieldMapper(SvrSnapshotBase jpaEntityRef, ServerMonitorValueDto dto) {
+    private void fieldMapper(SvrSnapshotBase jpaEntityRef, CollectedValueDto dto) {
 
         try {
 
@@ -189,12 +189,12 @@ public class JSonEntityToServerSnapshotEntityMapper {
      * @param valuesList       mérési eredmények
      * @param snapshotEntities Snapshot JPA entitások halmaza, ebbe gyűjtjük a lementendő JPA entitásokat
      */
-    public void map(List<ServerMonitorValueDto> valuesList, Set<SvrSnapshotBase> snapshotEntities) {
+    public void map(List<CollectedValueDto> valuesList, Set<SvrSnapshotBase> snapshotEntities) {
 
         SvrSnapshotBase snapshotEntity = null;
 
         //Végigmegyünk az összes mért JSon entitáson
-        for (ServerMonitorValueDto dto : valuesList) {
+        for (CollectedValueDto dto : valuesList) {
 
             //Leszedjük a mért értéket
             String path = dto.getPath();

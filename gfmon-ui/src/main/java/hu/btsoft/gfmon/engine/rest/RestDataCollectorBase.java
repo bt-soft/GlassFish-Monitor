@@ -13,6 +13,7 @@ package hu.btsoft.gfmon.engine.rest;
 
 import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
 import java.util.Iterator;
+import java.util.Set;
 import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.ws.rs.client.Client;
@@ -58,7 +59,7 @@ public abstract class RestDataCollectorBase {
     }
 
     public long getLong(String uri, String name, String key) {
-        Response result = getMonitorResponse(uri);
+        Response result = this.getMonitorResponse(uri);
         JsonObject jsonObject = getJsonObject(result, name);
         if (jsonObject == null) {
             return 0L;
@@ -67,7 +68,7 @@ public abstract class RestDataCollectorBase {
     }
 
     public int getInt(String uri, String name, String key) {
-        Response result = getMonitorResponse(uri);
+        Response result = this.getMonitorResponse(uri);
         JsonObject jsonObject = getJsonObject(result, name);
         if (jsonObject == null) {
             return 0;
@@ -76,7 +77,7 @@ public abstract class RestDataCollectorBase {
     }
 
     public String getString(String uri, String name, String key) {
-        Response result = getMonitorResponse(uri);
+        Response result = this.getMonitorResponse(uri);
         JsonObject jsonObject = getJsonObject(result, name);
         if (jsonObject == null) {
             return null;
@@ -86,7 +87,7 @@ public abstract class RestDataCollectorBase {
 
     public String[] getStringArray(String name, String key) {
         String[] empty = new String[0];
-        Response result = getMonitorResponse(name);
+        Response result = this.getMonitorResponse(name);
 
         JsonObject response = result.readEntity(JsonObject.class);
         if (response == null) {
@@ -116,6 +117,51 @@ public abstract class RestDataCollectorBase {
 
     // <editor-fold defaultstate="collapsed" desc="JsonObject getterek">
     /**
+     * A JSon válaszból az extraProperties leszedése
+     *
+     * @param result
+     *
+     * @return
+     */
+    public JsonObject getExtraProperties(Response result) {
+
+        if (result == null) {
+            return null;
+        }
+
+        JsonObject response = result.readEntity(JsonObject.class);
+        if (response == null) {
+            return null;
+        }
+
+        JsonObject extraProperties = response.getJsonObject("extraProperties");
+        return extraProperties;
+    }
+
+    /**
+     * A JSon válaszból az extraProperties/childResources leszedése
+     *
+     * @param result
+     *
+     * @return
+     */
+    public JsonObject getChildResources(Response result) {
+
+        JsonObject retVal = null;
+
+        JsonObject extraProperties = this.getExtraProperties(result);
+        if (extraProperties != null) {
+            retVal = extraProperties
+                    .getJsonObject("childResources");
+        } else {
+            log.trace("null az extraProperties JSonObject!");
+        }
+
+        return retVal;
+
+    }
+
+    /**
      * JSon entities leszedése a Response-ról
      *
      * @param result
@@ -126,24 +172,14 @@ public abstract class RestDataCollectorBase {
 
         JsonObject retVal = null;
 
-        if (result == null) {
-            return retVal;
-        }
-
-        JsonObject response = result.readEntity(JsonObject.class);
-        if (response == null) {
-            return retVal;
-        }
-
-        JsonObject extraProperties = response.getJsonObject("extraProperties");
+        JsonObject extraProperties = this.getExtraProperties(result);
         if (extraProperties != null) {
             retVal = extraProperties
                     .getJsonObject("entity");
         } else {
-            log.trace("null a vett JSonObject!");
+            log.trace("null az extraProperties JSonObject!");
         }
 
-        //log.trace("JsonObject Entities - retVal: {} (result: {})", retVal, result);
         return retVal;
     }
 
@@ -158,29 +194,36 @@ public abstract class RestDataCollectorBase {
     public JsonObject getJsonObject(Response result, String name) {
         JsonObject retVal = null;
 
-        if (result == null) {
-            return retVal;
-        }
-
-        JsonObject response = result.readEntity(JsonObject.class);
-        if (response == null) {
-            return retVal;
-        }
-
-        JsonObject extraProperties = response.getJsonObject("extraProperties");
+        JsonObject extraProperties = this.getExtraProperties(result);
         if (extraProperties != null) {
-            retVal = extraProperties
-                    .getJsonObject("entity")
-                    .getJsonObject(name);
+            JsonObject jsonEntities = this.getJsonEntities(result);
+            if (jsonEntities != null) {
+                retVal = jsonEntities.getJsonObject(name);
+            } else {
+                log.info("null az entity érték!");
+            }
         } else {
-            log.info("Null JSonObject vétel!");
+            log.info("null az extraproperties érték!");
         }
 
         log.info(String.format("JsonObject Name: %s, retVal :%s (result: %s)", name, retVal, result));
         return retVal;
     }
-    // </editor-fold>
 
+    /**
+     * A childresources szintről leszedi a tömb kulcsait
+     *
+     * @param result JSO válasz
+     *
+     * @return tömb vagy null
+     */
+    public Set<String> getChildResourcesKeys(Response result) {
+
+        JsonObject childResources = getChildResources(result);
+        return childResources != null ? childResources.keySet() : null;
+    }
+
+    // </editor-fold>
     /**
      * A GF REST API alap URL-jének összeállítása
      *

@@ -105,7 +105,7 @@ public class CollectorSettingsView extends ViewBase {
      *
      * @param newActiveFlag 'true'/'false'
      */
-    public void allActiveFlagSetter(boolean newActiveFlag) {
+    public void toggleAllDcuActiveFlag(boolean newActiveFlag) {
 
         selectedServer.getJoiners()
                 .forEach((joiner) -> {
