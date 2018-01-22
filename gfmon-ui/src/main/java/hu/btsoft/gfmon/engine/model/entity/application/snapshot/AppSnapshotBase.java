@@ -54,7 +54,7 @@ public abstract class AppSnapshotBase extends EntityBase {
     @NotNull(message = "A pathSuffix nem lehet null")
     @Size(min = 3, max = 255, message = "Az pathSuffix mező hossza {min} és {max} között lehet")
     @Column(length = 255, nullable = false)
-    @ColumnPosition(position = 10)
+    @ColumnPosition(position = 20)
     private String pathSuffix;
 
 }

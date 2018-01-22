@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +46,7 @@ public class ApplicationsCollector {
     private JSonEntityToApplicationSnapshotEntityMapper jSonEntityToApplicationSnapshotEntityMapper;
 
     @Inject
-    private Instance<AppServerCollector> appServerCollectors;
+    private AppServerCollector appServerCollector;
 
     private String appRealName;
 
@@ -80,8 +79,7 @@ public class ApplicationsCollector {
                 //Server path cuccok
                 uriParams.clear();
                 uriParams.put("{appRealName}", appRealName);
-                valuesList = appServerCollectors
-                        .get()
+                valuesList = appServerCollector
                         .execute(restDataCollector, simpleUrl, sessionToken, APP_SERVER_TOKENIZED_PATH, uriParams);
                 ApplicationServer appServerSnapshot = (ApplicationServer) jSonEntityToApplicationSnapshotEntityMapper.map(valuesList);
                 if (appServerSnapshot != null) {
@@ -98,8 +96,7 @@ public class ApplicationsCollector {
                         uriParams.clear();
                         uriParams.put("{appRealName}", appRealName);
                         uriParams.put("{childResourcesPath}", childResourcesPath);
-                        valuesList = appServerCollectors
-                                .get()
+                        valuesList = appServerCollector
                                 .execute(restDataCollector, simpleUrl, sessionToken, APP_SERVER_CHILDRESOURCES_TOKENIZED_PATH, uriParams);
                         ApplicationServerSubComponent appServerChildSnapshot = (ApplicationServerSubComponent) jSonEntityToApplicationSnapshotEntityMapper.map(valuesList);
                         if (appServerChildSnapshot != null) {
