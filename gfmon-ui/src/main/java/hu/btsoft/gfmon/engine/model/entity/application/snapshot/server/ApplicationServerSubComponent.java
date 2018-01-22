@@ -4,7 +4,7 @@
  *  GF Monitor project
  *
  *  Module:  gfmon (gfmon)
- *  File:    ApplicationServerChild.java
+ *  File:    ApplicationServerSubComponent.java
  *  Created: 2018.01.19. 19:18:15
  *
  *  ------------------------------------------------------------------------------------
@@ -15,15 +15,9 @@ import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
-import hu.btsoft.gfmon.engine.monitor.collector.types.AppServerChildType;
 import javax.persistence.Cacheable;
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -39,31 +33,25 @@ import org.eclipse.persistence.annotations.Customizer;
  * @author BT
  */
 @Entity
-@Table(name = "APP_SERVER_CHILD", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
+@Table(name = "APP_SERVER_SUBCOMP", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
 @Cacheable(false)
 @Data
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-public class ApplicationServerChild extends AppSnapshotBase {
+public class ApplicationServerSubComponent extends AppSnapshotBase {
 
-    /**
-     * A gyerek mérés neve
-     *
-     * DownloadServlet
-     * FacesServlet
-     * ThemeServlet
-     * default
-     * jsp
-     */
-    @NotNull(message = "Az appSvrChildType nem lehet null")
-    @Size(min = 5, max = 50, message = "Az appSvrChildType mező hossza {min} és {max} között lehet")
-    @Column(name = "APP_SVR_CHILD_TYPE", length = 255, nullable = false)
-    @ColumnPosition(position = 21)
-    @Enumerated(EnumType.STRING)
-    private AppServerChildType appSvrChildType;
-
+//    /**
+//     * A gyerek mérés neve
+//     *
+//     * DownloadServlet, Faces Servlet, ThemeServlet, TimerWelcomeServlet, jsp, defaul...
+//     */
+//    @NotNull(message = "Az appSvrSubCompName nem lehet null")
+//    @Size(min = 5, max = 50, message = "Az appSvrSubCompName mező hossza {min} és {max} között lehet")
+//    @Column(name = "APP_SVR_SUBCOMP_NAME", length = 255, nullable = false)
+//    @ColumnPosition(position = 21)
+//    private String appSvrSubCompName;
     /**
      * • errorcount
      *

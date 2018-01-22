@@ -16,8 +16,9 @@ import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.entity.server.SvrCollectorDataUnit;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SvrSnapshotBase;
-import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.CollectedValueDto;
+import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.server.IServerCollector;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -28,7 +29,6 @@ import java.util.Set;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import hu.btsoft.gfmon.engine.monitor.collector.server.IServerCollector;
 
 /**
  * Egy GF szerver összes szerver monitoradatát begyűjtő CDI bean
@@ -139,7 +139,7 @@ public class ServerSnapshotProvider {
             }
 
             //Az adott kollektor adatainak lekérése
-            log.trace("A(z) '{}' szerveren a(z) '{}' adatgyűjtő futtatása", server.getUrl(), collector.getPath());
+//            log.trace("A(z) '{}' szerveren a(z) '{}' adatgyűjtő futtatása", server.getUrl(), collector.getPath());
             List<CollectedValueDto> valuesList = collector.execute(restDataCollector, server.getSimpleUrl(), server.getSessionToken(), collectedDatatNames);
 
             //Üres a mért eredmények Map-je

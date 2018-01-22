@@ -13,9 +13,8 @@ package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.server.ApplicationServer;
-import hu.btsoft.gfmon.engine.model.entity.application.snapshot.server.ApplicationServerChild;
-import hu.btsoft.gfmon.engine.monitor.collector.application.server.AppServerCollector;
-import hu.btsoft.gfmon.engine.monitor.collector.application.server.child.AppServerChildJspCollector;
+import hu.btsoft.gfmon.engine.model.entity.application.snapshot.server.ApplicationServerSubComponent;
+import hu.btsoft.gfmon.engine.monitor.collector.application.ApplicationsCollector;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -26,33 +25,31 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AppRestPathToAppJpaEntityClassMap {
 
+    //public static final Pattern SERVER_REGEXP = Pattern.compile("^\\/?applications\\/([^\\/]+)\\/(?<subPath>server(\\/.+)?)$");
     /**
      * Monitor nakedPath alapján megállíptja, hogy milyen entitást kell használni
      *
-     * @param nakedPath monitor path
+     * @param tokenizedPath application monitor path vége
      *
      * @return JPA entitás osztály típus
      */
-    public static Class<? extends AppSnapshotBase> getJpaEntityClass(String nakedPath) {
+    public static Class<? extends AppSnapshotBase> getJpaEntityClass(String tokenizedPath) {
 
         Class<? extends AppSnapshotBase> clazz = null;
 
-        //A JPA entitás típusát attól függően azonosítjuk, hogy mely path-ról származik a mérés
-        switch (nakedPath) {
-
-            case AppServerCollector.PATH:
+        switch (tokenizedPath) {
+            case ApplicationsCollector.APP_SERVER_TOKENIZED_PATH:
                 clazz = ApplicationServer.class;
                 break;
 
-            case AppServerChildJspCollector.PATH:
-                clazz = ApplicationServerChild.class;
+            case ApplicationsCollector.APP_SERVER_CHILDRESOURCES_TOKENIZED_PATH:
+                clazz = ApplicationServerSubComponent.class;
                 break;
 
             default:
-                log.error("A(z) '{}' monitor path-hoz nincs alkalmazás JPA entitás osztály rendelve!", nakedPath);
+                log.error("A(z) '{}' monitor path-hoz nincs alkalmazás JPA entitás osztály rendelve!", tokenizedPath);
         }
 
         return clazz;
-
     }
 }

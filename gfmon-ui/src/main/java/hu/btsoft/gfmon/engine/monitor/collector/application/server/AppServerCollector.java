@@ -17,25 +17,4 @@ package hu.btsoft.gfmon.engine.monitor.collector.application.server;
  */
 public class AppServerCollector extends ApplicationCollectorBase {
 
-    public static final String PATH = "applications/<appRealName>/server";
-
-    /**
-     * Aktuális path az ősöknek
-     *
-     * @return path
-     */
-    @Override
-    public String getPath() {
-        return PATH;
-    }
-
-    /**
-     * Path igazi nével
-     *
-     * @return path
-     */
-    @Override
-    public String getPathWithRealAppName() {
-        return PATH.replace("<appRealName>", appRealName);
-    }
 }

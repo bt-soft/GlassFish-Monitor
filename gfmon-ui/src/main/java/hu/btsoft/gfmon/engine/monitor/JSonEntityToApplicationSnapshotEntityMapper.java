@@ -54,6 +54,8 @@ public class JSonEntityToApplicationSnapshotEntityMapper extends JSonEntityToSna
                     //DTO -> JPA entitás map
                     this.fieldMapper(snapshotEntity, dto);
 
+                    snapshotEntity.setPathSuffix(path);
+
                 } catch (InstantiationException | IllegalAccessException e) {
                     log.error("Nem lehet létrehozni az entitás példányt!", e);
                 }

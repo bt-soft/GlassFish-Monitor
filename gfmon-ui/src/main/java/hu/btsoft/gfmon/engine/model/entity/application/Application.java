@@ -152,6 +152,8 @@ public class Application extends ModifiableEntityBase {
      * Rövid név képzése
      *
      * @param _appRealName az alkalmazás hosszú neve
+     *
+     * @return az alklamzás verzió és classifier nélküli neve
      */
     public static String createAppShortName(String _appRealName) {
 

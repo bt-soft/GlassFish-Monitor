@@ -34,18 +34,18 @@ public class RestDataCollector extends RestDataCollectorBase {
     /**
      * REST válasz olvasása
      *
-     * @param uri          monitorozott rest erőforrás URI
+     * @param resourceUri  monitorozott rest erőforrás URI
      * @param simpleUrl    a GF szerver url-je
      * @param sessionToken a GF session token-je
      *
      * @return REST válasz
      */
-    public Response getMonitorResponse(String uri, String simpleUrl, String sessionToken) {
+    public Response getMonitorResponse(String resourceUri, String simpleUrl, String sessionToken) {
 
         super.simpleUrl = simpleUrl;
         super.sessionToken = sessionToken;
 
-        return getMonitorResponse(uri);
+        return getMonitorResponse(resourceUri);
     }
 
 }

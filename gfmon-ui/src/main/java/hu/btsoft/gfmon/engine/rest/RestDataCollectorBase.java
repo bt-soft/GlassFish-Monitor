@@ -274,13 +274,13 @@ public abstract class RestDataCollectorBase {
     /**
      * REST válasz olvasása
      *
-     * @param uri monitorozott rest erőforrás URI
+     * @param resourceUri monitorozott rest erőforrás URI
      *
      * @return REST válasz
      */
-    protected Response getMonitorResponse(String uri) {
+    protected Response getMonitorResponse(String resourceUri) {
 
-        String fullUrl = this.getMonitorBaseURI() + uri;
+        String fullUrl = this.getMonitorBaseURI() + resourceUri;
         WebTarget resource = client.target(fullUrl);
         Invocation.Builder builder = resource.request(MediaType.APPLICATION_JSON);
 

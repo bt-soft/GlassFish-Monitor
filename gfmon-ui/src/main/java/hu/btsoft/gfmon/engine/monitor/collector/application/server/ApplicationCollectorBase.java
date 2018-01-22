@@ -14,10 +14,11 @@ package hu.btsoft.gfmon.engine.monitor.collector.application.server;
 import hu.btsoft.gfmon.engine.monitor.collector.CollectedValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.CollectorBase;
 import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
-import hu.btsoft.gfmon.engine.monitor.collector.application.IAppServerCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.application.IApplicationCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.types.ValueUnitType;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
@@ -31,12 +32,20 @@ import lombok.extern.slf4j.Slf4j;
  * @author BT
  */
 @Slf4j
-public abstract class ApplicationCollectorBase extends CollectorBase implements IAppServerCollector {
+public abstract class ApplicationCollectorBase extends CollectorBase implements IApplicationCollector {
+
+    //private static final Pattern RESOURCE_URI_SUFFIX = Pattern.compile("^\\/?applications\\/(?<realAppName>[^\\/]+)\\/(?<suffix>.+)$");
+    protected String tokenizedUri;
 
     /**
-     * Az alkalmazás neve
+     * Csak az azonosításhoz kell, más jelentősége nincs
+     *
+     * @return
      */
-    protected String appRealName;
+    @Override
+    public String getPath() {
+        return tokenizedUri;
+    }
 
     /**
      * A REST válaszokból kinyeri az értékeket
@@ -79,6 +88,8 @@ public abstract class ApplicationCollectorBase extends CollectorBase implements 
             dto.setLastSampleTime(long2Date(jsonValueEntity.getJsonNumber("lastsampletime").longValue()));
             dto.setName(dataName);
             dto.setStartTime(long2Date(jsonValueEntity.getJsonNumber("starttime").longValue()));
+
+            //Path
             dto.setPath(getPath());
 
             //Érték típushelyes leszedése
@@ -117,22 +128,42 @@ public abstract class ApplicationCollectorBase extends CollectorBase implements 
     }
 
     /**
+     * REST path létrehozása tokenizált értékekből
+     *
+     * @param tokenizedUri tokenizálz Uri
+     * @param uriParams    token paraméterek
+     *
+     * @return REST uri path
+     */
+    private String makeRestUriPath(String tokenizedUri, Map<String, String> uriParams) {
+
+        String result = tokenizedUri;
+
+        for (String paramName : uriParams.keySet()) {
+            result = result.replace(paramName, uriParams.get(paramName));
+        }
+
+        return result;
+    }
+
+    /**
      * Adatgyűjtés végrehajtása
      *
      * @param restDataCollector REST Data Collector példány
      * @param simpleUrl         A GF szerver url-je
-     * @param appRealName       az alkalmazás igazi nevével
      * @param sessionToken      GF session token
+     * @param tokenizedUri      monitorozott REST erőforrás uri: maszkolt REST uri
+     * @param uriParams         maszk paraméterek
      *
      * @return application új entitás snapshotok listája
      *
      */
     @Override
-    public List<CollectedValueDto> execute(RestDataCollector restDataCollector, String simpleUrl, String appRealName, String sessionToken) {
+    public List<CollectedValueDto> execute(RestDataCollector restDataCollector, String simpleUrl, String sessionToken, String tokenizedUri, Map<String, String> uriParams) {
 
-        this.appRealName = appRealName;
+        this.tokenizedUri = tokenizedUri;
 
-        Response response = restDataCollector.getMonitorResponse(this.getPathWithRealAppName(), simpleUrl, sessionToken);
+        Response response = restDataCollector.getMonitorResponse(makeRestUriPath(tokenizedUri, uriParams), simpleUrl, sessionToken);
         JsonObject jsonEntities = restDataCollector.getJsonEntities(response);
 
         return this.fetchValues(jsonEntities);

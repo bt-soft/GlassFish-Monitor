@@ -59,8 +59,8 @@ public abstract class JSonEntityToSnapshotEntityMapperBase {
     /**
      * Memő kikeresése a név alapján
      *
-     * @param clazz
-     * @param fieldName
+     * @param fields    mezők
+     * @param fieldName keresett mező
      *
      * @return
      */
