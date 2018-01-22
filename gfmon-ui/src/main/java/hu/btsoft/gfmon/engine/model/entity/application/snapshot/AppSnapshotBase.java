@@ -45,7 +45,7 @@ public abstract class AppSnapshotBase extends EntityBase {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "APP_ID")
-    @ColumnPosition(position = 9)
+    @ColumnPosition(position = 10)
     private Application application;
 
     /**
@@ -54,7 +54,7 @@ public abstract class AppSnapshotBase extends EntityBase {
     @NotNull(message = "A pathSuffix nem lehet null")
     @Size(min = 3, max = 255, message = "Az pathSuffix mező hossza {min} és {max} között lehet")
     @Column(length = 255, nullable = false)
-    @ColumnPosition(position = 20)
+    @ColumnPosition(position = 19)
     private String pathSuffix;
 
 }

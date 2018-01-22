@@ -48,17 +48,72 @@ public class ApplicationsCollector {
     @Inject
     private AppServerCollector appServerCollector;
 
-    private String appRealName;
+    private boolean inRecursiveCall;
 
     /**
-     * Egy allamzás adatainak összegyűjtése
+     * Egy alkalamazás "server/*" dolgainak összeszedése
      *
-     * @param server
-     * @param appRealName
+     * @param simpleUrl    simple url
+     * @param sessionToken session token
      *
-     * @return
+     * @return snapshot halmaz, vagy null
      */
-    private Set<AppSnapshotBase> startCollectors(String simpleUrl, String sessionToken) {
+    private Set<AppSnapshotBase> collectServerSnapshots(String simpleUrl, String sessionToken, String appName) {
+
+        Set<AppSnapshotBase> snapshots = new HashSet<>();
+
+        //Server path cuccok
+        Map<String, String> uriParams = new HashMap<>();
+        uriParams.put("{appRealName}", appName);
+        List<CollectedValueDto> valuesList = appServerCollector.execute(restDataCollector, simpleUrl, sessionToken, APP_SERVER_TOKENIZED_PATH, uriParams);
+
+        ApplicationServer appServerSnapshot = (ApplicationServer) jSonEntityToApplicationSnapshotEntityMapper.map(valuesList);
+        if (appServerSnapshot != null) {
+            appServerSnapshot.setPathSuffix("server");
+            snapshots.add(appServerSnapshot);
+        }
+
+        //Megnézzük, hogy vannak-e gyermek objektumok, és jól lekérdezzük őket
+        String resourceUri = String.format("/applications/%s/server", appName);
+        Response response = restDataCollector.getMonitorResponse(resourceUri, simpleUrl, sessionToken);
+        Set<String> childResourcesKeys = restDataCollector.getChildResourcesKeys(response);
+        if (childResourcesKeys != null && !childResourcesKeys.isEmpty()) {
+            for (String childResourcesPath : childResourcesKeys) {
+
+                uriParams.clear();
+                uriParams.put("{appRealName}", appName);
+                uriParams.put("{childResourcesPath}", childResourcesPath);
+                valuesList = appServerCollector.execute(restDataCollector, simpleUrl, sessionToken, APP_SERVER_CHILDRESOURCES_TOKENIZED_PATH, uriParams);
+
+                ApplicationServerSubComponent appServerChildSnapshot = (ApplicationServerSubComponent) jSonEntityToApplicationSnapshotEntityMapper.map(valuesList);
+                if (appServerChildSnapshot != null) {
+                    appServerChildSnapshot.setPathSuffix("server/" + childResourcesPath);
+                    appServerChildSnapshot.setApplicationServer(appServerSnapshot);
+                }
+
+                snapshots.add(appServerChildSnapshot);
+            }
+        }
+
+        //Üres a mért eredmények?
+        if (snapshots.isEmpty()) {
+            log.warn("A(z) '{}' szerver '{}' alkalmazásának 'server' mérési eredményei üresek!", simpleUrl, appName);
+            return null;
+        }
+
+        return snapshots;
+    }
+
+    /**
+     * Egy alkalmzás adatainak összegyűjtése
+     * (rekurzív hivás!)
+     *
+     * @param simpleUrl    simlpe url
+     * @param sessionToken session token
+     * @param appRealName  alkalmazás igazi neve (változhat, pl EAR esetén)
+     * @param snapshots    pillenetfelvétel új entitások
+     */
+    private void startCollectors(String simpleUrl, String sessionToken, String appRealName, Set<AppSnapshotBase> snapshots) {
 
         //Lekérdezzük az alkalmazás 'childResources'-ét
         String resourceUri = String.format("/applications/%s", appRealName);
@@ -66,65 +121,46 @@ public class ApplicationsCollector {
         Set<String> childResourcesKeys = restDataCollector.getChildResourcesKeys(response);
 
         if (childResourcesKeys == null) {
-            return null;
+            return;
         }
 
-        Set<AppSnapshotBase> snapshots = new HashSet<>();
-        List<CollectedValueDto> valuesList = null;
-        Map<String, String> uriParams = new HashMap<>();
+        //Meg kell nézni, hogy van-e "server" childResourcesKey
+        // - Ha van, akkor ez egy 'sima' webes alkalmazás, mehetünk tovább
+        // - Ha nincs, akkor ez egy EAR
+        // -- 1) meg kell hívni rekurzívan magunkat
+        // -- 2) itt sem lesz server, hanem egy .jar és/vagy egy .war  -> reccnt = 1
+        // -- 3) meg kell hívni rekurzívan magunkat -> reccnt = 2
+        // -- 4) Ha van "server" kulcs akkor ez egy .war
+        // -- 5) Ha nincs, akkor ez egy EJB és jelet a Bean dolgokat kivadászni
+        //
+        if (!inRecursiveCall && !childResourcesKeys.contains("server")) {
+            for (String key : childResourcesKeys) {
+                String subAppName = String.format("%s/%s", appRealName, key);
+                //Rekurzív hívás!
+                inRecursiveCall = true;
+                startCollectors(simpleUrl, sessionToken, subAppName, snapshots);
+                inRecursiveCall = false;
+                return;
+            }
+        }
 
-        for (String key : childResourcesKeys) {
-
+        childResourcesKeys.forEach((key) -> {
             if ("server".equals(key)) {
                 //Server path cuccok
-                uriParams.clear();
-                uriParams.put("{appRealName}", appRealName);
-                valuesList = appServerCollector
-                        .execute(restDataCollector, simpleUrl, sessionToken, APP_SERVER_TOKENIZED_PATH, uriParams);
-                ApplicationServer appServerSnapshot = (ApplicationServer) jSonEntityToApplicationSnapshotEntityMapper.map(valuesList);
-                if (appServerSnapshot != null) {
-                    appServerSnapshot.setPathSuffix(key);
-                    snapshots.add(appServerSnapshot);
+                Set<AppSnapshotBase> collectedServerSnapshots = collectServerSnapshots(simpleUrl, sessionToken, appRealName);
+                if (collectedServerSnapshots != null) {
+                    snapshots.addAll(collectedServerSnapshots);
                 }
-
-                //Megnézzük, hogy vannak-e gyermek objektumok, és jól lekérdezzük őket
-                resourceUri = String.format("/applications/%s/server", appRealName);
-                response = restDataCollector.getMonitorResponse(resourceUri, simpleUrl, sessionToken);
-                childResourcesKeys = restDataCollector.getChildResourcesKeys(response);
-                if (childResourcesKeys != null && !childResourcesKeys.isEmpty()) {
-                    for (String childResourcesPath : childResourcesKeys) {
-                        uriParams.clear();
-                        uriParams.put("{appRealName}", appRealName);
-                        uriParams.put("{childResourcesPath}", childResourcesPath);
-                        valuesList = appServerCollector
-                                .execute(restDataCollector, simpleUrl, sessionToken, APP_SERVER_CHILDRESOURCES_TOKENIZED_PATH, uriParams);
-                        ApplicationServerSubComponent appServerChildSnapshot = (ApplicationServerSubComponent) jSonEntityToApplicationSnapshotEntityMapper.map(valuesList);
-                        if (appServerChildSnapshot != null) {
-                            appServerChildSnapshot.setPathSuffix("server/" + childResourcesPath);
-                            appServerChildSnapshot.setApplicationServer(appServerSnapshot);
-                        }
-
-                        snapshots.add(appServerChildSnapshot);
-                    }
-                }
-
             } else {
                 //EJB cuccok
-
+                log.trace("Bean -> appRealName: {}, key: {}", appRealName, key);
             }
+        });
 
-            //Üres a mért eredmények Map-je
-            if (valuesList == null || valuesList.isEmpty()) {
-                log.warn("A(z) '{}' szerver '{}' alkalmazásának '{}' mérési eredményei üresek!", simpleUrl, appRealName, key);
-            }
-
-        }
-
-        return snapshots.isEmpty() ? null : snapshots;
     }
 
     /**
-     * Egy szerver egy alkalmazásadatainak a kigyűjtése
+     * Egy szerver egy alkalmazás adatainak a kigyűjtése
      *
      * @param simpleUrl    szevrer url
      * @param sessionToken session token
@@ -134,10 +170,9 @@ public class ApplicationsCollector {
      */
     public Set<AppSnapshotBase> start(String simpleUrl, String sessionToken, String appRealName) {
 
-        this.appRealName = appRealName;
-
-        Set<AppSnapshotBase> snapshots = this.startCollectors(simpleUrl, sessionToken);
-        return snapshots;
+        Set<AppSnapshotBase> snapshots = new HashSet<>();
+        this.startCollectors(simpleUrl, sessionToken, appRealName, snapshots);
+        return snapshots.isEmpty() ? null : snapshots;
     }
 
 }
