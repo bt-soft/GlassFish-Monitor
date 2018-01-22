@@ -12,6 +12,8 @@
 package hu.btsoft.gfmon.engine.monitor.collector.application;
 
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
+import hu.btsoft.gfmon.engine.model.entity.application.snapshot.server.ApplicationServer;
+import hu.btsoft.gfmon.engine.model.entity.application.snapshot.server.ApplicationServerSubComponent;
 import hu.btsoft.gfmon.engine.monitor.JSonEntityToApplicationSnapshotEntityMapper;
 import hu.btsoft.gfmon.engine.monitor.collector.CollectedValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
@@ -68,10 +70,8 @@ public class ApplicationsCollector {
             return null;
         }
 
-        Set<AppSnapshotBase> snapshots = null;
-
+        Set<AppSnapshotBase> snapshots = new HashSet<>();
         List<CollectedValueDto> valuesList = null;
-
         Map<String, String> uriParams = new HashMap<>();
 
         for (String key : childResourcesKeys) {
@@ -83,6 +83,11 @@ public class ApplicationsCollector {
                 valuesList = appServerCollectors
                         .get()
                         .execute(restDataCollector, simpleUrl, sessionToken, APP_SERVER_TOKENIZED_PATH, uriParams);
+                ApplicationServer appServerSnapshot = (ApplicationServer) jSonEntityToApplicationSnapshotEntityMapper.map(valuesList);
+                if (appServerSnapshot != null) {
+                    appServerSnapshot.setPathSuffix(key);
+                    snapshots.add(appServerSnapshot);
+                }
 
                 //Megnézzük, hogy vannak-e gyermek objektumok, és jól lekérdezzük őket
                 resourceUri = String.format("/applications/%s/server", appRealName);
@@ -93,11 +98,19 @@ public class ApplicationsCollector {
                         uriParams.clear();
                         uriParams.put("{appRealName}", appRealName);
                         uriParams.put("{childResourcesPath}", childResourcesPath);
-                        valuesList.addAll(appServerCollectors
+                        valuesList = appServerCollectors
                                 .get()
-                                .execute(restDataCollector, simpleUrl, sessionToken, APP_SERVER_CHILDRESOURCES_TOKENIZED_PATH, uriParams));
+                                .execute(restDataCollector, simpleUrl, sessionToken, APP_SERVER_CHILDRESOURCES_TOKENIZED_PATH, uriParams);
+                        ApplicationServerSubComponent appServerChildSnapshot = (ApplicationServerSubComponent) jSonEntityToApplicationSnapshotEntityMapper.map(valuesList);
+                        if (appServerChildSnapshot != null) {
+                            appServerChildSnapshot.setPathSuffix("server/" + childResourcesPath);
+                            appServerChildSnapshot.setApplicationServer(appServerSnapshot);
+                        }
+
+                        snapshots.add(appServerChildSnapshot);
                     }
                 }
+
             } else {
                 //EJB cuccok
 
@@ -106,18 +119,11 @@ public class ApplicationsCollector {
             //Üres a mért eredmények Map-je
             if (valuesList == null || valuesList.isEmpty()) {
                 log.warn("A(z) '{}' szerver '{}' alkalmazásának '{}' mérési eredményei üresek!", simpleUrl, appRealName, key);
-                continue;
             }
 
-            //Betoljuk az eredményeket a snapshot entitásba
-            if (snapshots == null) {
-                snapshots = new HashSet<>();
-            }
-
-            jSonEntityToApplicationSnapshotEntityMapper.map(valuesList, snapshots);
         }
 
-        return snapshots;
+        return snapshots.isEmpty() ? null : snapshots;
     }
 
     /**

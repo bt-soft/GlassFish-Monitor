@@ -27,7 +27,8 @@ import lombok.extern.slf4j.Slf4j;
 public class JSonEntityToServerSnapshotEntityMapper extends JSonEntityToSnapshotEntityMapperBase {
 
     /**
-     * Map
+     * Egy Entitás felépítése a mérési eredményekből
+     * A valuesList egyenként egy mezőt tatalmaz, ezt kell mappalni egy entitásban
      *
      * @param valuesList       mérési eredmények
      * @param snapshotEntities Snapshot JPA entitások halmaza, ebbe gyűjtjük a lementendő JPA entitásokat
@@ -35,15 +36,16 @@ public class JSonEntityToServerSnapshotEntityMapper extends JSonEntityToSnapshot
     public void map(List<CollectedValueDto> valuesList, Set<SvrSnapshotBase> snapshotEntities) {
 
         SvrSnapshotBase snapshotEntity = null;
+        Class<? extends SvrSnapshotBase> jpaEntityClass = null;
 
         //Végigmegyünk az összes mért JSon entitáson
         for (CollectedValueDto dto : valuesList) {
 
-            //Leszedjük a mért értéket
-            String path = dto.getPath();
-
             //A JPA entitás típusát attól függően hozzuk létre, hogy mely uri-ról származik a mérés
-            Class<? extends SvrSnapshotBase> jpaEntityClass = SvrRestPathToSvrJpaEntityClassMap.getJpaEntityClass(path);
+            if (jpaEntityClass == null) {
+                //Leszedjük a mért értéket
+                jpaEntityClass = SvrRestPathToSvrJpaEntityClassMap.getJpaEntityClass(dto.getPath());
+            }
 
             if (jpaEntityClass != null) {
                 try {
@@ -58,8 +60,8 @@ public class JSonEntityToServerSnapshotEntityMapper extends JSonEntityToSnapshot
                     log.error("Nem lehet létrehozni az entitás példányt!", e);
                 }
             }
-        }
 
+        }
         //Ha van eredmény, akkor az hozzáadjuk a mérési halmazhoz
         if (snapshotEntity != null) {
             snapshotEntities.add(snapshotEntity);

@@ -17,6 +17,9 @@ import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
 import javax.persistence.Cacheable;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -26,7 +29,7 @@ import org.eclipse.persistence.annotations.Customizer;
 
 /**
  * Alkalmazás szerver (jsp|defaul|server|FacesServlet|ThemeServlet) adatai
- *
+ * <p>
  * pl.:
  * http://localhost:4848/monitoring/domain/server/applications/{appname}/server/(jsp|defaul|server|FacesServlet|ThemeServlet)
  *
@@ -42,19 +45,17 @@ import org.eclipse.persistence.annotations.Customizer;
 @Customizer(EntityColumnPositionCustomizer.class)
 public class ApplicationServerSubComponent extends AppSnapshotBase {
 
-//    /**
-//     * A gyerek mérés neve
-//     *
-//     * DownloadServlet, Faces Servlet, ThemeServlet, TimerWelcomeServlet, jsp, defaul...
-//     */
-//    @NotNull(message = "Az appSvrSubCompName nem lehet null")
-//    @Size(min = 5, max = 50, message = "Az appSvrSubCompName mező hossza {min} és {max} között lehet")
-//    @Column(name = "APP_SVR_SUBCOMP_NAME", length = 255, nullable = false)
-//    @ColumnPosition(position = 21)
-//    private String appSvrSubCompName;
+    /**
+     * Az alkalmazás melyik szerveren van?
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "APP_SERVER_ID", referencedColumnName = "ID", nullable = false)
+    @ColumnPosition(position = 11)
+    private ApplicationServer applicationServer;
+
     /**
      * • errorcount
-     *
+     * <p>
      * Number of error responses (that is, responses with a status code greater than or equal to 400)
      */
     @ColumnPosition(position = 21)
@@ -62,7 +63,7 @@ public class ApplicationServerSubComponent extends AppSnapshotBase {
 
     /**
      * • maxtime
-     *
+     * <p>
      * Maximum response time
      */
     @ColumnPosition(position = 22)
@@ -70,7 +71,7 @@ public class ApplicationServerSubComponent extends AppSnapshotBase {
 
     /**
      * • processingtime
-     *
+     * <p>
      * ProcessingTime
      */
     @ColumnPosition(position = 23)
@@ -78,7 +79,7 @@ public class ApplicationServerSubComponent extends AppSnapshotBase {
 
     /**
      * • requestcount
-     *
+     * <p>
      * Number of requests processed
      */
     @ColumnPosition(position = 24)
@@ -86,9 +87,10 @@ public class ApplicationServerSubComponent extends AppSnapshotBase {
 
     /**
      * • servicetime
-     *
+     * <p>
      * Aggregate response time
      */
     @ColumnPosition(position = 25)
     private Long ServiceTime;
+
 }

@@ -90,7 +90,7 @@ public class Application extends ModifiableEntityBase {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SVR_ID", referencedColumnName = "ID", nullable = false)
-    @ColumnPosition(position = 14)
+    @ColumnPosition(position = 30)
     private Server server;
 
     //---- Glassfish descriptoból jövő adatok /management/domain/applications/application/{appRealName}

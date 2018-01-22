@@ -5,9 +5,9 @@
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <properties>
             <!-- GF 4.1.x esetén -->
-            <!--<property name="eclipselink.logging.logger" value="JavaLogger"/>-->
+            <property name="eclipselink.logging.logger" value="JavaLogger"/>
             <!-- GF 5 esetén -->
-            <property name="eclipselink.logging.logger" value="org.eclipse.persistence.logging.slf4j.SLF4JLogger"/>
+            <!--<property name="eclipselink.logging.logger" value="org.eclipse.persistence.logging.slf4j.SLF4JLogger"/>-->
             <property name="eclipselink.logging.level" value="WARNING"/>
             <property name="eclipselink.logging.level.sql" value="WARNING"/>
             <!--<property name="eclipselink.logging.level.event" value="WARNING"/>-->

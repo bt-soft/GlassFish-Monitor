@@ -39,18 +39,22 @@ import org.eclipse.persistence.annotations.Customizer;
 @Customizer(EntityColumnPositionCustomizer.class)
 public abstract class AppSnapshotBase extends EntityBase {
 
-    @NotNull(message = "A pathSuffix nem lehet null")
-    @Size(min = 3, max = 255, message = "Az pathSuffix mező hossza {min} és {max} között lehet")
-    @Column(length = 255, nullable = false)
-    @ColumnPosition(position = 9)
-    private String pathSuffix;
-
     /**
      * A mérés melyik alkalmazáshoz tartozik?
      * (automatikusan index képződik rá)
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "APP_ID")
-    @ColumnPosition(position = 10)
+    @ColumnPosition(position = 9)
     private Application application;
+
+    /**
+     * Mi a mérés path-jának a vége?
+     */
+    @NotNull(message = "A pathSuffix nem lehet null")
+    @Size(min = 3, max = 255, message = "Az pathSuffix mező hossza {min} és {max} között lehet")
+    @Column(length = 255, nullable = false)
+    @ColumnPosition(position = 10)
+    private String pathSuffix;
+
 }
