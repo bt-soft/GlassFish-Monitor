@@ -12,6 +12,8 @@
 package hu.btsoft.gfmon.engine.monitor.collector.application.server;
 
 /**
+ * Egy üres osztály, csak a Collector -> Entity type megfeleltetés miatt van rá szükség
+ * Csak
  *
  * @author BT
  */

@@ -62,10 +62,10 @@ public class ServerService extends ServiceBase<Server> {
     /**
      * Az összes ismert DataCollectorUnit hozzáadása a aszerverhez
      *
-     * @param server    szerver példány
-     * @param createdBy létrehozó user
+     * @param server      szerver példány
+     * @param creatorUser ha nem interaktív user hívott, akkor ezzel az userrel legyen az audit logolás
      */
-    public void addDefaultAllCollectorDataUnits(Server server, String createdBy) {
+    public void addDefaultAllCollectorDataUnits(Server server, String creatorUser) {
 
         List<SvrCollectorDataUnit> allCdus = svrCollectorDataUnitService.findAll();
 
@@ -77,14 +77,14 @@ public class ServerService extends ServiceBase<Server> {
                 if (server.getJoiners() == null) {
                     server.setJoiners(new LinkedList<>());
                 }
-                super.save(server, createdBy);
+                super.save(server);
             }
 
             //Hozzáadjuk az összes DataUnit-et egy Join tábla segítségével, default esetben minden CDU aktív
             allCdus.forEach((cdu) -> {
 
                 //Létrehozuk a kapcsolótábla entitását
-                ServerSvrCollDataUnitJoiner joiner = new ServerSvrCollDataUnitJoiner(server, cdu, createdBy, Boolean.TRUE);
+                ServerSvrCollDataUnitJoiner joiner = new ServerSvrCollDataUnitJoiner(server, cdu, super.getSessionUser(creatorUser), Boolean.TRUE);
                 em.persist(joiner);
 
                 //Behuzalozzuk a szerverbe és le is mentjük
@@ -132,18 +132,17 @@ public class ServerService extends ServiceBase<Server> {
      *
      * (pl.: sessionToken, readyForMonitoring, stb..)
      *
-     * @param modifier módosító user
+     * @param modifierUser módosító user
      */
-    public void clearRuntimeValuesAndSave(String modifier) {
+    public void clearRuntimeValuesAndSave(String modifierUser) {
 
         super.findAll().stream().map((server) -> {
             server.setSessionToken(null);
             server.setMonitoringServiceReady(null);
             server.setRuntimeSeqId(null);
-            server.setModifiedBy(modifier);
             return server;
         }).forEachOrdered((server) -> {
-            super.save(server);
+            super.save(server, modifierUser);
         });
     }
 
@@ -166,10 +165,10 @@ public class ServerService extends ServiceBase<Server> {
      * Kieginfó módosítása
      *
      * @param entity            Server entitás
-     * @param modifier          módosító user
+     * @param modifierUser      módosító user
      * @param additionalMessage az adatbázisba írandó kieginfo
      */
-    public void updateAdditionalMessage(Server entity, String modifier, String additionalMessage) {
+    public void updateAdditionalMessage(Server entity, String modifierUser, String additionalMessage) {
 
         //Kieginfo
         entity.setAdditionalInformation(additionalMessage);
@@ -179,16 +178,16 @@ public class ServerService extends ServiceBase<Server> {
         entity.setOptLockVersion(lastVersion.getOptLockVersion());
 
         //Le is mentjük az adatbázisba az állapotot
-        super.save(entity, modifier);
+        super.save(entity, modifierUser);
     }
 
     /**
      * Kieginfo törlése
      *
-     * @param entity   Server entitás
-     * @param modifier módosító user
+     * @param entity       Server entitás
+     * @param modifierUser módosító user
      */
-    public void clearAdditionalMessage(Server entity, String modifier) {
+    public void clearAdditionalMessage(Server entity, String modifierUser) {
 
         //Rákeresünk, hogy ne legyen optimisticLocking
         Server lastVersion = super.find(entity.getId());
@@ -196,7 +195,7 @@ public class ServerService extends ServiceBase<Server> {
         //Ha nme üres a kieginfo-ja, akkor most töröljük!
         if (!StringUtils.isEmpty(lastVersion.getAdditionalInformation())) {
             lastVersion.setAdditionalInformation(null);
-            super.save(lastVersion, modifier);
+            super.save(lastVersion, modifierUser);
         }
     }
 

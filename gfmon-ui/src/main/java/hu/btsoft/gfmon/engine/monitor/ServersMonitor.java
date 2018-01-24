@@ -11,7 +11,6 @@
  */
 package hu.btsoft.gfmon.engine.monitor;
 
-import hu.btsoft.gfmon.corelib.cdi.CdiUtils;
 import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
@@ -54,6 +53,9 @@ public class ServersMonitor extends MonitorsBase {
 
     @EJB
     private SvrSnapshotService svrSnapshotService;
+
+    @Inject
+    private ServerMonitoringServiceStatus serverMonitoringServiceStatus;
 
     /**
      * Az adatbázisban módosítást végző user azonosítójának elkérése
@@ -108,9 +110,6 @@ public class ServersMonitor extends MonitorsBase {
         log.info("Adatnevek táblájának felépítése indul");
         long start = Elapsed.nowNano();
 
-        //Mivel egy @Singleton Bean-ban vagyunk, emiatt kézzel lookupOne-oljuk a CDI Bean-t, hogy ne fogjon le egy Rest kliesnt állandó jelleggel
-        ServerSnapshotProvider snapshotProvider = CdiUtils.lookupOne(ServerSnapshotProvider.class);
-
         List<DataUnitDto> dataUnits = null;
         for (Server server : serverService.findAllActiveServer()) {
             if (!super.acquireSessionToken(server)) {
@@ -118,7 +117,7 @@ public class ServersMonitor extends MonitorsBase {
                 continue;
             }
 
-            dataUnits = snapshotProvider.fetchDataUnits(server);
+            dataUnits = serverSnapshotProvider.fetchDataUnits(server);
             if (dataUnits != null) {
                 break;
             }
@@ -149,12 +148,9 @@ public class ServersMonitor extends MonitorsBase {
      */
     private void checkAndPrepareServers() {
 
-        //Mivel egy @Singleton Bean-ban vagyunk, emiatt kézzel lookupOne-oljuk a CDI Bean-t, hogy ne fogjon le egy Rest kliesnt állandó jelleggel
-        ServerMonitoringServiceStatus serverMonitoringServiceStatus = CdiUtils.lookupOne(ServerMonitoringServiceStatus.class);
-
         serverService.findAllActiveServer().stream()
                 .filter((server) -> !(!super.acquireSessionToken(server))) // Ha nem sikerül bejelentkezni, akkor letiltjuk és jöhet a következő szerver
-                .filter((server) -> (server.getMonitoringServiceReady() == null || !server.getMonitoringServiceReady())) //Csak az akív szerevekkel foglalkozunk
+                .filter((server) -> (server.getMonitoringServiceReady() == null || !server.getMonitoringServiceReady())) //Csak az aktív szerevekkel foglalkozunk
                 .map((server) -> {
 
                     // A monitorozandó GF példányok MonitoringService (module-monitoring-levels) ellenőrzése
@@ -180,7 +176,7 @@ public class ServersMonitor extends MonitorsBase {
                     }
                     return server;
                 }).map((server) -> {
-            //Az első indításkort még nem tudjuk, hogy a GF példányról milyen patháon milyen adatneveket lehet gyűjteni
+            //Az első indításkort még nem tudjuk, hogy a GF példányról milyen path-on milyen adatneveket lehet gyűjteni
             //Emiatt a DefaultConfigCreator-ban létrehozott szervereknél itt kapcsoljuk be a gyűjtendő adatneveket
             if (server.getJoiners() == null || server.getJoiners().isEmpty()) {
                 //Mindent mérjünk rajta!

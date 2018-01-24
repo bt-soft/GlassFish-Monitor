@@ -11,25 +11,25 @@
  */
 package hu.btsoft.gfmon.engine.monitor.management;
 
-import hu.btsoft.gfmon.engine.monitor.IndependentRestClientBase;
 import hu.btsoft.gfmon.corelib.time.Elapsed;
+import hu.btsoft.gfmon.engine.rest.RestClientBase;
 import javax.json.JsonObject;
 
 /**
  * Szerver uptime leszedése
- *
+ * <p>
  * http://localhost:4848/management/domain/uptime
  *
  * @author BT
  */
-public class ServerUptime extends IndependentRestClientBase {
+public class ServerUptime extends RestClientBase {
 
     private static final String SUB_URL = "/management/domain/uptime";
 
     /**
      * GF Szerver verzió adatok kigyűjtése
      *
-     * @param simpleUrl a GF szerver URL-je
+     * @param simpleUrl    a GF szerver URL-je
      * @param sessionToken session token
      *
      * @return A GF példány verzió adatai
@@ -37,20 +37,17 @@ public class ServerUptime extends IndependentRestClientBase {
     public String getServerUptime(String simpleUrl, String sessionToken) {
 
         //Válasz leszedése
-        JsonObject jsonObject = super.getJsonObject(simpleUrl, SUB_URL, sessionToken);
-        if (jsonObject == null) {
-            return null;
+        JsonObject rootJsonObject = super.getRootJsonObject(simpleUrl, SUB_URL, sessionToken);
+        if (rootJsonObject != null) {
+            JsonObject properties = rootJsonObject.getJsonObject("properties");
+            if (properties
+                    != null) {
+                //Értékek leszedése
+                String strMs = properties.getJsonString("milliseconds").getString();
+                return Elapsed.getMilliStr(Long.parseLong(strMs));
+            }
+
         }
-
-        //extraProperties leszedése
-        JsonObject properties = jsonObject.getJsonObject("properties");
-        if (properties == null) {
-            return null;
-        }
-
-        //Értékek leszedése
-        String strMs = properties.getJsonString("milliseconds").getString();
-        return Elapsed.getMilliStr(Long.parseLong(strMs));
-
+        return null;
     }
 }

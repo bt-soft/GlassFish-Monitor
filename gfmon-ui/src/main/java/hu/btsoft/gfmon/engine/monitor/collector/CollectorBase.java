@@ -11,6 +11,7 @@
  */
 package hu.btsoft.gfmon.engine.monitor.collector;
 
+import hu.btsoft.gfmon.corelib.json.GFJsonUtils;
 import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
 import hu.btsoft.gfmon.engine.monitor.SvrRestPathToSvrJpaEntityClassMap;
 import java.util.Date;
@@ -95,9 +96,53 @@ public abstract class CollectorBase implements ICollectorBase {
      */
     @Override
     public List<DataUnitDto> collectDataUnits(RestDataCollector restDataCollector, String simpleUrl, String sessionToken) {
-        Response response = restDataCollector.getMonitorResponse(this.getPath(), simpleUrl, sessionToken);
-        JsonObject entities = restDataCollector.getJsonEntities(response);
 
+        //URL hívása
+        Response response = restDataCollector.getMonitorResponse(this.getPath(), simpleUrl, sessionToken);
+        //JsonObject entities = restDataCollector.getJsonEntities(response);
+
+        //Response státuszkód ellenőrzése
+        if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
+            log.warn("A(z) {} url hívására {} hibakód jött", simpleUrl, response.getStatusInfo().getReasonPhrase());
+            return null;
+        }
+
+        //JSon válasz leszedése
+        JsonObject rootJsonObject = response.readEntity(JsonObject.class);
+
+        //Entitások kiszedése a jSon válaszból
+        JsonObject entities = GFJsonUtils.getEntities(rootJsonObject);
+
+        //Mehet az értékek kinyerése az entities-ből
         return this.fetchDataUnits(entities);
+    }
+
+    /**
+     * Monitorozandó entitások lekérése
+     *
+     * @param restDataCollector REST adatgyűjtóő példány
+     * @param simpleUrl         simple url
+     * @param sessionToken      session token
+     * @param path              milyen path-ról kell a JSon entitás
+     *
+     * @return Json entitás
+     */
+    protected JsonObject getMonitoredEntities(RestDataCollector restDataCollector, String simpleUrl, String sessionToken, String path) {
+
+        Response response = restDataCollector.getMonitorResponse(path, simpleUrl, sessionToken);
+
+        //Response státuszkód ellenőrzése
+        if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
+            log.warn("A(z) {} url hívására {} hibakód jött", simpleUrl, response.getStatusInfo().getReasonPhrase());
+            return null;
+        }
+
+        //JSon válasz leszedése
+        JsonObject rootJsonObject = response.readEntity(JsonObject.class);
+
+        //Entitások kiszedése a jSon válaszból
+        JsonObject entities = GFJsonUtils.getEntities(rootJsonObject);
+
+        return entities;
     }
 }

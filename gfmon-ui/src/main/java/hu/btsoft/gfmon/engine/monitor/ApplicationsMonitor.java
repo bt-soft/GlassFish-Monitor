@@ -17,7 +17,7 @@ import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.service.ApplicationService;
 import hu.btsoft.gfmon.engine.model.service.ApplicationSnapshotService;
-import hu.btsoft.gfmon.engine.monitor.management.ServerApplications;
+import hu.btsoft.gfmon.engine.monitor.management.ApplicationsDiscoverer;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -27,6 +27,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 
 /**
  *
@@ -48,7 +49,7 @@ public class ApplicationsMonitor extends MonitorsBase {
     private ApplicationService applicationService;
 
     @Inject
-    private ServerApplications serverApplications;
+    private ApplicationsDiscoverer applicationsDiscoverer;
 
     @Inject
     private ApplicationSnapshotProvider applicationSnapshotProvider;
@@ -79,71 +80,77 @@ public class ApplicationsMonitor extends MonitorsBase {
     @Override
     public void beforeStartTimer() {
         //Alkalmazások lekérdezése és felépítése
-        this.manageApplications();
+        this.manageAllActiverServerApplications();
     }
 
     /**
-     * Alkalmazások listájának felépítése, ha szükséges
-     * - megnézi, hogy az App szerepel-e az adatbázisban (rövid név + hosszú név azonos-e a db-belivel)
+     * Egy szerver alkalmazásainak feltérképezése
      *
+     * - megnézi, hogy az App szerepel-e az adatbázisban (rövid név + hosszú név azonos-e a db-belivel)
+     * <p>
      * - Ha nem szerepel az adatbázisban:
      * -- felveszi az alkalmazást az adatbázisba, de még nincs engedélyetve a monitorozása
-     *
+     * <p>
      * - Ha szerepel az adatbázisban:
      * -- ellenőrzi, hogy a hosszú név azonos-e?
      * --- ha azonos a hosszú név, akkor nem bántja, nem történt változás
      * --- ha nem azonos a hosszú név, akkor törli a db-belit (mert új deploy történt) és felveszi az újat, a státusza azonos lesz a korábbi db-belivel
+     *
+     * @param server vizsgálandó szerver
      */
-    private void manageApplications() {
+    public void manageServerAplication(Server server) {
+        //A szerver aktuális alkalmazás listája
+        List<Application> runtimeApps = applicationsDiscoverer.getServerAplications(server.getSimpleUrl(), server.getSessionToken());
 
-        //Végigmegyünk az összes szerveren
-        for (Server server : serverService.findAllActiveServer()) {
+        //A szerver eltárolt alkalmazás listája
+        List<Application> dbAppList = applicationService.findByServer(server.getId());
 
-            if (!super.acquireSessionToken(server)) {
-                // nem sikerült bejelentkezni -> letiltjuk és jöhet a következő szerver
-                continue;
-            }
+        //Ha a szerveren nincs alkalmazás de az adatbázisban mégis van, akkor töröljük az adatbázsi beli adatokat
+        if ((runtimeApps == null || runtimeApps.isEmpty()) && (dbAppList != null && !dbAppList.isEmpty())) {
+            dbAppList.forEach((dbApp) -> {
+                applicationService.remove(dbApp);
+            });
+            return;
+        }
 
-            //A szerver aktuális alkalmazás listája
-            List<Application> runtimeApps = serverApplications.getServerAplications(server.getSimpleUrl(), server.getSessionToken());
+        //Hasem a szerveren, sem az adatbázisban nincs alkalmazás, akkor nem megyünk tovább
+        if (runtimeApps == null) {
+            return;
+        }
 
-            //A szerver eltárolt alkalmazás listája
-            List<Application> dbAppList = applicationService.findByServer(server.getId());
+        ModelMapper modelMapper = new ModelMapper();
 
-            //Ha a szerveren nincs alkalmazás de az adatbázisban mégis van, akkor töröljük az adatbázsi beli adatokat
-            if ((runtimeApps == null || runtimeApps.isEmpty()) && (dbAppList != null && !dbAppList.isEmpty())) {
-                dbAppList.forEach((dbApp) -> {
-                    applicationService.remove(dbApp);
-                });
-                continue;
-            }
+        //Végigmegyünk a jelenlegi alkalmazások listáján
+        for (Application runtimeApp : runtimeApps) {
 
-            //Hasem a szerveren, sem az adatbázisban nincs alklamazás, akkor nem megyünk tovább
-            if (runtimeApps == null) {
-                continue;
-            }
-
-            //Végigmegyünk a jelenlegi alkalmazások listáján
-            for (Application runtimeApp : runtimeApps) {
-
-                //A rövid név alapján kikeressük az adatbázis listából az alkalmazást
-                Application existDbApp = null;
-                if (dbAppList != null) {
-                    for (Application dbApp : dbAppList) {
-                        if (dbApp.getAppShortName().equals(runtimeApp.getAppShortName())) {
-                            existDbApp = dbApp;
-                            break;
-                        }
+            //A rövid név alapján kikeressük az adatbázis listából az alkalmazást
+            Application existDbApp = null;
+            if (dbAppList != null) {
+                for (Application dbApp : dbAppList) {
+                    if (Objects.equals(dbApp.getAppShortName(), runtimeApp.getAppShortName()) //alkalmazás hosszú név egyezik?
+                            && Objects.equals(dbApp.getModuleShortName(), runtimeApp.getModuleShortName()) //modul rövid név egyezik?
+                            ) {
+                        existDbApp = dbApp;
+                        break;
                     }
                 }
+            }
 
-                //Még azonos a hosszú név?
-                Boolean existDbAppActiveStatus = false;
-                if (existDbApp != null && !Objects.equals(existDbApp.getAppRealName(), runtimeApp.getAppRealName())) {
-                    //nem azonos!
+            //Összehasonlítjuk az adatokat, ha van változás, akkor töröljük a DB-beli adatokat
+            Boolean existDbAppActiveStatus = false;
+            if (existDbApp != null) {
 
-                    //Eltesszük az eredeti active státuszát, amjd ezzel hozunk létre új bejegyzést az új hosszú névvel
+                if (!Objects.equals(existDbApp.getAppRealName(), runtimeApp.getAppRealName()) //igazi neve változott? Pl. verzió váltás volt?
+                        || !Objects.equals(existDbApp.getModuleRealName(), runtimeApp.getModuleRealName()) //modul neve változott?
+                        || !Objects.equals(existDbApp.getModuleEngines(), runtimeApp.getModuleEngines()) // motorok változtak?
+                        || existDbApp.isEnabled() != runtimeApp.isEnabled() // engedélyezett állapot változott?
+                        || !Objects.equals(existDbApp.getContextRoot(), runtimeApp.getContextRoot()) // contextRoot változott?
+                        || !Objects.equals(existDbApp.getDescription(), runtimeApp.getDescription()) // leírás változott?
+                        ) {
+                    //Változás van!!
+                    //Eltesszük az eredeti active státuszát, majd ezzel hozunk létre új bejegyzést az új adatokkal
                     existDbAppActiveStatus = existDbApp.getActive();
+
                     if (existDbAppActiveStatus == null) {
                         existDbAppActiveStatus = false;
                     }
@@ -152,22 +159,36 @@ public class ApplicationsMonitor extends MonitorsBase {
                     applicationService.remove(existDbApp);
                     existDbApp = null;
                 }
-
-                //létező és nem változott a neve, nem érdekel tovább
-                if (existDbApp != null) {
-                    continue;
-                }
-
-                //Új az alkalmazás (vagy a réginek megváltozott a hosszú neve,  felvesszük az adatbázisba!
-                //Az új entitás alapja a runtime listából jövő alkalmazás adatai lesznek
-                Application newApp = new Application(runtimeApp.getAppShortName(), runtimeApp.getAppRealName(), existDbAppActiveStatus, server);
-                newApp.setContextRoot(runtimeApp.getContextRoot());
-                newApp.setDescription(runtimeApp.getDescription());
-                newApp.setEnabled(runtimeApp.isEnabled());
-
-                applicationService.save(newApp, DB_MODIFICATOR_USER);
             }
+
+            //létező és nem változott a neve, nem érdekel tovább
+            if (existDbApp != null) {
+                continue;
+            }
+
+            //Új az alkalmazás (vagy a réginek megváltozott a hosszú neve,  felvesszük az adatbázisba!
+            //Az új entitás alapja a runtime listából jövő alkalmazás adatai lesznek
+            Application newApp = new Application();
+            modelMapper.map(runtimeApp, newApp); //mindent átmásolunk
+            newApp.setServer(server);
+            newApp.setActive(existDbAppActiveStatus); //beállítjuk a mentett monitoring státuszt
+
+            applicationService.save(newApp, DB_MODIFICATOR_USER);
         }
+
+    }
+
+    /**
+     * Alkalmazások listájának felépítése, ha szükséges
+     */
+    public void manageAllActiverServerApplications() {
+
+        //Végigmegyünk az összes szerveren
+        serverService.findAllActiveServer().stream()
+                .filter((server) -> super.acquireSessionToken(server)) // ha nem sikerült bejelentkezni -> letiltjuk és jöhet a következő szerver
+                .forEachOrdered((server) -> {
+                    this.manageServerAplication(server);
+                });
     }
 
     /**
@@ -213,7 +234,7 @@ public class ApplicationsMonitor extends MonitorsBase {
     @Override
     public void dailyJob() {
         //Alkalmazások lekérdezése és felépítése
-        this.manageApplications();
+        this.manageAllActiverServerApplications();
     }
 
 }

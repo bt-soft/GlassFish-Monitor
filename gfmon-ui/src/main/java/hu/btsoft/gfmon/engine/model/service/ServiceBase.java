@@ -17,6 +17,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import javax.annotation.Resource;
+import javax.ejb.EJBContext;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
@@ -40,6 +42,9 @@ import org.eclipse.persistence.exceptions.DatabaseException;
 @Slf4j
 public abstract class ServiceBase<T extends EntityBase> {
 
+    @Resource
+    private EJBContext ejbContext;
+
     private final Class<T> entityClass;
 
     /**
@@ -52,6 +57,24 @@ public abstract class ServiceBase<T extends EntityBase> {
     }
 
     protected abstract EntityManager getEntityManager();
+
+    /**
+     * EJB session user lekérdezése (ha lehet)
+     *
+     * @param defaultUser, ha nincs sessionContext, akkor ez lesz az user
+     *
+     * @return interaktív user, vagy null
+     */
+    protected String getSessionUser(String defaultUser) {
+        if (ejbContext != null) {
+            String user = ejbContext.getCallerPrincipal().getName();
+            if (user != null && !"ANONYMOUS".equals(user)) {
+                return user;
+            }
+        }
+
+        return defaultUser;
+    }
 
     /**
      * JPA cache -> adatbázis szinkronizálás
@@ -85,9 +108,10 @@ public abstract class ServiceBase<T extends EntityBase> {
             return;
         }
 
+        //Ha nincs sessionContext (pl.: nem WEB-ből/interaktívan hívták), akkor a paraméterben megadott userrel mentünk
         if (entity instanceof ModifiableEntityBase) {
             if (entity.getId() == null) {
-                ((ModifiableEntityBase) entity).setCreatedBy(user);
+                ((ModifiableEntityBase) entity).setCreatedBy(this.getSessionUser(user));
 
             } else {
                 //Csak akkor mentünk, ha valóban van változás az entitásban
@@ -96,7 +120,8 @@ public abstract class ServiceBase<T extends EntityBase> {
                     return;
                 }
                 //Mehet a mentés
-                ((ModifiableEntityBase) entity).setModifiedBy(user);
+                //Ha nincs sessionContext, akkor a paraméterben megadott usereel mentünk
+                ((ModifiableEntityBase) entity).setModifiedBy(this.getSessionUser(user));
             }
         }
 
@@ -119,11 +144,21 @@ public abstract class ServiceBase<T extends EntityBase> {
             return;
         }
 
+        String _user = this.getSessionUser(null);
+
         try {
             //Új entitás lesz?
             if (entity.getId() == null) {
+                //Ha ki tudjuk nyerni az usert, és még nincs beállítva, akkor használjuk
+                if (_user != null && entity instanceof ModifiableEntityBase && ((ModifiableEntityBase) entity).getCreatedBy() == null) {
+                    ((ModifiableEntityBase) entity).setCreatedBy(_user);
+                }
                 getEntityManager().persist(entity);
             } else {
+                //Ha ki tudjuk nyerni az usert, és még nincs beállítva, akkor használjuk
+                if (_user != null && entity instanceof ModifiableEntityBase && ((ModifiableEntityBase) entity).getModifiedBy() == null) {
+                    ((ModifiableEntityBase) entity).setModifiedBy(_user);
+                }
                 getEntityManager().merge(entity);
             }
         } catch (ConstraintViolationException e) {

@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Set;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
-import javax.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -134,9 +133,7 @@ public abstract class ServerCollectorBase extends CollectorBase implements IServ
             return null;
         }
 
-        Response response = restDataCollector.getMonitorResponse(getPath(), simpleUrl, sessionToken);
-        JsonObject entities = restDataCollector.getJsonEntities(response);
-
+        JsonObject entities = super.getMonitoredEntities(restDataCollector, simpleUrl, sessionToken, getPath());
         return this.fetchValues(entities, collectedDataNames);
     }
 

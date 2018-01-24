@@ -24,6 +24,13 @@
                 font-size: 1.4em;
                 font-family: Arial;
             }
+            .wideScreenArea{
+                width: 99.5%;
+            }
+            /* query gombok panel szélessége */
+            .buttonPanelGrid {
+                width: 100%;
+            }
         </style>
     </ui:define>
 
@@ -72,9 +79,10 @@
 
                 <p:panel>
                     <h:outputText value="Monitorozott szerverek" styleClass="sub-category-header-text"/>
-                    <p:panel id="tableButtonsPanelGrid">
+                    <p:panel id="tableButtonsPanelGrid"
+                             style="background: transparent; border: none;">
 
-                        <p:commandButton id="refreshBtn"
+                        <p:commandButton id="serverRefreshBtn"
                                          value="Frissít"
                                          title="Szerver lista frissítése"
                                          icon="fa fa-refresh"
@@ -211,144 +219,188 @@
 
                     <br/>
 
-                    <h:outputText value="Monitorozott Alkalmazások" styleClass="sub-category-header-text"/>
-                    <p:panel id="applicationsPanel" style="background: transparent; border: none;">
-
-                        <p:commandButton value="Összes aktív"
-                                         icon="fa fa-check-square-o"
-                                         title="Minden gyűjtendő adatnév aktív"
-                                         onstart="PF('blockUI').block();"
-                                         oncomplete="PF('blockUI').unblock();"
-                                         actionListener="#{settingsView.toggleAllAppActiveFlag(true)}"
-                                         update="@form :growl"
-                                         disabled="#{empty settingsView.selectedServer}"
-                                         />
+                    <h:outputText value="Alkalmazások"
+                                  styleClass="sub-category-header-text"
+                                  />
+                    <p:scrollPanel  mode="native" style="border: none; padding: 0; margin: 0">
+                        <p:panel id="applicationsPanel" style="background: transparent; border: none; width: 150%">
 
 
-                        <p:commandButton value="Összes inaktív"
-                                         icon="fa fa-square-o"
-                                         title="Minden gyűjtendő adatnév inaktív"
-                                         actionListener="#{settingsView.toggleAllAppActiveFlag(false)}"
-                                         onstart="PF('blockUI').block();"
-                                         oncomplete="PF('blockUI').unblock();"
-                                         update="@form :growl"
-                                         disabled="#{empty settingsView.selectedServer}"
-                                         />
-                        <p:dataTable id="appsTable"
-                                     widgetVar="appsTable"
 
-                                     value="#{settingsView.selectedServer.applications}"
-                                     var="app"
+                            <p:commandButton id="appRefreshBtn"
+                                             value="Frissít"
+                                             icon="fa fa-refresh"
+                                             title="A szerver alkalmazásainak újbóli lekérdezése"
+                                             actionListener="#{settingsView.refreshApplications}"
+                                             onstart="PF('blockUI').block();"
+                                             oncomplete="PF('blockUI').unblock();"
+                                             disabled="#{empty settingsView.selectedServer or not settingsView.selectedServer.active}"
+                                             update="appsTable"
+                                             />
 
-                                     scrollable="true"
-                                     scrollHeight="150"
-
-                                     multiViewState="false"
-                                     disabledTextSelection="false"
-
-                                     editable="true"
-                                     editMode="cell"
-
-                                     rowIndexVar="rowNdx"
-                                     rowKey="#{app.id}"
-
-                                     emptyMessage="Nincs Adat"
-                                     >
-
-                            <p:column headerText="No#"
-                                      styleClass="alignCenter"
-                                      style="width: 1.5em">
-                                <h:outputText value="#{rowNdx + 1}" />
-                            </p:column>
-
-                            <!--
-                            <p:column headerText="id"
-                                      style="width: 4em"
-                                      rendered="#{isDeveloperMode}">
-                                <h:outputText value="#{app.id}" />
-                            </p:column>
-                            <p:column headerText="srvId"
-                                      style="width: 4em"
-                                      rendered="#{isDeveloperMode}">
-                                <h:outputText value="#{app.server.id}" />
-                            </p:column>
-                            -->
-
-                            <p:column headerText="Short App Name"
-                                      style="width: 15em"
-                                      sortBy="#{app.appShortName}"
-                                      filterBy="#{app.appShortName}"
-                                      filterStyle="width: 10em; font-size: 0.6em"
-                                      filterMatchMode="contains"
-                                      >
-                                <h:outputText value="#{app.appShortName}" />
-                            </p:column>
-
-                            <p:column headerText="Real App Name"
-                                      style="width: 15em"
-                                      sortBy="#{app.appRealName}"
-                                      filterBy="#{app.appRealName}"
-                                      filterStyle="width: 10em; font-size: 0.6em"
-                                      filterMatchMode="contains"
-                                      >
-                                <h:outputText value="#{app.appRealName}" />
-                            </p:column>
-
-                            <p:column headerText="Moni.Eng"
-                                      styleClass="alignCenter"
-                                      style="width: 4em"
-                                      >
-                                <p:cellEditor>
-                                    <f:facet name="output">
-                                        <p:selectBooleanCheckbox value="#{app.active}"/>
-                                    </f:facet>
-                                    <f:facet name="input">
-                                        <h:inputHidden value="#{app.active}" />
-                                        <h:selectBooleanCheckbox value="#{app.active}" onclick="$(this).prev().val(this.checked)" />
-                                    </f:facet>
-
-                                </p:cellEditor>
-                            </p:column>
-
-                            <p:column headerText="ContextRoot">
-                                <h:outputText value="#{app.contextRoot}" />
-                            </p:column>
-                            <p:column headerText="Engedélyezve"
-                                      style="width: 6em"
-                                      styleClass="alignCenter">
-                                <p:selectBooleanCheckbox value="#{app.enabled}" disabled="true"/>
-                            </p:column>
-                            <p:column headerText="Leírás">
-                                <h:outputText value="#{app.description}"/>
-                            </p:column>
-
-                            <p:column headerText="Létrehozva" >
-                                <h:outputText value="#{app.createdDate}">
-                                    <f:convertDateTime pattern="yyyy.MM.dd HH:mm:ss"
-                                                       timeZone="Europe/Budapest"
-                                                       locale="hu_HU"/>
-                                </h:outputText>
-                            </p:column>
-
-                            <p:column headerText="Létrehozó">
-                                <h:outputText value="#{app.createdBy}"/>
-                            </p:column>
-
-                            <p:column headerText="Módosítva">
-                                <h:outputText value="#{app.modifiedDate}">
-                                    <f:convertDateTime pattern="yyyy.MM.dd HH:mm:ss"
-                                                       timeZone="Europe/Budapest"
-                                                       locale="hu_HU"/>
-                                </h:outputText>
-                            </p:column>
-
-                            <p:column headerText="Módosító" >
-                                <h:outputText value="#{app.modifiedBy}"/>
-                            </p:column>
+                            <p:commandButton value="Összes aktív"
+                                             icon="fa fa-check-square-o"
+                                             title="Minden gyűjtendő adatnév aktív"
+                                             onstart="PF('blockUI').block();"
+                                             oncomplete="PF('blockUI').unblock();"
+                                             actionListener="#{settingsView.toggleAllAppActiveFlag(true)}"
+                                             update="appsTable :growl"
+                                             disabled="#{empty settingsView.selectedServer or not settingsView.selectedServer.active}"
+                                             />
 
 
-                        </p:dataTable>
-                    </p:panel>
+                            <p:commandButton value="Összes inaktív"
+                                             icon="fa fa-square-o"
+                                             title="Minden gyűjtendő adatnév inaktív"
+                                             actionListener="#{settingsView.toggleAllAppActiveFlag(false)}"
+                                             onstart="PF('blockUI').block();"
+                                             oncomplete="PF('blockUI').unblock();"
+                                             update="appsTable :growl"
+                                             disabled="#{empty settingsView.selectedServer or not settingsView.selectedServer.active}"
+                                             />
+
+
+                            <p:dataTable id="appsTable"
+                                         widgetVar="appsTable"
+
+                                         value="#{settingsView.selectedServer.applications}"
+                                         var="app"
+
+                                         multiViewState="false"
+                                         disabledTextSelection="false"
+
+                                         editable="true"
+                                         editMode="cell"
+
+                                         rowIndexVar="rowNdx"
+                                         rowKey="#{app.id}"
+
+                                         emptyMessage="Nincs Adat"
+
+                                         >
+
+                                <p:column headerText="No#"
+                                          styleClass="alignCenter"
+                                          style="width: 1.5em">
+                                    <h:outputText value="#{rowNdx + 1}" />
+                                </p:column>
+
+                                <!--
+                                <p:column headerText="id"
+                                          style="width: 4em"
+                                          rendered="#{isDeveloperMode}">
+                                    <h:outputText value="#{app.id}" />
+                                </p:column>
+                                <p:column headerText="srvId"
+                                          style="width: 4em"
+                                          rendered="#{isDeveloperMode}">
+                                    <h:outputText value="#{app.server.id}" />
+                                </p:column>
+                                -->
+
+                                <p:column headerText="Monable"
+                                          styleClass="alignCenter"
+                                          style="width: 4em"
+                                          >
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <p:selectBooleanCheckbox value="#{app.active}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <h:inputHidden value="#{app.active}" />
+                                            <h:selectBooleanCheckbox value="#{app.active}" onclick="$(this).prev().val(this.checked)" />
+                                        </f:facet>
+
+                                    </p:cellEditor>
+                                </p:column>
+
+
+                                <p:column headerText="App SName"
+                                          style="width: 15em"
+                                          sortBy="#{app.appShortName}"
+                                          filterBy="#{app.appShortName}"
+                                          filterStyle="width: 10em; font-size: 0.6em"
+                                          filterMatchMode="contains"
+                                          >
+                                    <h:outputText value="#{app.appShortName}" />
+                                </p:column>
+                                <p:column headerText="App RName"
+                                          style="width: 15em"
+                                          sortBy="#{app.appRealName}"
+                                          filterBy="#{app.appRealName}"
+                                          filterStyle="width: 10em; font-size: 0.6em"
+                                          filterMatchMode="contains"
+                                          >
+                                    <h:outputText value="#{app.appRealName}" />
+                                </p:column>
+
+                                <p:column headerText="Module SName"
+                                          style="width: 15em"
+                                          sortBy="#{app.moduleShortName}"
+                                          filterBy="#{app.moduleShortName}"
+                                          filterStyle="width: 10em; font-size: 0.6em"
+                                          filterMatchMode="contains"
+                                          >
+                                    <h:outputText value="#{app.moduleShortName}" />
+                                </p:column>
+                                <p:column headerText="Module RName"
+                                          style="width: 15em"
+                                          sortBy="#{app.moduleRealName}"
+                                          filterBy="#{app.moduleRealName}"
+                                          filterStyle="width: 10em; font-size: 0.6em"
+                                          filterMatchMode="contains"
+                                          >
+                                    <h:outputText value="#{app.moduleRealName}" />
+                                </p:column>
+
+                                <p:column headerText="ContextRoot">
+                                    <h:outputText value="#{app.contextRoot}" />
+                                </p:column>
+                                <p:column headerText="Enabled"
+                                          style="width: 4em"
+                                          styleClass="alignCenter">
+                                    <p:selectBooleanCheckbox value="#{app.enabled}" disabled="true"/>
+                                </p:column>
+                                <p:column headerText="Leírás">
+                                    <h:outputText value="#{app.description}"/>
+                                </p:column>
+
+                                <p:column headerText="Létrehozva"
+                                          style="width: 10em"
+                                          >
+                                    <h:outputText value="#{app.createdDate}">
+                                        <f:convertDateTime pattern="yyyy.MM.dd HH:mm:ss"
+                                                           timeZone="Europe/Budapest"
+                                                           locale="hu_HU"/>
+                                    </h:outputText>
+                                </p:column>
+
+                                <p:column headerText="Létrehozó"
+                                          style="width: 8em"
+                                          >
+                                    <h:outputText value="#{app.createdBy}"/>
+                                </p:column>
+
+                                <p:column headerText="Módosítva"
+                                          style="width: 10em"
+                                          >
+                                    <h:outputText value="#{app.modifiedDate}">
+                                        <f:convertDateTime pattern="yyyy.MM.dd HH:mm:ss"
+                                                           timeZone="Europe/Budapest"
+                                                           locale="hu_HU"/>
+                                    </h:outputText>
+                                </p:column>
+
+                                <p:column headerText="Módosító"
+                                          style="width: 8em"
+                                          >
+                                    <h:outputText value="#{app.modifiedBy}"/>
+                                </p:column>
+
+
+                            </p:dataTable>
+                        </p:panel>
+                    </p:scrollPanel>
                 </p:panel>
 
             </bt:disablePanel>

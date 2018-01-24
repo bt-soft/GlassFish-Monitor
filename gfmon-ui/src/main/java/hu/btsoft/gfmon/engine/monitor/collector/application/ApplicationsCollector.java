@@ -11,6 +11,7 @@
  */
 package hu.btsoft.gfmon.engine.monitor.collector.application;
 
+import hu.btsoft.gfmon.corelib.json.GFJsonUtils;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.server.ApplicationServer;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.server.ApplicationServerSubComponent;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
+import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
@@ -76,7 +78,16 @@ public class ApplicationsCollector {
         //Megnézzük, hogy vannak-e gyermek objektumok, és jól lekérdezzük őket
         String resourceUri = String.format("/applications/%s/server", appName);
         Response response = restDataCollector.getMonitorResponse(resourceUri, simpleUrl, sessionToken);
-        Set<String> childResourcesKeys = restDataCollector.getChildResourcesKeys(response);
+        //Response státuszkód ellenőrzése
+        if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
+            log.warn("A(z) {} url hívására {} hibakód jött", simpleUrl, response.getStatusInfo().getReasonPhrase());
+            return null;
+        }
+
+        //JSon válasz leszedése
+        JsonObject rootJsonObject = response.readEntity(JsonObject.class);
+        Set<String> childResourcesKeys = GFJsonUtils.getChildResourcesKeys(rootJsonObject);
+
         if (childResourcesKeys != null && !childResourcesKeys.isEmpty()) {
             for (String childResourcesPath : childResourcesKeys) {
 
@@ -118,8 +129,15 @@ public class ApplicationsCollector {
         //Lekérdezzük az alkalmazás 'childResources'-ét
         String resourceUri = String.format("/applications/%s", appRealName);
         Response response = restDataCollector.getMonitorResponse(resourceUri, simpleUrl, sessionToken);
-        Set<String> childResourcesKeys = restDataCollector.getChildResourcesKeys(response);
+        //Response státuszkód ellenőrzése
+        if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
+            log.warn("A(z) {} url hívására {} hibakód jött", simpleUrl, response.getStatusInfo().getReasonPhrase());
+            return;
+        }
 
+        //JSon válasz leszedése
+        JsonObject rootJsonObject = response.readEntity(JsonObject.class);
+        Set<String> childResourcesKeys = GFJsonUtils.getChildResourcesKeys(rootJsonObject);
         if (childResourcesKeys == null) {
             return;
         }

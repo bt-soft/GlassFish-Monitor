@@ -21,12 +21,11 @@ import java.util.List;
 import java.util.Map;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
-import javax.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * Alkalmazás adatgyűjtés ős osztály
- *
+ * <p>
  * http://localhost:4848/monitoring/domain/server/applications/{appRealName}/???
  *
  * @author BT
@@ -162,11 +161,8 @@ public abstract class ApplicationCollectorBase extends CollectorBase implements 
     public List<CollectedValueDto> execute(RestDataCollector restDataCollector, String simpleUrl, String sessionToken, String tokenizedUri, Map<String, String> uriParams) {
 
         this.tokenizedUri = tokenizedUri;
-
-        Response response = restDataCollector.getMonitorResponse(makeRestUriPath(tokenizedUri, uriParams), simpleUrl, sessionToken);
-        JsonObject jsonEntities = restDataCollector.getJsonEntities(response);
-
-        return this.fetchValues(jsonEntities);
+        JsonObject entities = super.getMonitoredEntities(restDataCollector, simpleUrl, sessionToken, makeRestUriPath(tokenizedUri, uriParams));
+        return this.fetchValues(entities);
     }
 
 }

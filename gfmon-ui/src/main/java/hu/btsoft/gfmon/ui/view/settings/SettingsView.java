@@ -17,6 +17,7 @@ import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
 import hu.btsoft.gfmon.engine.model.service.IConfigKeyNames;
 import hu.btsoft.gfmon.engine.model.service.ServerService;
+import hu.btsoft.gfmon.engine.monitor.ApplicationsMonitor;
 import hu.btsoft.gfmon.engine.monitor.management.ServerUptime;
 import hu.btsoft.gfmon.engine.monitor.management.ServerVersion;
 import hu.btsoft.gfmon.ui.view.ViewBase;
@@ -61,6 +62,10 @@ public class SettingsView extends ViewBase {
 
     private List<Config> configs;
 
+    // --- Applications
+    @EJB
+    private ApplicationsMonitor applicationsMonitor;
+
     @Getter
     @Setter
     private Boolean configAutoStart;
@@ -81,7 +86,7 @@ public class SettingsView extends ViewBase {
     private List<Server> servers;
 
     //Az adatbázisból törlendő szerverek listája
-    private List<Server> deleteServersFromDb = new LinkedList<>();
+    private final List<Server> deleteServersFromDb = new LinkedList<>();
 
     /**
      * A táblázatban kiválasztott szerver (viewDetail)
@@ -207,10 +212,10 @@ public class SettingsView extends ViewBase {
         try {
             //Config mentése
             configs.forEach((Config config) -> {
-                configService.save(config, currentUser);
+                configService.save(config);
             });
 
-            //Szerver tényleges törlése
+            //Szerver tényleges törlése, ha a deleteServersFromDb-ben van törléendő
             if (deleteServersFromDb != null && !deleteServersFromDb.isEmpty()) {
                 deleteServersFromDb.forEach((Server server) -> {
                     serverService.remove(server);
@@ -220,6 +225,10 @@ public class SettingsView extends ViewBase {
             //Szerverek mentése
             servers.forEach((Server server) -> {
 
+                //Ha a szerver aktív, de van kieginfója, akkor azt most töröljük
+                //if (server.isActive() && !StringUtils.isEmpty(server.getAdditionalInformation())) {
+                //    server.setAdditionalInformation(null);
+                //}
                 //A JSF "" string lecserélése null-ra
                 if (StringUtils.isEmpty(server.getUserName())) {
                     server.setUserName(null);
@@ -233,7 +242,7 @@ public class SettingsView extends ViewBase {
                 }
 
                 //Szerver mentése, az alkalmazások update automatikusan megtörténik
-                serverService.save(server, currentUser);
+                serverService.save(server);
             });
 
             //Újra betöltünk mindent
@@ -423,5 +432,26 @@ public class SettingsView extends ViewBase {
                 .forEach((app) -> {
                     app.setActive(newActiveFlag);
                 });
+    }
+
+    /**
+     * Alkalmazások frissítése
+     */
+    public void refreshApplications() {
+
+        //Feltérképezzük a szerver alkalmazásait -> ez beírja az adatbázisba azt, amit épp lát
+        applicationsMonitor.manageServerAplication(selectedServer);
+
+        //Újra kikeressük az adatbázisból a szervert, hogy az alkalmazások lista frissűljön
+        Server refreshedServer = serverService.find(selectedServer.getId());
+        //Ugyan arra a runtimeSequId-re állítjuk
+        refreshedServer.setRuntimeSeqId(selectedServer.getRuntimeSeqId());
+
+        //Kicsréljük a listában az újonnan felolvasott szervert
+        int ndx = servers.indexOf(selectedServer);
+        servers.set(ndx, refreshedServer);
+
+        //Átállítjuk a selectedServer referenciát is, hogy az alkalmazások tábla is frissűlhessen
+        selectedServer = refreshedServer;
     }
 }
