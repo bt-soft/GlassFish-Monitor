@@ -40,14 +40,15 @@ public class ApplicationsDiscoverer extends RestClientBase {
     /**
      * GF Szerver alkamazás neveinek listájának kigyűjtése
      *
-     * @param simpleUrl    a GF szerver URL-je
-     * @param sessionToken session token
+     * @param simpleUrl    szerver url
+     * @param userName     REST hívás usere
+     * @param sessionToken GF session token
      *
      * @return A GF példány verzió adatai
      */
-    private Map<String /* AppRealName */, String /* url */> getAppNamesUrlMap(String simpleUrl, String sessionToken) {
+    private Map<String /* AppRealName */, String /* url */> getAppNamesUrlMap(String simpleUrl, String userName, String sessionToken) {
         //Válasz leszedése
-        Map<String /* AppRealName */, String /* url */> map = GFJsonUtils.getChildResourcesMap(super.getRootJsonObject(simpleUrl, SUB_URL, sessionToken));
+        Map<String /* AppRealName */, String /* url */> map = GFJsonUtils.getChildResourcesMap(super.getRootJsonObject(simpleUrl, SUB_URL, userName, sessionToken));
         return map;
     }
 
@@ -67,13 +68,14 @@ public class ApplicationsDiscoverer extends RestClientBase {
      * - Ránézünk a REST /management/domain/applications/application/{appname}/module/{modulename}/engines URL-re
      * - leszedjük az engine neveket
      *
-     * @param sessionToken     session token
      * @param appNamesUrlEntry [az alkalmazás igazi neve, full URL] map entry
+     * @param userName         REST hívás usere
+     * @param sessionToken     GF session token
      */
-    private List<Application> createApplications(String sessionToken, Map.Entry<String /* AppRealName */, String /* url */> appNamesUrlEntry) {
+    private List<Application> createApplications(Map.Entry<String /* AppRealName */, String /* url */> appNamesUrlEntry, String userName, String sessionToken) {
 
         //Válasz leszedése
-        JsonObject rootJsonObject = super.getRootJsonObject(appNamesUrlEntry.getValue(), sessionToken);
+        JsonObject rootJsonObject = super.getRootJsonObject(appNamesUrlEntry.getValue(), userName, sessionToken);
         JsonObject entities = GFJsonUtils.getEntities(rootJsonObject);
         if (entities == null) {
             return null;
@@ -89,24 +91,26 @@ public class ApplicationsDiscoverer extends RestClientBase {
 
         // -- Modulok leszedése
         String moduleUrl = GFJsonUtils.getChildResourcesValueByName(rootJsonObject, "module");
-        Map<String /* appModuleName */, String /* url */> modulesMap = GFJsonUtils.getChildResourcesMap(super.getRootJsonObject(moduleUrl, sessionToken));
+        Map<String /* appModuleName */, String /* url */> modulesMap = GFJsonUtils.getChildResourcesMap(super.getRootJsonObject(moduleUrl, userName, sessionToken));
 
-        modulesMap.entrySet().stream().map((appModuleEntry) -> StrUtils.deQuote(appModuleEntry.getKey())).map((appModuleRealName) -> {
-            String moduleEngineUrl = moduleUrl + "/" + appModuleRealName + "/engine";
-            Set<String> moduleEngines = GFJsonUtils.getChildResourcesKeys(super.getRootJsonObject(moduleEngineUrl, sessionToken));
+        modulesMap.entrySet().stream().map((appModuleEntry) -> StrUtils.deQuote(appModuleEntry.getKey()))
+                .map((appModuleRealName) -> {
+                    String moduleEngineUrl = moduleUrl + "/" + appModuleRealName + "/engine";
+                    Set<String> moduleEngines = GFJsonUtils.getChildResourcesKeys(super.getRootJsonObject(moduleEngineUrl, userName, sessionToken));
 
-            Application app = new Application();
-            app.setAppRealName(appRealName);
-            app.setAppShortName(Application.createAppShortName(appRealName));
-            app.setModuleRealName(appModuleRealName);
-            app.setModuleShortName(Application.createAppShortName(appModuleRealName));
-            app.setModuleEngines(moduleEngines);
-            app.setContextRoot(contextRoot);
-            app.setDescription(description);
-            app.setEnabled(enabled);
+                    Application app = new Application();
+                    app.setActive(false); //runtime összeszedett alkalmazást monitorozásra tiltottra teszünk default esetben
 
-            return app;
-        }).forEachOrdered((app) -> {
+                    app.setAppRealName(appRealName);
+                    app.setAppShortName(Application.createAppShortName(appRealName));
+                    app.setModuleRealName(appModuleRealName);
+                    app.setModuleShortName(Application.createAppShortName(appModuleRealName));
+                    app.setModuleEngines(moduleEngines);
+                    app.setContextRoot(contextRoot);
+                    app.setDescription(description);
+                    app.setEnabled(enabled);
+                    return app;
+                }).forEachOrdered((app) -> {
             applications.add(app);
         });
 
@@ -117,14 +121,15 @@ public class ApplicationsDiscoverer extends RestClientBase {
      * Az alkalmazások részletes adatainak listája
      *
      * @param simpleUrl    szerver URL-je
+     * @param userName     rest user
      * @param sessionToken session token
      *
      * @return Az alkalmazások részletes adatai új(de inkább detached) entitásokban, vagy null
      */
-    public List<Application> getServerAplications(String simpleUrl, String sessionToken) {
+    public List<Application> getServerAplications(String simpleUrl, String userName, String sessionToken) {
 
         //leszedjük az alkalmazások neveinek listáját
-        Map<String /* AppRealName */, String /* url */> appNamesUrlMap = this.getAppNamesUrlMap(simpleUrl, sessionToken);
+        Map<String /* AppRealName */, String /* url */> appNamesUrlMap = this.getAppNamesUrlMap(simpleUrl, userName, sessionToken);
 
         if (appNamesUrlMap == null) {
             return null;
@@ -133,10 +138,11 @@ public class ApplicationsDiscoverer extends RestClientBase {
         List<Application> result = new LinkedList<>();
 
         appNamesUrlMap.entrySet().stream()
-                .map((appNamesUrlEntry) -> this.createApplications(sessionToken, appNamesUrlEntry))
-                .filter((apps) -> (apps != null)).forEachOrdered((apps) -> {
-            result.addAll(apps);
-        });
+                .map((appNamesUrlEntry) -> this.createApplications(appNamesUrlEntry, userName, sessionToken))
+                .filter((apps) -> (apps != null))
+                .forEachOrdered((apps) -> {
+                    result.addAll(apps);
+                });
         return result.isEmpty() ? null : result;
     }
 }

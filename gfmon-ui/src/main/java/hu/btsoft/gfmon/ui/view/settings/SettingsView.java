@@ -11,8 +11,10 @@
  */
 package hu.btsoft.gfmon.ui.view.settings;
 
+import hu.btsoft.gfmon.corelib.exception.GfMonException;
 import hu.btsoft.gfmon.engine.model.RuntimeSequenceGenerator;
 import hu.btsoft.gfmon.engine.model.entity.Config;
+import hu.btsoft.gfmon.engine.model.entity.application.Application;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
 import hu.btsoft.gfmon.engine.model.service.IConfigKeyNames;
@@ -20,6 +22,7 @@ import hu.btsoft.gfmon.engine.model.service.ServerService;
 import hu.btsoft.gfmon.engine.monitor.ApplicationsMonitor;
 import hu.btsoft.gfmon.engine.monitor.management.ServerUptime;
 import hu.btsoft.gfmon.engine.monitor.management.ServerVersion;
+import hu.btsoft.gfmon.engine.security.SessionTokenAcquirer;
 import hu.btsoft.gfmon.ui.view.ViewBase;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -55,6 +58,9 @@ public class SettingsView extends ViewBase {
 
     @Inject
     private ServerUptime serverUptime;
+
+    @Inject
+    private SessionTokenAcquirer sessionTokenAcquirer;
 
     // --- Config -----------------------------------
     @EJB
@@ -243,6 +249,7 @@ public class SettingsView extends ViewBase {
 
                 //Szerver mentése, az alkalmazások update automatikusan megtörténik
                 serverService.save(server);
+
             });
 
             //Újra betöltünk mindent
@@ -392,7 +399,7 @@ public class SettingsView extends ViewBase {
         if (StringUtils.isEmpty(selectedServer.getSessionToken())) {
             return "Még nincs adat";
         }
-        Map<String, String> serverVersionInfo = serverVersion.getServerVersionInfo(selectedServer.getSimpleUrl(), selectedServer.getSessionToken());
+        Map<String, String> serverVersionInfo = serverVersion.getServerVersionInfo(selectedServer.getSimpleUrl(), selectedServer.getUserName(), selectedServer.getSessionToken());
         if (serverVersionInfo != null) {
             String versionStr = serverVersionInfo.get("full-version");
             if (!StringUtils.isEmpty(versionStr)) {
@@ -416,7 +423,7 @@ public class SettingsView extends ViewBase {
         if (StringUtils.isEmpty(selectedServer.getSessionToken())) {
             return "Még nincs adat";
         }
-        String uptimeStr = serverUptime.getServerUptime(selectedServer.getSimpleUrl(), selectedServer.getSessionToken());
+        String uptimeStr = serverUptime.getServerUptime(selectedServer.getSimpleUrl(), selectedServer.getUserName(), selectedServer.getSessionToken());
 
         return StringUtils.isEmpty(uptimeStr) ? "Nem kérdezhető le" : uptimeStr;
     }
@@ -439,19 +446,55 @@ public class SettingsView extends ViewBase {
      */
     public void refreshApplications() {
 
+        //Ha még zsír új a szerver, akkor nem turkálunk az adatbázisban
+        if (StringUtils.isEmpty(selectedServer.getSessionToken())) {
+
+            //Ha még nincs SessionToken, akkor csinálunk egyet
+            try {
+                String sessionToken = sessionTokenAcquirer.getSessionToken(selectedServer.getUrl(), selectedServer.getUserName(), selectedServer.getPlainPassword());
+                selectedServer.setSessionToken(sessionToken);
+            } catch (GfMonException e) {
+                FacesMessage facesMessage = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Hiba", e.getMessage());
+                RequestContext.getCurrentInstance().showMessageInDialog(facesMessage);
+                return;
+            }
+        }
+
+        //Ha a szerver még nincs az adatbázisban, akkor on-the-fly kérdezzük le az alkalmazásait
+        if (selectedServer.getId() == null) {
+            List<Application> applicationsList = applicationsMonitor.getApplicationsList(selectedServer);
+            //Beállítjuk, hogy ki vette fel őket
+            if (applicationsList != null) {
+                for (Application app : applicationsList) {
+                    if (app.getCreatedBy() == null) {
+                        //beállítjuk, hogy melyik szerveren fut az alkalmazás
+                        app.setCreatedBy(currentUser);
+                    }
+                }
+            }
+
+            selectedServer.setApplications(applicationsList);
+            return;
+        }
+
+        //
+        // A kiválasztott szerver az adatbázisban van, így abban kel az alkalmazások karbantartását elvégezni
+        //
         //Feltérképezzük a szerver alkalmazásait -> ez beírja az adatbázisba azt, amit épp lát
-        applicationsMonitor.manageServerAplication(selectedServer);
+        applicationsMonitor.maintenanceServerAplicationInDataBase(selectedServer);
 
         //Újra kikeressük az adatbázisból a szervert, hogy az alkalmazások lista frissűljön
         Server refreshedServer = serverService.find(selectedServer.getId());
+
         //Ugyan arra a runtimeSequId-re állítjuk
         refreshedServer.setRuntimeSeqId(selectedServer.getRuntimeSeqId());
 
-        //Kicsréljük a listában az újonnan felolvasott szervert
+        //Kicseréljük a listában az újonnan felolvasott szervert
         int ndx = servers.indexOf(selectedServer);
         servers.set(ndx, refreshedServer);
 
         //Átállítjuk a selectedServer referenciát is, hogy az alkalmazások tábla is frissűlhessen
         selectedServer = refreshedServer;
+
     }
 }

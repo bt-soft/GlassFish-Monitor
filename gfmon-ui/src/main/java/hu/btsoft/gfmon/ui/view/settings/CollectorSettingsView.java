@@ -77,7 +77,7 @@ public class CollectorSettingsView extends ViewBase {
 
     /**
      * A kiválasztott szerver joiner tábláját lerendezzük a szerverDCU-k path és adatnevei szerint
-     *
+     * <p>
      * Mivel kapcsolótábla van a Server és a DCU között, így a szerver DCU listájánál nincs a kezünkben a mező
      * amivel kiadhatnánk a JPA @OrderBy("jpaProperty DESC") annotációt.
      * Emiatt kézzel rendezünk
@@ -110,7 +110,23 @@ public class CollectorSettingsView extends ViewBase {
         selectedServer.getJoiners()
                 .forEach((joiner) -> {
                     joiner.setActive(newActiveFlag);
+                    joiner.setAdditionalMessage(null);  //töröljük a kieginfót
                 });
+    }
+
+    /**
+     * Egy joiner-t állítgattah -> töröljük a kieginfót!
+     *
+     * @param svrCollectorDataUnitId a joiner id-je
+     */
+    public void joinerActiveChanged(Long svrCollectorDataUnitId) {
+
+        for (ServerSvrCollDataUnitJoiner joiner : selectedServer.getJoiners()) {
+            if (joiner.getSvrCollectorDataUnit().getId().equals(svrCollectorDataUnitId)) {
+                joiner.setModifiedBy(currentUser);
+                joiner.setAdditionalMessage(null);
+            }
+        }
     }
 
     /**

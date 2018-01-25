@@ -14,6 +14,7 @@ package hu.btsoft.gfmon.engine.monitor;
 import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
+import hu.btsoft.gfmon.engine.model.entity.server.ServerSvrCollDataUnitJoiner;
 import hu.btsoft.gfmon.engine.model.entity.server.SvrCollectorDataUnit;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SvrSnapshotBase;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
@@ -21,6 +22,7 @@ import hu.btsoft.gfmon.engine.model.service.IConfigKeyNames;
 import hu.btsoft.gfmon.engine.model.service.SvrCollectorDataUnitService;
 import hu.btsoft.gfmon.engine.model.service.SvrSnapshotService;
 import hu.btsoft.gfmon.engine.monitor.management.ServerMonitoringServiceStatus;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.ejb.EJB;
@@ -154,7 +156,7 @@ public class ServersMonitor extends MonitorsBase {
                 .map((server) -> {
 
                     // A monitorozandó GF példányok MonitoringService (module-monitoring-levels) ellenőrzése
-                    Set<String> monitorableModules = serverMonitoringServiceStatus.checkMonitorStatus(server.getSimpleUrl(), server.getSessionToken());
+                    Set<String> monitorableModules = serverMonitoringServiceStatus.checkMonitorStatus(server.getSimpleUrl(), server.getUserName(), server.getSessionToken());
 
                     // Amely szervernek nincs engedélyezve egyetlen monitorozható modulja sem, azt jól inaktívvá tesszük
                     if (monitorableModules == null) {
@@ -200,6 +202,9 @@ public class ServersMonitor extends MonitorsBase {
         //Szerverek ellenőrzése
         this.checkAndPrepareServers();
 
+        //Hibára futott mérési oldalak, automatikusan tiltjuk őket
+        Set<String> erroredPaths = new HashSet<>();
+
         int measuredServerCnt = 0;
         for (Server server : serverService.findAllActiveServer()) {
 
@@ -211,7 +216,39 @@ public class ServersMonitor extends MonitorsBase {
 
             log.trace("Adatgyűjtés indul: {}", server.getUrl());
 
-            Set<SvrSnapshotBase> serverSnapshots = serverSnapshotProvider.fetchSnapshot(server);
+            erroredPaths.clear();
+            Set<SvrSnapshotBase> serverSnapshots = serverSnapshotProvider.fetchSnapshot(server, erroredPaths);
+
+            //letiltjuk a gyűjtendő adat pat-ját, ha nem sikerült elérni
+            if (!erroredPaths.isEmpty()) {
+                for (String path : erroredPaths) {
+                    for (ServerSvrCollDataUnitJoiner joiner : server.getJoiners()) {
+                        if (joiner.getSvrCollectorDataUnit().getRestPath().equals(path)) {
+                            joiner.setActive(false);
+                            joiner.setModifiedBy(DB_MODIFICATOR_USER);
+                            joiner.setAdditionalMessage(String.format("Nem érhető el a(z) '%s' path, emiatt az adatgyűjtés letiltva", path));
+                        }
+                    }
+                }
+                serverService.save(server, DB_MODIFICATOR_USER);
+            }
+
+//
+//            if (!erroredPaths.isEmpty()) {
+//                erroredPaths.forEach((path) -> {
+//                    server.getJoiners().stream()
+//                            .filter((joiner) -> joiner.getSvrCollectorDataUnit().getRestPath().equals(path))
+//                            .map((joiner) -> {
+//                                joiner.setActive(false);
+//                                joiner.setAdditionalMessage(String.format("Nem érhető el a(z) '%s' path, emiatt az adatgyűjtés letiltva", path));
+//                                return joiner;
+//                            })
+//                            .forEachOrdered((joiner) -> {
+//                                serverService.save(server, DB_MODIFICATOR_USER);
+//                            });
+//                });
+//            }
+//
             measuredServerCnt++;
 
             //Sikerült a bejelentkezés -> töröljük a kieginfót, ha van

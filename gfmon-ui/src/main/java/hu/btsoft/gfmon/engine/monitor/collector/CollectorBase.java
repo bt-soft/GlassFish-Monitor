@@ -17,6 +17,7 @@ import hu.btsoft.gfmon.engine.monitor.SvrRestPathToSvrJpaEntityClassMap;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
@@ -90,15 +91,16 @@ public abstract class CollectorBase implements ICollectorBase {
      *
      * @param restDataCollector REST Data Collector példány
      * @param simpleUrl         A GF szerver url-je
+     * @param userName          REST hívás usere
      * @param sessionToken      GF session token
      *
      * @return mért adatok leírásának listája
      */
     @Override
-    public List<DataUnitDto> collectDataUnits(RestDataCollector restDataCollector, String simpleUrl, String sessionToken) {
+    public List<DataUnitDto> collectDataUnits(RestDataCollector restDataCollector, String simpleUrl, String userName, String sessionToken) {
 
         //URL hívása
-        Response response = restDataCollector.getMonitorResponse(this.getPath(), simpleUrl, sessionToken);
+        Response response = restDataCollector.getMonitorResponse(this.getPath(), simpleUrl, userName, sessionToken);
         //JsonObject entities = restDataCollector.getJsonEntities(response);
 
         //Response státuszkód ellenőrzése
@@ -120,20 +122,25 @@ public abstract class CollectorBase implements ICollectorBase {
     /**
      * Monitorozandó entitások lekérése
      *
-     * @param restDataCollector REST adatgyűjtóő példány
+     * @param restDataCollector REST adatgyűjtő példány
      * @param simpleUrl         simple url
+     * @param userName          REST hívás usere
      * @param sessionToken      session token
      * @param path              milyen path-ról kell a JSon entitás
+     * @param erroredPaths      hibára futott URL-ek halmaza
      *
      * @return Json entitás
      */
-    protected JsonObject getMonitoredEntities(RestDataCollector restDataCollector, String simpleUrl, String sessionToken, String path) {
+    protected JsonObject getMonitoredEntities(RestDataCollector restDataCollector, String simpleUrl, String userName, String sessionToken, String path, Set<String> erroredPaths) {
 
-        Response response = restDataCollector.getMonitorResponse(path, simpleUrl, sessionToken);
+        Response response = restDataCollector.getMonitorResponse(path, simpleUrl, userName, sessionToken);
 
         //Response státuszkód ellenőrzése
         if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
-            log.warn("A(z) {} url hívására {} hibakód jött", simpleUrl, response.getStatusInfo().getReasonPhrase());
+            log.warn("A(z) {}/{} url hívására {} hibakód jött", simpleUrl, path, response.getStatusInfo().getReasonPhrase());
+            if (erroredPaths != null) {
+                erroredPaths.add(path);
+            }
             return null;
         }
 

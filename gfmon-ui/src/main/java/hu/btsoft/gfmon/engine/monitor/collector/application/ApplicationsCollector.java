@@ -56,18 +56,19 @@ public class ApplicationsCollector {
      * Egy alkalamazás "server/*" dolgainak összeszedése
      *
      * @param simpleUrl    simple url
+     * @param userName     REST hívás usere
      * @param sessionToken session token
      *
      * @return snapshot halmaz, vagy null
      */
-    private Set<AppSnapshotBase> collectServerSnapshots(String simpleUrl, String sessionToken, String appName) {
+    private Set<AppSnapshotBase> collectServerSnapshots(String simpleUrl, String userName, String sessionToken, String appName) {
 
         Set<AppSnapshotBase> snapshots = new HashSet<>();
 
         //Server path cuccok
         Map<String, String> uriParams = new HashMap<>();
         uriParams.put("{appRealName}", appName);
-        List<CollectedValueDto> valuesList = appServerCollector.execute(restDataCollector, simpleUrl, sessionToken, APP_SERVER_TOKENIZED_PATH, uriParams);
+        List<CollectedValueDto> valuesList = appServerCollector.execute(restDataCollector, simpleUrl, userName, sessionToken, APP_SERVER_TOKENIZED_PATH, uriParams);
 
         ApplicationServer appServerSnapshot = (ApplicationServer) jSonEntityToApplicationSnapshotEntityMapper.map(valuesList);
         if (appServerSnapshot != null) {
@@ -77,7 +78,7 @@ public class ApplicationsCollector {
 
         //Megnézzük, hogy vannak-e gyermek objektumok, és jól lekérdezzük őket
         String resourceUri = String.format("/applications/%s/server", appName);
-        Response response = restDataCollector.getMonitorResponse(resourceUri, simpleUrl, sessionToken);
+        Response response = restDataCollector.getMonitorResponse(resourceUri, simpleUrl, userName, sessionToken);
         //Response státuszkód ellenőrzése
         if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
             log.warn("A(z) {} url hívására {} hibakód jött", simpleUrl, response.getStatusInfo().getReasonPhrase());
@@ -94,7 +95,7 @@ public class ApplicationsCollector {
                 uriParams.clear();
                 uriParams.put("{appRealName}", appName);
                 uriParams.put("{childResourcesPath}", childResourcesPath);
-                valuesList = appServerCollector.execute(restDataCollector, simpleUrl, sessionToken, APP_SERVER_CHILDRESOURCES_TOKENIZED_PATH, uriParams);
+                valuesList = appServerCollector.execute(restDataCollector, simpleUrl, userName, sessionToken, APP_SERVER_CHILDRESOURCES_TOKENIZED_PATH, uriParams);
 
                 ApplicationServerSubComponent appServerChildSnapshot = (ApplicationServerSubComponent) jSonEntityToApplicationSnapshotEntityMapper.map(valuesList);
                 if (appServerChildSnapshot != null) {
@@ -120,15 +121,16 @@ public class ApplicationsCollector {
      * (rekurzív hivás!)
      *
      * @param simpleUrl    simlpe url
+     * @param userName     REST hívás usere
      * @param sessionToken session token
      * @param appRealName  alkalmazás igazi neve (változhat, pl EAR esetén)
      * @param snapshots    pillenetfelvétel új entitások
      */
-    private void startCollectors(String simpleUrl, String sessionToken, String appRealName, Set<AppSnapshotBase> snapshots) {
+    private void startCollectors(String simpleUrl, String userName, String sessionToken, String appRealName, Set<AppSnapshotBase> snapshots) {
 
         //Lekérdezzük az alkalmazás 'childResources'-ét
         String resourceUri = String.format("/applications/%s", appRealName);
-        Response response = restDataCollector.getMonitorResponse(resourceUri, simpleUrl, sessionToken);
+        Response response = restDataCollector.getMonitorResponse(resourceUri, simpleUrl, userName, sessionToken);
         //Response státuszkód ellenőrzése
         if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
             log.warn("A(z) {} url hívására {} hibakód jött", simpleUrl, response.getStatusInfo().getReasonPhrase());
@@ -156,7 +158,7 @@ public class ApplicationsCollector {
                 String subAppName = String.format("%s/%s", appRealName, key);
                 //Rekurzív hívás!
                 inRecursiveCall = true;
-                startCollectors(simpleUrl, sessionToken, subAppName, snapshots);
+                this.startCollectors(simpleUrl, userName, sessionToken, subAppName, snapshots);
                 inRecursiveCall = false;
                 return;
             }
@@ -165,7 +167,7 @@ public class ApplicationsCollector {
         childResourcesKeys.forEach((key) -> {
             if ("server".equals(key)) {
                 //Server path cuccok
-                Set<AppSnapshotBase> collectedServerSnapshots = collectServerSnapshots(simpleUrl, sessionToken, appRealName);
+                Set<AppSnapshotBase> collectedServerSnapshots = this.collectServerSnapshots(simpleUrl, userName, sessionToken, appRealName);
                 if (collectedServerSnapshots != null) {
                     snapshots.addAll(collectedServerSnapshots);
                 }
@@ -181,15 +183,16 @@ public class ApplicationsCollector {
      * Egy szerver egy alkalmazás adatainak a kigyűjtése
      *
      * @param simpleUrl    szevrer url
+     * @param userName     REST hívás usere
      * @param sessionToken session token
      * @param appRealName  akalmazás igazi neve
      *
      * @return kigyűjtött adatok
      */
-    public Set<AppSnapshotBase> start(String simpleUrl, String sessionToken, String appRealName) {
+    public Set<AppSnapshotBase> start(String simpleUrl, String userName, String sessionToken, String appRealName) {
 
         Set<AppSnapshotBase> snapshots = new HashSet<>();
-        this.startCollectors(simpleUrl, sessionToken, appRealName, snapshots);
+        this.startCollectors(simpleUrl, userName, sessionToken, appRealName, snapshots);
         return snapshots.isEmpty() ? null : snapshots;
     }
 

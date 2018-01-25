@@ -71,7 +71,13 @@ public class ServerSvrCollDataUnitJoiner implements Serializable {
     @NotNull(message = "Az active nem lehet null")
     @Column(name = "ACTIVE", nullable = false)
     @ColumnPosition(position = 3)
-    private Boolean active;
+    private boolean active;
+
+    /**
+     * Kieginfo, ha a monitor tilt le egy oldalt, mert pl.: törölték a http-listener-2-t
+     */
+    @ColumnPosition(position = 4)
+    private String additionalMessage;
 
     /**
      * Szerver
@@ -100,7 +106,7 @@ public class ServerSvrCollDataUnitJoiner implements Serializable {
     /**
      * Létrehozó user
      */
-    @Size(min = 1, max = 30, message = "A createdBy 1-30 hosszú lehet")
+    @Size(min = 1, max = 30, message = "A createdBy {min} és {max} karakter hosszú lehet")
     @NotNull(message = "A createdBy nem lehet null")
     @Column(name = "CREATED_BY", nullable = false, updatable = false)
     @ColumnPosition(position = 101)
@@ -117,7 +123,7 @@ public class ServerSvrCollDataUnitJoiner implements Serializable {
     /**
      * Módosító user
      */
-    @Size(min = 1, max = 30, message = "A modifiedBy 1-30 hosszú lehet")
+    @Size(min = 1, max = 30, message = "A modifiedBy {min} és {max} karakter hosszú lehet")
     @Column(name = "MODIFIED_BY", nullable = true)
     @ColumnPosition(position = 103)
     private String modifiedBy;
@@ -136,7 +142,7 @@ public class ServerSvrCollDataUnitJoiner implements Serializable {
      * Ezzel tudjuk detektálni, hogy változott-e az értéke az adatbázishoz képest?
      */
     @Transient
-    private Boolean activeDbValue;
+    private boolean activeDbValue;
 
     /**
      * Konstruktor

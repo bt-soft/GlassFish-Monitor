@@ -11,19 +11,24 @@
  */
 package hu.btsoft.gfmon.engine.security;
 
+import hu.btsoft.gfmon.corelib.exception.GfMonException;
 import hu.btsoft.gfmon.engine.IGFMonEngineConstants;
 import hu.btsoft.gfmon.engine.rest.GFMonitorRestClient;
+import java.io.Serializable;
 import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * GF Session token megszerzése
- *
+ * <p>
  * A GF administration-guide.pdf-ból infó:
  * <p>
  * Timport javax.ws.rs.client.Client;
@@ -51,7 +56,8 @@ import javax.ws.rs.core.MediaType;
  *
  * @author BT
  */
-public class SessionTokenAcquirer {
+@Slf4j
+public class SessionTokenAcquirer implements Serializable {
 
     @Inject
     @GFMonitorRestClient
@@ -68,23 +74,44 @@ public class SessionTokenAcquirer {
      * @param plainPassword kódolatlan jelszó
      *
      * @return GF session token
+     *
+     * @throws GfMonException ha hiba van
      */
-    public String getSessionToken(String url, String userName, String plainPassword) {
+    public String getSessionToken(String url, String userName, String plainPassword) throws GfMonException {
 
-        glassfishAuthenticator.addAuthenticator(client, userName, plainPassword);
+        try {
+            glassfishAuthenticator.addAuthenticator(client, userName, plainPassword);
 
-        WebTarget managementResource = this.client.target(url + "/management/");
-        JsonObject result = managementResource
-                .path("sessions")
-                .request(MediaType.APPLICATION_JSON)
-                .header("X-Requested-By", IGFMonEngineConstants.SHORT_APP_NAME)
-                .post(Entity.entity(Json.createObjectBuilder().build(), MediaType.APPLICATION_JSON), JsonObject.class);
+            WebTarget managementResource = this.client.target(url + "/management/");
+            JsonObject result = managementResource
+                    .path("sessions")
+                    .request(MediaType.APPLICATION_JSON)
+                    .header("X-Requested-By", IGFMonEngineConstants.SHORT_APP_NAME)
+                    .post(Entity.entity(Json.createObjectBuilder().build(), MediaType.APPLICATION_JSON), JsonObject.class);
 
-        JsonObject extraProps = result.getJsonObject("extraProperties");
-        String token = extraProps.getString("token");
+            JsonObject extraProps = result.getJsonObject("extraProperties");
+            String token = extraProps.getString("token");
 
-        //Visszatérünk a session token-el
-        return token;
+            //Visszatérünk a session token-el
+            return token;
+        } catch (Exception e) {
+
+            String msg;
+
+            if (e instanceof NotAuthorizedException) {
+                msg = String.format("A(z) '%s' szerverbe nem lehet bejelentkezni! (%s)", url, e.getMessage());
+
+            } else if (e instanceof ProcessingException) {
+                msg = String.format("A(z) '%s' szerver nem érhető el! (%s)", url, e.getMessage());
+
+            } else {
+                msg = String.format("A(z) '%s' szerver bejelentkezése során hiba lépett fel: %s", url, e.getCause().getMessage());
+            }
+
+            log.error(msg, e);
+
+            throw new GfMonException(msg, e);
+        }
     }
 
 }

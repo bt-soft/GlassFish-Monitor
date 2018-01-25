@@ -120,20 +120,22 @@ public abstract class ServerCollectorBase extends CollectorBase implements IServ
      *
      * @param restDataCollector  REST adatgyűjtó példány
      * @param simpleUrl          a szerver url-je
+     * @param userName           REST hívás usere
      * @param sessionToken       GF session token
      * @param collectedDataNames kigyűjtendő adatnevek halmaza
+     * @param erroredPaths       hibára futott URL-ek halmaza
      *
      * @return Json entitás - értékek Lista
      */
     @Override
-    public List<CollectedValueDto> execute(RestDataCollector restDataCollector, String simpleUrl, String sessionToken, Set<String> collectedDataNames) {
+    public List<CollectedValueDto> execute(RestDataCollector restDataCollector, String simpleUrl, String userName, String sessionToken, Set<String> collectedDataNames, Set<String> erroredPaths) {
 
         //Ha nem kell ebből az adatgyűjtőből semmi adat, akkor meg sem hívjuk;
         if (collectedDataNames == null) {
             return null;
         }
 
-        JsonObject entities = super.getMonitoredEntities(restDataCollector, simpleUrl, sessionToken, getPath());
+        JsonObject entities = super.getMonitoredEntities(restDataCollector, simpleUrl, userName, sessionToken, getPath(), erroredPaths);
         return this.fetchValues(entities, collectedDataNames);
     }
 

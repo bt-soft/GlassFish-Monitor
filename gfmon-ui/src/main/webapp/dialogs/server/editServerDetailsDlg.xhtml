@@ -52,11 +52,12 @@
 
                 <h:outputLabel value="User" />
                 <p:inputText id="user" value="#{settingsView.editedServer.userName}" onfocus="this.select();">
-                    <p:ajax event="blur" update="password" oncomplete="$('#password').focus();"/>
+                    <p:ajax event="keyup" update="password" />
                 </p:inputText>
 
                 <h:outputLabel value="Jelszó" />
-                <p:password id="password" value="#{settingsView.editedServer.plainPassword}" onfocus="this.select();" disabled="#{empty settingsView.editedServer.userName}"/>
+                <p:password id="password" value="#{settingsView.editedServer.plainPassword}" onfocus="this.select();" disabled="#{empty settingsView.editedServer.userName}"
+                            redisplay="true"/>
 
                 <h:outputLabel value="Leírás" />
                 <p:inputText id="desc" value="#{settingsView.editedServer.description}" onfocus="this.select();"/>

@@ -266,12 +266,25 @@ public class Server extends ModifiableEntityBase {
     }
 
     /**
-     * Mentés előtt
+     * Insert előtt
      * - jelszó kódolása
      */
     @PrePersist
+    @Override
+    protected void prePersist() {
+        super.prePersist();
+        // Jelszó kezelése
+        // mentés előtt kódolunk egyet
+        this.encPasswd = CryptUtil.encrypt(plainPassword);
+    }
+
+    /**
+     * Update előtt
+     * - jelszó kódolása
+     */
     @PreUpdate
-    protected void pre() {
+    @Override
+    protected void preUpdate() {
         // Jelszó kezelése
         // mentés előtt kódolunk egyet
         this.encPasswd = CryptUtil.encrypt(plainPassword);

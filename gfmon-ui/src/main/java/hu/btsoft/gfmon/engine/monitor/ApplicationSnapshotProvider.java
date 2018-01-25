@@ -52,7 +52,7 @@ public class ApplicationSnapshotProvider {
             //Ha monitorozásra akítív, akkor meghívjuk rá az adatgyűjtőt
             if (app.getActive() != null && Objects.equals(app.getActive(), Boolean.TRUE)) {
 
-                Set<AppSnapshotBase> appSnapshots = applicationsCollector.start(server.getSimpleUrl(), server.getSessionToken(), app.getAppRealName());
+                Set<AppSnapshotBase> appSnapshots = applicationsCollector.start(server.getSimpleUrl(), server.getUserName(), server.getSessionToken(), app.getAppRealName());
 
                 if (appSnapshots != null && !appSnapshots.isEmpty()) {
 

@@ -150,6 +150,7 @@ public abstract class ApplicationCollectorBase extends CollectorBase implements 
      *
      * @param restDataCollector REST Data Collector példány
      * @param simpleUrl         A GF szerver url-je
+     * @param userName          A REST hívás usere
      * @param sessionToken      GF session token
      * @param tokenizedUri      monitorozott REST erőforrás uri: maszkolt REST uri
      * @param uriParams         maszk paraméterek
@@ -158,10 +159,11 @@ public abstract class ApplicationCollectorBase extends CollectorBase implements 
      *
      */
     @Override
-    public List<CollectedValueDto> execute(RestDataCollector restDataCollector, String simpleUrl, String sessionToken, String tokenizedUri, Map<String, String> uriParams) {
+    public List<CollectedValueDto> execute(RestDataCollector restDataCollector, String simpleUrl, String userName, String sessionToken, String tokenizedUri, Map<String, String> uriParams) {
 
         this.tokenizedUri = tokenizedUri;
-        JsonObject entities = super.getMonitoredEntities(restDataCollector, simpleUrl, sessionToken, makeRestUriPath(tokenizedUri, uriParams));
+        log.trace("A letiltando path-ot majd kezelni!");
+        JsonObject entities = super.getMonitoredEntities(restDataCollector, simpleUrl, userName, sessionToken, makeRestUriPath(tokenizedUri, uriParams), null);
         return this.fetchValues(entities);
     }
 

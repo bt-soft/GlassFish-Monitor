@@ -44,11 +44,11 @@ import org.eclipse.persistence.annotations.Customizer;
 @Customizer(EntityColumnPositionCustomizer.class)
 public class ThreadSystem extends SvrSnapshotBase {
 
-    private final static int STRING_FIELD_LENGHT = 2048;
+    private final static int STRING_FIELD_LENGHT = 32_672;
 
     /**
      * • allthreadids
-     *
+     * <p>
      * Returns all live thread IDs
      */
     @ColumnPosition(position = 20)
@@ -58,7 +58,7 @@ public class ThreadSystem extends SvrSnapshotBase {
 
     /**
      * • currentthreadcputime
-     *
+     * <p>
      * Returns the total CPU time for the current thread in nanoseconds
      */
     @ColumnPosition(position = 21)
@@ -66,7 +66,7 @@ public class ThreadSystem extends SvrSnapshotBase {
 
     /**
      * • currentthreadusertime
-     *
+     * <p>
      * Returns the CPU time that the current thread has executed in user mode in nanoseconds
      */
     @ColumnPosition(position = 22)
@@ -74,7 +74,7 @@ public class ThreadSystem extends SvrSnapshotBase {
 
     /**
      * • daemonthreadcount
-     *
+     * <p>
      * Returns the current number of live daemon threads
      */
     @ColumnPosition(position = 23)
@@ -82,7 +82,7 @@ public class ThreadSystem extends SvrSnapshotBase {
 
     /**
      * • deadlockedthreads
-     *
+     * <p>
      * Finds cycles of threads that are in deadlock waiting to acquire object monitors or ownable synchronizers
      */
     @ColumnPosition(position = 24)
@@ -92,7 +92,7 @@ public class ThreadSystem extends SvrSnapshotBase {
 
     /**
      * • monitordeadlockedthreads
-     *
+     * <p>
      * Finds cycles of threads that are in deadlock waiting to acquire object monitors
      */
     @ColumnPosition(position = 25)
@@ -102,7 +102,7 @@ public class ThreadSystem extends SvrSnapshotBase {
 
     /**
      * • peakthreadcount
-     *
+     * <p>
      * Returns the peak live thread count since the Java virtual machine started or peak was reset
      */
     @ColumnPosition(position = 26)
@@ -110,7 +110,7 @@ public class ThreadSystem extends SvrSnapshotBase {
 
     /**
      * • threadcount
-     *
+     * <p>
      * Returns the current number of live threads including both daemon and non-daemon threads
      */
     @ColumnPosition(position = 27)
@@ -118,7 +118,7 @@ public class ThreadSystem extends SvrSnapshotBase {
 
     /**
      * • totalstartedthreadcount
-     *
+     * <p>
      * Returns the total number of threads created and also started since the Java virtual machine started
      */
     @ColumnPosition(position = 28)

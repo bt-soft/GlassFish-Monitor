@@ -32,14 +32,15 @@ public class ServerMonitoringServiceStatus extends RestClientBase {
      * GF module-monitoring-levels Attributes kigyűjtése
      *
      * @param simpleUrl    a GF szerver URL-je
+     * @param user         rest user
      * @param sessionToken session token
      *
      * @return A GF példány monitorozható GF moduljainak halmaza, vagy null, ha nincs egy sem
      */
-    public Set<String> checkMonitorStatus(String simpleUrl, String sessionToken) {
+    public Set<String> checkMonitorStatus(String simpleUrl, String user, String sessionToken) {
 
         //Válasz leszedése
-        JsonObject entities = GFJsonUtils.getEntities(super.getRootJsonObject(simpleUrl, SUB_URL, sessionToken));
+        JsonObject entities = GFJsonUtils.getEntities(super.getRootJsonObject(simpleUrl, SUB_URL, user, sessionToken));
         if (entities == null) {
             return null;
         }

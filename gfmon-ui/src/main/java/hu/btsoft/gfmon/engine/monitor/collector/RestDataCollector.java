@@ -12,7 +12,6 @@
 package hu.btsoft.gfmon.engine.monitor.collector;
 
 import hu.btsoft.gfmon.engine.rest.RestDataCollectorBase;
-import javax.ws.rs.core.Response;
 
 /**
  * Monitorozott adatok REST begyűjtése
@@ -30,22 +29,4 @@ public class RestDataCollector extends RestDataCollectorBase {
     protected String getSubUri() {
         return "/monitoring/domain/server/";
     }
-
-    /**
-     * REST válasz olvasása
-     *
-     * @param resourceUri  monitorozott rest erőforrás URI
-     * @param simpleUrl    a GF szerver url-je
-     * @param sessionToken a GF session token-je
-     *
-     * @return REST válasz
-     */
-    public Response getMonitorResponse(String resourceUri, String simpleUrl, String sessionToken) {
-
-        super.simpleUrl = simpleUrl;
-        super.sessionToken = sessionToken;
-
-        return getMonitorResponse(resourceUri);
-    }
-
 }

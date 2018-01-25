@@ -30,20 +30,10 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * REST kliens ős osztály
  *
- * @author u626374
+ * @author BT
  */
 @Slf4j
 public abstract class RestClientBase implements Serializable {
-
-    /**
-     * A GF szerver url-je
-     */
-    protected String simpleUrl;
-
-    /**
-     * GF session token
-     */
-    protected String sessionToken;
 
     /**
      * REST kliens
@@ -182,27 +172,29 @@ public abstract class RestClientBase implements Serializable {
 // </editor-fold>
     /**
      * Protokol kitalálása
+     * Ha nincs user, akkor sima http
      *
-     * @param sessionToken
+     * @param userName REST hívás usere
      *
      * @return http/https
      */
-    protected String getProtocol(String sessionToken) {
-        return StringUtils.isEmpty(sessionToken) ? IGFMonEngineConstants.PROTOCOL_HTTPS : IGFMonEngineConstants.PROTOCOL_HTTP;
+    protected String getProtocol(String userName) {
+        return StringUtils.isEmpty(userName) ? IGFMonEngineConstants.PROTOCOL_HTTP : IGFMonEngineConstants.PROTOCOL_HTTPS;
     }
 
     /**
      * A megadott full url-ről leszedi a választ
      *
      * @param fullUrl      teljes URL (http[s]://localhost:4848/....)
-     * @param sessionToken session token
+     * @param userName     REST hívás usere
+     * @param sessionToken GF session token
      *
      * @return Json Object
      */
-    public JsonObject getRootJsonObject(String fullUrl, String sessionToken) {
+    protected JsonObject getRootJsonObject(String fullUrl, String userName, String sessionToken) {
 
         try {
-            String protocol = this.getProtocol(sessionToken);
+            String protocol = this.getProtocol(userName);
 
             //A protokol lecserélése, ha szükséges
             URL url = new URL(fullUrl);
@@ -234,13 +226,14 @@ public abstract class RestClientBase implements Serializable {
      *
      * @param simpleUrl    szerver url
      * @param subUrl       sub url
-     * @param sessionToken session token
+     * @param userName     REST hívás usere
+     * @param sessionToken GF session token
      *
      * @return válast jsonjObject
      */
-    protected JsonObject getRootJsonObject(String simpleUrl, String subUrl, String sessionToken) {
-        String fullUrl = this.getProtocol(sessionToken) + simpleUrl + subUrl;
-        return this.getRootJsonObject(fullUrl, sessionToken);
+    protected JsonObject getRootJsonObject(String simpleUrl, String subUrl, String userName, String sessionToken) {
+        String fullUrl = this.getProtocol(userName) + simpleUrl + subUrl;
+        return this.getRootJsonObject(fullUrl, userName, sessionToken);
     }
 
 }

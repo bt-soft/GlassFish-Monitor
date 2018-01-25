@@ -102,22 +102,28 @@ public abstract class RestDataCollectorBase extends RestClientBase {
     /**
      * A GF REST API alap URL-jének összeállítása
      *
-     * @return
+     * @param simpleUrl a GF szerver url-je
+     * @param userName  REST hívás usere
+     *
+     * @return url
      */
-    private String getMonitorBaseURI() {
-        return super.getProtocol(sessionToken) + simpleUrl + getSubUri();
+    private String getMonitorBaseURI(String simpleUrl, String userName) {
+        return super.getProtocol(userName) + simpleUrl + getSubUri();
     }
 
     /**
      * REST válasz olvasása
      *
-     * @param resourceUri monitorozott rest erőforrás URI
+     * @param resourceUri  monitorozott rest erőforrás URI
+     * @param simpleUrl    a GF szerver url-je
+     * @param userName     REST hívás usere
+     * @param sessionToken a GF session token-je
      *
      * @return REST válasz
      */
-    protected Response getMonitorResponse(String resourceUri) {
+    public Response getMonitorResponse(String resourceUri, String simpleUrl, String userName, String sessionToken) {
 
-        String fullUrl = this.getMonitorBaseURI() + resourceUri;
+        String fullUrl = this.getMonitorBaseURI(simpleUrl, userName) + resourceUri;
         WebTarget resource = client.target(fullUrl);
         Invocation.Builder builder = resource.request(MediaType.APPLICATION_JSON);
 

@@ -84,8 +84,34 @@ public class ApplicationsMonitor extends MonitorsBase {
     }
 
     /**
-     * Egy szerver alkalmazásainak feltérképezése
+     * Adott szerver alkalmazásainak összegyűjtése
+     * Adatbázidban nem frissít
      *
+     * @param server kiválasztott szerver
+     *
+     * @return alkalmazások listája vagy null
+     */
+    public List<Application> getApplicationsList(Server server) {
+
+        //Runime lekérjük a szervertől az alkalmazások listáját
+        List<Application> serverAplications = applicationsDiscoverer.getServerAplications(server.getSimpleUrl(), server.getUserName(), server.getSessionToken());
+
+        //Ha még nincs beállítva az alkalmazásoknál az, hogy melyik szerveren vannak, akkor azt most megtesszük:
+        if (serverAplications != null) {
+            for (Application app : serverAplications) {
+                if (app.getServer() == null) {
+                    //beállítjuk, hogy melyik szerveren fut az alkalmazás
+                    app.setServer(server);
+                }
+            }
+        }
+
+        return serverAplications;
+    }
+
+    /**
+     * Egy szerver alkalmazásainak feltérképezése !!!! ÉS az adatbázisban történő frissítése !!!
+     * <p>
      * - megnézi, hogy az App szerepel-e az adatbázisban (rövid név + hosszú név azonos-e a db-belivel)
      * <p>
      * - Ha nem szerepel az adatbázisban:
@@ -98,9 +124,9 @@ public class ApplicationsMonitor extends MonitorsBase {
      *
      * @param server vizsgálandó szerver
      */
-    public void manageServerAplication(Server server) {
+    public void maintenanceServerAplicationInDataBase(Server server) {
         //A szerver aktuális alkalmazás listája
-        List<Application> runtimeApps = applicationsDiscoverer.getServerAplications(server.getSimpleUrl(), server.getSessionToken());
+        List<Application> runtimeApps = getApplicationsList(server);
 
         //A szerver eltárolt alkalmazás listája
         List<Application> dbAppList = applicationService.findByServer(server.getId());
@@ -170,7 +196,6 @@ public class ApplicationsMonitor extends MonitorsBase {
             //Az új entitás alapja a runtime listából jövő alkalmazás adatai lesznek
             Application newApp = new Application();
             modelMapper.map(runtimeApp, newApp); //mindent átmásolunk
-            newApp.setServer(server);
             newApp.setActive(existDbAppActiveStatus); //beállítjuk a mentett monitoring státuszt
 
             applicationService.save(newApp, DB_MODIFICATOR_USER);
@@ -187,7 +212,7 @@ public class ApplicationsMonitor extends MonitorsBase {
         serverService.findAllActiveServer().stream()
                 .filter((server) -> super.acquireSessionToken(server)) // ha nem sikerült bejelentkezni -> letiltjuk és jöhet a következő szerver
                 .forEachOrdered((server) -> {
-                    this.manageServerAplication(server);
+                    this.maintenanceServerAplicationInDataBase(server);
                 });
     }
 

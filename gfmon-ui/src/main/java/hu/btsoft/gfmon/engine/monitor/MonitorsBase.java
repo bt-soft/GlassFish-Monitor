@@ -11,14 +11,13 @@
  */
 package hu.btsoft.gfmon.engine.monitor;
 
+import hu.btsoft.gfmon.corelib.exception.GfMonException;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.service.ServerService;
 import hu.btsoft.gfmon.engine.security.SessionTokenAcquirer;
 import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.inject.Inject;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.ProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -31,7 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 public abstract class MonitorsBase {
 
     @Inject
-    SessionTokenAcquirer sessionTokenAcquirer;
+    private SessionTokenAcquirer sessionTokenAcquirer;
 
     @EJB
     protected ServerService serverService;
@@ -80,38 +79,19 @@ public abstract class MonitorsBase {
         String userName = server.getUserName();
         String plainPassword = server.getPlainPassword();
 
-        //ha még nincs SessionToken, akkor csinálunk egyet
+        //Ha még nincs SessionToken, akkor csinálunk egyet
         try {
             String sessionToken = sessionTokenAcquirer.getSessionToken(url, userName, plainPassword);
-
             server.setSessionToken(sessionToken);
+            return true;
 
-        } catch (Exception e) {
+        } catch (GfMonException e) {
 
-            String logMsg;
-            String dbMsg;
-            if (e instanceof NotAuthorizedException) {
-                logMsg = "a(z) '{}' szerverbe nem lehet bejelentkezni!";
-                dbMsg = "Nem lehet bejelentkezni!";
-
-            } else if (e instanceof ProcessingException) {
-                logMsg = "a(z) '{}' szerver nem érhető el!";
-                dbMsg = "A szerver nem érhető el!";
-
-            } else {
-                logMsg = String.format("a(z) '{}' szerver monitorozása ismeretlen hibára futott: %s", e.getCause().getMessage());
-                dbMsg = "Ismeretlen hiba: " + e.getCause().getMessage();
-            }
-
-            log.error("GFMon {} modul: " + logMsg, getControllerName(), server.getUrl());
-
-            //Beírjuk az üzenetet az adatbázisba is
-            serverService.updateAdditionalMessage(server, getDbModificationUser(), dbMsg);
-
-            return false;
+            //Beírjuk a hibaüzenetet üzenetet az adatbázisba is
+            serverService.updateAdditionalMessage(server, getDbModificationUser(), e.getMessage());
         }
 
-        return true;
+        return false;
     }
 
     /**

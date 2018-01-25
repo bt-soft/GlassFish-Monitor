@@ -30,14 +30,15 @@ public class ServerUptime extends RestClientBase {
      * GF Szerver verzió adatok kigyűjtése
      *
      * @param simpleUrl    a GF szerver URL-je
+     * @param user         rest user
      * @param sessionToken session token
      *
      * @return A GF példány verzió adatai
      */
-    public String getServerUptime(String simpleUrl, String sessionToken) {
+    public String getServerUptime(String simpleUrl, String user, String sessionToken) {
 
         //Válasz leszedése
-        JsonObject rootJsonObject = super.getRootJsonObject(simpleUrl, SUB_URL, sessionToken);
+        JsonObject rootJsonObject = super.getRootJsonObject(simpleUrl, SUB_URL, user, sessionToken);
         if (rootJsonObject != null) {
             JsonObject properties = rootJsonObject.getJsonObject("properties");
             if (properties

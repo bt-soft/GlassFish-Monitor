@@ -32,14 +32,15 @@ public class ServerVersion extends RestClientBase {
      * GF Szerver verzió adatok kigyűjtése
      *
      * @param simpleUrl    a GF szerver URL-je
+     * @param user         rest user
      * @param sessionToken session token
      *
      * @return A GF példány verzió adatai
      */
-    public Map<String, String> getServerVersionInfo(String simpleUrl, String sessionToken) {
+    public Map<String, String> getServerVersionInfo(String simpleUrl, String user, String sessionToken) {
 
         //Válasz leszedése
-        JsonObject extraProperties = GFJsonUtils.getExtraProperties(super.getRootJsonObject(simpleUrl, SUB_URL, sessionToken));
+        JsonObject extraProperties = GFJsonUtils.getExtraProperties(super.getRootJsonObject(simpleUrl, SUB_URL, user, sessionToken));
         if (extraProperties == null) {
             return null;
         }

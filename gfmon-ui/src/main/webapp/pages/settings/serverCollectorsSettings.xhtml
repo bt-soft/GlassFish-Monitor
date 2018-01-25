@@ -86,94 +86,112 @@
                                      />
                 </h:panelGrid>
 
-                <p:dataTable id="cdusTable"
-                             widgetVar="cdusTable"
+                <p:scrollPanel  mode="native" style="border: none; padding: 0; margin: 0;">
+                    <p:dataTable id="cdusTable"
+                                 widgetVar="cdusTable"
 
-                             value="#{collectorSettingsView.selectedServer.joiners}"
-                             var="joiner"
+                                 value="#{collectorSettingsView.selectedServer.joiners}"
+                                 var="joiner"
 
-                             scrollable="true"
-                             scrollHeight="600"
+                                 scrollable="true"
+                                 scrollWidth="120%"
+                                 scrollHeight="600"
 
-                             multiViewState="false"
-                             disabledTextSelection="false"
+                                 multiViewState="false"
+                                 disabledTextSelection="false"
 
-                             editable="true"
-                             editMode="cell"
+                                 editable="true"
+                                 editMode="cell"
 
-                             rowIndexVar="rowNdx"
-                             rowKey="#{joiner.svrCollectorDataUnitId}"
+                                 rowIndexVar="rowNdx"
+                                 rowKey="#{joiner.svrCollectorDataUnitId}"
 
-                             emptyMessage="Nincs Adat"
-                             >
+                                 emptyMessage="Nincs Adat"
+                                 >
 
-                    <p:column headerText="No#"
-                              styleClass="alignCenter"
-                              style="width: 1.5em">
-                        <h:outputText value="#{rowNdx + 1}" />
-                    </p:column>
+                        <p:column headerText="No#"
+                                  styleClass="alignCenter"
+                                  style="width: 1.5em">
+                            <h:outputText value="#{rowNdx + 1}" />
+                        </p:column>
 
-                    <p:column headerText="active"
-                              styleClass="alignCenter"
-                              style="width: 4em"
-                              >
-                        <p:cellEditor>
-                            <f:facet name="output">
-                                <p:selectBooleanCheckbox value="#{joiner.active}"/>
-                            </f:facet>
-                            <f:facet name="input">
-                                <h:inputHidden value="#{joiner.active}" />
-                                <h:selectBooleanCheckbox value="#{joiner.active}" onclick="$(this).prev().val(this.checked)" />
-                            </f:facet>
+                        <p:column headerText="active"
+                                  styleClass="alignCenter"
+                                  style="width: 3em"
+                                  >
+                            <p:selectBooleanCheckbox value="#{joiner.active}">
+                                <p:ajax event="valueChange"  update="cdusTable" listener="#{collectorSettingsView.joinerActiveChanged(joiner.svrCollectorDataUnitId)}"/>
+                            </p:selectBooleanCheckbox>
+                        </p:column>
 
-                        </p:cellEditor>
-                    </p:column>
 
-                    <!--
-                    <p:column headerText="srvId"
-                              style="width: 4em"
-                              rendered="#{isDeveloperMode}">
-                        <h:outputText value="#{joiner.serverId}" />
-                    </p:column>
+                        <p:column headerText="!"
+                                  styleClass="alignCenter"
+                                  style="width: 1em">
 
-                    <p:column headerText="dcuId"
-                              style="width: 4em"
-                              rendered="#{isDeveloperMode}">
-                        <h:outputText value="#{joiner.svrCollectorDataUnitId}" />
-                    </p:column>
-                    -->
+                            <p:outputLabel id="emptyLabel"
+                                           rendered="#{not empty joiner.additionalMessage}">
+                                <i id="warningIcon"
+                                   class="fa fa-exclamation-triangle"
+                                   style="color: orange"
+                                   />
+                                <p:tooltip for="emptyLabel"
+                                           showEffect="fade" hideEffect="slide"
+                                           value="#{joiner.additionalMessage}"/>
+                            </p:outputLabel>
 
-                    <p:column headerText="restPath"
-                              style="width: 20em"
-                              sortBy="#{joiner.svrCollectorDataUnit.restPath}"
-                              filterBy="#{joiner.svrCollectorDataUnit.restPath}"
-                              filterStyle="width: 10em; font-size: 0.6em"
-                              filterMatchMode="contains"
-                              >
-                        <h:outputText value="#{joiner.svrCollectorDataUnit.restPath}" />
-                    </p:column>
+                        </p:column>
 
-                    <p:column headerText="dataName"
-                              style="width: 15em"
-                              sortBy="#{joiner.svrCollectorDataUnit.dataName}"
-                              filterBy="#{joiner.svrCollectorDataUnit.dataName}"
-                              filterStyle="width: 10em; font-size: 0.6em"
-                              filterMatchMode="contains"
-                              >
-                        <h:outputText value="#{joiner.svrCollectorDataUnit.dataName}" />
-                    </p:column>
 
-                    <p:column headerText="unit"
-                              style="width: 6em"
-                              sortBy="#{joiner.svrCollectorDataUnit.unit}"
-                              >
-                        <h:outputText value="#{joiner.svrCollectorDataUnit.unit}" />
-                    </p:column>
 
-                    <p:column headerText="description">
-                        <h:outputText value="#{joiner.svrCollectorDataUnit.description}" />
-                    </p:column>
-                </p:dataTable>
+                        <!--
+                        <p:column headerText="srvId"
+                                  style="width: 4em"
+                                  rendered="#{isDeveloperMode}">
+                            <h:outputText value="#{joiner.serverId}" />
+                        </p:column>
+
+                        <p:column headerText="dcuId"
+                                  style="width: 4em"
+                                  rendered="#{isDeveloperMode}">
+                            <h:outputText value="#{joiner.svrCollectorDataUnitId}" />
+                        </p:column>
+                        -->
+
+                        <p:column headerText="restPath"
+                                  style="width: 18em"
+                                  sortBy="#{joiner.svrCollectorDataUnit.restPath}"
+                                  filterBy="#{joiner.svrCollectorDataUnit.restPath}"
+                                  filterStyle="width: 10em; font-size: 0.6em"
+                                  filterMatchMode="contains"
+                                  >
+                            <h:outputText value="#{joiner.svrCollectorDataUnit.restPath}" />
+                        </p:column>
+
+                        <p:column headerText="dataName"
+                                  style="width: 15em"
+                                  sortBy="#{joiner.svrCollectorDataUnit.dataName}"
+                                  filterBy="#{joiner.svrCollectorDataUnit.dataName}"
+                                  filterStyle="width: 10em; font-size: 0.6em"
+                                  filterMatchMode="contains"
+                                  >
+                            <h:outputText value="#{joiner.svrCollectorDataUnit.dataName}" />
+                        </p:column>
+
+                        <p:column headerText="unit"
+                                  style="width: 6em"
+                                  sortBy="#{joiner.svrCollectorDataUnit.unit}"
+                                  >
+                            <h:outputText value="#{joiner.svrCollectorDataUnit.unit}" />
+                        </p:column>
+
+                        <p:column headerText="description">
+                            <h:outputText value="#{joiner.svrCollectorDataUnit.description}" />
+                        </p:column>
+                    </p:dataTable>
+
+                </p:scrollPanel>
+
             </h:form>
 
         </bt:disablePanel>

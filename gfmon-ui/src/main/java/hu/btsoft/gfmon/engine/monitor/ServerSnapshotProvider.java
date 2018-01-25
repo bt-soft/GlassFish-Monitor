@@ -24,7 +24,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -32,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Egy GF szerver összes szerver monitoradatát begyűjtő CDI bean
- *
+ * <p>
  * - Paraméterként megkapja a monitorozando GF szerver adatait
  * - Jól meg is nézegeti a GF REST interfészén keresztül a szükséges adatokat
  * - Közben gyűjti az egyes mért adatok nevét/mértékegységét/leírását az adatbázisba (a CollectorDataUnit entitás segítségével)
@@ -65,7 +64,7 @@ public class ServerSnapshotProvider {
         //Végigmegyünk az összes adatgyűjtőn
         for (IServerCollector collector : serverCollectors) {
 
-            List<DataUnitDto> collectDataUnits = collector.collectDataUnits(restDataCollector, server.getSimpleUrl(), server.getSessionToken());
+            List<DataUnitDto> collectDataUnits = collector.collectDataUnits(restDataCollector, server.getSimpleUrl(), server.getUserName(), server.getSessionToken());
 
             if (collectDataUnits != null) {
                 if (result == null) {
@@ -82,11 +81,12 @@ public class ServerSnapshotProvider {
     /**
      * Az összes szerver kollentor adatait összegyűjti, majd egy új szerver Snapshot entitásba rakja az eredményeket
      *
-     * @param server a monitorozandó Server entitása
+     * @param server       a monitorozandó Server entitása
+     * @param erroredPaths hibára futott mérési oldalak (pl.: törölték a listenert)
      *
      * @return szerver Snapshot példányok halmaza, az adatgyűjtés eredménye (new/detach entitás)
      */
-    public Set<SvrSnapshotBase> fetchSnapshot(Server server) {
+    public Set<SvrSnapshotBase> fetchSnapshot(Server server, Set<String> erroredPaths) {
 
         long start = Elapsed.nowNano();
 
@@ -103,10 +103,10 @@ public class ServerSnapshotProvider {
         if (server.getJoiners() != null) {
             server.getJoiners().forEach((joiner) -> {
 
-                SvrCollectorDataUnit svrDcu = joiner.getSvrCollectorDataUnit();
+                SvrCollectorDataUnit svrCdu = joiner.getSvrCollectorDataUnit();
 
                 //A kollektorok Path-jai
-                String path = svrDcu.getRestPath();
+                String path = svrCdu.getRestPath();
                 serverMonitorablePaths.add(path);
 
                 if (!collectedDatatNamesMap.containsKey(path)) {
@@ -115,8 +115,8 @@ public class ServerSnapshotProvider {
                 Set<String> collectedDatatNames = collectedDatatNamesMap.get(path);
 
                 //Ha kell gyűjteni az adatnevet, akkor megjegyezzük
-                if (Objects.equals(Boolean.TRUE, joiner.getActive())) {
-                    collectedDatatNames.add(svrDcu.getDataName());
+                if (joiner.isActive()) {
+                    collectedDatatNames.add(svrCdu.getDataName());
                 }
             });
         }
@@ -140,7 +140,7 @@ public class ServerSnapshotProvider {
 
             //Az adott kollektor adatainak lekérése
 //            log.trace("A(z) '{}' szerveren a(z) '{}' adatgyűjtő futtatása", server.getUrl(), collector.getPath());
-            List<CollectedValueDto> valuesList = collector.execute(restDataCollector, server.getSimpleUrl(), server.getSessionToken(), collectedDatatNames);
+            List<CollectedValueDto> valuesList = collector.execute(restDataCollector, server.getSimpleUrl(), server.getUserName(), server.getSessionToken(), collectedDatatNames, erroredPaths);
 
             //Üres a mért eredmények Map-je
             if (valuesList == null || valuesList.isEmpty()) {

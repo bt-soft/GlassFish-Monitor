@@ -18,7 +18,6 @@ import hu.btsoft.gfmon.engine.model.entity.server.SvrCollectorDataUnit;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -129,7 +128,7 @@ public class ServerService extends ServiceBase<Server> {
      * - Lekéri az összes entitást az adatbázisból
      * - Törli a runtime értékeket
      * - majd visszamenti az adatbázisba
-     *
+     * <p>
      * (pl.: sessionToken, readyForMonitoring, stb..)
      *
      * @param modifierUser módosító user
@@ -225,7 +224,8 @@ public class ServerService extends ServiceBase<Server> {
 
         //Mehet az update - de csak ha változott az active értéke a DB-hez képest
         server.getJoiners().stream()
-                .filter((joiner) -> !(Objects.equals(joiner.getActive(), joiner.getActiveDbValue()))) //csak, ha nem azonos az active
+                .filter((joiner) -> (joiner.isActive() != joiner.isActiveDbValue())
+                ) //csak, ha nem azonos az active
                 .map((joiner) -> {
                     joiner.setModifiedBy(user);
                     return joiner;

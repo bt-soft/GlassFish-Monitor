@@ -32,9 +32,10 @@ public interface ICollectorBase {
      *
      * @param restDataCollector REST Data Collector példány
      * @param simpleUrl         A GF szerver url-je
+     * @param userName          REST hívás usere
      * @param sessionToken      GF session token
      *
      * @return mért adatok leírásának listája
      */
-    List<DataUnitDto> collectDataUnits(RestDataCollector restDataCollector, String simpleUrl, String sessionToken);
+    List<DataUnitDto> collectDataUnits(RestDataCollector restDataCollector, String simpleUrl, String userName, String sessionToken);
 }

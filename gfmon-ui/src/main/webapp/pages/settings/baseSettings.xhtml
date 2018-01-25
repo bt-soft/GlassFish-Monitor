@@ -24,13 +24,6 @@
                 font-size: 1.4em;
                 font-family: Arial;
             }
-            .wideScreenArea{
-                width: 99.5%;
-            }
-            /* query gombok panel szélessége */
-            .buttonPanelGrid {
-                width: 100%;
-            }
         </style>
     </ui:define>
 
@@ -223,9 +216,7 @@
                                   styleClass="sub-category-header-text"
                                   />
                     <p:scrollPanel  mode="native" style="border: none; padding: 0; margin: 0">
-                        <p:panel id="applicationsPanel" style="background: transparent; border: none; width: 150%">
-
-
+                        <p:panel id="applicationsPanel" style="background: transparent; border: none;">
 
                             <p:commandButton id="appRefreshBtn"
                                              value="Frissít"
@@ -275,8 +266,7 @@
                                          rowIndexVar="rowNdx"
                                          rowKey="#{app.id}"
 
-                                         emptyMessage="Nincs Adat"
-
+                                         emptyMessage="Nincsenek alkalmazások"
                                          >
 
                                 <p:column headerText="No#"
@@ -302,16 +292,9 @@
                                           styleClass="alignCenter"
                                           style="width: 4em"
                                           >
-                                    <p:cellEditor>
-                                        <f:facet name="output">
-                                            <p:selectBooleanCheckbox value="#{app.active}"/>
-                                        </f:facet>
-                                        <f:facet name="input">
-                                            <h:inputHidden value="#{app.active}" />
-                                            <h:selectBooleanCheckbox value="#{app.active}" onclick="$(this).prev().val(this.checked)" />
-                                        </f:facet>
-
-                                    </p:cellEditor>
+                                    <p:selectBooleanCheckbox value="#{app.active}">
+                                        <!--<p:ajax event="valueChange" update="appsTable"/>-->
+                                    </p:selectBooleanCheckbox>
                                 </p:column>
 
 
