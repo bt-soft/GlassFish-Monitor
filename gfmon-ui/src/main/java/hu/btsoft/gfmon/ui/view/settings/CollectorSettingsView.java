@@ -41,10 +41,16 @@ public class CollectorSettingsView extends ViewBase {
     @Getter
     private List<Server> servers;
 
+    /**
+     * A kiválasztott szerver ID-je
+     */
     @Getter
     @Setter
     private Long selectedServerId;
 
+    /**
+     * A kiválasztott szerver példánya
+     */
     @Getter
     @Setter
     private Server selectedServer;
@@ -115,7 +121,21 @@ public class CollectorSettingsView extends ViewBase {
     }
 
     /**
-     * Egy joiner-t állítgattah -> töröljük a kieginfót!
+     * Van figyelmeztető üzenet?
+     *
+     * @return true -> van
+     */
+    public boolean warningExisInDcus() {
+        for (ServerSvrCollDataUnitJoiner joiner : selectedServer.getJoiners()) {
+            if (joiner.getAdditionalMessage() != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Egy joiner-t állítgattak -> töröljük a kieginfót!
      *
      * @param svrCollectorDataUnitId a joiner id-je
      */

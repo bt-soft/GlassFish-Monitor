@@ -39,6 +39,8 @@
                                      icon="fa fa-save"
                                      title="Beállítások mentése az adatbázisba"
                                      actionListener="#{settingsView.saveSettings()}"
+                                     onstart="PF('blockUI').block();"
+                                     oncomplete="PF('blockUI').unblock();"
                                      update="@form :growl"
                                      style="float: right"
                                      />

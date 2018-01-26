@@ -12,8 +12,8 @@
 package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
-import hu.btsoft.gfmon.engine.model.entity.application.snapshot.server.ApplicationServer;
-import hu.btsoft.gfmon.engine.model.entity.application.snapshot.server.ApplicationServerSubComponent;
+import hu.btsoft.gfmon.engine.model.entity.application.snapshot.app.AppStatistic;
+import hu.btsoft.gfmon.engine.model.entity.application.snapshot.app.AppServletStatistic;
 import hu.btsoft.gfmon.engine.monitor.collector.application.ApplicationsCollector;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,12 +38,12 @@ public class AppRestPathToAppJpaEntityClassMap {
         Class<? extends AppSnapshotBase> clazz = null;
 
         switch (tokenizedPath) {
-            case ApplicationsCollector.APP_SERVER_TOKENIZED_PATH:
-                clazz = ApplicationServer.class;
+            case ApplicationsCollector.APP_STAT_TOKENIZED_PATH:
+                clazz = AppStatistic.class;
                 break;
 
-            case ApplicationsCollector.APP_SERVER_CHILDRESOURCES_TOKENIZED_PATH:
-                clazz = ApplicationServerSubComponent.class;
+            case ApplicationsCollector.APP_STAT_SERVLET_TOKENIZED_PATH:
+                clazz = AppServletStatistic.class;
                 break;
 
             default:

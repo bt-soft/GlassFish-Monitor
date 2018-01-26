@@ -69,8 +69,6 @@ public class ApplicationSnapshotProvider {
             }
         }
 
-        log.trace("server url: {}, elapsed: {}", server.getUrl(), Elapsed.getElapsedNanoStr(start));
-
         return snapshots;
     }
 

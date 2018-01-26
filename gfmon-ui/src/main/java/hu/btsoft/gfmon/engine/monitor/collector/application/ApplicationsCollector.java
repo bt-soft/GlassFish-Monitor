@@ -13,12 +13,12 @@ package hu.btsoft.gfmon.engine.monitor.collector.application;
 
 import hu.btsoft.gfmon.corelib.json.GFJsonUtils;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
-import hu.btsoft.gfmon.engine.model.entity.application.snapshot.server.ApplicationServer;
-import hu.btsoft.gfmon.engine.model.entity.application.snapshot.server.ApplicationServerSubComponent;
+import hu.btsoft.gfmon.engine.model.entity.application.snapshot.app.AppServletStatistic;
+import hu.btsoft.gfmon.engine.model.entity.application.snapshot.app.AppStatistic;
 import hu.btsoft.gfmon.engine.monitor.JSonEntityToApplicationSnapshotEntityMapper;
 import hu.btsoft.gfmon.engine.monitor.collector.CollectedValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
-import hu.btsoft.gfmon.engine.monitor.collector.application.server.AppServerCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.application.server.AppStatisticCollector;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -38,8 +38,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ApplicationsCollector {
 
-    public static final String APP_SERVER_TOKENIZED_PATH = "/applications/{appRealName}/server";
-    public static final String APP_SERVER_CHILDRESOURCES_TOKENIZED_PATH = "/applications/{appRealName}/server/{childResourcesPath}";
+    public static final String APP_STAT_TOKENIZED_PATH = "/applications/{appRealName}/server";
+    public static final String APP_STAT_SERVLET_TOKENIZED_PATH = "/applications/{appRealName}/server/{childResourcesPath}";
 
     @Inject
     private RestDataCollector restDataCollector;
@@ -48,7 +48,7 @@ public class ApplicationsCollector {
     private JSonEntityToApplicationSnapshotEntityMapper jSonEntityToApplicationSnapshotEntityMapper;
 
     @Inject
-    private AppServerCollector appServerCollector;
+    private AppStatisticCollector appServerCollector;
 
     private boolean inRecursiveCall;
 
@@ -61,27 +61,26 @@ public class ApplicationsCollector {
      *
      * @return snapshot halmaz, vagy null
      */
-    private Set<AppSnapshotBase> collectServerSnapshots(String simpleUrl, String userName, String sessionToken, String appName) {
+    private Set<AppSnapshotBase> collectAppStatisticSnapshots(String simpleUrl, String userName, String sessionToken, String appName) {
 
         Set<AppSnapshotBase> snapshots = new HashSet<>();
 
         //Server path cuccok
         Map<String, String> uriParams = new HashMap<>();
         uriParams.put("{appRealName}", appName);
-        List<CollectedValueDto> valuesList = appServerCollector.execute(restDataCollector, simpleUrl, userName, sessionToken, APP_SERVER_TOKENIZED_PATH, uriParams);
+        List<CollectedValueDto> valuesList = appServerCollector.execute(restDataCollector, simpleUrl, userName, sessionToken, APP_STAT_TOKENIZED_PATH, uriParams);
 
-        ApplicationServer appServerSnapshot = (ApplicationServer) jSonEntityToApplicationSnapshotEntityMapper.map(valuesList);
-        if (appServerSnapshot != null) {
-            appServerSnapshot.setPathSuffix("server");
-            snapshots.add(appServerSnapshot);
+        AppStatistic appStatistic = (AppStatistic) jSonEntityToApplicationSnapshotEntityMapper.map(valuesList);
+        if (appStatistic != null) {
+            appStatistic.setPathSuffix("server");
+            snapshots.add(appStatistic);
         }
-
         //Megnézzük, hogy vannak-e gyermek objektumok, és jól lekérdezzük őket
         String resourceUri = String.format("/applications/%s/server", appName);
         Response response = restDataCollector.getMonitorResponse(resourceUri, simpleUrl, userName, sessionToken);
         //Response státuszkód ellenőrzése
         if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
-            log.warn("A(z) {} url hívására {} hibakód jött", simpleUrl, response.getStatusInfo().getReasonPhrase());
+            log.warn("A(z) {}{} url hívására {} hibakód jött", simpleUrl, resourceUri, response.getStatusInfo().getReasonPhrase());
             return null;
         }
 
@@ -90,20 +89,21 @@ public class ApplicationsCollector {
         Set<String> childResourcesKeys = GFJsonUtils.getChildResourcesKeys(rootJsonObject);
 
         if (childResourcesKeys != null && !childResourcesKeys.isEmpty()) {
-            for (String childResourcesPath : childResourcesKeys) {
+            for (String servletName : childResourcesKeys) {
 
                 uriParams.clear();
                 uriParams.put("{appRealName}", appName);
-                uriParams.put("{childResourcesPath}", childResourcesPath);
-                valuesList = appServerCollector.execute(restDataCollector, simpleUrl, userName, sessionToken, APP_SERVER_CHILDRESOURCES_TOKENIZED_PATH, uriParams);
+                uriParams.put("{childResourcesPath}", servletName);
+                valuesList = appServerCollector.execute(restDataCollector, simpleUrl, userName, sessionToken, APP_STAT_SERVLET_TOKENIZED_PATH, uriParams);
 
-                ApplicationServerSubComponent appServerChildSnapshot = (ApplicationServerSubComponent) jSonEntityToApplicationSnapshotEntityMapper.map(valuesList);
-                if (appServerChildSnapshot != null) {
-                    appServerChildSnapshot.setPathSuffix("server/" + childResourcesPath);
-                    appServerChildSnapshot.setApplicationServer(appServerSnapshot);
+                AppServletStatistic appServletStatistic = (AppServletStatistic) jSonEntityToApplicationSnapshotEntityMapper.map(valuesList);
+                if (appServletStatistic != null) {
+                    appServletStatistic.setServletName(servletName); //A szervlet neve
+                    appServletStatistic.setAppStatistic(appStatistic); //melyik alkalmazáshoz tartozik
+                    appServletStatistic.setPathSuffix("server/" + servletName); //mi a path-ja
                 }
 
-                snapshots.add(appServerChildSnapshot);
+                snapshots.add(appServletStatistic);
             }
         }
 
@@ -133,7 +133,8 @@ public class ApplicationsCollector {
         Response response = restDataCollector.getMonitorResponse(resourceUri, simpleUrl, userName, sessionToken);
         //Response státuszkód ellenőrzése
         if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
-            log.warn("A(z) {} url hívására {} hibakód jött", simpleUrl, response.getStatusInfo().getReasonPhrase());
+            //Nem jött válasz -> valószínűleg nincs engedélyezve az alkalmazás
+            //log.warn("A(z) {}{} url hívására {} hibakód jött", simpleUrl, resourceUri, response.getStatusInfo().getReasonPhrase());
             return;
         }
 
@@ -165,15 +166,15 @@ public class ApplicationsCollector {
         }
 
         childResourcesKeys.forEach((key) -> {
-            if ("server".equals(key)) {
+            if ("server".equals(key)) { //Ez az app statisztika
                 //Server path cuccok
-                Set<AppSnapshotBase> collectedServerSnapshots = this.collectServerSnapshots(simpleUrl, userName, sessionToken, appRealName);
+                Set<AppSnapshotBase> collectedServerSnapshots = this.collectAppStatisticSnapshots(simpleUrl, userName, sessionToken, appRealName);
                 if (collectedServerSnapshots != null) {
                     snapshots.addAll(collectedServerSnapshots);
                 }
             } else {
                 //EJB cuccok
-                log.trace("Bean -> appRealName: {}, key: {}", appRealName, key);
+                log.trace("Bean információk kigyűjtése -> appRealName: {}, key: {}", appRealName, key);
             }
         });
 

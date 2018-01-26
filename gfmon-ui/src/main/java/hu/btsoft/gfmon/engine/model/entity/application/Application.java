@@ -14,7 +14,7 @@ package hu.btsoft.gfmon.engine.model.entity.application;
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.engine.model.entity.ModifiableEntityBase;
-import hu.btsoft.gfmon.engine.model.entity.application.snapshot.server.ApplicationServer;
+import hu.btsoft.gfmon.engine.model.entity.application.snapshot.app.AppStatistic;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import java.util.List;
 import java.util.Set;
@@ -156,7 +156,7 @@ public class Application extends ModifiableEntityBase {
 
     //-- Mérési eredmények
     @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ApplicationServer> applicationServers;
+    private List<AppStatistic> appStatistics;
 
     /**
      * Konstruktor

@@ -4,23 +4,26 @@
  *  GF Monitor project
  *
  *  Module:  gfmon (gfmon)
- *  File:    ApplicationServerSubComponent.java
+ *  File:    AppServletStatistic.java
  *  Created: 2018.01.19. 19:18:15
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.model.entity.application.snapshot.server;
+package hu.btsoft.gfmon.engine.model.entity.application.snapshot.app;
 
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
 import javax.persistence.Cacheable;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -36,22 +39,28 @@ import org.eclipse.persistence.annotations.Customizer;
  * @author BT
  */
 @Entity
-@Table(name = "APP_SERVER_SUBCOMP", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
+@Table(name = "APP_SERVLET_STAT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
 @Cacheable(false)
 @Data
 @ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = {"appStatistic"})
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-public class ApplicationServerSubComponent extends AppSnapshotBase {
+public class AppServletStatistic extends AppSnapshotBase {
 
     /**
      * Az alkalmazás melyik szerveren van?
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "APP_SERVER_ID", referencedColumnName = "ID", nullable = false)
+    @JoinColumn(name = "APP_STAT_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 11)
-    private ApplicationServer applicationServer;
+    private AppStatistic appStatistic;
+
+    @NotNull(message = "A servletName nem lehet null")
+    @Size(min = 3, max = 255, message = "A servletName mező hossza {min} és {max} között lehet")
+    @Column(name = "SERVLET_NAME", length = 255, nullable = false)
+    @ColumnPosition(position = 12)
+    private String servletName;
 
     /**
      * • errorcount

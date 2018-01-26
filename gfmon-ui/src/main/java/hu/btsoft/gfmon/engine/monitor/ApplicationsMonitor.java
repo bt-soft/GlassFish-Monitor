@@ -230,7 +230,7 @@ public class ApplicationsMonitor extends MonitorsBase {
             measuredServerCnt++;
 
             if (applicationSnapshots == null || applicationSnapshots.isEmpty()) {
-                log.warn("Nincsenek menthető alkalmazás pillanatfelvételek!");
+                log.warn("Szerver: {} -> Nincsenek menthető alkalmazás pillanatfelvételek!", server.getSimpleUrl());
                 return;
             }
 
@@ -242,12 +242,13 @@ public class ApplicationsMonitor extends MonitorsBase {
                         applicationSnapshotService.save(snapshot);
                         return snapshot;
                     }).forEachOrdered((snapshot) -> {
-                log.trace("Application Snapshot: {}", snapshot);
+                //log.trace("Application Snapshot: {}", snapshot);
             });
 
             //Kiíratjuk a változásokat az adatbázisba
             applicationSnapshotService.flush();
 
+            log.trace("server url: {}, snapshots: {}, elapsed: {}", server.getUrl(), applicationSnapshots.size(), Elapsed.getElapsedNanoStr(start));
         }
 
         log.trace("Alkalmazás adatok kigyűjtve {} db szerverre, elapsed: {}", measuredServerCnt, Elapsed.getElapsedNanoStr(start));

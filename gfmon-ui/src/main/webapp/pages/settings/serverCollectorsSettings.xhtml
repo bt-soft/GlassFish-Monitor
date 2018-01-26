@@ -4,6 +4,7 @@
                  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
                  xmlns:h="http://xmlns.jcp.org/jsf/html"
                  xmlns:p="http://primefaces.org/ui"
+                 xmlns:pe="http://primefaces.org/ui/extensions"
                  xmlns:f="http://xmlns.jcp.org/jsf/core"
                  xmlns:bt="http://bt-soft.hu/jsf/ui"
                  template="./../../templates/pageTemplate.xhtml"
@@ -94,7 +95,7 @@
                                  var="joiner"
 
                                  scrollable="true"
-                                 scrollWidth="120%"
+                                 scrollWidth="180%"
                                  scrollHeight="600"
 
                                  multiViewState="false"
@@ -117,7 +118,8 @@
 
                         <p:column headerText="active"
                                   styleClass="alignCenter"
-                                  style="width: 3em"
+                                  sortBy="{joiner.active}"
+                                  style="width: 1em"
                                   >
                             <p:selectBooleanCheckbox value="#{joiner.active}">
                                 <p:ajax event="valueChange"  update="cdusTable" listener="#{collectorSettingsView.joinerActiveChanged(joiner.svrCollectorDataUnitId)}"/>
@@ -125,9 +127,10 @@
                         </p:column>
 
 
-                        <p:column headerText="!"
+                        <p:column headerText="!!"
                                   styleClass="alignCenter"
-                                  style="width: 1em">
+                                  sortBy="#{joiner.additionalMessage}"
+                                  style="width: 1em; color: #{collectorSettingsView.warningExisInDcus() ? 'orange' : null}; font-weight: #{collectorSettingsView.warningExisInDcus() ? 'bold' : null}">
 
                             <p:outputLabel id="emptyLabel"
                                            rendered="#{not empty joiner.additionalMessage}">
@@ -135,9 +138,24 @@
                                    class="fa fa-exclamation-triangle"
                                    style="color: orange"
                                    />
-                                <p:tooltip for="emptyLabel"
-                                           showEffect="fade" hideEffect="slide"
-                                           value="#{joiner.additionalMessage}"/>
+                                <pe:tooltip for="emptyLabel"
+                                            showEffect="fadeIn" hideEffect="slideToggle"
+                                            header="Figyelem">
+                                    <h:panelGrid columns="2" style="font-size: 0.9em" styleClass="top-aligned-columns" columnClasses="viewDlgTblPrompt">
+                                        <p:outputLabel value="Módosító: "/>
+                                        <h:outputText value="#{joiner.modifiedBy}" escape="false"/>
+
+                                        <p:outputLabel value="Időpont: "/>
+                                        <h:outputText value="#{joiner.modifiedDate}" escape="false">
+                                            <f:convertDateTime pattern="yyyy.MM.dd HH:mm:ss"
+                                                               timeZone="Europe/Budapest"
+                                                               locale="hu_HU"/>
+                                        </h:outputText>
+
+                                        <p:outputLabel value="KiegInfó: "/>
+                                        <h:outputText value="#{joiner.additionalMessage}" escape="false"/>
+                                    </h:panelGrid>
+                                </pe:tooltip>
                             </p:outputLabel>
 
                         </p:column>
@@ -159,7 +177,7 @@
                         -->
 
                         <p:column headerText="restPath"
-                                  style="width: 18em"
+                                  style="width: 18vh"
                                   sortBy="#{joiner.svrCollectorDataUnit.restPath}"
                                   filterBy="#{joiner.svrCollectorDataUnit.restPath}"
                                   filterStyle="width: 10em; font-size: 0.6em"
@@ -169,7 +187,7 @@
                         </p:column>
 
                         <p:column headerText="dataName"
-                                  style="width: 15em"
+                                  style="width: 14vh"
                                   sortBy="#{joiner.svrCollectorDataUnit.dataName}"
                                   filterBy="#{joiner.svrCollectorDataUnit.dataName}"
                                   filterStyle="width: 10em; font-size: 0.6em"
@@ -179,7 +197,7 @@
                         </p:column>
 
                         <p:column headerText="unit"
-                                  style="width: 6em"
+                                  style="width: 4vh"
                                   sortBy="#{joiner.svrCollectorDataUnit.unit}"
                                   >
                             <h:outputText value="#{joiner.svrCollectorDataUnit.unit}" />

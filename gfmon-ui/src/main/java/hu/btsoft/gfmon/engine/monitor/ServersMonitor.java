@@ -86,6 +86,7 @@ public class ServersMonitor extends MonitorsBase {
     public void beforeStartTimer() {
 
         //Runtime értékek törlése az adatbázisból
+        log.trace("Szerver runtime adatok törlése");
         serverService.clearRuntimeValuesAndSave(DB_MODIFICATOR_USER);
 
         //Van egyáltalán monitorizható szerver?
@@ -226,7 +227,7 @@ public class ServersMonitor extends MonitorsBase {
                         if (joiner.getSvrCollectorDataUnit().getRestPath().equals(path)) {
                             joiner.setActive(false);
                             joiner.setModifiedBy(DB_MODIFICATOR_USER);
-                            joiner.setAdditionalMessage(String.format("Nem érhető el a(z) '%s' path, emiatt az adatgyűjtés letiltva", path));
+                            joiner.setAdditionalMessage("A path nem érhető el, az adatgyűjtés letiltva");
                         }
                     }
                 }

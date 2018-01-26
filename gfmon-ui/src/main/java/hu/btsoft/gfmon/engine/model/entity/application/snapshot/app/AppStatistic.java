@@ -4,16 +4,17 @@
  *  GF Monitor project
  *
  *  Module:  gfmon (gfmon)
- *  File:    ApplicationServer.java
+ *  File:    AppStatistic.java
  *  Created: 2018.01.19. 19:03:17
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.model.entity.application.snapshot.server;
+package hu.btsoft.gfmon.engine.model.entity.application.snapshot.app;
 
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
+import hu.btsoft.gfmon.engine.model.entity.application.Application;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
 import java.util.List;
 import javax.persistence.Cacheable;
@@ -21,6 +22,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Data;
@@ -38,14 +40,22 @@ import org.eclipse.persistence.annotations.Customizer;
  * @author BT
  */
 @Entity
-@Table(name = "APP_SERVER", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
+@Table(name = "APP_STAT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
 @Cacheable(false)
 @Data
 @ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true, exclude = {"applicationServerSubComponents"})
+@EqualsAndHashCode(callSuper = true, exclude = {"appServletStatistics"})
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-public class ApplicationServer extends AppSnapshotBase {
+public class AppStatistic extends AppSnapshotBase {
+
+    /**
+     * Az app statisztika melyik alkalmazáshoz tartozik
+     */
+    @ManyToOne
+    @JoinColumn(name = "APPLICATION_ID", referencedColumnName = "ID")
+    @ColumnPosition(position = 11)
+    private Application aplication;
 
     /**
      * • ActivatedSessionsTotal
@@ -200,9 +210,9 @@ public class ApplicationServer extends AppSnapshotBase {
     @ColumnPosition(position = 36)
     private Long totalServletsLoaded;
 
-    //-- Mérési eredmények
-    @OneToMany(mappedBy = "applicationServer", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "SUBCOMP_ID", referencedColumnName = "ID", nullable = false)
-    private List<ApplicationServerSubComponent> applicationServerSubComponents;
+    //-- Servlet mérési eredmények
+    @OneToMany(mappedBy = "appStatistic", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "APP_SERVLET_STAT_ID", referencedColumnName = "ID", nullable = false)
+    private List<AppServletStatistic> appServletStatistics;
 
 }
