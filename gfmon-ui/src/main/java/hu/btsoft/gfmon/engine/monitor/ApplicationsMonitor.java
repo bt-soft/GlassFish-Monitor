@@ -99,12 +99,12 @@ public class ApplicationsMonitor extends MonitorsBase {
 
         //Ha még nincs beállítva az alkalmazásoknál az, hogy melyik szerveren vannak, akkor azt most megtesszük:
         if (serverAplications != null) {
-            for (Application app : serverAplications) {
-                if (app.getServer() == null) {
-                    //beállítjuk, hogy melyik szerveren fut az alkalmazás
-                    app.setServer(server);
-                }
-            }
+            //beállítjuk, hogy melyik szerveren fut az alkalmazás
+            serverAplications.stream()
+                    .filter((app) -> (app.getServer() == null))
+                    .forEachOrdered((app) -> {
+                        app.setServer(server);
+                    });
         }
 
         return serverAplications;
