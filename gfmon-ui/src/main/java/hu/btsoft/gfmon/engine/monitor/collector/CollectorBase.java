@@ -173,7 +173,7 @@ public abstract class CollectorBase implements ICollectorBase {
                 }
             } else if (valueUnitType == ValueUnitType.UNIT
                     && jsonValueEntity.getJsonNumber("mintime") != null
-                    && jsonValueEntity.getJsonNumber("mintime") != null
+                    && jsonValueEntity.getJsonNumber("maxtime") != null
                     && jsonValueEntity.getJsonNumber("totaltime") != null) {
                 valueUnitType = ValueUnitType.COUNT_MT_MT_TT;
             }
