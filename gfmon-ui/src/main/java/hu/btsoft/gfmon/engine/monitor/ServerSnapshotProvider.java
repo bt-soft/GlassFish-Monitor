@@ -15,7 +15,7 @@ import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.entity.server.SvrCollectorDataUnit;
-import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SvrSnapshotBase;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SnapshotBase;
 import hu.btsoft.gfmon.engine.monitor.collector.CollectedValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.server.IServerCollector;
@@ -48,7 +48,7 @@ public class ServerSnapshotProvider {
     private RestDataCollector restDataCollector;
 
     @Inject
-    private JSonEntityToServerSnapshotEntityMapper jSonEntityToServerSnapshotEntityMapper;
+    private JSonEntityToSnapshotEntityMapper jSonEntityToServerSnapshotEntityMapper;
 
     /**
      * Monitorizható adatnevek adatainak kigyűjtése Ezt csak egy üres adatbázis során indítjuk el
@@ -86,11 +86,11 @@ public class ServerSnapshotProvider {
      *
      * @return szerver Snapshot példányok halmaza, az adatgyűjtés eredménye (new/detach entitás)
      */
-    public Set<SvrSnapshotBase> fetchSnapshot(Server server, Set<String> erroredPaths) {
+    public Set<SnapshotBase> fetchSnapshot(Server server, Set<String> erroredPaths) {
 
         long start = Elapsed.nowNano();
 
-        Set<SvrSnapshotBase> snapshots = null;
+        Set<SnapshotBase> snapshots = null;
 
         //Kigyűjtjük a szerver beállításaiban található monitorozandó path-okat és adatneveket
         //
@@ -149,10 +149,13 @@ public class ServerSnapshotProvider {
             }
 
             //Betoljuk az eredményeket a snapshot entitásba
-            if (snapshots == null) {
-                snapshots = new HashSet<>();
+            SnapshotBase jpaEntity = (SnapshotBase) jSonEntityToServerSnapshotEntityMapper.map(valuesList);
+            if (jpaEntity != null) {
+                if (snapshots == null) {
+                    snapshots = new HashSet<>();
+                }
+                snapshots.add(jpaEntity);
             }
-            jSonEntityToServerSnapshotEntityMapper.map(valuesList, snapshots);
         }
 
         log.trace("server url: {}, elapsed: {}", server.getUrl(), Elapsed.getElapsedNanoStr(start));

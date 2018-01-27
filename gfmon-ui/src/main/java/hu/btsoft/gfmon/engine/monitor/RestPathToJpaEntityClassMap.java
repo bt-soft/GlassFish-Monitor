@@ -4,14 +4,19 @@
  *  GF Monitor project
  *
  *  Module:  gfmon-engine (gfmon-engine)
- *  File:    SvrRestPathToSvrJpaEntityClassMap.java
+ *  File:    RestPathToJpaEntityClassMap.java
  *  Created: 2018.01.06. 10:40:13
  *
  *  ------------------------------------------------------------------------------------
  */
 package hu.btsoft.gfmon.engine.monitor;
 
-import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SvrSnapshotBase;
+import hu.btsoft.gfmon.engine.model.entity.EntityBase;
+import hu.btsoft.gfmon.engine.model.entity.application.snapshot.app.AppServletStatistic;
+import hu.btsoft.gfmon.engine.model.entity.application.snapshot.app.AppStatistic;
+import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbBeanMethodStat;
+import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbBeanPoolStat;
+import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbStat;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.httpservice.HttpServiceRequest;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.jvm.JvmMemory;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.jvm.ThreadSystem;
@@ -27,6 +32,11 @@ import hu.btsoft.gfmon.engine.model.entity.server.snapshot.web.Jsp;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.web.Request;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.web.Servlet;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.web.Session;
+import hu.btsoft.gfmon.engine.monitor.collector.application.app.AppServletStatisticCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.application.app.AppWebStatisticCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbBeanMethodCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbBeanPoolCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.server.httpservice.HttpServiceRequestCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.server.jvm.MemoryColletor;
 import hu.btsoft.gfmon.engine.monitor.collector.server.jvm.ThreadSystemCollector;
@@ -50,21 +60,21 @@ import lombok.extern.slf4j.Slf4j;
  * @author BT
  */
 @Slf4j
-public class SvrRestPathToSvrJpaEntityClassMap {
+public class RestPathToJpaEntityClassMap {
 
     /**
-     * Monitor nakedPath alapján megállíptja, hogy milyen szerver adat entitást kell használni
+     * Monitor path alapján megállíptja, hogy milyen szerver adat entitást kell használni
      *
-     * @param nakedPath monitor path
+     * @param path monitor path
      *
-     * @return JPA szerver adat entitás osztály típus
+     * @return JPA adat entitás osztály típus
      */
-    public static Class<? extends SvrSnapshotBase> getJpaEntityClass(String nakedPath) {
+    public static Class<? extends EntityBase> getJpaEntityClass(String path) {
 
-        Class<? extends SvrSnapshotBase> clazz = null;
+        Class<? extends EntityBase> clazz = null;
 
         //A JPA entitás típusát attól függően azonosítjuk, hogy mely path-ról származik a mérés
-        switch (nakedPath) {
+        switch (path) {
 
             case HttpServiceRequestCollector.PATH:
                 clazz = HttpServiceRequest.class;
@@ -126,8 +136,29 @@ public class SvrRestPathToSvrJpaEntityClassMap {
                 clazz = Session.class;
                 break;
 
+            // --- Alkalmazás entitások
+            case AppWebStatisticCollector.PATH:
+                clazz = AppStatistic.class;
+                break;
+
+            case AppServletStatisticCollector.PATH:
+                clazz = AppServletStatistic.class;
+                break;
+
+            case AppEjbCollector.PATH:
+                clazz = EjbStat.class;
+                break;
+
+            case AppEjbBeanMethodCollector.PATH:
+                clazz = EjbBeanMethodStat.class;
+                break;
+
+            case AppEjbBeanPoolCollector.PATH:
+                clazz = EjbBeanPoolStat.class;
+                break;
+
             default:
-                log.error("A(z) '{}' monitor path-hoz nincs szerver JPA entitás osztály rendelve!", nakedPath);
+                log.error("A(z) '{}' monitor path-hoz nincs szerver JPA entitás osztály rendelve!", path);
         }
 
         return clazz;

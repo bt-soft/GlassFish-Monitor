@@ -31,7 +31,7 @@ import org.eclipse.persistence.annotations.Customizer;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-public abstract class ConnectionQueueFieldsBase extends SvrSnapshotBase {
+public abstract class ConnectionQueueFieldsBase extends SnapshotBase {
 
     /**
      * • countopenconnections

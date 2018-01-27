@@ -20,7 +20,14 @@ import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
  */
 public interface IGFMonEngineConstants extends IGFMonCoreLibConstants {
 
-    String LOW_WATERMARK_VAR_POSTFX = "Lw";
-    String HIGH_WATERMARK_VAR_POSTFX = "Hw";
+    String LOW_WATERMARK_VAR_POSTFIX = "Lw";
+    String HIGH_WATERMARK_VAR_POSTFIX = "Hw";
+
+    String LOWERBOUND_VAR_POSTFIX = "Lb";
+    String UPPERBOUND_VAR_POSTFIX = "Ub";
+
+    String MINTIME_VAR_POSTFIX = "Tmin";
+    String MAXTIME_VAR_POSTFIX = "Tmax";
+    String TOTALTIME_VAR_POSTFIX = "Ttot";
 
 }

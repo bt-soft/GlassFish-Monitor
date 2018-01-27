@@ -11,11 +11,14 @@
  */
 package hu.btsoft.gfmon.engine.monitor.collector.types;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * GF monitoradatok mértékegységei
  *
  * @author BT
  */
+@Slf4j
 public enum ValueUnitType {
 
     COUNT("count", ValueClass.NUMBER),
@@ -26,7 +29,16 @@ public enum ValueUnitType {
     STRING("String", ValueClass.STRING),
     LIST("List", ValueClass.STRING),
     //
-    COUNT_CURLWHW("ne-találd-meg", ValueClass.NUMBER); //Current/Low/HighWatermark
+    //EJB statisztika csacsiságai
+    //
+    MILLISECONDS("Milliseconds", ValueClass.NUMBER),
+    UNIT("unit", ValueClass.NUMBER),
+    //
+    //Ezek 'kézzel' lesznek feltérképezve (CollectorBase.fetchValues())
+    //
+    COUNT_CURR_LW_HW("ne-találd-meg", ValueClass.NUMBER), //Current/Low/HighWatermark
+    COUNT_CURR_LW_HW_LB_UB("ne-találd-meg", ValueClass.NUMBER), //Current/Low/HighWatermark + LowerBound/UpperBound (EJB methodreadycount)
+    COUNT_MT_MT_TT("ne-találd-meg", ValueClass.NUMBER); //Count/MinTime/MaxTime/TotalTime
 
     private final String unitName;
 
@@ -52,17 +64,16 @@ public enum ValueUnitType {
      * @param value enum érték
      *
      * @return enum vagy null
-     *
-     * @throws IllegalArgumentException ha nincs meg
      */
-    public static ValueUnitType fromValue(String value) throws IllegalArgumentException {
+    public static ValueUnitType fromValue(String value) {
 
         for (ValueUnitType valueUnitType : ValueUnitType.values()) {
-            if (valueUnitType.unitName.equals(value)) {
+            if (valueUnitType.unitName.equalsIgnoreCase(value)) {  //Az EJB statisztikában van 'Miliseconds', meg 'unit' is... :-/
                 return valueUnitType;
             }
         }
 
+        log.warn("Nincs a(z) '{}' mértékegység kezelve ", value);
         return null;
     }
 }

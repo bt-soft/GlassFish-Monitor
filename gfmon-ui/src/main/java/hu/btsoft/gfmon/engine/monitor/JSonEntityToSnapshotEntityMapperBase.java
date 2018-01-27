@@ -139,6 +139,7 @@ public abstract class JSonEntityToSnapshotEntityMapperBase {
 
                         case SECONDS:
                         case MILLISECOND:
+                        case MILLISECONDS:
                         case NANOSECOND:
                         case COUNT:
                         case BYTES:
@@ -150,25 +151,69 @@ public abstract class JSonEntityToSnapshotEntityMapperBase {
                             field.set(jpaEntityRef, this.typeSafeValueConverter(fieldType, dto.getCurrent()));
                             break;
 
-                        case COUNT_CURLWHW:
+                        case COUNT_CURR_LW_HW_LB_UB: {
+                            //lowerbound
+                            Field _field = this.getFieldByName(fields, field.getName() + IGFMonEngineConstants.LOWERBOUND_VAR_POSTFIX);
+                            if (_field != null) {
+                                _field.setAccessible(true);
+                                _field.set(jpaEntityRef, this.typeSafeValueConverter(fieldType, dto.getLowerBound()));
+                            }
+
+                            //upperbound
+                            _field = this.getFieldByName(fields, field.getName() + IGFMonEngineConstants.UPPERBOUND_VAR_POSTFIX);
+                            if (_field != null) {
+                                _field.setAccessible(true);
+                                _field.set(jpaEntityRef, this.typeSafeValueConverter(fieldType, dto.getUpperBound()));
+                            }
+                        }
+                        //NINCS BREAK!!! -> csorogjon rá a COUNT_CURR_LW_HW-ra !
+
+                        case COUNT_CURR_LW_HW:
                             field.set(jpaEntityRef, this.typeSafeValueConverter(fieldType, dto.getCurrent()));
+                             {
+                                //LowWatermark
+                                Field _field = this.getFieldByName(fields, field.getName() + IGFMonEngineConstants.LOW_WATERMARK_VAR_POSTFIX);
+                                if (_field != null) {
+                                    _field.setAccessible(true);
+                                    _field.set(jpaEntityRef, this.typeSafeValueConverter(fieldType, dto.getLowWatermark()));
+                                }
 
-                            //LowWatermark
-                            Field _field = this.getFieldByName(fields, field.getName() + IGFMonEngineConstants.LOW_WATERMARK_VAR_POSTFX);
-                            if (_field != null) {
-                                _field.setAccessible(true);
-                                _field.set(jpaEntityRef, this.typeSafeValueConverter(fieldType, dto.getLowWatermark()));
+                                //HighWatermark
+                                _field = this.getFieldByName(fields, field.getName() + IGFMonEngineConstants.HIGH_WATERMARK_VAR_POSTFIX);
+                                if (_field != null) {
+                                    _field.setAccessible(true);
+                                    _field.set(jpaEntityRef, this.typeSafeValueConverter(fieldType, dto.getHighWatermark()));
+                                }
                             }
-
-                            //HighWatermark
-                            _field = this.getFieldByName(fields, field.getName() + IGFMonEngineConstants.HIGH_WATERMARK_VAR_POSTFX);
-                            if (_field != null) {
-                                _field.setAccessible(true);
-                                _field.set(jpaEntityRef, this.typeSafeValueConverter(fieldType, dto.getHighWatermark()));
-                            }
-
                             break;
 
+                        case COUNT_MT_MT_TT:
+                            field.set(jpaEntityRef, this.typeSafeValueConverter(fieldType, dto.getCount()));
+                             {
+                                //minTime
+                                Field _field = this.getFieldByName(fields, field.getName() + IGFMonEngineConstants.MINTIME_VAR_POSTFIX);
+                                if (_field != null) {
+                                    _field.setAccessible(true);
+                                    _field.set(jpaEntityRef, this.typeSafeValueConverter(fieldType, dto.getMinTime()));
+                                }
+
+                                //maxTime
+                                _field = this.getFieldByName(fields, field.getName() + IGFMonEngineConstants.MAXTIME_VAR_POSTFIX);
+                                if (_field != null) {
+                                    _field.setAccessible(true);
+                                    _field.set(jpaEntityRef, this.typeSafeValueConverter(fieldType, dto.getMaxTime()));
+                                }
+                                //totalTime
+                                _field = this.getFieldByName(fields, field.getName() + IGFMonEngineConstants.TOTALTIME_VAR_POSTFIX);
+                                if (_field != null) {
+                                    _field.setAccessible(true);
+                                    _field.set(jpaEntityRef, this.typeSafeValueConverter(fieldType, dto.getTotalTime()));
+                                }
+                            }
+                            break;
+
+                        default:
+                            log.warn("Nincs lekezelve a mapping, fieldName: '{}', unitType: {}!", field.getName(), dto.getUnit());
                     }
                 }
             }

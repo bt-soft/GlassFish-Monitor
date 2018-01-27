@@ -67,4 +67,19 @@ public class CollectedValueDto {
      * A mért érték legnagyobb értéke
      */
     private Long highWatermark;
+
+    /**
+     * legkisebb határ
+     */
+    private Long lowerBound;
+
+    /**
+     * legnagyobb határ
+     */
+    private Long upperBound;
+
+    private Long minTime;
+    private Long maxTime;
+    private Long totalTime;
+
 }

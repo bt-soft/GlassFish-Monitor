@@ -11,20 +11,13 @@
  */
 package hu.btsoft.gfmon.engine.model.entity.application.snapshot;
 
-import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.EntityBase;
-import hu.btsoft.gfmon.engine.model.entity.application.Application;
-import javax.persistence.Column;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.eclipse.persistence.annotations.Customizer;
 
 /**
@@ -34,27 +27,10 @@ import org.eclipse.persistence.annotations.Customizer;
  */
 @MappedSuperclass
 @Data
-@EqualsAndHashCode(callSuper = true, exclude = "application")
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
 public abstract class AppSnapshotBase extends EntityBase {
-
-    /**
-     * A mérés melyik alkalmazáshoz tartozik?
-     * (automatikusan index képződik rá)
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "APP_ID")
-    @ColumnPosition(position = 10)
-    private Application application;
-
-    /**
-     * Mi a mérés path-jának a vége?
-     */
-    @NotNull(message = "A pathSuffix nem lehet null")
-    @Size(min = 3, max = 255, message = "Az pathSuffix mező hossza {min} és {max} között lehet")
-    @Column(length = 255, nullable = false)
-    @ColumnPosition(position = 19)
-    private String pathSuffix;
 
 }

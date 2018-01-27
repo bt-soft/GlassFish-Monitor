@@ -15,7 +15,6 @@ import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
-import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -40,22 +39,25 @@ import org.eclipse.persistence.annotations.Customizer;
  */
 @Entity
 @Table(name = "APP_SERVLET_STAT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
-@Cacheable(false)
 @Data
-@ToString(callSuper = true)
+@ToString(callSuper = true, exclude = {"appStatistic"})
 @EqualsAndHashCode(callSuper = true, exclude = {"appStatistic"})
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
 public class AppServletStatistic extends AppSnapshotBase {
 
     /**
-     * Az alkalmazás melyik szerveren van?
+     * A mérés melyik alkalmazás statisztikához tartozik?
+     * (automatikusan index képződik rá)
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "APP_STAT_ID", referencedColumnName = "ID", nullable = false)
-    @ColumnPosition(position = 11)
+    @JoinColumn(name = "APP_STAT_ID")
+    @ColumnPosition(position = 10)
     private AppStatistic appStatistic;
 
+    /**
+     * Szervlet neve
+     */
     @NotNull(message = "A servletName nem lehet null")
     @Size(min = 3, max = 255, message = "A servletName mező hossza {min} és {max} között lehet")
     @Column(name = "SERVLET_NAME", length = 255, nullable = false)

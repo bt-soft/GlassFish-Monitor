@@ -11,7 +11,7 @@
  */
 package hu.btsoft.gfmon.engine.model.service;
 
-import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SvrSnapshotBase;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SnapshotBase;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Stateless
 @Slf4j
-public class SvrSnapshotService extends ServiceBase<SvrSnapshotBase> {
+public class SvrSnapshotService extends ServiceBase<SnapshotBase> {
 
     @PersistenceContext(unitName = "gfmon_PU")
     private EntityManager em;
@@ -33,7 +33,7 @@ public class SvrSnapshotService extends ServiceBase<SvrSnapshotBase> {
      * Kontruktor
      */
     public SvrSnapshotService() {
-        super(SvrSnapshotBase.class);
+        super(SnapshotBase.class);
     }
 
     /**
@@ -55,7 +55,7 @@ public class SvrSnapshotService extends ServiceBase<SvrSnapshotBase> {
 //     *
 //     * @return törölt entitásrekordok száma
 //     */
-//    private <T extends SvrSnapshotBase> int deleteEntityOldRecord(Class<T> entityType, Date beforeDate) {
+//    private <T extends SnapshotBase> int deleteEntityOldRecord(Class<T> entityType, Date beforeDate) {
 //        CriteriaBuilder builder = em.getCriteriaBuilder();
 //        CriteriaDelete<T> delete = builder.createCriteriaDelete(entityType);
 //        Root<T> root = delete.from(entityType);
@@ -83,13 +83,13 @@ public class SvrSnapshotService extends ServiceBase<SvrSnapshotBase> {
 //        Date beforeDate = Date.from(before.atStartOfDay(ZoneId.systemDefault()).toInstant());
 //
 //        cnt = em.getMetamodel().getEntities().stream()
-//                .filter((entity) -> (entity instanceof SvrSnapshotBase))
-//                .map((entity) -> (SvrSnapshotBase) entity)
+//                .filter((entity) -> (entity instanceof SnapshotBase))
+//                .map((entity) -> (SnapshotBase) entity)
 //                .map((snapshotEntity) -> deleteEntityOldRecord(snapshotEntity.getClass(), beforeDate))
 //                .reduce(cnt, Integer::sum);
 //
 //        return cnt;
-        return super.deleteOldRecords(SvrSnapshotBase.class, keepDays);
+        return super.deleteOldRecords(SnapshotBase.class, keepDays);
 
     }
 

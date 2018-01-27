@@ -191,7 +191,7 @@ public abstract class RestClientBase implements Serializable {
      *
      * @return Json Object
      */
-    protected JsonObject getRootJsonObject(String fullUrl, String userName, String sessionToken) {
+    public JsonObject getRootJsonObject(String fullUrl, String userName, String sessionToken) {
 
         try {
             String protocol = this.getProtocol(userName);
@@ -210,8 +210,14 @@ public abstract class RestClientBase implements Serializable {
                 builder.cookie(new Cookie("gfresttoken", sessionToken));
             }
 
-            Response restResponse = builder.get(Response.class);
-            JsonObject jsonObject = restResponse.readEntity(JsonObject.class);
+            Response response = builder.get(Response.class);
+            if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
+                //Nem jött válasz -> valószínűleg nincs engedélyezve az alkalmazás
+                log.warn("A(z) '{}' url hívására {} hibakód jött", fullUrl, response.getStatusInfo().getReasonPhrase());
+                return null;
+            }
+
+            JsonObject jsonObject = response.readEntity(JsonObject.class);
 
             return jsonObject;
         } catch (MalformedURLException | URISyntaxException e) {
@@ -231,7 +237,7 @@ public abstract class RestClientBase implements Serializable {
      *
      * @return válast jsonjObject
      */
-    protected JsonObject getRootJsonObject(String simpleUrl, String subUrl, String userName, String sessionToken) {
+    public JsonObject getRootJsonObject(String simpleUrl, String subUrl, String userName, String sessionToken) {
         String fullUrl = this.getProtocol(userName) + simpleUrl + subUrl;
         return this.getRootJsonObject(fullUrl, userName, sessionToken);
     }

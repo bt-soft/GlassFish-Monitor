@@ -11,10 +11,9 @@
  */
 package hu.btsoft.gfmon.engine.monitor;
 
-import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SvrSnapshotBase;
+import hu.btsoft.gfmon.engine.model.entity.EntityBase;
 import hu.btsoft.gfmon.engine.monitor.collector.CollectedValueDto;
 import java.util.List;
-import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -24,19 +23,24 @@ import lombok.extern.slf4j.Slf4j;
  * @author BT
  */
 @Slf4j
-public class JSonEntityToServerSnapshotEntityMapper extends JSonEntityToSnapshotEntityMapperBase {
+public class JSonEntityToSnapshotEntityMapper extends JSonEntityToSnapshotEntityMapperBase {
 
     /**
      * Egy Entitás felépítése a mérési eredményekből
      * A valuesList egyenként egy mezőt tatalmaz, ezt kell mappalni egy entitásban
      *
-     * @param valuesList       mérési eredmények
-     * @param snapshotEntities Snapshot JPA entitások halmaza, ebbe gyűjtjük a lementendő JPA entitásokat
+     * @param valuesList mérési eredmények
+     *
+     * @return adatokkal feltöltött JPA entitás, vagy null
      */
-    public void map(List<CollectedValueDto> valuesList, Set<SvrSnapshotBase> snapshotEntities) {
+    public EntityBase map(List<CollectedValueDto> valuesList) {
 
-        SvrSnapshotBase snapshotEntity = null;
-        Class<? extends SvrSnapshotBase> jpaEntityClass = null;
+        if (valuesList == null || valuesList.isEmpty()) {
+            return null;
+        }
+
+        EntityBase jpaEntity = null;
+        Class<? extends EntityBase> jpaEntityClass = null;
 
         //Végigmegyünk az összes mért JSon entitáson
         for (CollectedValueDto dto : valuesList) {
@@ -44,17 +48,17 @@ public class JSonEntityToServerSnapshotEntityMapper extends JSonEntityToSnapshot
             //A JPA entitás típusát attól függően hozzuk létre, hogy mely uri-ról származik a mérés
             if (jpaEntityClass == null) {
                 //Leszedjük a mért értéket
-                jpaEntityClass = SvrRestPathToSvrJpaEntityClassMap.getJpaEntityClass(dto.getPath());
+                jpaEntityClass = RestPathToJpaEntityClassMap.getJpaEntityClass(dto.getPath());
             }
 
             if (jpaEntityClass != null) {
                 try {
-                    if (snapshotEntity == null) {
-                        snapshotEntity = (SvrSnapshotBase) jpaEntityClass.newInstance();
+                    if (jpaEntity == null) {
+                        jpaEntity = (EntityBase) jpaEntityClass.newInstance();
                     }
 
-                    //DTO -> JPA entitás map
-                    this.fieldMapper(snapshotEntity, dto);
+                    //DTO -> JPA entitás adat feltöltés
+                    this.fieldMapper(jpaEntity, dto);
 
                 } catch (InstantiationException | IllegalAccessException e) {
                     log.error("Nem lehet létrehozni az entitás példányt!", e);
@@ -62,9 +66,6 @@ public class JSonEntityToServerSnapshotEntityMapper extends JSonEntityToSnapshot
             }
 
         }
-        //Ha van eredmény, akkor az hozzáadjuk a mérési halmazhoz
-        if (snapshotEntity != null) {
-            snapshotEntities.add(snapshotEntity);
-        }
+        return jpaEntity;
     }
 }

@@ -4,7 +4,7 @@
  *  GF Monitor project
  *
  *  Module:  gfmon-engine (gfmon-engine)
- *  File:    SvrSnapshotBase.java
+ *  File:    SnapshotBase.java
  *  Created: 2017.12.26. 15:08:12
  *
  *  ------------------------------------------------------------------------------------
@@ -34,7 +34,7 @@ import org.eclipse.persistence.annotations.Customizer;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-public abstract class SvrSnapshotBase extends EntityBase {
+public abstract class SnapshotBase extends EntityBase {
 
     /**
      * A mérés melyik szerverhez tartozik?

@@ -36,7 +36,7 @@ public abstract class RestDataCollectorBase extends RestClientBase {
 //    }
 //
 //    public long getLong(String uri, String name, String key) {
-//        Response result = this.getMonitorResponse(uri);
+//        Response result = this.getResponse(uri);
 //        JsonObject jsonObject = super.getJsonEntityByName(result, name);
 //        if (jsonObject == null) {
 //            return 0L;
@@ -45,7 +45,7 @@ public abstract class RestDataCollectorBase extends RestClientBase {
 //    }
 //
 //    public int getInt(String uri, String name, String key) {
-//        Response result = this.getMonitorResponse(uri);
+//        Response result = this.getResponse(uri);
 //        JsonObject jsonObject = super.getJsonEntityByName(result, name);
 //        if (jsonObject == null) {
 //            return 0;
@@ -54,7 +54,7 @@ public abstract class RestDataCollectorBase extends RestClientBase {
 //    }
 //
 //    public String getString(String uri, String name, String key) {
-//        Response result = this.getMonitorResponse(uri);
+//        Response result = this.getResponse(uri);
 //        JsonObject jsonObject = super.getJsonEntityByName(result, name);
 //        if (jsonObject == null) {
 //            return null;
@@ -64,7 +64,7 @@ public abstract class RestDataCollectorBase extends RestClientBase {
 //
 //    public String[] getStringArray(String name, String key) {
 //        String[] empty = new String[0];
-//        Response result = this.getMonitorResponse(name);
+//        Response result = this.getResponse(name);
 //
 //        JsonObject response = result.readEntity(JsonObject.class);
 //        if (response == null) {
@@ -114,16 +114,12 @@ public abstract class RestDataCollectorBase extends RestClientBase {
     /**
      * REST válasz olvasása
      *
-     * @param resourceUri  monitorozott rest erőforrás URI
-     * @param simpleUrl    a GF szerver url-je
-     * @param userName     REST hívás usere
+     * @param fullUrl      monitorozott rest teljes erőforrás URL
      * @param sessionToken a GF session token-je
      *
      * @return REST válasz
      */
-    public Response getMonitorResponse(String resourceUri, String simpleUrl, String userName, String sessionToken) {
-
-        String fullUrl = this.getMonitorBaseURI(simpleUrl, userName) + resourceUri;
+    public Response getResponse(String fullUrl, String sessionToken) {
         WebTarget resource = client.target(fullUrl);
         Invocation.Builder builder = resource.request(MediaType.APPLICATION_JSON);
 
@@ -132,5 +128,21 @@ public abstract class RestDataCollectorBase extends RestClientBase {
             builder.cookie(new Cookie("gfresttoken", sessionToken));
         }
         return builder.get(Response.class);
+    }
+
+    /**
+     * REST válasz olvasása
+     *
+     * @param resourceUri  monitorozott rest erőforrás URI
+     * @param simpleUrl    a GF szerver url-je
+     * @param userName     REST hívás usere
+     * @param sessionToken a GF session token-je
+     *
+     * @return REST válasz
+     */
+    public Response getResponse(String resourceUri, String simpleUrl, String userName, String sessionToken) {
+
+        String fullUrl = this.getMonitorBaseURI(simpleUrl, userName) + resourceUri;
+        return this.getResponse(fullUrl, sessionToken);
     }
 }

@@ -15,17 +15,20 @@ import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.engine.model.entity.ModifiableEntityBase;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.app.AppStatistic;
+import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbStat;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import java.util.List;
 import java.util.Set;
 import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapKeyColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -55,7 +58,7 @@ import lombok.extern.slf4j.Slf4j;
     @NamedQuery(name = "Application.findByServerIdAndAppShortName", query = "SELECT a FROM Application a WHERE a.server.id = :serverId AND a.appShortName = :appShortName"), //
 })
 @Data
-@ToString(callSuper = true)
+@ToString(callSuper = true, exclude = {"server", "ejbStatistics", "appStatistics"})
 @EqualsAndHashCode(callSuper = true, of = {"appShortName", "appRealName", "moduleShortName", "moduleRealName", "active"})
 @NoArgsConstructor
 @Slf4j
@@ -112,9 +115,11 @@ public class Application extends ModifiableEntityBase {
      * /management/domain/applications/application/TestEar/module/TestEar-web-0.0.3.war/engine
      * Egy EJB modulnak nincs WEB motorja!
      */
-    @Column(name = "MODULE_ENGINES", length = 512)
-    @ColumnPosition(position = 15)
     @ElementCollection
+    @MapKeyColumn(name = "APPLICATION_ID")
+    @Column(name = "MODULE_ENGINE_NAME", length = 512)
+    @CollectionTable(name = "APPLICATION_MODULE_ENGINE", joinColumns = @JoinColumn(name = "APPLICATION_ID"))
+    @ColumnPosition(position = 15)
     private Set<String> moduleEngines;
 
     /**
@@ -154,9 +159,13 @@ public class Application extends ModifiableEntityBase {
     @ColumnPosition(position = 30)
     private Server server;
 
-    //-- Mérési eredmények
+    //-- Alkalmazás statisztika Mérési eredmények
     @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AppStatistic> appStatistics;
+
+    //-- Mérési eredmények
+    @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EjbStat> ejbStatistics;
 
     /**
      * Konstruktor

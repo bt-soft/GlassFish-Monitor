@@ -30,7 +30,7 @@ import org.eclipse.persistence.annotations.Customizer;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-public abstract class ThreadPoolFieldsBase extends SvrSnapshotBase {
+public abstract class ThreadPoolFieldsBase extends SnapshotBase {
 
     /**
      * • corethreads

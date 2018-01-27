@@ -14,14 +14,15 @@ package hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb;
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
+import hu.btsoft.gfmon.engine.model.entity.application.Application;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
 import java.util.List;
-import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -38,13 +39,21 @@ import org.eclipse.persistence.annotations.Customizer;
  */
 @Entity
 @Table(name = "APP_EJBSTAT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
-@Cacheable(false)
 @Data
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true, exclude = {"ejbBeanPoolStats", "ejbBeanMethodeStats"})
+@ToString(callSuper = true, exclude = {"application", "ejbBeanPoolStats", "ejbBeanMethodStats"})
+@EqualsAndHashCode(callSuper = true, exclude = {"application", "ejbBeanPoolStats", "ejbBeanMethodStats"})
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
 public class EjbStat extends AppSnapshotBase {
+
+    /**
+     * A mérés melyik alkalmazáshoz tartozik?
+     * (automatikusan index képződik rá)
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "APPLICATION_ID")
+    @ColumnPosition(position = 10)
+    private Application application;
 
     /**
      * Az EJB neve
@@ -69,23 +78,35 @@ public class EjbStat extends AppSnapshotBase {
      * Number of stateless session beans in MethodReady state
      */
     @ColumnPosition(position = 21)
-    private Long methodReadyCount;      //HW-LW érték!
+    private Long methodReadyCount;      //HW-LW + LoweBound-UpperBound érték
+
+    @ColumnPosition(position = 22)
+    private Long methodReadyCountLw;      //LowWaterMark
+
+    @ColumnPosition(position = 23)
+    private Long methodReadyCountHw;      //HighWaterMark
+
+    @ColumnPosition(position = 24)
+    private Long methodReadyCountLb;      //LowerBound
+
+    @ColumnPosition(position = 25)
+    private Long methodReadyCountUb;      //UpperBound
 
     /**
      * • RemoveCount
      * <p>
      * Number of times EJB remove method is called
      */
-    @ColumnPosition(position = 21)
+    @ColumnPosition(position = 26)
     private Long removeCount;
 
     /**
      * EJB Methode stat
      */
     @OneToMany(mappedBy = "ejbStat", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "APP_EJBMETHODE_STAT_ID", referencedColumnName = "ID", nullable = false)
+    @JoinColumn(name = "APP_EJBMETHOD_STAT_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 23)
-    private List<EjbBeanMethodeStat> ejbBeanMethodeStats;
+    private List<EjbBeanMethodStat> ejbBeanMethodStats;
 
     /**
      * EJB Bean pool Stat

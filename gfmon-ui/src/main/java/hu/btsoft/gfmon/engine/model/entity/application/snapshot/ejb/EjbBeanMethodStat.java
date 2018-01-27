@@ -4,7 +4,7 @@
  *  GF Monitor project
  *
  *  Module:  gfmon (gfmon)
- *  File:    EjbBeanMethodeStat.java
+ *  File:    EjbBeanMethodStat.java
  *  Created: 2018.01.26. 12:39:23
  *
  *  ------------------------------------------------------------------------------------
@@ -15,7 +15,6 @@ import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
-import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -35,14 +34,13 @@ import org.eclipse.persistence.annotations.Customizer;
  * @author BT
  */
 @Entity
-@Table(name = "APP_EJBMETHODE_STAT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
-@Cacheable(false)
+@Table(name = "APP_EJBMETHOD_STAT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
 @Data
-@ToString(callSuper = true)
+@ToString(callSuper = true, exclude = {"ejbStat"})
 @EqualsAndHashCode(callSuper = true, exclude = {"ejbStat"})
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-public class EjbBeanMethodeStat extends AppSnapshotBase {
+public class EjbBeanMethodStat extends AppSnapshotBase {
 
     /**
      * Az EJB metódus statisztika melyik EJB-hez tartozik?
@@ -55,11 +53,11 @@ public class EjbBeanMethodeStat extends AppSnapshotBase {
     /**
      * Az EJB neve
      */
-    @NotNull(message = "Az methodeName nem lehet null")
-    @Size(min = 3, max = 255, message = "Az methodeName mező hossza {min} és {max} között lehet")
-    @Column(name = "METHODE_NAME", length = 255, nullable = false)
+    @NotNull(message = "A methodName nem lehet null")
+    @Size(min = 3, max = 255, message = "A methodName mező hossza {min} és {max} között lehet")
+    @Column(name = "METHOD_NAME", length = 255, nullable = false)
     @ColumnPosition(position = 19)
-    private String methodeName;
+    private String methodName;
 
     /**
      * • ExecutionTime
@@ -78,11 +76,29 @@ public class EjbBeanMethodeStat extends AppSnapshotBase {
     private Long methodStatistic;
 
     /**
+     * Mintime
+     */
+    @ColumnPosition(position = 21)
+    private Long methodStatisticTmin;
+
+    /**
+     * MaxTime
+     */
+    @ColumnPosition(position = 22)
+    private Long methodStatisticTmax;
+
+    /**
+     * TotoalTime
+     */
+    @ColumnPosition(position = 23)
+    private Long methodStatisticTtot;
+
+    /**
      * • TotalNumErrors
      * <p>
      * Provides the total number of errors that occured during invocation or execution of an operation.
      */
-    @ColumnPosition(position = 20)
+    @ColumnPosition(position = 24)
     private Long totalNumErrors;
 
     /**
@@ -90,7 +106,7 @@ public class EjbBeanMethodeStat extends AppSnapshotBase {
      * <p>
      * Provides the total number of successful invocations of the method.
      */
-    @ColumnPosition(position = 20)
+    @ColumnPosition(position = 25)
     private Long totalNumSuccess;
 
 }

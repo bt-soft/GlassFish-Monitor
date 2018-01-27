@@ -17,7 +17,6 @@ import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
 import java.util.List;
-import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -41,21 +40,21 @@ import org.eclipse.persistence.annotations.Customizer;
  */
 @Entity
 @Table(name = "APP_STAT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
-@Cacheable(false)
 @Data
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true, exclude = {"appServletStatistics"})
+@ToString(callSuper = true, exclude = {"application", "appServletStatistics"})
+@EqualsAndHashCode(callSuper = true, exclude = {"application", "appServletStatistics"})
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
 public class AppStatistic extends AppSnapshotBase {
 
     /**
-     * Az app statisztika melyik alkalmazáshoz tartozik
+     * A mérés melyik alkalmazáshoz tartozik?
+     * (automatikusan index képződik rá)
      */
-    @ManyToOne
-    @JoinColumn(name = "APPLICATION_ID", referencedColumnName = "ID")
-    @ColumnPosition(position = 11)
-    private Application aplication;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "APPLICATION_ID")
+    @ColumnPosition(position = 10)
+    private Application application;
 
     /**
      * • ActivatedSessionsTotal

@@ -14,7 +14,7 @@ package hu.btsoft.gfmon.engine.model.entity.server.snapshot.web;
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
-import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SvrSnapshotBase;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SnapshotBase;
 import javax.persistence.Cacheable;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -38,7 +38,7 @@ import org.eclipse.persistence.annotations.Customizer;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-public class Session extends SvrSnapshotBase {
+public class Session extends SnapshotBase {
 
     /**
      * • activatedsessionstotal

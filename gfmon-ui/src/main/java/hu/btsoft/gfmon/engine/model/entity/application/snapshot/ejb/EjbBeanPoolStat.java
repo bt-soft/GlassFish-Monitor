@@ -15,7 +15,6 @@ import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
-import javax.persistence.Cacheable;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -33,9 +32,8 @@ import org.eclipse.persistence.annotations.Customizer;
  */
 @Entity
 @Table(name = "APP_EJBPOOL_STAT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
-@Cacheable(false)
 @Data
-@ToString(callSuper = true)
+@ToString(callSuper = true, exclude = {"ejbStat"})
 @EqualsAndHashCode(callSuper = true, exclude = {"ejbStat"})
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)

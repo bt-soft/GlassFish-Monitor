@@ -15,7 +15,7 @@ import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
-import hu.btsoft.gfmon.engine.monitor.collector.application.ApplicationsCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.application.AppStatsCollectorController;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ApplicationSnapshotProvider {
 
     @Inject
-    private ApplicationsCollector applicationsCollector;
+    private AppStatsCollectorController appStatsCollectorController;
 
     /**
      * Az összes alkalmazás kollektor adatait összegyűjti, majd egy új alkalmazás Snapshot entitásba rakja az eredményeket
@@ -52,14 +52,9 @@ public class ApplicationSnapshotProvider {
             //Ha monitorozásra akítív, akkor meghívjuk rá az adatgyűjtőt
             if (app.getActive() != null && Objects.equals(app.getActive(), Boolean.TRUE)) {
 
-                Set<AppSnapshotBase> appSnapshots = applicationsCollector.start(server.getSimpleUrl(), server.getUserName(), server.getSessionToken(), app.getAppRealName());
+                Set<AppSnapshotBase> appSnapshots = appStatsCollectorController.start(app);
 
                 if (appSnapshots != null && !appSnapshots.isEmpty()) {
-
-                    //Beállítjuk az összes pillanatfelvételen, hogy ez melyik alkalmazáshoz van rendelve
-                    appSnapshots.forEach((appSnapshot) -> {
-                        appSnapshot.setApplication(app);
-                    });
 
                     if (snapshots == null) {
                         snapshots = new LinkedHashSet<>();
@@ -68,6 +63,8 @@ public class ApplicationSnapshotProvider {
                 }
             }
         }
+
+        log.info("Alkalmazások statisztika kigyűjtése elapsed: {}", Elapsed.getElapsedNanoStr(start));
 
         return snapshots;
     }

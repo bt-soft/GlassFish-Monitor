@@ -14,7 +14,7 @@ package hu.btsoft.gfmon.engine.model.entity.server.snapshot.taservice;
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
-import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SvrSnapshotBase;
+import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SnapshotBase;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -40,7 +40,7 @@ import org.eclipse.persistence.annotations.Customizer;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-public class TransActionService extends SvrSnapshotBase {
+public class TransActionService extends SnapshotBase {
 
     private final static int STRING_FIELD_LENGHT = 2048;
 
