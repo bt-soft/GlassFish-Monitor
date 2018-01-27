@@ -26,9 +26,9 @@ import javax.json.JsonObject;
  * CDI Bean
  * <p>
  * 1) Lekérjük az alkalmazások listáját: http://localhost:4848/management/domain/applications/application/ - child resources
- * 2) alkalmazásonként leszedjük ajellemzőit (enabled, contetRoot, description) http://localhost:4848/management/domain/applications/application/TestEar
- * 3) alkalmazásonként megnézzük a modulokat: http://localhost:4848/management/domain/applications/application/TestEar/module
- * 4) modulonként megnézzük a modul motorjait (ejb, web, security, weld). Egy modul akkor EJB, ha nincs web modulja
+ * 2) Alkalmazásonként leszedjük a jellemzőit (enabled, contetRoot, description) http://localhost:4848/management/domain/applications/application/TestEar
+ * 3) Alkalmazásonként megnézzük a modulokat: http://localhost:4848/management/domain/applications/application/TestEar/module
+ * 4) Modulonként megnézzük a modul motorjait (ejb, web, security, weld). Egy modul akkor EJB, ha nincs web modulja
  *
  *
  * @author BT
