@@ -9,7 +9,7 @@
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.model.entity;
+package hu.btsoft.gfmon.engine.config;
 
 /**
  * Konfigurációs beállítások adattípusai

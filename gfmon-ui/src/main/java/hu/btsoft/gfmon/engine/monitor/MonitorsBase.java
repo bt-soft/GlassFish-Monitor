@@ -13,6 +13,7 @@ package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.exception.GfMonException;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
+import hu.btsoft.gfmon.engine.model.service.ConfigService;
 import hu.btsoft.gfmon.engine.model.service.ServerService;
 import hu.btsoft.gfmon.engine.security.SessionTokenAcquirer;
 import javax.ejb.Asynchronous;
@@ -34,6 +35,9 @@ public abstract class MonitorsBase {
 
     @EJB
     protected ServerService serverService;
+
+    @EJB
+    protected ConfigService configService;
 
     /**
      * Az adatbázisban módosítást végző user azonosítójának elkérése

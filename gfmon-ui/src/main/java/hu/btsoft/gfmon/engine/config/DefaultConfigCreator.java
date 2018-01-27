@@ -12,7 +12,6 @@
 package hu.btsoft.gfmon.engine.config;
 
 import hu.btsoft.gfmon.engine.model.entity.Config;
-import hu.btsoft.gfmon.engine.model.entity.ConfigValueType;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
 import hu.btsoft.gfmon.engine.model.service.IConfigKeyNames;

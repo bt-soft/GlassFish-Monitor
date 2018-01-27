@@ -17,6 +17,7 @@ import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.service.ApplicationService;
 import hu.btsoft.gfmon.engine.model.service.ApplicationSnapshotService;
+import hu.btsoft.gfmon.engine.model.service.IConfigKeyNames;
 import hu.btsoft.gfmon.engine.monitor.management.ApplicationsDiscoverer;
 import java.util.List;
 import java.util.Objects;
@@ -131,9 +132,10 @@ public class ApplicationsMonitor extends MonitorsBase {
         //A szerver eltárolt alkalmazás listája
         List<Application> dbAppList = applicationService.findByServer(server.getId());
 
-        //Ha a szerveren nincs alkalmazás de az adatbázisban mégis van, akkor töröljük az adatbázsi beli adatokat
+        //Ha a szerveren nincs alkalmazás de az adatbázisban mégis van, akkor töröljük az adatbázis beli adatokat
         if ((runtimeApps == null || runtimeApps.isEmpty()) && (dbAppList != null && !dbAppList.isEmpty())) {
             dbAppList.forEach((dbApp) -> {
+                log.warn("Server: {} -> már nem létező alkalmazások törlése az adatbázisból", server.getSimpleUrl());
                 applicationService.remove(dbApp);
             });
             return;
@@ -183,6 +185,7 @@ public class ApplicationsMonitor extends MonitorsBase {
 
                     //töröljük az adatbázisból!
                     applicationService.remove(existDbApp);
+                    log.info("Server: {} -> a(z) '{}' alkalmazás törlése az adatbázisból", server.getSimpleUrl(), existDbApp.getAppRealName());
                     existDbApp = null;
                 }
             }
@@ -199,6 +202,7 @@ public class ApplicationsMonitor extends MonitorsBase {
             newApp.setActive(existDbAppActiveStatus); //beállítjuk a mentett monitoring státuszt
 
             applicationService.save(newApp, DB_MODIFICATOR_USER);
+            log.info("Server: {} -> a(z) '{}' új alkalmazás felvétele az adatbázisba", server.getSimpleUrl(), newApp.getAppRealName());
         }
 
     }
@@ -259,8 +263,19 @@ public class ApplicationsMonitor extends MonitorsBase {
      */
     @Override
     public void dailyJob() {
+        long start = Elapsed.nowNano();
+
         //Alkalmazások lekérdezése és felépítése
         this.manageAllActiverServerApplications();
+        log.info("Alkalmazások automatikus karbantartása OK, elapsed: {}", Elapsed.getElapsedNanoStr(start));
+
+        //Megőrzendő napok száma
+        start = Elapsed.nowNano();
+        Integer keepDays = configService.getInteger(IConfigKeyNames.SAMPLE_DATA_KEEP_DAYS);
+        log.info("Alkalmazás mérési adatok pucolása indul, keepDays: {}", keepDays);
+        //Összes régi rekord törlése
+        int deletedRecords = applicationSnapshotService.deleteOldRecords(keepDays);
+        log.info("Alkalmazás mérési adatok pucolása OK, törölt rekord: {}, elapsed: {}", deletedRecords, Elapsed.getElapsedNanoStr(start));
     }
 
 }

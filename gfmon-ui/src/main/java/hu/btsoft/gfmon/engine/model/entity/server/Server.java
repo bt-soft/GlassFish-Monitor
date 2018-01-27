@@ -192,6 +192,9 @@ public class Server extends ModifiableEntityBase {
 
     /**
      * A szerveren milyen JDBC ConnectionPool-ok vannak?
+     * - eager: mindig kell -> mindig felolvassuk
+     * - cascade: update, merge menjen rájuk is, ha a szervert töröljük, akkor törlődjönenek az alkalmazások is
+     * - orphanRemoval: izomból törlés lesz
      */
     @OrderBy("poolName DESC")//JPA nevet kell megadni
     @OneToMany(mappedBy = "server", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)

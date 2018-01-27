@@ -21,7 +21,7 @@ import lombok.ToString;
 import org.eclipse.persistence.annotations.Customizer;
 
 /**
- * Szerver mérési eredmények entitások ős osztálya
+ * Alklamazás statisztika entitások ős osztálya
  *
  * @author BT
  */
@@ -33,4 +33,7 @@ import org.eclipse.persistence.annotations.Customizer;
 @Customizer(EntityColumnPositionCustomizer.class)
 public abstract class AppSnapshotBase extends EntityBase {
 
+    // Üres osztály, csak amiatt, hogy a napi takarításokat el tudjuk végezni
+    // A takartító (ApplicationSnapshotService.deleteOldRecords()) csak az AppSnapshotBase leszármazottait kezeli
+    // Ha igen, akkor pucolhatja a régi entitás bejegyzéseket az adatbázisból
 }
