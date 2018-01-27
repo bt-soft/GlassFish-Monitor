@@ -65,6 +65,14 @@ import lombok.extern.slf4j.Slf4j;
 public class Application extends ModifiableEntityBase {
 
     /**
+     * Az alkalmazás melyik szerveren van?
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "SVR_ID", referencedColumnName = "ID", nullable = false)
+    @ColumnPosition(position = 10)
+    private Server server;
+
+    /**
      * Az alkalmazás rövid neve
      * pl.: TestEar
      * (verziószám és classifier nélkül)
@@ -150,14 +158,6 @@ public class Application extends ModifiableEntityBase {
     @Column(length = 256)
     @ColumnPosition(position = 19)
     private String description;
-
-    /**
-     * Az alkalmazás melyik szerveren van?
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "SVR_ID", referencedColumnName = "ID", nullable = false)
-    @ColumnPosition(position = 30)
-    private Server server;
 
     //-- Alkalmazás statisztika Mérési eredmények
     @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)

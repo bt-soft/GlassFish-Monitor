@@ -84,7 +84,7 @@ public class GlassFishMonitorController {
         int sampleIntervalSec = configService.getInteger(IConfigKeyNames.SAMPLE_INTERVAL);
 
         //Timer felhúzása
-        this.timer = this.timerService.createIntervalTimer(1_000, // késleltetés
+        this.timer = this.timerService.createIntervalTimer(10_000, // késleltetés 10mp
                 sampleIntervalSec * 1_000, //intervallum
                 new TimerConfig("GFMon-Timer", false) //ne legyen perzisztens a timer!
         );

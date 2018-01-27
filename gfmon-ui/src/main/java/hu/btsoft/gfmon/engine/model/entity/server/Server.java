@@ -17,6 +17,7 @@ import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.network.NetworkUtils;
 import hu.btsoft.gfmon.engine.model.entity.ModifiableEntityBase;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
+import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcConnectionPool;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.httpservice.HttpServiceRequest;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.jvm.JvmMemory;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.jvm.ThreadSystem;
@@ -185,11 +186,20 @@ public class Server extends ModifiableEntityBase {
      * - cascade: update, merge menjen rájuk is, ha a szervert töröljük, akkor törlődjönenek az alkalmazások is
      * - orphanRemoval: izomból törlés lesz
      */
-    @OrderBy("appRealName DESC")
+    @OrderBy("appRealName DESC") //JPA nevet kell megadni
     @OneToMany(mappedBy = "server", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Application> applications;
 
-    //-- Mérési eredmények
+    /**
+     * A szerveren milyen JDBC ConnectionPool-ok vannak?
+     */
+    @OrderBy("poolName DESC")//JPA nevet kell megadni
+    @OneToMany(mappedBy = "server", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<JdbcConnectionPool> jdbcConnectionPool;
+
+    /**
+     * Szerver statisztika mérési eredméynek
+     */
     @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HttpServiceRequest> httpServiceRequests;
 

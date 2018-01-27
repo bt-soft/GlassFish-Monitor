@@ -4,12 +4,12 @@
  *  GF Monitor project
  *
  *  Module:  gfmon (gfmon)
- *  File:    ApplicationCollectorDataUnit.java
+ *  File:    ConnectionPoolCollectorDataUnit.java
  *  Created: 2018.01.19. 17:22:20
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.model.entity.application;
+package hu.btsoft.gfmon.engine.model.entity.jdbc;
 
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
@@ -33,17 +33,17 @@ import org.eclipse.persistence.annotations.Customizer;
  */
 @Entity
 @Cacheable(true)
-@Table(name = "APP_COLLDATA_UNIT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,
+@Table(name = "RES_CONNPOOL_COLLDATA_UNIT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,
         indexes = {
-            @Index(name = "IDX_APP_CDU_RESTPATHMASK", columnList = "RESTPATHMASK", unique = false),
-            @Index(name = "IDX_APP_CDU_ENTITYNAME", columnList = "ENTITYNAME", unique = false)
+            @Index(name = "IDX_RES_CONPOOL_CDU_RESTPATHMASK", columnList = "RESTPATHMASK", unique = false),
+            @Index(name = "IDX_RES_CONPOOL_CDU_ENTITYNAME", columnList = "ENTITYNAME", unique = false)
         })
 @Data
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-public class ApplicationCollectorDataUnit extends EntityBase {
+public class ConnectionPoolCollectorDataUnit extends EntityBase {
 
     /**
      * A mértékegység milyen REST Path-on van?
