@@ -78,50 +78,50 @@ public class JdbcConnectionPoolMonitor extends MonitorsBase {
     public void maintenanceServerJdbcResourcesInDataBase(Server server) {
 
         //A szerver aktuális alkalmazás listája
-        List<JdbcConnectionPool> runtimeJdbcResources = this.getJdbcConnectionPoolsList(server);
+        List<JdbcConnectionPool> runtimeJdbcConnectionPools = this.getJdbcConnectionPoolsList(server);
 
         //A szerver eltárolt alkalmazás listája
-        List<JdbcConnectionPool> dbJdbcResources = jdbcConnectionPoolService.findByServer(server.getId());
+        List<JdbcConnectionPool> dbJdbcConnectionPools = jdbcConnectionPoolService.findByServer(server.getId());
 
         //Ha a szerveren nincs alkalmazás de az adatbázisban mégis van, akkor töröljük az adatbázis beli adatokat
-        if ((runtimeJdbcResources == null || runtimeJdbcResources.isEmpty()) && (dbJdbcResources != null && !dbJdbcResources.isEmpty())) {
-            dbJdbcResources.forEach((dbJbdcResource) -> {
-                log.warn("Server: {} -> már nem létező JDBC erőforrások törlése az adatbázisból", server.getSimpleUrl());
-                jdbcConnectionPoolService.remove(dbJbdcResource);
+        if ((runtimeJdbcConnectionPools == null || runtimeJdbcConnectionPools.isEmpty()) && (dbJdbcConnectionPools != null && !dbJdbcConnectionPools.isEmpty())) {
+            dbJdbcConnectionPools.forEach((dbJdbcConnectionPool) -> {
+                log.warn("Server: {} -> már nem létező JDBC ConnectionPool törlése az adatbázisból", server.getSimpleUrl());
+                jdbcConnectionPoolService.remove(dbJdbcConnectionPool);
             });
             return;
         }
 
         //Hasem a szerveren, sem az adatbázisban nincs alkalmazás, akkor nem megyünk tovább
-        if (runtimeJdbcResources == null) {
+        if (runtimeJdbcConnectionPools == null) {
             return;
         }
 
         //Végigmegyünk a runtime JDBC erőforrások listáján
-        runtimeJdbcResources.forEach((runtimeJdbcResource) -> {
+        runtimeJdbcConnectionPools.forEach((runtimeJdbcConnectionPool) -> {
 
             boolean needPersistNewEntity = true; //Kell új entitást felvenni?
-            boolean existDbJdbcResourceActiveStatus = false;
+            boolean existDbJdbcConnectionPoolActiveStatus = false;
 
             //A poolName alapján kikeressük az adatbázis listából az jdbcPool-t
-            if (dbJdbcResources != null) {
-                for (JdbcConnectionPool dbJdbcResource : dbJdbcResources) {
+            if (dbJdbcConnectionPools != null) {
+                for (JdbcConnectionPool dbJdbcConnectionPool : dbJdbcConnectionPools) {
                     //Ha névre megvan, akkor tételesen összehasonlítjuk a két objektumot
-                    if (Objects.equals(dbJdbcResource.getPoolName(), runtimeJdbcResource.getPoolName())) { //név egyezik?
+                    if (Objects.equals(dbJdbcConnectionPool.getPoolName(), runtimeJdbcConnectionPool.getPoolName())) { //név egyezik?
 
                         //Ha tételesen már NEM egyezik a két objektum, akkor az adatbázisbelit töröljük, de az 'active' státuszát megőrizzük!
                         //A monitoring státusz nem része az @EquaslAndhashCode()-nak!
-                        if (Objects.equals(dbJdbcResource, runtimeJdbcResource)) {
+                        if (Objects.equals(dbJdbcConnectionPool, runtimeJdbcConnectionPool)) {
 
                             //Elmentjük a státuszt
-                            existDbJdbcResourceActiveStatus = dbJdbcResource.getActive();
+                            existDbJdbcConnectionPoolActiveStatus = dbJdbcConnectionPool.getActive();
 
                             //Beállítjuk, hogy kell menteni az új entitást
                             needPersistNewEntity = true;
 
                             //töröljük az adatbázisból!
-                            log.info("Server: {} -> a(z) '{}' JDBC erőforrás törlése az adatbázisból", server.getSimpleUrl(), dbJdbcResource.getPoolName());
-                            jdbcConnectionPoolService.remove(dbJdbcResource);
+                            log.info("Server: {} -> a(z) '{}' JDBC ConnectionPool törlése az adatbázisból", server.getSimpleUrl(), dbJdbcConnectionPool.getPoolName());
+                            jdbcConnectionPoolService.remove(dbJdbcConnectionPool);
 
                         } else {
 
@@ -136,9 +136,9 @@ public class JdbcConnectionPoolMonitor extends MonitorsBase {
 
             if (needPersistNewEntity) {
                 //Új JDBC erőforrás felvétele
-                runtimeJdbcResource.setActive(existDbJdbcResourceActiveStatus); //beállítjuk a korábbi monitoring státuszt
-                jdbcConnectionPoolService.save(runtimeJdbcResource, DB_MODIFICATOR_USER);
-                log.info("Server: {} -> a(z) '{}' új JDBC erőforrás felvétele az adatbázisba", server.getSimpleUrl(), runtimeJdbcResource.getPoolName());
+                runtimeJdbcConnectionPool.setActive(existDbJdbcConnectionPoolActiveStatus); //beállítjuk a korábbi monitoring státuszt
+                jdbcConnectionPoolService.save(runtimeJdbcConnectionPool, DB_MODIFICATOR_USER);
+                log.info("Server: {} -> a(z) '{}' új JDBC ConnectionPool felvétele az adatbázisba", server.getSimpleUrl(), runtimeJdbcConnectionPool.getPoolName());
             }
         });
     }

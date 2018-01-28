@@ -28,7 +28,6 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 
 /**
  *
@@ -117,14 +116,14 @@ public class ApplicationsMonitor extends MonitorsBase {
      */
     public void maintenanceServerAplicationInDataBase(Server server) {
         //A szerver aktuális alkalmazás listája
-        List<Application> runtimeApps = this.getApplicationsList(server);
+        List<Application> runtimeApplications = this.getApplicationsList(server);
 
         //A szerver eltárolt alkalmazás listája
-        List<Application> dbAppList = applicationService.findByServer(server.getId());
+        List<Application> dbApplications = applicationService.findByServer(server.getId());
 
         //Ha a szerveren nincs alkalmazás de az adatbázisban mégis van, akkor töröljük az adatbázis beli adatokat
-        if ((runtimeApps == null || runtimeApps.isEmpty()) && (dbAppList != null && !dbAppList.isEmpty())) {
-            dbAppList.forEach((dbApp) -> {
+        if ((runtimeApplications == null || runtimeApplications.isEmpty()) && (dbApplications != null && !dbApplications.isEmpty())) {
+            dbApplications.forEach((dbApp) -> {
                 log.warn("Server: {} -> már nem létező alkalmazások törlése az adatbázisból", server.getSimpleUrl());
                 applicationService.remove(dbApp);
             });
@@ -132,69 +131,55 @@ public class ApplicationsMonitor extends MonitorsBase {
         }
 
         //Hasem a szerveren, sem az adatbázisban nincs alkalmazás, akkor nem megyünk tovább
-        if (runtimeApps == null) {
+        if (runtimeApplications == null) {
             return;
         }
 
-        ModelMapper modelMapper = new ModelMapper();
+        //Végigmegyünk a runtime Alklamazások listáján
+        runtimeApplications.forEach((runtimeApplication) -> {
 
-        //Végigmegyünk a jelenlegi alkalmazások listáján
-        for (Application runtimeApp : runtimeApps) {
+            boolean needPersistNewEntity = true; //Kell új entitást felvenni?
+            boolean existDbAppActiveStatus = false;
 
-            //A rövid név alapján kikeressük az adatbázis listából az alkalmazást
-            Application existDbApp = null;
-            if (dbAppList != null) {
-                for (Application dbApp : dbAppList) {
-                    if (Objects.equals(dbApp.getAppShortName(), runtimeApp.getAppShortName()) //alkalmazás hosszú név egyezik?
-                            && Objects.equals(dbApp.getModuleShortName(), runtimeApp.getModuleShortName()) //modul rövid név egyezik?
-                            ) {
-                        existDbApp = dbApp;
+            //A poolName alapján kikeressük az adatbázis listából az jdbcPool-t
+            if (dbApplications != null) {
+                for (Application dbApplication : dbApplications) {
+                    //Ha névre megvan, akkor tételesen összehasonlítjuk a két objektumot
+                    if (Objects.equals(dbApplication.getAppShortName(), runtimeApplication.getAppShortName()) //app rövid név egyezik?
+                            && Objects.equals(dbApplication.getModuleShortName(), runtimeApplication.getModuleShortName())) {  // ÉS az app modul rövid név egyezik?
+
+                        //Ha tételesen már NEM egyezik a két objektum, akkor az adatbázisbelit töröljük, de az 'active' státuszát megőrizzük!
+                        //A monitoring státusz nem része az @EquaslAndhashCode()-nak!
+                        if (Objects.equals(dbApplication, runtimeApplication)) {
+
+                            //Elmentjük a státuszt
+                            existDbAppActiveStatus = dbApplication.getActive();
+
+                            //Beállítjuk, hogy kell menteni az új entitást
+                            needPersistNewEntity = true;
+
+                            //töröljük az adatbázisból!
+                            log.info("Server: {} -> a(z) '{}-{}' alkalmazás törlése az adatbázisból", server.getSimpleUrl(), dbApplication.getAppRealName(), dbApplication.getModuleRealName());
+                            applicationService.remove(dbApplication);
+
+                        } else {
+
+                            //tételesen is egyezik -> nem kell menteni
+                            needPersistNewEntity = false;
+                        }
+
                         break;
                     }
                 }
             }
 
-            //Összehasonlítjuk az adatokat, ha van változás, akkor töröljük a DB-beli adatokat
-            Boolean existDbAppActiveStatus = false;
-            if (existDbApp != null) {
-
-                if (!Objects.equals(existDbApp.getAppRealName(), runtimeApp.getAppRealName()) //igazi neve változott? Pl. verzió váltás volt?
-                        || !Objects.equals(existDbApp.getModuleRealName(), runtimeApp.getModuleRealName()) //modul neve változott?
-                        || !Objects.equals(existDbApp.getModuleEngines(), runtimeApp.getModuleEngines()) // motorok változtak?
-                        || existDbApp.isEnabled() != runtimeApp.isEnabled() // engedélyezett állapot változott?
-                        || !Objects.equals(existDbApp.getContextRoot(), runtimeApp.getContextRoot()) // contextRoot változott?
-                        || !Objects.equals(existDbApp.getDescription(), runtimeApp.getDescription()) // leírás változott?
-                        ) {
-                    //Változás van!!
-                    //Eltesszük az eredeti active státuszát, majd ezzel hozunk létre új bejegyzést az új adatokkal
-                    existDbAppActiveStatus = existDbApp.getActive();
-
-                    if (existDbAppActiveStatus == null) {
-                        existDbAppActiveStatus = false;
-                    }
-
-                    //töröljük az adatbázisból!
-                    applicationService.remove(existDbApp);
-                    log.info("Server: {} -> a(z) '{}' alkalmazás törlése az adatbázisból", server.getSimpleUrl(), existDbApp.getAppRealName());
-                    existDbApp = null;
-                }
+            if (needPersistNewEntity) {
+                //Új JDBC erőforrás felvétele
+                runtimeApplication.setActive(existDbAppActiveStatus); //beállítjuk a korábbi monitoring státuszt
+                applicationService.save(runtimeApplication, DB_MODIFICATOR_USER);
+                log.info("Server: {} -> a(z) '{} - {}' új alkalmazás felvétele az adatbázisba", server.getSimpleUrl(), runtimeApplication.getAppRealName(), runtimeApplication.getModuleRealName());
             }
-
-            //létező és nem változott a neve, nem érdekel tovább
-            if (existDbApp != null) {
-                continue;
-            }
-
-            //Új az alkalmazás (vagy a réginek megváltozott a hosszú neve,  felvesszük az adatbázisba!
-            //Az új entitás alapja a runtime listából jövő alkalmazás adatai lesznek
-            Application newApp = new Application();
-            modelMapper.map(runtimeApp, newApp); //mindent átmásolunk
-            newApp.setActive(existDbAppActiveStatus); //beállítjuk a mentett monitoring státuszt
-
-            applicationService.save(newApp, DB_MODIFICATOR_USER);
-            log.info("Server: {} -> a(z) '{}' új alkalmazás felvétele az adatbázisba", server.getSimpleUrl(), newApp.getAppRealName());
-        }
-
+        });
     }
 
     /**
