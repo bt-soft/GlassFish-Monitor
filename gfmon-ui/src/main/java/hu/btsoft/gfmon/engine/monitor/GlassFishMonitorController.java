@@ -11,6 +11,7 @@
  */
 package hu.btsoft.gfmon.engine.monitor;
 
+import hu.btsoft.gfmon.corelib.cdi.CdiUtils;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
 import hu.btsoft.gfmon.engine.model.service.IConfigKeyNames;
 import javax.annotation.PostConstruct;
@@ -26,6 +27,7 @@ import javax.ejb.Timeout;
 import javax.ejb.Timer;
 import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
+import javax.enterprise.inject.Instance;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -72,6 +74,8 @@ public class GlassFishMonitorController {
             log.warn("A Timer már fut!", timer);
             return;
         }
+
+        Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class);
         monitors.forEach((monitor) -> {
             monitor.beforeStartTimer();
         });
@@ -106,7 +110,7 @@ public class GlassFishMonitorController {
         } finally {
             this.timer = null;
         }
-
+        Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class);
         monitors.forEach((monitor) -> {
             monitor.afterStopTimer();
         });
@@ -135,6 +139,7 @@ public class GlassFishMonitorController {
      */
     @Timeout
     protected void timeOut() {
+        Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class);
         monitors.forEach((monitor) -> {
             try {
                 monitor.startMonitoring();
@@ -150,7 +155,7 @@ public class GlassFishMonitorController {
      */
     @Schedule(hour = "00", minute = "00", second = "00")
     protected void doDailyPeriodicCleanup() {
-
+        Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class);
         monitors.forEach((monitor) -> {
             try {
                 monitor.dailyJob();
