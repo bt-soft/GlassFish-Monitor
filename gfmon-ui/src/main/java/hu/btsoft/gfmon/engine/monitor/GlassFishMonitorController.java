@@ -26,6 +26,8 @@ import javax.ejb.Timeout;
 import javax.ejb.Timer;
 import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -46,11 +48,16 @@ public class GlassFishMonitorController {
 
     protected Timer timer;
 
-    @EJB
-    private ServersMonitor serversMonitor;
-
-    @EJB
-    private ApplicationsMonitor applicationsMonitor;
+//    @EJB
+//    private ServersMonitor serversMonitor;
+//
+//    @EJB
+//    private ApplicationsMonitor applicationsMonitor;
+//
+//    @EJB
+//    private ResourcesMonitor resourcesMonitor;
+    @Inject
+    private Instance<MonitorsBase> monitors;
 
     /**
      * GFMon engine indítása
@@ -77,8 +84,12 @@ public class GlassFishMonitorController {
             return;
         }
 
-        serversMonitor.beforeStartTimer();
-        applicationsMonitor.beforeStartTimer();
+//        serversMonitor.beforeStartTimer();
+//        applicationsMonitor.beforeStartTimer();
+//        resourcesMonitor.beforeStartTimer();
+        monitors.forEach((monitor) -> {
+            monitor.beforeStartTimer();
+        });
 
         //Mérési periódusidő leszedése a konfigból
         int sampleIntervalSec = configService.getInteger(IConfigKeyNames.SAMPLE_INTERVAL);
@@ -111,8 +122,13 @@ public class GlassFishMonitorController {
             this.timer = null;
         }
 
-        serversMonitor.afterStopTimer();
-        applicationsMonitor.afterStopTimer();
+//        serversMonitor.afterStopTimer();
+//        applicationsMonitor.afterStopTimer();
+//        resourcesMonitor.afterStopTimer();
+        monitors.forEach((monitor) -> {
+            monitor.afterStopTimer();
+        });
+
     }
 
     /**
@@ -137,12 +153,22 @@ public class GlassFishMonitorController {
      */
     @Timeout
     protected void timeOut() {
-        try {
-            serversMonitor.startMonitoring();
-            applicationsMonitor.startMonitoring();
-        } catch (Exception e) {
-            log.error("Hiba a monitorozott adatok begyűjtése közben", e);
-        }
+//        try {
+//            serversMonitor.startMonitoring();
+//            applicationsMonitor.startMonitoring();
+//            resourcesMonitor.startMonitoring();
+//        } catch (Exception e) {
+//            log.error("Hiba a monitorozott adatok begyűjtése közben", e);
+//        }
+
+        monitors.forEach((monitor) -> {
+            try {
+                monitor.startMonitoring();
+            } catch (Exception e) {
+                log.error(String.format("%s -> Hiba a monitorozott adatok begyűjtése közben", monitor.getControllerName()), e);
+            }
+        });
+
     }
 
     /**
@@ -150,11 +176,21 @@ public class GlassFishMonitorController {
      */
     @Schedule(hour = "00", minute = "00", second = "00")
     protected void doDailyPeriodicCleanup() {
-        try {
-            serversMonitor.dailyJob();
-            applicationsMonitor.dailyJob();
-        } catch (Exception e) {
-            log.error("Hiba a napi takarítás közben", e);
-        }
+//        try {
+//            serversMonitor.dailyJob();
+//            applicationsMonitor.dailyJob();
+//            resourcesMonitor.dailyJob();
+//        } catch (Exception e) {
+//            log.error("Hiba a napi takarítás közben", e);
+//        }
+
+        monitors.forEach((monitor) -> {
+            try {
+                monitor.dailyJob();
+            } catch (Exception e) {
+                log.error(String.format("%s -> Hiba a napi takarítás közben", monitor.getControllerName()), e);
+            }
+        });
+
     }
 }

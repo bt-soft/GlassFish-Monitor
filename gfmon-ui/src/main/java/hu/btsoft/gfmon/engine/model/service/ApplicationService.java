@@ -20,6 +20,7 @@ import javax.persistence.Query;
 import lombok.extern.slf4j.Slf4j;
 
 /**
+ * Alklamazuások entitásait kezelő osztály
  *
  * @author BT
  */

@@ -14,7 +14,8 @@ package hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot;
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
-import hu.btsoft.gfmon.engine.model.entity.EntityBase;
+import hu.btsoft.gfmon.engine.model.entity.application.Application;
+import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcResourceSnapshotBase;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -36,11 +37,11 @@ import org.eclipse.persistence.annotations.Customizer;
 @Entity
 @Table(name = "RES_CONPOOL_APP_STAT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
 @Data
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = {"connectionPoolStatistic", "application"})
+@EqualsAndHashCode(callSuper = true, exclude = {"connectionPoolStatistic", "application"})
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-public class ConnectionPoolAppStatistic extends EntityBase {
+public class ConnectionPoolAppStatistic extends JdbcResourceSnapshotBase {
 
     /**
      * A mérés melyik ConnectionPool statisztikához tartozik?
@@ -52,12 +53,21 @@ public class ConnectionPoolAppStatistic extends EntityBase {
     private ConnectionPoolStatistic connectionPoolStatistic;
 
     /**
+     * A ConnectionPool Allmaazásstsisztika melyik alklamazáshoz?
+     * (automatikusan index képződik rá)
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "APPLICATION_ID")
+    @ColumnPosition(position = 11)
+    private Application application;
+
+    /**
      * Az alkalmazás neve neve, ami használja a ConnectionPool-t
      */
     @NotNull(message = "A appName nem lehet null")
     @Size(min = 3, max = 255, message = "A appName mező hossza {min} és {max} között lehet")
     @Column(name = "APP_NAME", length = 255, nullable = false)
-    @ColumnPosition(position = 12)
+    @ColumnPosition(position = 20)
     private String appName;
 
     /**
@@ -86,10 +96,10 @@ public class ConnectionPoolAppStatistic extends EntityBase {
     @ColumnPosition(position = 23)
     private Long numConnUsed;
 
-    @ColumnPosition(position = 23)
+    @ColumnPosition(position = 24)
     private Long numConnUsedLw;
 
-    @ColumnPosition(position = 23)
+    @ColumnPosition(position = 25)
     private Long numConnUsedHw;
 
 }

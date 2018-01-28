@@ -14,8 +14,8 @@ package hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot;
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
-import hu.btsoft.gfmon.engine.model.entity.EntityBase;
 import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcConnectionPool;
+import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcResourceSnapshotBase;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -41,14 +41,14 @@ import org.eclipse.persistence.annotations.Customizer;
 @EqualsAndHashCode(callSuper = true, exclude = {"jdbcConnectionPool", "connectionPoolAppStatistic"})
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-public class ConnectionPoolStatistic extends EntityBase {
+public class ConnectionPoolStatistic extends JdbcResourceSnapshotBase {
 
     /**
      * A ConnectionPool statisztika melyik JdbcConnectionPool-hoz tartozik?
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "JDBC_CONNECTION_POOL_ID", referencedColumnName = "ID", nullable = false)
-    @ColumnPosition(position = 30)
+    @ColumnPosition(position = 10)
     private JdbcConnectionPool jdbcConnectionPool;
 
     /**

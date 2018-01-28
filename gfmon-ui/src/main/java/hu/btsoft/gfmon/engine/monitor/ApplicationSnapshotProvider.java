@@ -49,7 +49,7 @@ public class ApplicationSnapshotProvider {
         //Véégigmegyünk a szerver alkalmazásain
         for (Application app : server.getApplications()) {
 
-            //Ha monitorozásra akítív, akkor meghívjuk rá az adatgyűjtőt
+            //Ha monitorozásra aktív, akkor meghívjuk rá az adatgyűjtőt
             if (app.getActive() != null && Objects.equals(app.getActive(), Boolean.TRUE)) {
 
                 Set<AppSnapshotBase> appSnapshots = appStatsCollectorController.start(app);

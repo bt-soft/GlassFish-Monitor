@@ -152,8 +152,8 @@
                                  >
 
 
-                        <p:ajax event="rowSelect"  update="settingsForm:tableButtonsPanelGrid settingsForm:applicationsPanel :growl" />
-                        <p:ajax event="rowUnselect"  update="settingsForm:tableButtonsPanelGrid settingsForm:applicationsPanel :growl" />
+                        <p:ajax event="rowSelect"  update="settingsForm:tableButtonsPanelGrid settingsForm:applicationsPanel settingsForm:connPoolPanel :growl" />
+                        <p:ajax event="rowUnselect"  update="settingsForm:tableButtonsPanelGrid settingsForm:applicationsPanel settingsForm:connPoolPanel :growl" />
 
                         <p:column headerText="No#"
                                   styleClass="alignCenter"
@@ -212,6 +212,24 @@
                     </p:dataTable>
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                     <br/>
 
                     <h:outputText value="Alkalmazások"
@@ -233,7 +251,7 @@
 
                             <p:commandButton value="Összes aktív"
                                              icon="fa fa-check-square-o"
-                                             title="Minden gyűjtendő adatnév aktív"
+                                             title="Minden alkalmazás monitorozható"
                                              onstart="PF('blockUI').block();"
                                              oncomplete="PF('blockUI').unblock();"
                                              actionListener="#{settingsView.toggleAllAppActiveFlag(true)}"
@@ -244,7 +262,7 @@
 
                             <p:commandButton value="Összes inaktív"
                                              icon="fa fa-square-o"
-                                             title="Minden gyűjtendő adatnév inaktív"
+                                             title="Egyik alkalmazás sem monitorozható"
                                              actionListener="#{settingsView.toggleAllAppActiveFlag(false)}"
                                              onstart="PF('blockUI').block();"
                                              oncomplete="PF('blockUI').unblock();"
@@ -294,9 +312,7 @@
                                           styleClass="alignCenter"
                                           style="width: 4em"
                                           >
-                                    <p:selectBooleanCheckbox value="#{app.active}">
-                                        <!--<p:ajax event="valueChange" update="appsTable"/>-->
-                                    </p:selectBooleanCheckbox>
+                                    <p:selectBooleanCheckbox value="#{app.active}"/>
                                 </p:column>
 
 
@@ -387,6 +403,152 @@
                         </p:panel>
                     </p:scrollPanel>
                 </p:panel>
+
+
+
+
+
+
+
+
+
+
+
+
+                <br/>
+
+                <h:outputText value="JDBC ConnectionPool"
+                              styleClass="sub-category-header-text"
+                              />
+                <p:scrollPanel  mode="native" style="border: none; padding: 0; margin: 0">
+                    <p:panel id="connPoolPanel" style="background: transparent; border: none;">
+
+                        <p:commandButton id="conPoolRefreshBtn"
+                                         value="Frissít"
+                                         icon="fa fa-refresh"
+                                         title="A szerver JDBC ConnectionPool újbóli lekérdezése"
+                                         actionListener="#{settingsView.refreshConnectionPools}"
+                                         onstart="PF('blockUI').block();"
+                                         oncomplete="PF('blockUI').unblock();"
+                                         disabled="#{empty settingsView.selectedServer or not settingsView.selectedServer.active}"
+                                         update="conPoolTable"
+                                         />
+
+                        <p:commandButton value="Összes aktív"
+                                         icon="fa fa-check-square-o"
+                                         title="Minden ConnectionPool monitorozható"
+                                         onstart="PF('blockUI').block();"
+                                         oncomplete="PF('blockUI').unblock();"
+                                         actionListener="#{settingsView.toggleAllConPoolActiveFlag(true)}"
+                                         update="conPoolTable :growl"
+                                         disabled="#{empty settingsView.selectedServer or not settingsView.selectedServer.active}"
+                                         />
+
+
+                        <p:commandButton value="Összes inaktív"
+                                         icon="fa fa-square-o"
+                                         title="Egyik ConnectionPool sem monitorozható"
+                                         actionListener="#{settingsView.toggleAllConPoolActiveFlag(false)}"
+                                         onstart="PF('blockUI').block();"
+                                         oncomplete="PF('blockUI').unblock();"
+                                         update="conPoolTable :growl"
+                                         disabled="#{empty settingsView.selectedServer or not settingsView.selectedServer.active}"
+                                         />
+
+
+                        <p:dataTable id="conPoolTable"
+                                     widgetVar="conPoolTable"
+
+                                     value="#{settingsView.selectedServer.jdbcConnectionPool}"
+                                     var="conPool"
+
+                                     multiViewState="false"
+                                     disabledTextSelection="false"
+
+                                     editable="true"
+                                     editMode="cell"
+
+                                     rowIndexVar="rowNdx"
+                                     rowKey="#{app.id}"
+
+                                     emptyMessage="Nincsenek JDBC ConnectionPool-ok"
+                                     >
+
+                            <p:column headerText="No#"
+                                      styleClass="alignCenter"
+                                      style="width: 1.5em">
+                                <h:outputText value="#{rowNdx + 1}" />
+                            </p:column>
+                            <!--
+                            <p:column headerText="id"
+                                      style="width: 4em"
+                                      rendered="#{isDeveloperMode}">
+                                <h:outputText value="#{conPool.id}" />
+                            </p:column>
+                            <p:column headerText="srvId"
+                                      style="width: 4em"
+                                      rendered="#{isDeveloperMode}">
+                                <h:outputText value="#{conPool.server.id}" />
+                            </p:column>
+                            -->
+
+                            <p:column headerText="Monable"
+                                      styleClass="alignCenter"
+                                      style="width: 4em"
+                                      >
+                                <p:selectBooleanCheckbox value="#{conPool.active}"/>
+                            </p:column>
+
+
+                            <p:column headerText="PoolName"
+                                      style="width: 20em"
+                                      sortBy="#{conPool.poolName}"
+                                      filterBy="#{conPool.poolName}"
+                                      filterStyle="width: 10em; font-size: 0.6em"
+                                      filterMatchMode="contains"
+                                      >
+                                <h:outputText value="#{conPool.poolName}" />
+                            </p:column>
+
+                            <p:column headerText="Leírás">
+                                <h:outputText value="#{conPool.description}"/>
+                            </p:column>
+
+                            <p:column headerText="Létrehozva"
+                                      style="width: 10em"
+                                      >
+                                <h:outputText value="#{conPool.createdDate}">
+                                    <f:convertDateTime pattern="yyyy.MM.dd HH:mm:ss"
+                                                       timeZone="Europe/Budapest"
+                                                       locale="hu_HU"/>
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="Létrehozó"
+                                      style="width: 8em"
+                                      >
+                                <h:outputText value="#{conPool.createdBy}"/>
+                            </p:column>
+
+                            <p:column headerText="Módosítva"
+                                      style="width: 10em"
+                                      >
+                                <h:outputText value="#{conPool.modifiedDate}">
+                                    <f:convertDateTime pattern="yyyy.MM.dd HH:mm:ss"
+                                                       timeZone="Europe/Budapest"
+                                                       locale="hu_HU"/>
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="Módosító"
+                                      style="width: 8em"
+                                      >
+                                <h:outputText value="#{conPool.modifiedBy}"/>
+                            </p:column>
+                        </p:dataTable>
+                    </p:panel>
+                </p:scrollPanel>
+
 
             </bt:disablePanel>
         </h:form>

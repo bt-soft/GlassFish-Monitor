@@ -239,7 +239,7 @@ public class AppStatsCollectorController {
 
         for (String key : childResourcesMap.keySet()) {
 
-            Set<AppSnapshotBase> statistics = null;
+            Set<AppSnapshotBase> statistics;
 
             if ("server".equals(key)) {
                 statistics = this.collectWebStatistics(app, childResourcesMap.get(key), userName, sessionToken);

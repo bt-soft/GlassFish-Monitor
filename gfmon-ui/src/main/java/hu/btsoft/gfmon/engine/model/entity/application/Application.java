@@ -16,6 +16,7 @@ import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.engine.model.entity.ModifiableEntityBase;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.app.AppStatistic;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbStat;
+import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnectionPoolAppStatistic;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import java.util.List;
 import java.util.Set;
@@ -163,9 +164,13 @@ public class Application extends ModifiableEntityBase {
     @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AppStatistic> appStatistics;
 
-    //-- Mérési eredmények
+    //-- EJB statisztika eredmények
     @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EjbStat> ejbStatistics;
+
+    //-- ConnectionPool usage statisztika mérése eredmények
+    @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ConnectionPoolAppStatistic> connectionPoolAppStatistics;
 
     /**
      * Konstruktor

@@ -22,6 +22,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -45,7 +46,7 @@ import org.eclipse.persistence.annotations.Customizer;
 @Table(name = "JDBC_RESOURCE",
         catalog = "",
         schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,
-        uniqueConstraints = @UniqueConstraint(columnNames = {"RESOURCE_NAME"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"JNDI_NAME"})
 )
 @Data
 @ToString(callSuper = true, exclude = {"jdbcConnectionPool"})
@@ -67,21 +68,25 @@ public class JdbcResource extends ModifiableEntityBase {
      * A JDBC ConnectionPool neve
      * pl.: connectionPool_gfmon
      */
-    @NotNull(message = "A resourceName nem lehet null")
-    @Size(min = 5, max = 255, message = "A resourceName mező hossza {min} és {max} között lehet")
-    @Column(name = "RESOURCE_NAME", length = 255, nullable = false)
+    @NotNull(message = "A jndiName nem lehet null")
+    @Size(min = 5, max = 255, message = "A jndiName mező hossza {min} és {max} között lehet")
+    @Column(name = "JNDI_NAME", length = 255, nullable = false)
     @ColumnPosition(position = 11)
-    private String resourceName;
-
-    /**
-     * JNDI név
-     */
-    @ColumnPosition(position = 12)
     private String jndiName;
 
     /**
      * Leírás
      */
-    @ColumnPosition(position = 13)
+    @ColumnPosition(position = 12)
     private String description;
+
+    /**
+     * Engedélyezett?
+     */
+    @ColumnPosition(position = 13)
+    private boolean enabled;
+
+    //ezt a jdbcConnectionPool hordozza, csak a kigyűjtéskor használjuk
+    @Transient
+    private String poolName;
 }

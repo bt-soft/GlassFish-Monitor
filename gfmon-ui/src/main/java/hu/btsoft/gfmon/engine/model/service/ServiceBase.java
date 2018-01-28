@@ -153,12 +153,14 @@ public abstract class ServiceBase<T extends EntityBase> {
                 if (_user != null && entity instanceof ModifiableEntityBase && ((ModifiableEntityBase) entity).getCreatedBy() == null) {
                     ((ModifiableEntityBase) entity).setCreatedBy(_user);
                 }
+                log.trace("Persist -> {}", entity);
                 getEntityManager().persist(entity);
             } else {
                 //Ha ki tudjuk nyerni az usert, és még nincs beállítva, akkor használjuk
                 if (_user != null && entity instanceof ModifiableEntityBase && ((ModifiableEntityBase) entity).getModifiedBy() == null) {
                     ((ModifiableEntityBase) entity).setModifiedBy(_user);
                 }
+                log.trace("Merge -> {}", entity);
                 getEntityManager().merge(entity);
             }
         } catch (ConstraintViolationException e) {

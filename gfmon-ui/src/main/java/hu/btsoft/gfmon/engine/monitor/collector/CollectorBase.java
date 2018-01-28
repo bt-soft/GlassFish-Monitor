@@ -160,7 +160,7 @@ public abstract class CollectorBase implements ICollectorBase {
 
             //Ha COUNT az unit, de van 'lowwatermark' és 'highwatermark' -> COUNT_CURR_LW_HW lesz a típus
             //Ha COUNT az unit, de van 'lowwatermark' és 'highwatermark' és 'lowerbound' meg 'upperbound'  -> COUNT_CURR_LW_HW_LB_UB lesz a típus
-            if (valueUnitType == ValueUnitType.COUNT
+            if ((valueUnitType == ValueUnitType.COUNT || valueUnitType == ValueUnitType.MILLISECOND) //A JdbcConnectionPool-ban van MILLESECOND Hi/Lo értékkel :-/
                     && jsonValueEntity.getJsonNumber("lowwatermark") != null
                     && jsonValueEntity.getJsonNumber("highwatermark") != null) {
 

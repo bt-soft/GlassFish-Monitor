@@ -15,11 +15,13 @@ import hu.btsoft.gfmon.corelib.exception.GfMonException;
 import hu.btsoft.gfmon.engine.model.RuntimeSequenceGenerator;
 import hu.btsoft.gfmon.engine.model.entity.Config;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
+import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcConnectionPool;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
 import hu.btsoft.gfmon.engine.model.service.IConfigKeyNames;
 import hu.btsoft.gfmon.engine.model.service.ServerService;
 import hu.btsoft.gfmon.engine.monitor.ApplicationsMonitor;
+import hu.btsoft.gfmon.engine.monitor.JdbcConnectionPoolMonitor;
 import hu.btsoft.gfmon.engine.monitor.management.ServerUptime;
 import hu.btsoft.gfmon.engine.monitor.management.ServerVersion;
 import hu.btsoft.gfmon.engine.security.SessionTokenAcquirer;
@@ -67,10 +69,6 @@ public class SettingsView extends ViewBase {
     private ConfigService configService;
 
     private List<Config> configs;
-
-    // --- Applications
-    @EJB
-    private ApplicationsMonitor applicationsMonitor;
 
     @Getter
     @Setter
@@ -124,6 +122,14 @@ public class SettingsView extends ViewBase {
      * Módosítás van folyamatban?
      */
     private boolean underModifyProcess;
+
+    // --- Applications
+    @EJB
+    private ApplicationsMonitor applicationsMonitor;
+
+    //--- JDBC Connection pool
+    @EJB
+    private JdbcConnectionPoolMonitor jdbcConnectionPoolMonitor;
 
     /**
      * JSF ManagedBean init
@@ -231,10 +237,6 @@ public class SettingsView extends ViewBase {
             //Szerverek mentése
             servers.forEach((Server server) -> {
 
-                //Ha a szerver aktív, de van kieginfója, akkor azt most töröljük
-                //if (server.isActive() && !StringUtils.isEmpty(server.getAdditionalInformation())) {
-                //    server.setAdditionalInformation(null);
-                //}
                 //A JSF "" string lecserélése null-ra
                 if (StringUtils.isEmpty(server.getUserName())) {
                     server.setUserName(null);
@@ -497,4 +499,73 @@ public class SettingsView extends ViewBase {
         selectedServer = refreshedServer;
 
     }
+
+    /**
+     * JDBC ConncetionPool frissítése
+     */
+    public void refreshConnectionPools() {
+
+        //Ha még zsír új a szerver, akkor nem turkálunk az adatbázisban
+        if (StringUtils.isEmpty(selectedServer.getSessionToken())) {
+
+            //Ha még nincs SessionToken, akkor csinálunk egyet
+            try {
+                String sessionToken = sessionTokenAcquirer.getSessionToken(selectedServer.getUrl(), selectedServer.getUserName(), selectedServer.getPlainPassword());
+                selectedServer.setSessionToken(sessionToken);
+            } catch (GfMonException e) {
+                FacesMessage facesMessage = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Hiba", e.getMessage());
+                RequestContext.getCurrentInstance().showMessageInDialog(facesMessage);
+                return;
+            }
+        }
+        //Ha a szerver még nincs az adatbázisban, akkor on-the-fly kérdezzük le az alkalmazásait
+        if (selectedServer.getId() == null) {
+            List<JdbcConnectionPool> jdbcConnectionPools = jdbcConnectionPoolMonitor.getJdbcConnectionPoolsList(selectedServer);
+            //Beállítjuk, hogy ki vette fel őket
+            if (jdbcConnectionPools != null) {
+                for (JdbcConnectionPool app : jdbcConnectionPools) {
+                    if (app.getCreatedBy() == null) {
+                        //beállítjuk, hogy melyik szerveren fut az alkalmazás
+                        app.setCreatedBy(currentUser);
+                    }
+                }
+            }
+
+            selectedServer.setJdbcConnectionPool(jdbcConnectionPools);
+            return;
+        }
+
+        //
+        // A kiválasztott szerver az adatbázisban van, így abban kel a JDBC ConnectionPool karbantartását elvégezni
+        //
+        //Feltérképezzük a szerver JDBC COnnectionPool-jait -> ez beírja az adatbázisba azt, amit épp lát
+        jdbcConnectionPoolMonitor.maintenanceServerJdbcResourcesInDataBase(selectedServer);
+
+        //Újra kikeressük az adatbázisból a szervert, hogy a JDBC lista frissűljön
+        Server refreshedServer = serverService.find(selectedServer.getId());
+
+        //Ugyan arra a runtimeSequId-re állítjuk
+        refreshedServer.setRuntimeSeqId(selectedServer.getRuntimeSeqId());
+
+        //Kicseréljük a listában az újonnan felolvasott szervert
+        int ndx = servers.indexOf(selectedServer);
+        servers.set(ndx, refreshedServer);
+
+        //Átállítjuk a selectedServer referenciát is, hogy az alkalmazások tábla is frissűlhessen
+        selectedServer = refreshedServer;
+    }
+
+    /**
+     * A kiválasztott szerver összes JDBC ConnectionPool adatának aktív flagjának állítgatása
+     *
+     * @param newActiveFlag 'true'/'false'
+     */
+    public void toggleAllConPoolActiveFlag(boolean newActiveFlag) {
+
+        selectedServer.getJdbcConnectionPool()
+                .forEach((app) -> {
+                    app.setActive(newActiveFlag);
+                });
+    }
+
 }

@@ -54,8 +54,8 @@ import org.eclipse.persistence.annotations.Customizer;
     @NamedQuery(name = "JdbcConnectionPool.findByServerId", query = "SELECT c FROM JdbcConnectionPool c WHERE c.server.id = :serverId ORDER BY c.poolName"), //
 })
 @Data
-@ToString(callSuper = true, exclude = {"server", "connectionPoolStatistic"})
-@EqualsAndHashCode(callSuper = true, exclude = {"server", "connectionPoolStatistic"})
+@ToString(callSuper = true, exclude = {"server", "jdbcResources", "connectionPoolStatistics"})
+@EqualsAndHashCode(callSuper = true, exclude = {"server", "active", "jdbcResources", "connectionPoolStatistics"}) //az 'active' nem számít bele az azonosságba!
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
 @Slf4j
@@ -68,6 +68,13 @@ public class JdbcConnectionPool extends ModifiableEntityBase {
     @JoinColumn(name = "SVR_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 10)
     private Server server;
+
+    /**
+     * A monitorozás aktív rá?
+     */
+    @Column(nullable = false)
+    @ColumnPosition(position = 10)
+    private Boolean active;
 
     /**
      * A JDBC ConnectionPool neve
@@ -86,17 +93,49 @@ public class JdbcConnectionPool extends ModifiableEntityBase {
     private String datasourceClassname;
 
     @ColumnPosition(position = 14)
-    private String maxPoolSize;
+    private String driverClassname;
 
     @ColumnPosition(position = 15)
-    private String steadyPoolSize;
+    private String idleTimeoutInSeconds;
 
     @ColumnPosition(position = 16)
+    private String initSql;
+
+    @ColumnPosition(position = 17)
+    private String maxConnectionUsageCount;
+
+    @ColumnPosition(position = 18)
+    private String maxPoolSize;
+
+    @ColumnPosition(position = 19)
+    private String maxWaitTimeInMillis;
+
+    @ColumnPosition(position = 20)
     private String poolResizeQuantity;
+
+    @ColumnPosition(position = 21)
+    private boolean pooling;
+
+    @ColumnPosition(position = 22)
+    private String resType;
+
+    @ColumnPosition(position = 23)
+    private String statementCacheSize;
+
+    @ColumnPosition(position = 25)
+    private String steadyPoolSize;
+
+    @ColumnPosition(position = 26)
+    private String statementTimeoutInSeconds;
+
+    //Milyen jdbcResources használja?
+    @OneToMany(mappedBy = "jdbcConnectionPool", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "JDBC_RESOURCE_ID", referencedColumnName = "ID", nullable = false)
+    private List<JdbcResource> jdbcResources;
 
     //-- Milyen statisztikái vannak?
     @OneToMany(mappedBy = "jdbcConnectionPool", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "JDBC_CONPOOL_STAT_ID", referencedColumnName = "ID", nullable = false)
-    private List<ConnectionPoolStatistic> connectionPoolStatistic;
+    private List<ConnectionPoolStatistic> connectionPoolStatistics;
 
 }

@@ -14,6 +14,7 @@ package hu.btsoft.gfmon.engine.monitor.management;
 import hu.btsoft.gfmon.corelib.json.GFJsonUtils;
 import hu.btsoft.gfmon.corelib.string.StrUtils;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
+import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.rest.RestClientBase;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,21 +37,6 @@ import javax.json.JsonObject;
 public class ApplicationsDiscoverer extends RestClientBase {
 
     private static final String SUB_URL = "/management/domain/applications/application";
-
-    /**
-     * GF Szerver alkamazás neveinek listájának kigyűjtése
-     *
-     * @param simpleUrl    szerver url
-     * @param userName     REST hívás usere
-     * @param sessionToken GF session token
-     *
-     * @return A GF példány verzió adatai
-     */
-    private Map<String /* AppRealName */, String /* url */> getAppNamesUrlMap(String simpleUrl, String userName, String sessionToken) {
-        //Válasz leszedése
-        Map<String /* AppRealName */, String /* url */> map = GFJsonUtils.getChildResourcesMap(super.getRootJsonObject(simpleUrl, SUB_URL, userName, sessionToken));
-        return map;
-    }
 
     /**
      * Az alkalmazás részleteinek lekérdezése
@@ -120,17 +106,20 @@ public class ApplicationsDiscoverer extends RestClientBase {
     /**
      * Az alkalmazások részletes adatainak listája
      *
-     * @param simpleUrl    szerver URL-je
-     * @param userName     rest user
-     * @param sessionToken session token
+     *
+     * @param server szerver JPA entitás példány
      *
      * @return Az alkalmazások részletes adatai új(de inkább detached) entitásokban, vagy null
      */
-    public List<Application> getServerAplications(String simpleUrl, String userName, String sessionToken) {
+    public List<Application> getAplications(Server server) {
+
+        String simpleUrl = server.getSimpleUrl();
+        String userName = server.getUserName();
+        String sessionToken = server.getSessionToken();
 
         //leszedjük az alkalmazások neveinek listáját
-        Map<String /* AppRealName */, String /* url */> appNamesUrlMap = this.getAppNamesUrlMap(simpleUrl, userName, sessionToken);
-
+        JsonObject rootJsonObject = super.getRootJsonObject(simpleUrl, SUB_URL, userName, sessionToken);
+        Map<String /* AppRealName */, String /* url */> appNamesUrlMap = GFJsonUtils.getChildResourcesMap(rootJsonObject);
         if (appNamesUrlMap == null) {
             return null;
         }
@@ -138,11 +127,17 @@ public class ApplicationsDiscoverer extends RestClientBase {
         List<Application> result = new LinkedList<>();
 
         appNamesUrlMap.entrySet().stream()
-                .map((appNamesUrlEntry) -> this.createApplications(appNamesUrlEntry, userName, sessionToken))
-                .filter((apps) -> (apps != null))
-                .forEachOrdered((apps) -> {
-                    result.addAll(apps);
+                .map((appNamesUrlMapEntry) -> this.createApplications(appNamesUrlMapEntry, userName, sessionToken))
+                .forEachOrdered((applications) -> {
+                    applications.stream().map((app) -> {
+                        app.setServer(server);
+                        return app;
+                    }).forEachOrdered((app) -> {
+                        result.add(app);
+                    });
                 });
+        /* AppRealName */ /* url */
+
         return result.isEmpty() ? null : result;
     }
 }

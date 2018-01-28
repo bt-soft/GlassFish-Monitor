@@ -95,19 +95,9 @@ public class ApplicationsMonitor extends MonitorsBase {
     public List<Application> getApplicationsList(Server server) {
 
         //Runime lekérjük a szervertől az alkalmazások listáját
-        List<Application> serverAplications = applicationsDiscoverer.getServerAplications(server.getSimpleUrl(), server.getUserName(), server.getSessionToken());
+        List<Application> aplications = applicationsDiscoverer.getAplications(server);
 
-        //Ha még nincs beállítva az alkalmazásoknál az, hogy melyik szerveren vannak, akkor azt most megtesszük:
-        if (serverAplications != null) {
-            //beállítjuk, hogy melyik szerveren fut az alkalmazás
-            serverAplications.stream()
-                    .filter((app) -> (app.getServer() == null))
-                    .forEachOrdered((app) -> {
-                        app.setServer(server);
-                    });
-        }
-
-        return serverAplications;
+        return aplications;
     }
 
     /**
@@ -127,7 +117,7 @@ public class ApplicationsMonitor extends MonitorsBase {
      */
     public void maintenanceServerAplicationInDataBase(Server server) {
         //A szerver aktuális alkalmazás listája
-        List<Application> runtimeApps = getApplicationsList(server);
+        List<Application> runtimeApps = this.getApplicationsList(server);
 
         //A szerver eltárolt alkalmazás listája
         List<Application> dbAppList = applicationService.findByServer(server.getId());

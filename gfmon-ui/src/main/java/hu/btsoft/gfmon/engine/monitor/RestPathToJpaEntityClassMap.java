@@ -17,6 +17,8 @@ import hu.btsoft.gfmon.engine.model.entity.application.snapshot.app.AppStatistic
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbBeanMethodStat;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbBeanPoolStat;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbStat;
+import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnectionPoolAppStatistic;
+import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnectionPoolStatistic;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.httpservice.HttpServiceRequest;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.jvm.JvmMemory;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.jvm.ThreadSystem;
@@ -37,6 +39,8 @@ import hu.btsoft.gfmon.engine.monitor.collector.application.app.AppWebStatisticC
 import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbBeanMethodCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbBeanPoolCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.jdbcconpool.JdbcConnectionPoolAppCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.jdbcconpool.JdbcConnectionPoolCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.server.httpservice.HttpServiceRequestCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.server.jvm.MemoryColletor;
 import hu.btsoft.gfmon.engine.monitor.collector.server.jvm.ThreadSystemCollector;
@@ -155,6 +159,15 @@ public class RestPathToJpaEntityClassMap {
 
             case AppEjbBeanPoolCollector.PATH:
                 clazz = EjbBeanPoolStat.class;
+                break;
+
+            //JDBC erőforrások
+            case JdbcConnectionPoolCollector.PATH:
+                clazz = ConnectionPoolStatistic.class;
+                break;
+
+            case JdbcConnectionPoolAppCollector.PATH:
+                clazz = ConnectionPoolAppStatistic.class;
                 break;
 
             default:
