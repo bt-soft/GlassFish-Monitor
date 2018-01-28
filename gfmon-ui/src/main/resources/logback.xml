@@ -12,7 +12,8 @@
     <!-- Console appender -->
     <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%date{HH:mm:ss.SSS, Europe/Budapest} %-5level [%thread] - %-50.50(%logger\(%M:%L\)) - %msg</pattern>
+            <pattern>%date{HH:mm:ss.SSS, Europe/Budapest} %-5level %-50.50(%logger\(%M:%L\)) - %msg</pattern>
+            <!--<pattern>%date{HH:mm:ss.SSS, Europe/Budapest} %-5level [%thread] - %-50.50(%logger\(%M:%L\)) - %msg</pattern>-->
         </encoder>
     </appender>
 
