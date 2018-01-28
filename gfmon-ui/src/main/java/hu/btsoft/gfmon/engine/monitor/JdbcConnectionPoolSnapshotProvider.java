@@ -22,6 +22,7 @@ import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.jdbcconpool.JdbcConnectionPoolAppCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.jdbcconpool.JdbcConnectionPoolCollector;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -84,7 +85,12 @@ public class JdbcConnectionPoolSnapshotProvider {
                 if (connectionPoolAppStatistic != null) {
                     connectionPoolAppStatistic.setAppName(appname); //Az alkamazás neve
                     connectionPoolAppStatistic.setConnectionPoolStatistic(connectionPoolStatistic); //melyik connectionPool statisztikához tartozik
-//                    connectionPoolStatistic.getConnectionPoolAppStatistic().add(connectionPoolAppStatistic);
+
+                    //Hozzáadjuk a Connectionpool statisztikáhozs az connectionPoolAppStatistic statisztikát is
+                    if (connectionPoolStatistic.getConnectionPoolAppStatistic() == null) {
+                        connectionPoolStatistic.setConnectionPoolAppStatistic(new LinkedList<>());
+                    }
+                    connectionPoolStatistic.getConnectionPoolAppStatistic().add(connectionPoolAppStatistic);
                 }
             }
         }
@@ -127,7 +133,11 @@ public class JdbcConnectionPoolSnapshotProvider {
                         server.getApplications().stream()
                                 .filter((app) -> (Objects.equals(app.getAppRealName(), conAppStat.getAppName()))) //Kikeressük a  névre azonosságot
                                 .map((app) -> {
-//                                        app.getConnectionPoolAppStatistics().add(conAppStat);   //beállítjuk az alkalmazásnak
+                                    if (app.getConnectionPoolAppStatistics() == null) {
+                                        app.setConnectionPoolAppStatistics(new LinkedList<>());
+                                    }
+                                    app.getConnectionPoolAppStatistics().add(conAppStat);   //beállítjuk az alkalmazásnak, hogy van ConnectionPool statisztikája
+
                                     return app;
                                 }).forEachOrdered((app) -> {
                             conAppStat.setApplication(app);                                 //beállítjuk a COnnectionPoolApplStatnak is az allamazást

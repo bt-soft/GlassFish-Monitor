@@ -92,7 +92,7 @@ public class JdbcConnectionPoolDiscoverer extends RestClientBase {
         cp.setPoolName(StrUtils.deNull(StrUtils.deQuote(entities.get("name").toString())));
         cp.setDescription(StrUtils.deNull(StrUtils.deQuote(entities.get("description").toString())));
         cp.setDatasourceClassname(StrUtils.deNull(StrUtils.deQuote(entities.get("datasourceClassname").toString())));
-        cp.setDriverClassname(StrUtils.deNull(StrUtils.deQuote(entities.get("driverClassname").toString())));
+//        cp.setDriverClassname(StrUtils.deNull(StrUtils.deQuote(entities.get("driverClassname").toString())));
         cp.setIdleTimeoutInSeconds(StrUtils.deNull(StrUtils.deQuote(entities.get("idleTimeoutInSeconds").toString())));
         cp.setInitSql(StrUtils.deNull(StrUtils.deQuote(entities.get("initSql").toString())));
         cp.setMaxConnectionUsageCount(StrUtils.deNull(StrUtils.deQuote(entities.get("maxConnectionUsageCount").toString())));

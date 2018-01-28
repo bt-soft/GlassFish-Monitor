@@ -92,9 +92,8 @@ public class JdbcConnectionPool extends ModifiableEntityBase {
     @ColumnPosition(position = 13)
     private String datasourceClassname;
 
-    @ColumnPosition(position = 14)
-    private String driverClassname;
-
+//    @ColumnPosition(position = 14)
+//    private String driverClassname;
     @ColumnPosition(position = 15)
     private String idleTimeoutInSeconds;
 
