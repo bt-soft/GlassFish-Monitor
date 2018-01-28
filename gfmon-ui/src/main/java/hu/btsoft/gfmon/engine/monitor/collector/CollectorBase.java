@@ -60,7 +60,7 @@ public abstract class CollectorBase implements ICollectorBase {
      *
      * @return adatneves leírása
      */
-    protected List<DataUnitDto> fetchDataUnits(JsonObject entities) {
+    public List<DataUnitDto> fetchDataUnits(JsonObject entities) {
 
         if (entities == null) {
             return null;

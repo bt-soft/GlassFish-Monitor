@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SvrCollectorDataUnitService extends ServiceBase<SvrCollectorDataUnit> {
 
-    @PersistenceContext(unitName = "gfmon_PU")
+    @PersistenceContext
     private EntityManager em;
 
     /**

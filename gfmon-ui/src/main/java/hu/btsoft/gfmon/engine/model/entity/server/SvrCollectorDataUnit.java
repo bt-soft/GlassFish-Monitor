@@ -51,7 +51,7 @@ import org.eclipse.persistence.annotations.Customizer;
  */
 @Entity
 @Cacheable(true)
-@Table(name = "SRV_COLLDATA_UNIT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,
+@Table(name = "SRV_CDU", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,
         indexes = {
             @Index(name = "IDX_SVR_CDU_RESTPATH", columnList = "RESTPATH", unique = false),
             @Index(name = "IDX_SVR_CDU_ENTITYNAME", columnList = "ENTITYNAME", unique = false)
@@ -75,7 +75,7 @@ public class SvrCollectorDataUnit extends EntityBase {
      */
     @ColumnPosition(position = 20)
     @NotNull(message = "A restPath nem lehet null")
-    @Column(length = 50, nullable = false)
+    @Column(length = 1024, nullable = false)
     private String restPath;
 
     /**

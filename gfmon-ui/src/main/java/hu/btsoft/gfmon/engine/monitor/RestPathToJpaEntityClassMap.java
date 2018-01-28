@@ -17,6 +17,7 @@ import hu.btsoft.gfmon.engine.model.entity.application.snapshot.app.AppStatistic
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbBeanMethodStat;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbBeanPoolStat;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbStat;
+import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbTimerStat;
 import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnectionPoolAppStatistic;
 import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnectionPoolStatistic;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.httpservice.HttpServiceRequest;
@@ -39,6 +40,7 @@ import hu.btsoft.gfmon.engine.monitor.collector.application.app.AppWebStatisticC
 import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbBeanMethodCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbBeanPoolCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbTimersCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.jdbcconpool.JdbcConnectionPoolAppCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.jdbcconpool.JdbcConnectionPoolCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.server.httpservice.HttpServiceRequestCollector;
@@ -159,6 +161,10 @@ public class RestPathToJpaEntityClassMap {
 
             case AppEjbBeanPoolCollector.PATH:
                 clazz = EjbBeanPoolStat.class;
+                break;
+
+            case AppEjbTimersCollector.PATH:
+                clazz = EjbTimerStat.class;
                 break;
 
             //JDBC erőforrások

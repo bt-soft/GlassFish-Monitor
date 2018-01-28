@@ -40,8 +40,8 @@ import org.eclipse.persistence.annotations.Customizer;
 @Entity
 @Table(name = "APP_EJBSTAT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
 @Data
-@ToString(callSuper = true, exclude = {"application", "ejbBeanPoolStats", "ejbBeanMethodStats"})
-@EqualsAndHashCode(callSuper = true, exclude = {"application", "ejbBeanPoolStats", "ejbBeanMethodStats"})
+@ToString(callSuper = true, exclude = {"application", "ejbBeanPoolStats", "ejbBeanMethodStats", "ejbTimersStat"})
+@EqualsAndHashCode(callSuper = true, exclude = {"application", "ejbBeanPoolStats", "ejbBeanMethodStats", "ejbTimersStat"})
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
 public class EjbStat extends AppSnapshotBase {
@@ -115,5 +115,13 @@ public class EjbStat extends AppSnapshotBase {
     @JoinColumn(name = "APP_EJBPOOL_STAT_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 22)
     private List<EjbBeanPoolStat> ejbBeanPoolStats;
+
+    /**
+     * EJB Timers Stat
+     */
+    @OneToMany(mappedBy = "ejbStat", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "APP_EJBTIMERS_STAT_ID", referencedColumnName = "ID", nullable = false)
+    @ColumnPosition(position = 22)
+    private List<EjbTimerStat> ejbTimerStats;
 
 }

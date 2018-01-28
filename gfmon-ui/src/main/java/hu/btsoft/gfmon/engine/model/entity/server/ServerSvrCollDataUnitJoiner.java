@@ -47,7 +47,7 @@ import org.eclipse.persistence.annotations.Customizer;
  */
 @Entity
 @Cacheable(false)
-@Table(name = "SERVER_SRVCOLLDATA_UNIT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
+@Table(name = "SERVER_SRV_CDU", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
 @Data
 @EqualsAndHashCode(exclude = {"server", "svrCollectorDataUnit"})
 @NoArgsConstructor
@@ -61,7 +61,7 @@ public class ServerSvrCollDataUnitJoiner implements Serializable {
     private Long serverId;
 
     @Id
-    @Column(name = "SVRCDU_ID", insertable = false, updatable = false)
+    @Column(name = "SVR_CDU_ID", insertable = false, updatable = false)
     @ColumnPosition(position = 2)
     private Long svrCollectorDataUnitId;
 
@@ -69,7 +69,7 @@ public class ServerSvrCollDataUnitJoiner implements Serializable {
      * Az adott szerveren aktív az adatnév gyűjtése?
      */
     @NotNull(message = "Az active nem lehet null")
-    @Column(name = "ACTIVE", nullable = false)
+    @Column(nullable = false)
     @ColumnPosition(position = 3)
     private boolean active;
 
@@ -91,7 +91,7 @@ public class ServerSvrCollDataUnitJoiner implements Serializable {
      * Itt nem szabad kiadni a "cascade = CascadeType.ALL"-t mert végigtörli az összes mértékegységet is :)
      */
     @ManyToOne
-    @JoinColumn(name = "SVRCDU_ID", referencedColumnName = "ID")
+    @JoinColumn(name = "SVR_CDU_ID", referencedColumnName = "ID")
     private SvrCollectorDataUnit svrCollectorDataUnit;
 
     /**

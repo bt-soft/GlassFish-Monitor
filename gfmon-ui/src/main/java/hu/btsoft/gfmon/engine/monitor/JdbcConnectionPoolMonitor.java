@@ -12,13 +12,17 @@
 package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.time.Elapsed;
+import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
 import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcConnectionPool;
+import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcConnectionPoolCollectorDataUnit;
 import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnectionPoolStatistic;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.service.IConfigKeyNames;
+import hu.btsoft.gfmon.engine.model.service.JdbcConnectionPoolCollectorDataUnitService;
 import hu.btsoft.gfmon.engine.model.service.JdbcConnectionPoolService;
 import hu.btsoft.gfmon.engine.model.service.JdbcResourcesSnapshotService;
 import hu.btsoft.gfmon.engine.monitor.management.JdbcConnectionPoolDiscoverer;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -52,6 +56,11 @@ public class JdbcConnectionPoolMonitor extends MonitorsBase {
     @Inject
     private JdbcConnectionPoolSnapshotProvider jdbcConnectionPoolSnapshotProvider;
 
+    @EJB
+    private JdbcConnectionPoolCollectorDataUnitService jdbcConnectionPoolCollectorDataUnitService;
+
+    private boolean collecJdbcConnectionPoolCollectorDataUnits;
+
     @Override
     protected String getDbModificationUser() {
         return DB_MODIFICATOR_USER;
@@ -66,6 +75,12 @@ public class JdbcConnectionPoolMonitor extends MonitorsBase {
     public void beforeStartTimer() {
         //Alkalmazások lekérdezése és felépítése
         this.manageAllActiverServerJdbcResources();
+
+        if (jdbcConnectionPoolCollectorDataUnitService.count() < 1) {
+            log.info("A JDBC ConnectionPool 'adatnevek' táblája az első mérés során fel lesz építve!");
+            collecJdbcConnectionPoolCollectorDataUnits = true;
+        }
+
     }
 
     /**
@@ -173,6 +188,26 @@ public class JdbcConnectionPoolMonitor extends MonitorsBase {
     }
 
     /**
+     * Összegyűjtött adatnevek mentése
+     *
+     * @param dataUnits összegyűjtött adatnevek halmaza
+     */
+    private void processCollectedDataUnits(Set<DataUnitDto> dataUnits) {
+
+        log.info("JDBC ConnectionPool monitor adatnevek táblájának felépítése indul");
+        long start = Elapsed.nowNano();
+
+        //Végigmegyünk az összes adatneven és jól beírjuk az adatbázisba őket
+        dataUnits.stream()
+                .map((dto) -> new JdbcConnectionPoolCollectorDataUnit(dto.getRestPath(), dto.getEntityName(), dto.getDataName(), dto.getUnit(), dto.getDescription()))
+                .forEachOrdered((cdu) -> {
+                    jdbcConnectionPoolCollectorDataUnitService.save(cdu, DB_MODIFICATOR_USER);
+                });
+
+        log.info("JDBC ConnectionPool monitor adatnevek felépítése OK, adatnevek: {}db, elapsed: {}", dataUnits.size(), Elapsed.getElapsedNanoStr(start));
+    }
+
+    /**
      * JDBC erőforrások monitorozása
      */
     @Override
@@ -183,8 +218,20 @@ public class JdbcConnectionPoolMonitor extends MonitorsBase {
         int measuredServerCnt = 0;
         for (Server server : serverService.findAllActiveServer()) {
 
-            Set<ConnectionPoolStatistic> jdbcConnectionPoolSnashots = jdbcConnectionPoolSnapshotProvider.fetchSnapshot(server);
+            Set<DataUnitDto> dataUnits = null;
+
+            //Kell gyűjteni a mértékegységeket?
+            if (collecJdbcConnectionPoolCollectorDataUnits) {
+                dataUnits = new LinkedHashSet<>();
+            }
+
+            Set<ConnectionPoolStatistic> jdbcConnectionPoolSnashots = jdbcConnectionPoolSnapshotProvider.fetchSnapshot(server, dataUnits);
             measuredServerCnt++;
+
+            //Kellett gyűjteni a mértékegységeket?
+            if (collecJdbcConnectionPoolCollectorDataUnits && dataUnits != null && !dataUnits.isEmpty()) {
+                this.processCollectedDataUnits(dataUnits);
+            }
 
             if (jdbcConnectionPoolSnashots == null || jdbcConnectionPoolSnashots.isEmpty()) {
                 log.warn("Szerver: {} -> Nincsenek menthető JDBC erőforrás pillanatfelvételek!", server.getSimpleUrl());

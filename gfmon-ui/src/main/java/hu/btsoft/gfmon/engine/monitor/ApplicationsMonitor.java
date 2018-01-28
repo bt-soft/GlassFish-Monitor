@@ -12,13 +12,17 @@
 package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.time.Elapsed;
+import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
+import hu.btsoft.gfmon.engine.model.entity.application.ApplicationCollectorDataUnit;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
+import hu.btsoft.gfmon.engine.model.service.ApplicationCollectorDataUnitService;
 import hu.btsoft.gfmon.engine.model.service.ApplicationService;
 import hu.btsoft.gfmon.engine.model.service.ApplicationSnapshotService;
 import hu.btsoft.gfmon.engine.model.service.IConfigKeyNames;
 import hu.btsoft.gfmon.engine.monitor.management.ApplicationsDiscoverer;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -57,6 +61,11 @@ public class ApplicationsMonitor extends MonitorsBase {
     @EJB
     private ApplicationSnapshotService applicationSnapshotService;
 
+    @EJB
+    private ApplicationCollectorDataUnitService applicationCollectorDataUnitService;
+
+    private boolean collecApplicationsCollectorDataUnits;
+
     /**
      * Az adatbázisban módosítást végző user azonosítójának elkérése
      *
@@ -81,6 +90,11 @@ public class ApplicationsMonitor extends MonitorsBase {
     public void beforeStartTimer() {
         //Alkalmazások lekérdezése és felépítése
         this.manageAllActiverServerApplications();
+
+        if (applicationCollectorDataUnitService.count() < 1) {
+            log.info("Az alkalmazás 'adatnevek' táblája az első mérés során fel lesz építve!");
+            collecApplicationsCollectorDataUnits = true;
+        }
     }
 
     /**
@@ -135,7 +149,7 @@ public class ApplicationsMonitor extends MonitorsBase {
             return;
         }
 
-        //Végigmegyünk a runtime Alklamazások listáján
+        //Végigmegyünk a runtime Alkalmazások listáján
         runtimeApplications.forEach((runtimeApplication) -> {
 
             boolean needPersistNewEntity = true; //Kell új entitást felvenni?
@@ -196,6 +210,26 @@ public class ApplicationsMonitor extends MonitorsBase {
     }
 
     /**
+     * Összegyűjtött adatnevek mentése
+     *
+     * @param dataUnits összegyűjtött adatnevek halmaza
+     */
+    private void processCollectedDataUnits(Set<DataUnitDto> dataUnits) {
+
+        log.info("Alkalmazás monitor adatnevek táblájának felépítése indul");
+        long start = Elapsed.nowNano();
+
+        //Végigmegyünk az összes adatneven és jól beírjuk az adatbázisba őket
+        dataUnits.stream()
+                .map((dto) -> new ApplicationCollectorDataUnit(dto.getRestPath(), dto.getEntityName(), dto.getDataName(), dto.getUnit(), dto.getDescription()))
+                .forEachOrdered((cdu) -> {
+                    applicationCollectorDataUnitService.save(cdu, DB_MODIFICATOR_USER);
+                });
+
+        log.info("Alkalmazás monitor adatnevek felépítése OK, adatnevek: {}db, elapsed: {}", dataUnits.size(), Elapsed.getElapsedNanoStr(start));
+    }
+
+    /**
      * Mérés
      */
     @Override
@@ -205,9 +239,20 @@ public class ApplicationsMonitor extends MonitorsBase {
         int measuredServerCnt = 0;
         for (Server server : serverService.findAllActiveServer()) {
 
-            Set<AppSnapshotBase> applicationSnapshots = applicationSnapshotProvider.fetchSnapshot(server);
-            measuredServerCnt++;
+            Set<DataUnitDto> dataUnits = null;
 
+            //Kell gyűjteni a mértékegységeket?
+            if (collecApplicationsCollectorDataUnits) {
+                dataUnits = new LinkedHashSet<>();
+            }
+            Set<AppSnapshotBase> applicationSnapshots = applicationSnapshotProvider.fetchSnapshot(server, dataUnits);
+
+            //Kellett gyűjteni a mértékegységeket?
+            if (collecApplicationsCollectorDataUnits && dataUnits != null && !dataUnits.isEmpty()) {
+                this.processCollectedDataUnits(dataUnits);
+            }
+
+            measuredServerCnt++;
             if (applicationSnapshots == null || applicationSnapshots.isEmpty()) {
                 log.warn("Szerver: {} -> Nincsenek menthető alkalmazás pillanatfelvételek!", server.getSimpleUrl());
                 return;

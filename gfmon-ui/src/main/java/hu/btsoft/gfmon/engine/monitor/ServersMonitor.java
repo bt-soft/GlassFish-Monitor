@@ -101,11 +101,11 @@ public class ServersMonitor extends MonitorsBase {
     private void checkCollectorDataUnits() {
 
         if (svrCollectorDataUnitService.count() > 1) {
-            log.info("Az 'adatnevek' tábla már OK");
+            log.info("A szerver 'adatnevek' tábla már OK");
             return;
         }
 
-        log.info("Adatnevek táblájának felépítése indul");
+        log.info("Szerver monitor adatnevek táblájának felépítése indul");
         long start = Elapsed.nowNano();
 
         List<DataUnitDto> dataUnits = null;
@@ -128,12 +128,13 @@ public class ServersMonitor extends MonitorsBase {
         }
 
         //Végigmegyünk az összes adatneven és jól beírjuk az adatbázisba őket
-        for (DataUnitDto dto : dataUnits) {
-            SvrCollectorDataUnit cdu = new SvrCollectorDataUnit(dto.getRestPath(), dto.getEntityName(), dto.getDataName(), dto.getUnit(), dto.getDescription());
-            svrCollectorDataUnitService.save(cdu, DB_MODIFICATOR_USER);
-        }
+        dataUnits.stream()
+                .map((dto) -> new SvrCollectorDataUnit(dto.getRestPath(), dto.getEntityName(), dto.getDataName(), dto.getUnit(), dto.getDescription()))
+                .forEachOrdered((cdu) -> {
+                    svrCollectorDataUnitService.save(cdu, DB_MODIFICATOR_USER);
+                });
 
-        log.info("Adatnevek felépítése OK, adatnevek: {}db, elapsed: {}", dataUnits.size(), Elapsed.getElapsedNanoStr(start));
+        log.info("Szerver monitor adatnevek felépítése OK, adatnevek: {}db, elapsed: {}", dataUnits.size(), Elapsed.getElapsedNanoStr(start));
     }
 
     /**

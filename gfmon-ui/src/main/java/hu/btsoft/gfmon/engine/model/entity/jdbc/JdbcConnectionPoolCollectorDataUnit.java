@@ -4,7 +4,7 @@
  *  GF Monitor project
  *
  *  Module:  gfmon (gfmon)
- *  File:    ConnectionPoolCollectorDataUnit.java
+ *  File:    JdbcConnectionPoolCollectorDataUnit.java
  *  Created: 2018.01.19. 17:22:20
  *
  *  ------------------------------------------------------------------------------------
@@ -19,6 +19,8 @@ import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Index;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
@@ -33,24 +35,29 @@ import org.eclipse.persistence.annotations.Customizer;
  */
 @Entity
 @Cacheable(true)
-@Table(name = "JDBC_CONNPOOL_COLLDATA_UNIT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,
+@Table(name = "JDBC_CONNPOOL_CDU", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,
         indexes = {
             @Index(name = "IDX_JDBC_CONPOOL_CDU_RESTPATHMASK", columnList = "RESTPATHMASK", unique = false),
             @Index(name = "IDX_JDBC_CONPOOL_CDU_ENTITYNAME", columnList = "ENTITYNAME", unique = false)
         })
+@NamedQueries({
+    @NamedQuery(name = "JdbcConnectionPoolCollectorDataUnit.findAll", query = "SELECT jdbcCdu from JdbcConnectionPoolCollectorDataUnit jdbcCdu ORDER BY jdbcCdu.restPathMask, jdbcCdu.dataName"),//
+    @NamedQuery(name = "JdbcConnectionPoolCollectorDataUnit.findAllRestPathMasks", query = "SELECT jdbcCdu.restPathMask from JdbcConnectionPoolCollectorDataUnit jdbcCdu GROUP BY jdbcCdu.restPathMask ORDER BY jdbcCdu.restPathMask, jdbcCdu.dataName"),//
+    @NamedQuery(name = "JdbcConnectionPoolCollectorDataUnit.findByRestPathMask", query = "SELECT jdbcCdu from JdbcConnectionPoolCollectorDataUnit jdbcCdu WHERE jdbcCdu.restPathMask = :restPathMask ORDER BY jdbcCdu.dataName"),//
+})
 @Data
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-public class ConnectionPoolCollectorDataUnit extends EntityBase {
+public class JdbcConnectionPoolCollectorDataUnit extends EntityBase {
 
     /**
      * A mértékegység milyen REST Path-on van?
      */
     @ColumnPosition(position = 20)
     @NotNull(message = "A restPathMask nem lehet null")
-    @Column(length = 50, nullable = false)
+    @Column(length = 1024, nullable = false)
     private String restPathMask;
 
     /**
@@ -84,5 +91,22 @@ public class ConnectionPoolCollectorDataUnit extends EntityBase {
     @NotNull(message = "A description nem lehet null")
     @Column(length = 512, nullable = false)
     private String description;
+
+    /**
+     * Konstrujtor
+     *
+     * @param restPathMask REST path maszk
+     * @param entityName   entitás neve
+     * @param dataName     adatnév
+     * @param unit         mértékegység
+     * @param description  leírás
+     */
+    public JdbcConnectionPoolCollectorDataUnit(String restPathMask, String entityName, String dataName, String unit, String description) {
+        this.restPathMask = restPathMask;
+        this.entityName = entityName;
+        this.dataName = dataName;
+        this.unit = unit;
+        this.description = description;
+    }
 
 }

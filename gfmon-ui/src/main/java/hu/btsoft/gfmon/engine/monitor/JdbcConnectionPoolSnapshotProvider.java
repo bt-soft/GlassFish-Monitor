@@ -13,6 +13,7 @@ package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.json.GFJsonUtils;
 import hu.btsoft.gfmon.corelib.time.Elapsed;
+import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
 import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcConnectionPool;
 import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnectionPoolAppStatistic;
 import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnectionPoolStatistic;
@@ -51,6 +52,8 @@ public class JdbcConnectionPoolSnapshotProvider {
     @Inject
     private JSonEntityToSnapshotEntityMapper jSonEntityToSnapshotEntityMapper;
 
+    private Set<DataUnitDto> collectDataUnits;
+
     /**
      *
      * @param simpleUrl
@@ -64,6 +67,14 @@ public class JdbcConnectionPoolSnapshotProvider {
         String resourceUri = restDataCollector.getSubUri() + "resources/" + poolName;
         JsonObject rootJsonObject = restDataCollector.getRootJsonObject(simpleUrl, resourceUri, userName, sessionToken);
         List<CollectedValueDto> valuesList = jdbcConnectionPoolCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
+
+        //Ha kell dataUnitokat is gyűjteni
+        if (collectDataUnits != null) {
+            List<DataUnitDto> dataUnits = jdbcConnectionPoolCollector.fetchDataUnits(GFJsonUtils.getEntities(rootJsonObject));
+            if (dataUnits != null && !dataUnits.isEmpty()) {
+                collectDataUnits.addAll(dataUnits);
+            }
+        }
 
         ConnectionPoolStatistic connectionPoolStatistic = (ConnectionPoolStatistic) jSonEntityToSnapshotEntityMapper.map(valuesList);
         if (connectionPoolStatistic == null) {
@@ -79,6 +90,14 @@ public class JdbcConnectionPoolSnapshotProvider {
 
                 rootJsonObject = restDataCollector.getRootJsonObject(serrvletFullUrl, userName, sessionToken);
                 valuesList = jdbcConnectionPooApplCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
+
+                //Ha kell dataUnitokat is gyűjteni
+                if (collectDataUnits != null) {
+                    List<DataUnitDto> dataUnits = jdbcConnectionPooApplCollector.fetchDataUnits(GFJsonUtils.getEntities(rootJsonObject));
+                    if (dataUnits != null && !dataUnits.isEmpty()) {
+                        collectDataUnits.addAll(dataUnits);
+                    }
+                }
 
                 ConnectionPoolAppStatistic connectionPoolAppStatistic = (ConnectionPoolAppStatistic) jSonEntityToSnapshotEntityMapper.map(valuesList);
 
@@ -101,11 +120,14 @@ public class JdbcConnectionPoolSnapshotProvider {
     /**
      * Az összes JDBC resource kollektor adatait összegyűjti, majd egy új Jdbcresource Snapshot entitásba rakja az eredményeket
      *
-     * @param server a monitorozandó Server entitása
+     * @param server    a monitorozandó Server entitása
+     * @param dataUnits ha nem null, akkor ebbe kell gyűjteni az adtneveket
      *
      * @return JDBC resource Snapshot példányok halmaza, az adatgyűjtés eredménye (new/detach entitás)
      */
-    public Set<ConnectionPoolStatistic> fetchSnapshot(Server server) {
+    public Set<ConnectionPoolStatistic> fetchSnapshot(Server server, Set<DataUnitDto> dataUnits) {
+
+        this.collectDataUnits = dataUnits;
 
         long start = Elapsed.nowNano();
 

@@ -13,6 +13,7 @@ package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.json.GFJsonUtils;
 import hu.btsoft.gfmon.corelib.time.Elapsed;
+import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.app.AppServletStatistic;
@@ -20,6 +21,7 @@ import hu.btsoft.gfmon.engine.model.entity.application.snapshot.app.AppStatistic
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbBeanMethodStat;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbBeanPoolStat;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbStat;
+import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbTimerStat;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.monitor.collector.CollectedValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
@@ -28,6 +30,7 @@ import hu.btsoft.gfmon.engine.monitor.collector.application.app.AppWebStatisticC
 import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbBeanMethodCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbBeanPoolCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbTimersCollector;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -65,7 +68,12 @@ public class ApplicationSnapshotProvider {
     private AppEjbBeanMethodCollector appEjbBeanMethodCollector;
 
     @Inject
+    private AppEjbTimersCollector appEjbTimersCollector;
+
+    @Inject
     private JSonEntityToSnapshotEntityMapper jSonEntityToSnapshotEntityMapper;
+
+    private Set<DataUnitDto> collectDataUnits;
 
     /**
      * Alkalmazás path-jának kitalálása
@@ -116,6 +124,14 @@ public class ApplicationSnapshotProvider {
         JsonObject rootJsonObject = restDataCollector.getRootJsonObject(fullUrl, userName, sessionToken);
         List<CollectedValueDto> valuesList = appWebStatisticCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
 
+        //Ha kell dataUnitokat is gyűjteni
+        if (collectDataUnits != null) {
+            List<DataUnitDto> dataUnits = appWebStatisticCollector.fetchDataUnits(GFJsonUtils.getEntities(rootJsonObject));
+            if (dataUnits != null && !dataUnits.isEmpty()) {
+                collectDataUnits.addAll(dataUnits);
+            }
+        }
+
         AppStatistic appStatistic = (AppStatistic) jSonEntityToSnapshotEntityMapper.map(valuesList);
         if (appStatistic != null) {
             appStatistic.setApplication(app);
@@ -131,6 +147,14 @@ public class ApplicationSnapshotProvider {
 
                 rootJsonObject = restDataCollector.getRootJsonObject(serrvletFullUrl, userName, sessionToken);
                 valuesList = appServletStatisticCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
+
+                //Ha kell dataUnitokat is gyűjteni
+                if (collectDataUnits != null) {
+                    List<DataUnitDto> dataUnits = appServletStatisticCollector.fetchDataUnits(GFJsonUtils.getEntities(rootJsonObject));
+                    if (dataUnits != null && !dataUnits.isEmpty()) {
+                        collectDataUnits.addAll(dataUnits);
+                    }
+                }
 
                 AppServletStatistic appServletStatistic = (AppServletStatistic) jSonEntityToSnapshotEntityMapper.map(valuesList);
 
@@ -161,6 +185,15 @@ public class ApplicationSnapshotProvider {
 
         JsonObject rootJsonObject = restDataCollector.getRootJsonObject(fullUrl, userName, sessionToken);
         List<CollectedValueDto> valuesList = appEjbCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
+
+        //Ha kell dataUnitokat is gyűjteni
+        if (collectDataUnits != null) {
+            List<DataUnitDto> dataUnits = appEjbCollector.fetchDataUnits(GFJsonUtils.getEntities(rootJsonObject));
+            if (dataUnits != null && !dataUnits.isEmpty()) {
+                collectDataUnits.addAll(dataUnits);
+            }
+        }
+
         EjbStat ejbStat = (EjbStat) jSonEntityToSnapshotEntityMapper.map(valuesList);
         if (ejbStat != null) {
             ejbStat.setApplication(app);
@@ -185,6 +218,14 @@ public class ApplicationSnapshotProvider {
                                 rootJsonObject = restDataCollector.getRootJsonObject(beanMethodFullUrl, userName, sessionToken);
                                 valuesList = appEjbBeanMethodCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
 
+                                //Ha kell dataUnitokat is gyűjteni
+                                if (collectDataUnits != null) {
+                                    List<DataUnitDto> dataUnits = appEjbBeanMethodCollector.fetchDataUnits(GFJsonUtils.getEntities(rootJsonObject));
+                                    if (dataUnits != null && !dataUnits.isEmpty()) {
+                                        collectDataUnits.addAll(dataUnits);
+                                    }
+                                }
+
                                 EjbBeanMethodStat ejbBeanMethodStat = (EjbBeanMethodStat) jSonEntityToSnapshotEntityMapper.map(valuesList);
                                 if (ejbBeanMethodStat != null) {
                                     ejbBeanMethodStat.setEjbStat(ejbStat);
@@ -197,6 +238,15 @@ public class ApplicationSnapshotProvider {
 
                     case "bean-pool":
                         valuesList = appEjbBeanPoolCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
+
+                        //Ha kell dataUnitokat is gyűjteni
+                        if (collectDataUnits != null) {
+                            List<DataUnitDto> dataUnits = appEjbBeanPoolCollector.fetchDataUnits(GFJsonUtils.getEntities(rootJsonObject));
+                            if (dataUnits != null && !dataUnits.isEmpty()) {
+                                collectDataUnits.addAll(dataUnits);
+                            }
+                        }
+
                         EjbBeanPoolStat ejbBeanPoolStat = (EjbBeanPoolStat) jSonEntityToSnapshotEntityMapper.map(valuesList);
                         if (ejbBeanPoolStat != null) {
                             ejbBeanPoolStat.setEjbStat(ejbStat);
@@ -204,8 +254,26 @@ public class ApplicationSnapshotProvider {
                         }
                         break;
 
+                    case "timers":
+                        valuesList = appEjbTimersCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
+
+                        //Ha kell dataUnitokat is gyűjteni
+                        if (collectDataUnits != null) {
+                            List<DataUnitDto> dataUnits = appEjbTimersCollector.fetchDataUnits(GFJsonUtils.getEntities(rootJsonObject));
+                            if (dataUnits != null && !dataUnits.isEmpty()) {
+                                collectDataUnits.addAll(dataUnits);
+                            }
+                        }
+
+                        EjbTimerStat ejbTimersStat = (EjbTimerStat) jSonEntityToSnapshotEntityMapper.map(valuesList);
+                        if (ejbTimersStat != null) {
+                            ejbTimersStat.setEjbStat(ejbStat);
+                            snapshots.add(ejbTimersStat);
+                        }
+                        break;
+
                     default:
-                        log.warn("Nincs lekezelve a(z) '{}' bean statisztika!", ejbStatName);
+                        log.warn("Nincs lekezelve a(z) '{}' bean statisztika! (fullUrl: '{}')", ejbStatName, ejbStatFullUrl);
                 }
             }
         }
@@ -263,11 +331,14 @@ public class ApplicationSnapshotProvider {
     /**
      * Az összes alkalmazás kollektor adatait összegyűjti, majd egy új alkalmazás Snapshot entitásba rakja az eredményeket
      *
-     * @param server a monitorozandó Server entitása
+     * @param server    a monitorozandó Server entitása
+     * @param dataUnits ha nem null, akko ki kell gyűjteni a mért értékek mértékegységét is
      *
      * @return alkalmazás Snapshot példányok halmaza, az adatgyűjtés eredménye (new/detach entitás)
      */
-    public Set<AppSnapshotBase> fetchSnapshot(Server server) {
+    public Set<AppSnapshotBase> fetchSnapshot(Server server, Set<DataUnitDto> dataUnits) {
+
+        this.collectDataUnits = dataUnits;
 
         long start = Elapsed.nowNano();
 

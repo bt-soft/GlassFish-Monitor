@@ -26,8 +26,6 @@ import javax.ejb.Timeout;
 import javax.ejb.Timer;
 import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -48,9 +46,8 @@ public class GlassFishMonitorController {
 
     protected Timer timer;
 
-    @Inject
-    private Instance<MonitorsBase> monitors;
-
+//    @Inject
+//    private Instance<MonitorsBase> monitors;
     /**
      * GFMon engine indítása
      */
