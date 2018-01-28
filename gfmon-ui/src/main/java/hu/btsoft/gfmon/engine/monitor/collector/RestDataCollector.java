@@ -26,7 +26,7 @@ public class RestDataCollector extends RestDataCollectorBase {
      * @return sub uri
      */
     @Override
-    protected String getSubUri() {
+    public String getSubUri() {
         return "/monitoring/domain/server/";
     }
 }

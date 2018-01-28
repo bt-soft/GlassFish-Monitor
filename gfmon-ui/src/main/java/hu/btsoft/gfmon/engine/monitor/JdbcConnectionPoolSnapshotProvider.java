@@ -61,7 +61,7 @@ public class JdbcConnectionPoolSnapshotProvider {
      * @return
      */
     private ConnectionPoolStatistic start(String simpleUrl, String userName, String sessionToken, String poolName) {
-        String resourceUri = String.format("/monitoring/domain/server/resources/%s", poolName);
+        String resourceUri = restDataCollector.getSubUri() + "resources/" + poolName;
         JsonObject rootJsonObject = restDataCollector.getRootJsonObject(simpleUrl, resourceUri, userName, sessionToken);
         List<CollectedValueDto> valuesList = jdbcConnectionPoolCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
 

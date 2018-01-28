@@ -51,7 +51,7 @@ public class ServerSnapshotProvider {
     private JSonEntityToSnapshotEntityMapper jSonEntityToServerSnapshotEntityMapper;
 
     /**
-     * Monitorizható adatnevek adatainak kigyűjtése Ezt csak egy üres adatbázis során indítjuk el
+     * Monitorozható adatnevek adatainak kigyűjtése Ezt csak egy üres adatbázis során indítjuk el
      *
      * @param server a monitorozandó Server entitása
      *
@@ -134,12 +134,10 @@ public class ServerSnapshotProvider {
 
             //Csak, ha van mit összegyűjteni, akkor indítjuk a kollektort
             if (collectedDatatNames == null || collectedDatatNames.isEmpty()) {
-                //log.trace("A(z) {} szerveren a(z) '{}' adatgyűjtőt nem kell futtatni", server.getUrl(), collector.getPath());
                 continue;
             }
 
             //Az adott kollektor adatainak lekérése
-//            log.trace("A(z) '{}' szerveren a(z) '{}' adatgyűjtő futtatása", server.getUrl(), collector.getPath());
             List<CollectedValueDto> valuesList = collector.execute(restDataCollector, server.getSimpleUrl(), server.getUserName(), server.getSessionToken(), collectedDatatNames, erroredPaths);
 
             //Üres a mért eredmények Map-je

@@ -101,20 +101,7 @@ public abstract class CollectorBase implements ICollectorBase {
     @Override
     public List<DataUnitDto> collectDataUnits(RestDataCollector restDataCollector, String simpleUrl, String userName, String sessionToken) {
 
-        //URL hívása
-        Response response = restDataCollector.getResponse(this.getPath(), simpleUrl, userName, sessionToken);
-        //JsonObject entities = restDataCollector.getJsonEntities(response);
-
-        //Response státuszkód ellenőrzése
-        if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
-            log.warn("A(z) {} url hívására {} hibakód jött", simpleUrl, response.getStatusInfo().getReasonPhrase());
-            return null;
-        }
-
-        //JSon válasz leszedése
-        JsonObject rootJsonObject = response.readEntity(JsonObject.class);
-
-        //Entitások kiszedése a jSon válaszból
+        JsonObject rootJsonObject = restDataCollector.getRootJsonObject(simpleUrl, restDataCollector.getSubUri() + this.getPath(), userName, sessionToken);
         JsonObject entities = GFJsonUtils.getEntities(rootJsonObject);
 
         //Mehet az értékek kinyerése az entities-ből
