@@ -12,6 +12,7 @@
 package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.cdi.CdiUtils;
+import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
 import hu.btsoft.gfmon.engine.model.service.IConfigKeyNames;
 import javax.annotation.PostConstruct;
@@ -48,8 +49,11 @@ public class GlassFishMonitorController {
 
     protected Timer timer;
 
+    //  A singleton miatt nem célszerű itt injektálni,
+    // mert nem érvényesül a StateLess, inkább singleton lesz az is ...
 //    @Inject
 //    private Instance<MonitorsBase> monitors;
+//
     /**
      * GFMon engine indítása
      */
@@ -75,10 +79,13 @@ public class GlassFishMonitorController {
             return;
         }
 
+        //A singleton vezérlés miatt inkább mindig lookup-olunk, mert csak így lesz StateLess a monitor vezérlő
         Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class);
-        monitors.forEach((monitor) -> {
-            monitor.beforeStartTimer();
-        });
+        if (monitors != null) {
+            monitors.forEach((monitor) -> {
+                monitor.beforeStartTimer();
+            });
+        }
 
         //Mérési periódusidő leszedése a konfigból
         int sampleIntervalSec = configService.getInteger(IConfigKeyNames.SAMPLE_INTERVAL);
@@ -110,10 +117,14 @@ public class GlassFishMonitorController {
         } finally {
             this.timer = null;
         }
+
+        //A singleton vezérlés miatt inkább mindig lookup-olunk, mert csak így lesz StateLess a monitor vezérlő
         Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class);
-        monitors.forEach((monitor) -> {
-            monitor.afterStopTimer();
-        });
+        if (monitors != null) {
+            monitors.forEach((monitor) -> {
+                monitor.afterStopTimer();
+            });
+        }
 
     }
 
@@ -139,15 +150,23 @@ public class GlassFishMonitorController {
      */
     @Timeout
     protected void timeOut() {
-        Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class);
-        monitors.forEach((monitor) -> {
-            try {
-                monitor.startMonitoring();
-            } catch (Exception e) {
-                log.error(String.format("%s -> Hiba a monitorozott adatok begyűjtése közben", monitor.getControllerName()), e);
-            }
-        });
 
+        long start = Elapsed.nowNano();
+        log.trace("----- Monitoring start --------------------------------------------------------------------------------");
+
+        //A singleton vezérlés miatt inkább mindig lookup-olunk, mert csak így lesz StateLess a monitor vezérlő
+        Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class);
+        if (monitors != null) {
+            monitors.forEach((monitor) -> {
+                try {
+                    monitor.startMonitoring();
+                } catch (Exception e) {
+                    log.error(String.format("%s -> Hiba a monitorozott adatok begyűjtése közben", monitor.getControllerName()), e);
+                }
+            });
+        }
+
+        log.trace("----- Monitoring End, elapsed: {} ---------------------------", Elapsed.getElapsedNanoStr(start));
     }
 
     /**
@@ -155,14 +174,18 @@ public class GlassFishMonitorController {
      */
     @Schedule(hour = "00", minute = "00", second = "00")
     protected void doDailyPeriodicCleanup() {
+
+        //A singleton vezérlés miatt inkább mindig lookup-olunk, mert csak így lesz StateLess a monitor vezérlő
         Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class);
-        monitors.forEach((monitor) -> {
-            try {
-                monitor.dailyJob();
-            } catch (Exception e) {
-                log.error(String.format("%s -> Hiba a napi takarítás közben", monitor.getControllerName()), e);
-            }
-        });
+        if (monitors != null) {
+            monitors.forEach((monitor) -> {
+                try {
+                    monitor.dailyJob();
+                } catch (Exception e) {
+                    log.error(String.format("%s -> Hiba a napi takarítás közben", monitor.getControllerName()), e);
+                }
+            });
+        }
 
     }
 }

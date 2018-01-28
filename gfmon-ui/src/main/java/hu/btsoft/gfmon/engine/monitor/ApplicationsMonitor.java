@@ -64,8 +64,6 @@ public class ApplicationsMonitor extends MonitorsBase {
     @EJB
     private ApplicationCollectorDataUnitService applicationCollectorDataUnitService;
 
-    private boolean collecApplicationsCollectorDataUnits;
-
     /**
      * Az adatbázisban módosítást végző user azonosítójának elkérése
      *
@@ -90,11 +88,6 @@ public class ApplicationsMonitor extends MonitorsBase {
     public void beforeStartTimer() {
         //Alkalmazások lekérdezése és felépítése
         this.manageAllActiverServerApplications();
-
-        if (applicationCollectorDataUnitService.count() < 1) {
-            log.info("Az alkalmazás 'adatnevek' táblája az első mérés során fel lesz építve!");
-            collecApplicationsCollectorDataUnits = true;
-        }
     }
 
     /**
@@ -230,6 +223,20 @@ public class ApplicationsMonitor extends MonitorsBase {
     }
 
     /**
+     * Kell a CDU-kat gyűjteni?
+     *
+     * @return true -> igen
+     */
+    private boolean wantCollectCDU() {
+
+        if (applicationCollectorDataUnitService.count() < 1) {
+            log.info("Az alkalmazás 'adatnevek' táblájának felépítése szükséges!");
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Mérés
      */
     @Override
@@ -239,16 +246,15 @@ public class ApplicationsMonitor extends MonitorsBase {
         int measuredServerCnt = 0;
         for (Server server : serverService.findAllActiveServer()) {
 
-            Set<DataUnitDto> dataUnits = null;
-
             //Kell gyűjteni a mértékegységeket?
-            if (collecApplicationsCollectorDataUnits) {
+            Set<DataUnitDto> dataUnits = null;
+            if (wantCollectCDU()) {
                 dataUnits = new LinkedHashSet<>();
             }
             Set<AppSnapshotBase> applicationSnapshots = applicationSnapshotProvider.fetchSnapshot(server, dataUnits);
 
             //Kellett gyűjteni a mértékegységeket?
-            if (collecApplicationsCollectorDataUnits && dataUnits != null && !dataUnits.isEmpty()) {
+            if (dataUnits != null && !dataUnits.isEmpty()) {
                 this.processCollectedDataUnits(dataUnits);
             }
 

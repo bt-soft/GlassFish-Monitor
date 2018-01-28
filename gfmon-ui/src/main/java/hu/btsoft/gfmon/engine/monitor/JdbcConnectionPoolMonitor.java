@@ -59,8 +59,6 @@ public class JdbcConnectionPoolMonitor extends MonitorsBase {
     @EJB
     private JdbcConnectionPoolCollectorDataUnitService jdbcConnectionPoolCollectorDataUnitService;
 
-    private boolean collecJdbcConnectionPoolCollectorDataUnits;
-
     @Override
     protected String getDbModificationUser() {
         return DB_MODIFICATOR_USER;
@@ -75,12 +73,6 @@ public class JdbcConnectionPoolMonitor extends MonitorsBase {
     public void beforeStartTimer() {
         //Alkalmazások lekérdezése és felépítése
         this.manageAllActiverServerJdbcResources();
-
-        if (jdbcConnectionPoolCollectorDataUnitService.count() < 1) {
-            log.info("A JDBC ConnectionPool 'adatnevek' táblája az első mérés során fel lesz építve!");
-            collecJdbcConnectionPoolCollectorDataUnits = true;
-        }
-
     }
 
     /**
@@ -208,6 +200,20 @@ public class JdbcConnectionPoolMonitor extends MonitorsBase {
     }
 
     /**
+     * Kell a CDU-kat gyűjteni?
+     *
+     * @return true -> igen
+     */
+    private boolean wantCollectCDU() {
+
+        if (jdbcConnectionPoolCollectorDataUnitService.count() < 1) {
+            log.info("A JDBC ConnectionPool 'adatnevek' táblájának felépítése szükséges!");
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * JDBC erőforrások monitorozása
      */
     @Override
@@ -218,10 +224,9 @@ public class JdbcConnectionPoolMonitor extends MonitorsBase {
         int measuredServerCnt = 0;
         for (Server server : serverService.findAllActiveServer()) {
 
-            Set<DataUnitDto> dataUnits = null;
-
             //Kell gyűjteni a mértékegységeket?
-            if (collecJdbcConnectionPoolCollectorDataUnits) {
+            Set<DataUnitDto> dataUnits = null;
+            if (this.wantCollectCDU()) {
                 dataUnits = new LinkedHashSet<>();
             }
 
@@ -229,7 +234,7 @@ public class JdbcConnectionPoolMonitor extends MonitorsBase {
             measuredServerCnt++;
 
             //Kellett gyűjteni a mértékegységeket?
-            if (collecJdbcConnectionPoolCollectorDataUnits && dataUnits != null && !dataUnits.isEmpty()) {
+            if (dataUnits != null && !dataUnits.isEmpty()) {
                 this.processCollectedDataUnits(dataUnits);
             }
 
