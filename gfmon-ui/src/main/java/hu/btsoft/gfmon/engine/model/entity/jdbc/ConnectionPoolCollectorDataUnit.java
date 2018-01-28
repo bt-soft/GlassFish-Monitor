@@ -33,10 +33,10 @@ import org.eclipse.persistence.annotations.Customizer;
  */
 @Entity
 @Cacheable(true)
-@Table(name = "RES_CONNPOOL_COLLDATA_UNIT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,
+@Table(name = "JDBC_CONNPOOL_COLLDATA_UNIT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,
         indexes = {
-            @Index(name = "IDX_RES_CONPOOL_CDU_RESTPATHMASK", columnList = "RESTPATHMASK", unique = false),
-            @Index(name = "IDX_RES_CONPOOL_CDU_ENTITYNAME", columnList = "ENTITYNAME", unique = false)
+            @Index(name = "IDX_JDBC_CONPOOL_CDU_RESTPATHMASK", columnList = "RESTPATHMASK", unique = false),
+            @Index(name = "IDX_JDBC_CONPOOL_CDU_ENTITYNAME", columnList = "ENTITYNAME", unique = false)
         })
 @Data
 @ToString(callSuper = true)

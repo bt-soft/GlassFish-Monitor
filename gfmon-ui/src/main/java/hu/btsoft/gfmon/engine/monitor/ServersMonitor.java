@@ -233,22 +233,6 @@ public class ServersMonitor extends MonitorsBase {
                 serverService.save(server, DB_MODIFICATOR_USER);
             }
 
-//
-//            if (!erroredPaths.isEmpty()) {
-//                erroredPaths.forEach((path) -> {
-//                    server.getJoiners().stream()
-//                            .filter((joiner) -> joiner.getSvrCollectorDataUnit().getRestPath().equals(path))
-//                            .map((joiner) -> {
-//                                joiner.setActive(false);
-//                                joiner.setAdditionalMessage(String.format("Nem érhető el a(z) '%s' path, emiatt az adatgyűjtés letiltva", path));
-//                                return joiner;
-//                            })
-//                            .forEachOrdered((joiner) -> {
-//                                serverService.save(server, DB_MODIFICATOR_USER);
-//                            });
-//                });
-//            }
-//
             measuredServerCnt++;
 
             //Sikerült a bejelentkezés -> töröljük a kieginfót, ha van

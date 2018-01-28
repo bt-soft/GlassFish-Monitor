@@ -48,14 +48,6 @@ public class GlassFishMonitorController {
 
     protected Timer timer;
 
-//    @EJB
-//    private ServersMonitor serversMonitor;
-//
-//    @EJB
-//    private ApplicationsMonitor applicationsMonitor;
-//
-//    @EJB
-//    private ResourcesMonitor resourcesMonitor;
     @Inject
     private Instance<MonitorsBase> monitors;
 
@@ -83,10 +75,6 @@ public class GlassFishMonitorController {
             log.warn("A Timer már fut!", timer);
             return;
         }
-
-//        serversMonitor.beforeStartTimer();
-//        applicationsMonitor.beforeStartTimer();
-//        resourcesMonitor.beforeStartTimer();
         monitors.forEach((monitor) -> {
             monitor.beforeStartTimer();
         });
@@ -122,9 +110,6 @@ public class GlassFishMonitorController {
             this.timer = null;
         }
 
-//        serversMonitor.afterStopTimer();
-//        applicationsMonitor.afterStopTimer();
-//        resourcesMonitor.afterStopTimer();
         monitors.forEach((monitor) -> {
             monitor.afterStopTimer();
         });
@@ -153,14 +138,6 @@ public class GlassFishMonitorController {
      */
     @Timeout
     protected void timeOut() {
-//        try {
-//            serversMonitor.startMonitoring();
-//            applicationsMonitor.startMonitoring();
-//            resourcesMonitor.startMonitoring();
-//        } catch (Exception e) {
-//            log.error("Hiba a monitorozott adatok begyűjtése közben", e);
-//        }
-
         monitors.forEach((monitor) -> {
             try {
                 monitor.startMonitoring();
@@ -176,13 +153,6 @@ public class GlassFishMonitorController {
      */
     @Schedule(hour = "00", minute = "00", second = "00")
     protected void doDailyPeriodicCleanup() {
-//        try {
-//            serversMonitor.dailyJob();
-//            applicationsMonitor.dailyJob();
-//            resourcesMonitor.dailyJob();
-//        } catch (Exception e) {
-//            log.error("Hiba a napi takarítás közben", e);
-//        }
 
         monitors.forEach((monitor) -> {
             try {

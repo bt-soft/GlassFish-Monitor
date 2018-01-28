@@ -33,7 +33,7 @@ import org.eclipse.persistence.annotations.Customizer;
  * @author BT
  */
 @Entity
-@Table(name = "RES_CONPOOL_APP_STAT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
+@Table(name = "JDBC_CONPOOL_APP_STAT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
 @Data
 @ToString(callSuper = true, exclude = {"connectionPoolStatistic", "application"})
 @EqualsAndHashCode(callSuper = true, exclude = {"connectionPoolStatistic", "application"})
@@ -46,7 +46,7 @@ public class ConnectionPoolAppStatistic extends JdbcResourceSnapshotBase {
      * (automatikusan index képződik rá)
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "RES_CONPOOL_STAT_ID")
+    @JoinColumn(name = "JDBC_CONPOOL_STAT_ID")
     @ColumnPosition(position = 10)
     private ConnectionPoolStatistic connectionPoolStatistic;
 

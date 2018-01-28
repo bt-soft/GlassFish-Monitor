@@ -185,6 +185,6 @@ public class ConnectionPoolStatistic extends JdbcResourceSnapshotBase {
 
     //-- Az alkalmazások ConnectionPool statisztika mérési eredményei
     @OneToMany(mappedBy = "connectionPoolStatistic", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "RES_CONPOOL_APP_STAT_ID", referencedColumnName = "ID", nullable = false)
+    @JoinColumn(name = "JDBC_CONPOOL_APP_STAT_ID", referencedColumnName = "ID", nullable = false)
     private List<ConnectionPoolAppStatistic> connectionPoolAppStatistic;
 }

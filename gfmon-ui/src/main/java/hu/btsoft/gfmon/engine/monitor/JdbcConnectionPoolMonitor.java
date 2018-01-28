@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW) //A BEAN-be záródik a tranzakció
 public class JdbcConnectionPoolMonitor extends MonitorsBase {
 
-    private static final String DB_MODIFICATOR_USER = "res-mon-ctrl";
+    private static final String DB_MODIFICATOR_USER = "jdbc-mon-ctrl";
 
     @Inject
     private JdbcConnectionPoolDiscoverer jdbcConnectionPoolDiscoverer;
