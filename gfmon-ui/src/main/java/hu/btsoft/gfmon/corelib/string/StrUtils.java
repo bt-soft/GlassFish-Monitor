@@ -46,4 +46,15 @@ public class StrUtils {
         return null;
     }
 
+    /**
+     * "null" -> null
+     *
+     * @param str tetszőleges String
+     *
+     * @return str kiszedett aposztrófos String
+     */
+    public static String deNull(String str) {
+        return "null".equals(str) ? null : str;
+    }
+
 }

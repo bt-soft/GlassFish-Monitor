@@ -67,11 +67,10 @@ public class ApplicationsDiscoverer extends RestClientBase {
             return null;
         }
 
-        String appRealName = StrUtils.deQuote(entities.get("name").toString());
-        String ctxRoot = StrUtils.deQuote(entities.get("contextRoot").toString());
-        String contextRoot = "null".equals(ctxRoot) ? null : ctxRoot;
-        String description = StrUtils.deQuote(entities.get("description").toString());
-        boolean enabled = Boolean.parseBoolean(StrUtils.deQuote(entities.get("enabled").toString()));
+        String appRealName = StrUtils.deNull(StrUtils.deQuote(entities.get("name").toString()));
+        String contextRoot = StrUtils.deNull(StrUtils.deQuote(entities.get("contextRoot").toString()));
+        String description = StrUtils.deNull(StrUtils.deQuote(entities.get("description").toString()));
+        boolean enabled = Boolean.parseBoolean(StrUtils.deNull(StrUtils.deQuote(entities.get("enabled").toString())));
 
         List<Application> applications = new LinkedList<>();
 

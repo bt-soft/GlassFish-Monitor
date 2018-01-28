@@ -89,25 +89,21 @@ public class JdbcConnectionPoolDiscoverer extends RestClientBase {
 
         JdbcConnectionPool cp = new JdbcConnectionPool();
 
-        cp.setPoolName(StrUtils.deQuote(entities.get("name").toString()));
-        cp.setDescription(StrUtils.deQuote(entities.get("description").toString()));
-        cp.setDatasourceClassname(StrUtils.deQuote(entities.get("datasourceClassname").toString()));
-        String driverClassname = StrUtils.deQuote(entities.get("driverClassname").toString());
-        driverClassname = "null".equals(driverClassname) ? null : driverClassname;
-        cp.setDriverClassname(driverClassname);
-        cp.setIdleTimeoutInSeconds(StrUtils.deQuote(entities.get("idleTimeoutInSeconds").toString()));
-        String initSql = StrUtils.deQuote(entities.get("initSql").toString());
-        initSql = "null".equals(initSql) ? null : initSql;
-        cp.setInitSql(initSql);
-        cp.setMaxConnectionUsageCount(StrUtils.deQuote(entities.get("maxConnectionUsageCount").toString()));
-        cp.setMaxPoolSize(StrUtils.deQuote(entities.get("maxPoolSize").toString()));
-        cp.setMaxWaitTimeInMillis(StrUtils.deQuote(entities.get("maxWaitTimeInMillis").toString()));
-        cp.setPoolResizeQuantity(StrUtils.deQuote(entities.get("poolResizeQuantity").toString()));
-        cp.setPooling(Boolean.parseBoolean(StrUtils.deQuote(entities.get("pooling").toString())));
-        cp.setResType(StrUtils.deQuote(entities.get("resType").toString()));
-        cp.setStatementCacheSize(StrUtils.deQuote(entities.get("statementCacheSize").toString()));
-        cp.setSteadyPoolSize(StrUtils.deQuote(entities.get("steadyPoolSize").toString()));
-        cp.setStatementTimeoutInSeconds(StrUtils.deQuote(entities.get("statementTimeoutInSeconds").toString()));
+        cp.setPoolName(StrUtils.deNull(StrUtils.deQuote(entities.get("name").toString())));
+        cp.setDescription(StrUtils.deNull(StrUtils.deQuote(entities.get("description").toString())));
+        cp.setDatasourceClassname(StrUtils.deNull(StrUtils.deQuote(entities.get("datasourceClassname").toString())));
+        cp.setDriverClassname(StrUtils.deNull(StrUtils.deQuote(entities.get("driverClassname").toString())));
+        cp.setIdleTimeoutInSeconds(StrUtils.deNull(StrUtils.deQuote(entities.get("idleTimeoutInSeconds").toString())));
+        cp.setInitSql(StrUtils.deNull(StrUtils.deQuote(entities.get("initSql").toString())));
+        cp.setMaxConnectionUsageCount(StrUtils.deNull(StrUtils.deQuote(entities.get("maxConnectionUsageCount").toString())));
+        cp.setMaxPoolSize(StrUtils.deNull(StrUtils.deQuote(entities.get("maxPoolSize").toString())));
+        cp.setMaxWaitTimeInMillis(StrUtils.deNull(StrUtils.deQuote(entities.get("maxWaitTimeInMillis").toString())));
+        cp.setPoolResizeQuantity(StrUtils.deNull(StrUtils.deQuote(entities.get("poolResizeQuantity").toString())));
+        cp.setPooling(Boolean.parseBoolean(StrUtils.deNull(StrUtils.deQuote(entities.get("pooling").toString()))));
+        cp.setResType(StrUtils.deNull(StrUtils.deQuote(entities.get("resType").toString())));
+        cp.setStatementCacheSize(StrUtils.deNull(StrUtils.deQuote(entities.get("statementCacheSize").toString())));
+        cp.setSteadyPoolSize(StrUtils.deNull(StrUtils.deQuote(entities.get("steadyPoolSize").toString())));
+        cp.setStatementTimeoutInSeconds(StrUtils.deNull(StrUtils.deQuote(entities.get("statementTimeoutInSeconds").toString())));
 
         //A Property leszedésével most nem foglalkozunk...
         return cp;
