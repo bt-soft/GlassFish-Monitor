@@ -16,14 +16,12 @@ import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
 import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcResourceSnapshotBase;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.persistence.Transient;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -64,10 +62,11 @@ public class ConnectionPoolAppStatistic extends JdbcResourceSnapshotBase {
     /**
      * Az alkalmazás neve neve, ami használja a ConnectionPool-t
      */
-    @NotNull(message = "A appName nem lehet null")
-    @Size(min = 3, max = 255, message = "A appName mező hossza {min} és {max} között lehet")
-    @Column(name = "APP_NAME", length = 255, nullable = false)
-    @ColumnPosition(position = 20)
+//    @NotNull(message = "A appName nem lehet null")
+//    @Size(min = 3, max = 255, message = "A appName mező hossza {min} és {max} között lehet")
+//    @Column(name = "APP_NAME", length = 255, nullable = false)
+//    @ColumnPosition(position = 20)
+    @Transient //Ezt az 'application'-ból ki lehet találni, felesleges tárolni
     private String appName;
 
     /**
