@@ -17,8 +17,8 @@ import hu.btsoft.gfmon.engine.model.entity.Config;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
 import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcConnectionPool;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
+import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
-import hu.btsoft.gfmon.engine.model.service.IConfigKeyNames;
 import hu.btsoft.gfmon.engine.model.service.ServerService;
 import hu.btsoft.gfmon.engine.monitor.ApplicationsMonitor;
 import hu.btsoft.gfmon.engine.monitor.JdbcConnectionPoolMonitor;
@@ -68,20 +68,20 @@ public class SettingsView extends ViewBase {
     @EJB
     private ConfigService configService;
 
+    @Getter
     private List<Config> configs;
 
-    @Getter
-    @Setter
-    private Boolean configAutoStart;
-
-    @Getter
-    @Setter
-    private Integer configSampleInterval;
-
-    @Getter
-    @Setter
-    private Integer configSampleDataKeepDays;
-
+//    @Getter
+//    @Setter
+//    private Boolean configAutoStart;
+//
+//    @Getter
+//    @Setter
+//    private Integer configSampleInterval;
+//
+//    @Getter
+//    @Setter
+//    private Integer configSampleDataKeepDays;
     // --- Server -----------------------------------
     @EJB
     private ServerService serverService;
@@ -140,15 +140,14 @@ public class SettingsView extends ViewBase {
         //Konfig rekordok betöltése
         configs = configService.findAll();
 
-        Config config = findConfig(IConfigKeyNames.AUTOSTART);
-        configAutoStart = config != null ? Boolean.parseBoolean(config.getKeyValue()) : null;
-
-        config = findConfig(IConfigKeyNames.SAMPLE_INTERVAL);
-        configSampleInterval = config != null ? Integer.parseInt(config.getKeyValue()) : null;
-
-        config = findConfig(IConfigKeyNames.SAMPLE_DATA_KEEP_DAYS);
-        configSampleDataKeepDays = config != null ? Integer.parseInt(config.getKeyValue()) : null;
-
+//        Config config = findConfig(IConfigKeyNames.AUTOSTART);
+//        configAutoStart = config != null ? Boolean.parseBoolean(config.getKeyValue()) : null;
+//
+//        config = findConfig(IConfigKeyNames.SAMPLE_INTERVAL);
+//        configSampleInterval = config != null ? Integer.parseInt(config.getKeyValue()) : null;
+//
+//        config = findConfig(IConfigKeyNames.SAMPLE_DATA_KEEP_DAYS);
+//        configSampleDataKeepDays = config != null ? Integer.parseInt(config.getKeyValue()) : null;
         //Szerverek betöltése
         refreshServers();
     }
@@ -159,9 +158,9 @@ public class SettingsView extends ViewBase {
     private void clearAll() {
 
         configs = null;
-        configAutoStart = null;
-        configSampleInterval = null;
-        configSampleDataKeepDays = null;
+//        configAutoStart = null;
+//        configSampleInterval = null;
+//        configSampleDataKeepDays = null;
 
         servers = null;
         //selectedServer = null;
@@ -179,6 +178,7 @@ public class SettingsView extends ViewBase {
         servers = serverService.findAllAndSetRuntimeSeqId();
     }
 
+//<editor-fold defaultstate="collapsed" desc="Konfigurációs értékek getter/setter">
     /**
      * Konfigurációs entitás keresése
      *
@@ -186,12 +186,58 @@ public class SettingsView extends ViewBase {
      *
      * @return Config entitás vagy null, ha nincs ilyen
      */
-    private Config findConfig(String keyName) {
-        return configs.stream()
+    private String getConfig(String keyName) {
+        Config config = configs.stream()
                 .filter(x -> keyName.equals(x.getKeyName()))
                 .findFirst()
                 .get();
+
+        return config != null ? config.getKeyValue() : null;
     }
+
+    /**
+     * Konfig beállítása
+     *
+     * @param keyName konfig kulcs neve
+     * @param value   értéke
+     */
+    private void setConfig(String keyName, String value) {
+        Config config = configs.stream()
+                .filter(x -> keyName.equals(x.getKeyName()))
+                .findFirst()
+                .get();
+        if (config != null) {
+            config.setKeyValue(value);
+            settingsDataChanged = true;
+        } else {
+            log.warn("Nincs ilyen konfigurációs kulcs: {}", keyName);
+        }
+    }
+
+    public String getAutoStart() {
+        return this.getConfig(ConfigKeyNames.AUTOSTART);
+    }
+
+    public void setAutoStart(String value) {
+        this.setConfig(ConfigKeyNames.AUTOSTART, value);
+    }
+
+    public String getSampleInterval() {
+        return this.getConfig(ConfigKeyNames.SAMPLE_INTERVAL);
+    }
+
+    public void setSampleInterval(String value) {
+        this.setConfig(ConfigKeyNames.SAMPLE_INTERVAL, value);
+    }
+
+    public String getKeepDays() {
+        return this.getConfig(ConfigKeyNames.SAMPLE_DATA_KEEP_DAYS);
+    }
+
+    public void setKeepDays(String value) {
+        this.setConfig(ConfigKeyNames.SAMPLE_DATA_KEEP_DAYS, value);
+    }
+//</editor-fold>
 
     /**
      * Beállítások mentése
@@ -200,26 +246,25 @@ public class SettingsView extends ViewBase {
 
         {//A mentendő Config rekord beállítása
 
-            //SampleInterval beállítása
-            Config config = findConfig(IConfigKeyNames.SAMPLE_INTERVAL);
-            if (config != null) {
-                config.setKeyValue(configSampleInterval.toString());
-                settingsDataChanged = true;
-            }
-
-            //AutoStart beállítása
-            config = findConfig(IConfigKeyNames.AUTOSTART);
-            if (config != null) {
-                config.setKeyValue(configAutoStart.toString());
-                settingsDataChanged = true;
-            }
-
-            //KeepDays beállítása
-            config = findConfig(IConfigKeyNames.SAMPLE_DATA_KEEP_DAYS);
-            if (config != null) {
-                config.setKeyValue(configSampleDataKeepDays.toString());
-                settingsDataChanged = true;
-            }
+//            //SampleInterval beállítása
+//            Config config = findConfig(IConfigKeyNames.SAMPLE_INTERVAL);
+//            if (config != null) {
+//                config.setKeyValue(configSampleInterval.toString());
+//            }
+//
+//            //AutoStart beállítása
+//            config = findConfig(IConfigKeyNames.AUTOSTART);
+//            if (config != null) {
+//                config.setKeyValue(configAutoStart.toString());
+//                settingsDataChanged = true;
+//            }
+//
+//            //KeepDays beállítása
+//            config = findConfig(IConfigKeyNames.SAMPLE_DATA_KEEP_DAYS);
+//            if (config != null) {
+//                config.setKeyValue(configSampleDataKeepDays.toString());
+//                settingsDataChanged = true;
+//            }
         }
         try {
             //Config mentése

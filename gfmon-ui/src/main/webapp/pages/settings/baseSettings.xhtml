@@ -29,6 +29,7 @@
 
     <ui:define name="content">
 
+
         <h:form id="settingsForm">
 
             <bt:disablePanel disabled="#{not isAdmin}">
@@ -56,16 +57,17 @@
                     <h:outputText value="Működés" styleClass="sub-category-header-text" />
 
                     <h:panelGrid columns="8" cellpadding="10">
+
                         <h:outputLabel value="Automatikus indítás: " />
-                        <p:inputSwitch value="#{settingsView.configAutoStart}" offLabel="ki" onLabel="be"/>
+                        <p:inputSwitch value="#{settingsView.autoStart}" offLabel="ki" onLabel="be"/>
 
 
                         <h:outputLabel value="Mintavétel [mp]: "/>
-                        <p:spinner  value="#{settingsView.configSampleInterval}" min="10" max="300" stepFactor="5" size="1" />
+                        <p:spinner  value="#{settingsView.sampleInterval}" min="10" max="300" stepFactor="5" size="1" />
 
 
                         <h:outputLabel value="Megőrzendő napok száma [db]: "/>
-                        <p:spinner  value="#{settingsView.configSampleDataKeepDays}" min="10" max="300" stepFactor="1" size="1" />
+                        <p:spinner  value="#{settingsView.keepDays}" min="10" max="300" stepFactor="1" size="1" />
                     </h:panelGrid>
                 </p:panel>
 
@@ -510,7 +512,7 @@
                                 <h:outputText value="#{conPool.poolName}" />
                             </p:column>
 
-                            <p:column headerText="Leírás">
+                            <p:column headerText="Leírás" style="width: 25em">
                                 <h:outputText value="#{conPool.description}"/>
                             </p:column>
 

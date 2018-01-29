@@ -52,7 +52,7 @@ import lombok.extern.slf4j.Slf4j;
 @Table(name = "APPLICATION",
         catalog = "",
         schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,
-        uniqueConstraints = @UniqueConstraint(columnNames = {"SHORT_NAME", "REAL_NAME", "MODULE_REAL_NAME", "MODULE_SHORT_NAME"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"SVR_ID", "SHORT_NAME", "REAL_NAME", "MODULE_REAL_NAME", "MODULE_SHORT_NAME"})
 )
 @NamedQueries({
     @NamedQuery(name = "Application.findByServerId", query = "SELECT a FROM Application a WHERE a.server.id = :serverId ORDER BY a.appRealName, a.moduleRealName"), //

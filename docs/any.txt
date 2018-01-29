@@ -1,0 +1,1 @@
+    //private static final Pattern RESOURCE_URI_SUFFIX = Pattern.compile("^\\/?applications\\/(?<realAppName>[^\\/]+)\\/(?<suffix>.+)$");

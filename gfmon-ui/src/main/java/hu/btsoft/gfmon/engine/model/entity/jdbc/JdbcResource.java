@@ -46,7 +46,7 @@ import org.eclipse.persistence.annotations.Customizer;
 @Table(name = "JDBC_RESOURCE",
         catalog = "",
         schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,
-        uniqueConstraints = @UniqueConstraint(columnNames = {"JNDI_NAME"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"JDBC_CONNECTION_POOL_ID", "JNDI_NAME"})
 )
 @Data
 @ToString(callSuper = true, exclude = {"jdbcConnectionPool"})

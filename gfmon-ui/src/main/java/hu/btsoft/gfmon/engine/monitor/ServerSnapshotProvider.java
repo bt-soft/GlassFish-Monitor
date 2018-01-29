@@ -142,7 +142,7 @@ public class ServerSnapshotProvider {
 
             //Üres a mért eredmények Map-je
             if (valuesList == null || valuesList.isEmpty()) {
-                log.warn("A(z) '{}' szerver mérési eredményei üresek!", server.getSimpleUrl());
+                log.warn("A(z) '{}' szerver '{}' path mérési eredményei üresek!", server.getSimpleUrl(), collector.getPath());
                 continue;
             }
 

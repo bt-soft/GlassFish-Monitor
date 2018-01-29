@@ -14,7 +14,6 @@ package hu.btsoft.gfmon.engine.monitor;
 import hu.btsoft.gfmon.corelib.cdi.CdiUtils;
 import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
-import hu.btsoft.gfmon.engine.model.service.IConfigKeyNames;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
@@ -30,6 +29,7 @@ import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
 import javax.enterprise.inject.Instance;
 import lombok.extern.slf4j.Slf4j;
+import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
 
 /**
  *
@@ -60,7 +60,7 @@ public class GlassFishMonitorController {
     @PostConstruct
     protected void init() {
 
-        if (!configService.getBoolean(IConfigKeyNames.AUTOSTART)) {
+        if (!configService.getBoolean(ConfigKeyNames.AUTOSTART)) {
             log.debug("Az automatikus indítás kikapcsolva");
             return;
         }
@@ -77,10 +77,12 @@ public class GlassFishMonitorController {
         if (isRunningTimer()) {
             log.warn("A Timer már fut!", timer);
             return;
+
         }
 
         //A singleton vezérlés miatt inkább mindig lookup-olunk, mert csak így lesz StateLess a monitor vezérlő
-        Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class);
+        Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class
+        );
         if (monitors != null) {
             monitors.forEach((monitor) -> {
                 monitor.beforeStartTimer();
@@ -88,7 +90,7 @@ public class GlassFishMonitorController {
         }
 
         //Mérési periódusidő leszedése a konfigból
-        int sampleIntervalSec = configService.getInteger(IConfigKeyNames.SAMPLE_INTERVAL);
+        int sampleIntervalSec = configService.getInteger(ConfigKeyNames.SAMPLE_INTERVAL);
 
         //Timer felhúzása
         this.timer = this.timerService.createIntervalTimer(5_000, // 5mp múlva induljon az adatgyűjtés
@@ -116,10 +118,12 @@ public class GlassFishMonitorController {
             log.error("Nem állítható le a Timer: {}", this.timer, e);
         } finally {
             this.timer = null;
+
         }
 
         //A singleton vezérlés miatt inkább mindig lookup-olunk, mert csak így lesz StateLess a monitor vezérlő
-        Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class);
+        Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class
+        );
         if (monitors != null) {
             monitors.forEach((monitor) -> {
                 monitor.afterStopTimer();
@@ -155,7 +159,8 @@ public class GlassFishMonitorController {
         log.trace("----- Monitoring start --------------------------------------------------------------------------------");
 
         //A singleton vezérlés miatt inkább mindig lookup-olunk, mert csak így lesz StateLess a monitor vezérlő
-        Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class);
+        Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class
+        );
         if (monitors != null) {
             monitors.forEach((monitor) -> {
                 try {
@@ -176,7 +181,8 @@ public class GlassFishMonitorController {
     protected void doDailyPeriodicCleanup() {
 
         //A singleton vezérlés miatt inkább mindig lookup-olunk, mert csak így lesz StateLess a monitor vezérlő
-        Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class);
+        Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class
+        );
         if (monitors != null) {
             monitors.forEach((monitor) -> {
                 try {

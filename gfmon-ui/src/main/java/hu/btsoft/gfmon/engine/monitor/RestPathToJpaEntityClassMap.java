@@ -14,6 +14,7 @@ package hu.btsoft.gfmon.engine.monitor;
 import hu.btsoft.gfmon.engine.model.entity.EntityBase;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.app.AppServletStatistic;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.app.AppStatistic;
+import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbBeanCacheStat;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbBeanMethodStat;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbBeanPoolStat;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbStat;
@@ -37,6 +38,7 @@ import hu.btsoft.gfmon.engine.model.entity.server.snapshot.web.Servlet;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.web.Session;
 import hu.btsoft.gfmon.engine.monitor.collector.application.app.AppServletStatisticCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.application.app.AppWebStatisticCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbBeanCacheStatCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbBeanMethodCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbBeanPoolCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbCollector;
@@ -165,6 +167,10 @@ public class RestPathToJpaEntityClassMap {
 
             case AppEjbTimersCollector.PATH:
                 clazz = EjbTimerStat.class;
+                break;
+
+            case AppEjbBeanCacheStatCollector.PATH:
+                clazz = EjbBeanCacheStat.class;
                 break;
 
             //JDBC erőforrások

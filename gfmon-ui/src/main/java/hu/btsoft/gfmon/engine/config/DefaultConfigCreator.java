@@ -13,8 +13,8 @@ package hu.btsoft.gfmon.engine.config;
 
 import hu.btsoft.gfmon.engine.model.entity.Config;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
+import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
-import hu.btsoft.gfmon.engine.model.service.IConfigKeyNames;
 import hu.btsoft.gfmon.engine.model.service.ServerService;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -51,19 +51,19 @@ public class DefaultConfigCreator {
 
         boolean dropCalled = false;
 
-        //Induláskor kell séma legyártás?
-        if (propertiesConfig.getConfig().getBoolean(PropertiesConfig.STARTUP_JPA_DROPANDCREATE_KEY, false)) {
-            configService.dropAndCreate();
-            dropCalled = true;
-        }
-
-        //Megnézzük, hogy létezik-e bármilyen beállítás rekord az adatbázisban
-        if (!configService.checkEntityTableExist()) {
-            if (!dropCalled) {
-                configService.dropAndCreate();
-            }
-            createDefaultConfig();
-        }
+//        //Induláskor kell séma legyártás?
+//        if (propertiesConfig.getConfig().getBoolean(PropertiesConfig.STARTUP_JPA_DROPANDCREATE_KEY, false)) {
+//            configService.dropAndCreate();
+//            dropCalled = true;
+//        }
+//
+//        //Megnézzük, hogy létezik-e bármilyen beállítás rekord az adatbázisban
+//        if (!configService.checkEntityTableExist()) {
+//            if (!dropCalled) {
+//                configService.dropAndCreate();
+//            }
+        createDefaultConfig();
+//        }
 
     }
 
@@ -74,11 +74,11 @@ public class DefaultConfigCreator {
         log.trace("Default beállítások létrehozása");
 
         {//autostart
-            Config config = new Config(IConfigKeyNames.CLASS_NAME, IConfigKeyNames.AUTOSTART, ConfigValueType.B, "true");
+            Config config = new Config(ConfigKeyNames.CLASS_NAME, ConfigKeyNames.AUTOSTART, ConfigValueType.B, "true");
             configService.save(config, DEF_USERNAME);
         }
         {//sampleInterval
-            Config config = new Config(IConfigKeyNames.CLASS_NAME, IConfigKeyNames.SAMPLE_INTERVAL, ConfigValueType.I, "60");
+            Config config = new Config(ConfigKeyNames.CLASS_NAME, ConfigKeyNames.SAMPLE_INTERVAL, ConfigValueType.I, "60");
             configService.save(config, DEF_USERNAME);
         }
 
@@ -92,7 +92,7 @@ public class DefaultConfigCreator {
         }
 
         {//Clearing limit days
-            Config config = new Config(IConfigKeyNames.CLASS_NAME, IConfigKeyNames.SAMPLE_DATA_KEEP_DAYS, ConfigValueType.I, "90");
+            Config config = new Config(ConfigKeyNames.CLASS_NAME, ConfigKeyNames.SAMPLE_DATA_KEEP_DAYS, ConfigValueType.I, "90");
             configService.save(config, DEF_USERNAME);
         }
 

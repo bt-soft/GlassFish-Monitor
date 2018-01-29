@@ -48,7 +48,7 @@ import org.eclipse.persistence.annotations.Customizer;
 @Table(name = "JDBC_CONNECTION_POOL",
         catalog = "",
         schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,
-        uniqueConstraints = @UniqueConstraint(columnNames = {"POOL_NAME"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"SVR_ID", "POOL_NAME"})
 )
 @NamedQueries({
     @NamedQuery(name = "JdbcConnectionPool.findByServerId", query = "SELECT c FROM JdbcConnectionPool c WHERE c.server.id = :serverId ORDER BY c.poolName"), //

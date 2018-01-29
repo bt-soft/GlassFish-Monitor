@@ -16,7 +16,6 @@ import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.entity.server.SvrCollectorDataUnit;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SnapshotBase;
-import hu.btsoft.gfmon.engine.model.service.IConfigKeyNames;
 import hu.btsoft.gfmon.engine.model.service.SvrCollectorDataUnitService;
 import hu.btsoft.gfmon.engine.model.service.SvrSnapshotService;
 import hu.btsoft.gfmon.engine.monitor.management.ServerMonitoringServiceStatus;
@@ -29,6 +28,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
 
 /**
  * GF szerver adatokat összegyűjtő SLSB
@@ -275,7 +275,7 @@ public class ServersMonitor extends MonitorsBase {
         long start = Elapsed.nowNano();
 
         //Megőrzendő napok száma
-        Integer keepDays = configService.getInteger(IConfigKeyNames.SAMPLE_DATA_KEEP_DAYS);
+        Integer keepDays = configService.getInteger(ConfigKeyNames.SAMPLE_DATA_KEEP_DAYS);
         log.info("Szerver mérési adatok pucolása indul, keepDays: {}", keepDays);
         //Összes régi rekord törlése
         int deletedRecords = svrSnapshotService.deleteOldRecords(keepDays);

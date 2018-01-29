@@ -17,7 +17,6 @@ import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcConnectionPool;
 import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcConnectionPoolCollectorDataUnit;
 import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnectionPoolStatistic;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
-import hu.btsoft.gfmon.engine.model.service.IConfigKeyNames;
 import hu.btsoft.gfmon.engine.model.service.JdbcConnectionPoolCollectorDataUnitService;
 import hu.btsoft.gfmon.engine.model.service.JdbcConnectionPoolService;
 import hu.btsoft.gfmon.engine.model.service.JdbcResourcesSnapshotService;
@@ -32,6 +31,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
 
 /**
  *
@@ -276,7 +276,7 @@ public class JdbcConnectionPoolMonitor extends MonitorsBase {
 
         //Megőrzendő napok száma
         start = Elapsed.nowNano();
-        Integer keepDays = configService.getInteger(IConfigKeyNames.SAMPLE_DATA_KEEP_DAYS);
+        Integer keepDays = configService.getInteger(ConfigKeyNames.SAMPLE_DATA_KEEP_DAYS);
         log.info("JDBC erőforrások mérési adatok pucolása indul, keepDays: {}", keepDays);
         //Összes régi rekord törlése
         int deletedRecords = jdbcResourcesSnapshotService.deleteOldRecords(keepDays);

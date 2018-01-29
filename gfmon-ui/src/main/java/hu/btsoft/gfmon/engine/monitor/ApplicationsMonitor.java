@@ -20,7 +20,6 @@ import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.service.ApplicationCollectorDataUnitService;
 import hu.btsoft.gfmon.engine.model.service.ApplicationService;
 import hu.btsoft.gfmon.engine.model.service.ApplicationSnapshotService;
-import hu.btsoft.gfmon.engine.model.service.IConfigKeyNames;
 import hu.btsoft.gfmon.engine.monitor.management.ApplicationsDiscoverer;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -32,6 +31,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
 
 /**
  *
@@ -297,7 +297,7 @@ public class ApplicationsMonitor extends MonitorsBase {
 
         //Megőrzendő napok száma
         start = Elapsed.nowNano();
-        Integer keepDays = configService.getInteger(IConfigKeyNames.SAMPLE_DATA_KEEP_DAYS);
+        Integer keepDays = configService.getInteger(ConfigKeyNames.SAMPLE_DATA_KEEP_DAYS);
         log.info("Alkalmazás mérési adatok pucolása indul, keepDays: {}", keepDays);
         //Összes régi rekord törlése
         int deletedRecords = applicationSnapshotService.deleteOldRecords(keepDays);

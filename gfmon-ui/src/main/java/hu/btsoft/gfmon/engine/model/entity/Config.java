@@ -11,9 +11,9 @@
  */
 package hu.btsoft.gfmon.engine.model.entity;
 
-import hu.btsoft.gfmon.engine.config.ConfigValueType;
-import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
+import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
+import hu.btsoft.gfmon.engine.config.ConfigValueType;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,6 +22,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlElement;
 import lombok.AllArgsConstructor;
@@ -36,7 +37,9 @@ import lombok.NoArgsConstructor;
  */
 @Entity
 @Cacheable(false)
-@Table(name = "CONFIG", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
+@Table(name = "CONFIG", catalog = "",
+        schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,
+        uniqueConstraints = @UniqueConstraint(columnNames = {"KEYCLASS_NAME", "KEY_NAME", "VALUE_TYPE"}))
 @Data
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor

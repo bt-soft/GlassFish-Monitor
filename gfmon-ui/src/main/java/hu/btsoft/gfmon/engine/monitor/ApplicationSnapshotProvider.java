@@ -18,6 +18,7 @@ import hu.btsoft.gfmon.engine.model.entity.application.Application;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.app.AppServletStatistic;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.app.AppStatistic;
+import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbBeanCacheStat;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbBeanMethodStat;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbBeanPoolStat;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbStat;
@@ -27,12 +28,14 @@ import hu.btsoft.gfmon.engine.monitor.collector.CollectedValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.application.app.AppServletStatisticCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.application.app.AppWebStatisticCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbBeanCacheStatCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbBeanMethodCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbBeanPoolCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbTimersCollector;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -71,6 +74,9 @@ public class ApplicationSnapshotProvider {
     private AppEjbTimersCollector appEjbTimersCollector;
 
     @Inject
+    private AppEjbBeanCacheStatCollector appEjbBeanCacheStatCollector;
+
+    @Inject
     private JSonEntityToSnapshotEntityMapper jSonEntityToSnapshotEntityMapper;
 
     private Set<DataUnitDto> collectDataUnits;
@@ -78,7 +84,7 @@ public class ApplicationSnapshotProvider {
     /**
      * Alkalmazás path-jának kitalálása
      * Ha több modulból áll, akkor érdekes
-     *
+     * <p>
      * Anomália:
      * TODO: ezzel még kell kezdeni valamit....
      * - http://localhost:4848/monitoring/domain/server/applications/TestEar-ear/TestEar-ejb-0_0_3.jar
@@ -195,11 +201,14 @@ public class ApplicationSnapshotProvider {
         }
 
         EjbStat ejbStat = (EjbStat) jSonEntityToSnapshotEntityMapper.map(valuesList);
-        if (ejbStat != null) {
-            ejbStat.setApplication(app);
-            ejbStat.setEjbName(beanName);
-            snapshots.add(ejbStat);
+        if (ejbStat == null) {
+            log.warn("Null az '{}' alkalmazás '{}' ejbStatisztikája!", app, fullUrl);
+            return null;
         }
+
+        ejbStat.setApplication(app);
+        ejbStat.setEjbName(beanName);
+        snapshots.add(ejbStat);
 
         //Milyen más EJB statisztikái vannak?
         Map<String, String> ejbStatisticsMap = GFJsonUtils.getChildResourcesMap(rootJsonObject);
@@ -228,8 +237,13 @@ public class ApplicationSnapshotProvider {
 
                                 EjbBeanMethodStat ejbBeanMethodStat = (EjbBeanMethodStat) jSonEntityToSnapshotEntityMapper.map(valuesList);
                                 if (ejbBeanMethodStat != null) {
-                                    ejbBeanMethodStat.setEjbStat(ejbStat);
                                     ejbBeanMethodStat.setMethodName(beanMethodName);
+                                    ejbBeanMethodStat.setEjbStat(ejbStat);
+                                    if (ejbStat.getEjbBeanMethodStats() == null) {
+                                        ejbStat.setEjbBeanMethodStats(new LinkedList<>());
+                                    }
+                                    ejbStat.getEjbBeanMethodStats().add(ejbBeanMethodStat);
+
                                     snapshots.add(ejbBeanMethodStat);
                                 }
                             }
@@ -250,6 +264,11 @@ public class ApplicationSnapshotProvider {
                         EjbBeanPoolStat ejbBeanPoolStat = (EjbBeanPoolStat) jSonEntityToSnapshotEntityMapper.map(valuesList);
                         if (ejbBeanPoolStat != null) {
                             ejbBeanPoolStat.setEjbStat(ejbStat);
+                            if (ejbStat.getEjbBeanPoolStats() == null) {
+                                ejbStat.setEjbBeanPoolStats(new LinkedList<>());
+                            }
+                            ejbStat.getEjbBeanPoolStats().add(ejbBeanPoolStat);
+
                             snapshots.add(ejbBeanPoolStat);
                         }
                         break;
@@ -268,7 +287,34 @@ public class ApplicationSnapshotProvider {
                         EjbTimerStat ejbTimersStat = (EjbTimerStat) jSonEntityToSnapshotEntityMapper.map(valuesList);
                         if (ejbTimersStat != null) {
                             ejbTimersStat.setEjbStat(ejbStat);
+                            if (ejbStat.getEjbTimersStats() == null) {
+                                ejbStat.setEjbTimersStats(new LinkedList<>());
+                            }
+                            ejbStat.getEjbTimersStats().add(ejbTimersStat);
+
                             snapshots.add(ejbTimersStat);
+                        }
+                        break;
+
+                    case "bean-cache":
+                        valuesList = appEjbBeanCacheStatCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
+
+                        //Ha kell dataUnitokat is gyűjteni
+                        if (collectDataUnits != null) {
+                            List<DataUnitDto> dataUnits = appEjbBeanCacheStatCollector.fetchDataUnits(GFJsonUtils.getEntities(rootJsonObject));
+                            if (dataUnits != null && !dataUnits.isEmpty()) {
+                                collectDataUnits.addAll(dataUnits);
+                            }
+                        }
+
+                        EjbBeanCacheStat ejbBeanCacheStat = (EjbBeanCacheStat) jSonEntityToSnapshotEntityMapper.map(valuesList);
+                        if (ejbBeanCacheStat != null) {
+                            ejbBeanCacheStat.setEjbStat(ejbStat);
+                            if (ejbStat.getEjbBeanCacheStat() == null) {
+                                ejbStat.setEjbBeanCacheStat(new LinkedList<>());
+                            }
+                            ejbStat.getEjbBeanCacheStat().add(ejbBeanCacheStat);
+                            snapshots.add(ejbBeanCacheStat);
                         }
                         break;
 
@@ -301,7 +347,7 @@ public class ApplicationSnapshotProvider {
         //Megnézzük, hogy milyen statisztikái vannak
         String resourceUri = restDataCollector.getSubUri() + "applications/" + this.getModulePath(app);
         JsonObject rootJsonObject = restDataCollector.getRootJsonObject(simpleUrl, resourceUri, userName, sessionToken);
-        Map<String/* 'server', vagy a bean neve*/, String /* full URL*/> childResourcesMap = GFJsonUtils.getChildResourcesMap(rootJsonObject);
+        Map<String/* 'server', vagy a bean neve */, String /* full URL */> childResourcesMap = GFJsonUtils.getChildResourcesMap(rootJsonObject);
         if (childResourcesMap == null || childResourcesMap.isEmpty()) {
             return null;
         }

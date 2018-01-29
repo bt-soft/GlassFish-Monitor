@@ -69,7 +69,7 @@ public class ConfigService extends ServiceBase<Config> {
      */
     private Config getConfig(String keyName) {
         Query query = em.createNamedQuery("Config.findByKeyNames");
-        query.setParameter("keyClassName", IConfigKeyNames.CLASS_NAME);
+        query.setParameter("keyClassName", ConfigKeyNames.CLASS_NAME);
         query.setParameter("keyName", keyName);
 
         Config config = (Config) query.getSingleResult();
