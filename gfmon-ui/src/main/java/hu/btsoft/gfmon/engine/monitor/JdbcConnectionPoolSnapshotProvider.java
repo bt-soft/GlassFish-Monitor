@@ -14,6 +14,7 @@ package hu.btsoft.gfmon.engine.monitor;
 import hu.btsoft.gfmon.corelib.json.GFJsonUtils;
 import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
+import hu.btsoft.gfmon.engine.model.entity.application.Application;
 import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcConnectionPool;
 import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnectionPoolAppStatistic;
 import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnectionPoolStatistic;
@@ -63,7 +64,13 @@ public class JdbcConnectionPoolSnapshotProvider {
      *
      * @return
      */
-    private ConnectionPoolStatistic start(String simpleUrl, String userName, String sessionToken, String poolName) {
+    private ConnectionPoolStatistic start(Server server, String poolName) {
+
+        List<Application> applications = server.getApplications();
+        String simpleUrl = server.getSimpleUrl();
+        String userName = server.getUserName();
+        String sessionToken = server.getSessionToken();
+
         String resourceUri = restDataCollector.getSubUri() + "resources/" + poolName;
         JsonObject rootJsonObject = restDataCollector.getRootJsonObject(simpleUrl, resourceUri, userName, sessionToken);
         List<CollectedValueDto> valuesList = jdbcConnectionPoolCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
@@ -86,9 +93,21 @@ public class JdbcConnectionPoolSnapshotProvider {
         if (applicationsMap != null && !applicationsMap.isEmpty()) {
             for (String appname : applicationsMap.keySet()) {
 
-                String serrvletFullUrl = applicationsMap.get(appname);
+                //Ha a pool statisztika egy már nem élő alkalmazáshoz tartozik, akkor nem gyűjtjük róla az adatokat
+                boolean isLiveApplicationsConnectionPool = false;
+                for (Application app : applications) {
+                    if (app.getAppRealName().equals(appname)) {
+                        isLiveApplicationsConnectionPool = true;
+                        break;
+                    }
+                }
+                if (!isLiveApplicationsConnectionPool) {
+                    continue;
+                }
 
-                rootJsonObject = restDataCollector.getRootJsonObject(serrvletFullUrl, userName, sessionToken);
+                String connPoolFullUrl = applicationsMap.get(appname);
+
+                rootJsonObject = restDataCollector.getRootJsonObject(connPoolFullUrl, userName, sessionToken);
                 valuesList = jdbcConnectionPooApplCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
 
                 //Ha kell dataUnitokat is gyűjteni
@@ -102,7 +121,7 @@ public class JdbcConnectionPoolSnapshotProvider {
                 ConnectionPoolAppStatistic connectionPoolAppStatistic = (ConnectionPoolAppStatistic) jSonEntityToSnapshotEntityMapper.map(valuesList);
 
                 if (connectionPoolAppStatistic != null) {
-                    connectionPoolAppStatistic.setAppName(appname); //Az alkamazás neve
+                    connectionPoolAppStatistic.setAppName(appname); //Az alkalmazás neve
                     connectionPoolAppStatistic.setConnectionPoolStatistic(connectionPoolStatistic); //melyik connectionPool statisztikához tartozik
 
                     //Hozzáadjuk a Connectionpool statisztikáhozs az connectionPoolAppStatistic statisztikát is
@@ -139,7 +158,7 @@ public class JdbcConnectionPoolSnapshotProvider {
             //Ha monitorozásra aktív, akkor meghívjuk rá az adatgyűjtőt
             if (jdbcConnectionPool.getActive() != null && Objects.equals(jdbcConnectionPool.getActive(), Boolean.TRUE)) {
 
-                ConnectionPoolStatistic connectionPoolStatisticSnapshot = this.start(server.getSimpleUrl(), server.getUserName(), server.getSessionToken(), jdbcConnectionPool.getPoolName());
+                ConnectionPoolStatistic connectionPoolStatisticSnapshot = this.start(server, jdbcConnectionPool.getPoolName());
 
                 if (connectionPoolStatisticSnapshot == null) {
                     continue;

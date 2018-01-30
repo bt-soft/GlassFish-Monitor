@@ -21,6 +21,7 @@ import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
 import hu.btsoft.gfmon.engine.model.service.ServerService;
 import hu.btsoft.gfmon.engine.monitor.ApplicationsMonitor;
+import hu.btsoft.gfmon.engine.monitor.GlassFishMonitorController;
 import hu.btsoft.gfmon.engine.monitor.JdbcConnectionPoolMonitor;
 import hu.btsoft.gfmon.engine.monitor.management.ServerUptime;
 import hu.btsoft.gfmon.engine.monitor.management.ServerVersion;
@@ -64,6 +65,9 @@ public class SettingsView extends ViewBase {
     @Inject
     private SessionTokenAcquirer sessionTokenAcquirer;
 
+    @EJB
+    private GlassFishMonitorController glassFishMonitorController;
+
     // --- Config -----------------------------------
     @EJB
     private ConfigService configService;
@@ -71,17 +75,6 @@ public class SettingsView extends ViewBase {
     @Getter
     private List<Config> configs;
 
-//    @Getter
-//    @Setter
-//    private Boolean configAutoStart;
-//
-//    @Getter
-//    @Setter
-//    private Integer configSampleInterval;
-//
-//    @Getter
-//    @Setter
-//    private Integer configSampleDataKeepDays;
     // --- Server -----------------------------------
     @EJB
     private ServerService serverService;
@@ -131,23 +124,22 @@ public class SettingsView extends ViewBase {
     @EJB
     private JdbcConnectionPoolMonitor jdbcConnectionPoolMonitor;
 
+    @Getter
+    @Setter
+    private boolean currentMonitorControllerTimerStatus;
+
     /**
      * JSF ManagedBean init
      */
     @PostConstruct
     protected void loadAllFromDb() {
 
+        //Kontroller státusz
+        currentMonitorControllerTimerStatus = glassFishMonitorController.isRunningTimer();
+
         //Konfig rekordok betöltése
         configs = configService.findAll();
 
-//        Config config = findConfig(IConfigKeyNames.AUTOSTART);
-//        configAutoStart = config != null ? Boolean.parseBoolean(config.getKeyValue()) : null;
-//
-//        config = findConfig(IConfigKeyNames.SAMPLE_INTERVAL);
-//        configSampleInterval = config != null ? Integer.parseInt(config.getKeyValue()) : null;
-//
-//        config = findConfig(IConfigKeyNames.SAMPLE_DATA_KEEP_DAYS);
-//        configSampleDataKeepDays = config != null ? Integer.parseInt(config.getKeyValue()) : null;
         //Szerverek betöltése
         refreshServers();
     }
@@ -158,12 +150,7 @@ public class SettingsView extends ViewBase {
     private void clearAll() {
 
         configs = null;
-//        configAutoStart = null;
-//        configSampleInterval = null;
-//        configSampleDataKeepDays = null;
-
         servers = null;
-        //selectedServer = null;
         editedServer = null;
         editServerDialogHeaderText = null;
         settingsDataChanged = false;
@@ -176,6 +163,21 @@ public class SettingsView extends ViewBase {
      */
     public void refreshServers() {
         servers = serverService.findAllAndSetRuntimeSeqId();
+    }
+
+    /**
+     * Monitor timer állítgatása
+     */
+    public void toggleMonitorControllerTimerStatus() {
+        if (currentMonitorControllerTimerStatus) {
+            glassFishMonitorController.startTimer();
+            addJsfMessage("growl", FacesMessage.SEVERITY_INFO, "Monitor Timer elindítása OK");
+        } else {
+            glassFishMonitorController.stopTimer();
+            addJsfMessage("growl", FacesMessage.SEVERITY_WARN, "A Monitor Timer leállítva!");
+        }
+
+        currentMonitorControllerTimerStatus = glassFishMonitorController.isRunningTimer();
     }
 
 //<editor-fold defaultstate="collapsed" desc="Konfigurációs értékek getter/setter">
@@ -244,28 +246,6 @@ public class SettingsView extends ViewBase {
      */
     public void saveSettings() {
 
-        {//A mentendő Config rekord beállítása
-
-//            //SampleInterval beállítása
-//            Config config = findConfig(IConfigKeyNames.SAMPLE_INTERVAL);
-//            if (config != null) {
-//                config.setKeyValue(configSampleInterval.toString());
-//            }
-//
-//            //AutoStart beállítása
-//            config = findConfig(IConfigKeyNames.AUTOSTART);
-//            if (config != null) {
-//                config.setKeyValue(configAutoStart.toString());
-//                settingsDataChanged = true;
-//            }
-//
-//            //KeepDays beállítása
-//            config = findConfig(IConfigKeyNames.SAMPLE_DATA_KEEP_DAYS);
-//            if (config != null) {
-//                config.setKeyValue(configSampleDataKeepDays.toString());
-//                settingsDataChanged = true;
-//            }
-        }
         try {
             //Config mentése
             configs.forEach((Config config) -> {

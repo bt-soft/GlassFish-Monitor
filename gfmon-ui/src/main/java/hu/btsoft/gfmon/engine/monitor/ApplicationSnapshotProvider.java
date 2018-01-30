@@ -35,7 +35,6 @@ import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbTimersCollector;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -141,6 +140,7 @@ public class ApplicationSnapshotProvider {
         AppStatistic appStatistic = (AppStatistic) jSonEntityToSnapshotEntityMapper.map(valuesList);
         if (appStatistic != null) {
             appStatistic.setApplication(app);
+            app.getAppStatistics().add(appStatistic);
             snapshots.add(appStatistic);
         }
 
@@ -167,6 +167,7 @@ public class ApplicationSnapshotProvider {
                 if (appServletStatistic != null) {
                     appServletStatistic.setServletName(servletName); //A szervlet neve
                     appServletStatistic.setAppStatistic(appStatistic); //melyik alkalmazás statisztikához tartozik
+                    appStatistic.getAppServletStatistics().add(appServletStatistic);
                     snapshots.add(appServletStatistic);
                 }
             }
@@ -206,8 +207,9 @@ public class ApplicationSnapshotProvider {
             return null;
         }
 
-        ejbStat.setApplication(app);
         ejbStat.setEjbName(beanName);
+        ejbStat.setApplication(app);
+        app.getEjbStats().add(ejbStat);
         snapshots.add(ejbStat);
 
         //Milyen más EJB statisztikái vannak?
@@ -239,11 +241,7 @@ public class ApplicationSnapshotProvider {
                                 if (ejbBeanMethodStat != null) {
                                     ejbBeanMethodStat.setMethodName(beanMethodName);
                                     ejbBeanMethodStat.setEjbStat(ejbStat);
-                                    if (ejbStat.getEjbBeanMethodStats() == null) {
-                                        ejbStat.setEjbBeanMethodStats(new LinkedList<>());
-                                    }
                                     ejbStat.getEjbBeanMethodStats().add(ejbBeanMethodStat);
-
                                     snapshots.add(ejbBeanMethodStat);
                                 }
                             }
@@ -264,11 +262,7 @@ public class ApplicationSnapshotProvider {
                         EjbBeanPoolStat ejbBeanPoolStat = (EjbBeanPoolStat) jSonEntityToSnapshotEntityMapper.map(valuesList);
                         if (ejbBeanPoolStat != null) {
                             ejbBeanPoolStat.setEjbStat(ejbStat);
-                            if (ejbStat.getEjbBeanPoolStats() == null) {
-                                ejbStat.setEjbBeanPoolStats(new LinkedList<>());
-                            }
                             ejbStat.getEjbBeanPoolStats().add(ejbBeanPoolStat);
-
                             snapshots.add(ejbBeanPoolStat);
                         }
                         break;
@@ -287,11 +281,7 @@ public class ApplicationSnapshotProvider {
                         EjbTimerStat ejbTimersStat = (EjbTimerStat) jSonEntityToSnapshotEntityMapper.map(valuesList);
                         if (ejbTimersStat != null) {
                             ejbTimersStat.setEjbStat(ejbStat);
-                            if (ejbStat.getEjbTimersStats() == null) {
-                                ejbStat.setEjbTimersStats(new LinkedList<>());
-                            }
                             ejbStat.getEjbTimersStats().add(ejbTimersStat);
-
                             snapshots.add(ejbTimersStat);
                         }
                         break;
@@ -310,9 +300,6 @@ public class ApplicationSnapshotProvider {
                         EjbBeanCacheStat ejbBeanCacheStat = (EjbBeanCacheStat) jSonEntityToSnapshotEntityMapper.map(valuesList);
                         if (ejbBeanCacheStat != null) {
                             ejbBeanCacheStat.setEjbStat(ejbStat);
-                            if (ejbStat.getEjbBeanCacheStat() == null) {
-                                ejbStat.setEjbBeanCacheStat(new LinkedList<>());
-                            }
                             ejbStat.getEjbBeanCacheStat().add(ejbBeanCacheStat);
                             snapshots.add(ejbBeanCacheStat);
                         }

@@ -13,13 +13,19 @@ package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.cdi.CdiUtils;
 import hu.btsoft.gfmon.corelib.time.Elapsed;
+import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
+import javax.annotation.security.RolesAllowed;
+import javax.ejb.ConcurrencyManagement;
+import javax.ejb.ConcurrencyManagementType;
 import javax.ejb.DependsOn;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
@@ -29,7 +35,6 @@ import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
 import javax.enterprise.inject.Instance;
 import lombok.extern.slf4j.Slf4j;
-import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
 
 /**
  *
@@ -39,6 +44,9 @@ import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
 @Startup
 @DependsOn("Bootstrapper")
 @Slf4j
+@RolesAllowed("APP_GFMON_ADMIN")
+@ConcurrencyManagement(ConcurrencyManagementType.BEAN) //Ne legyen lock a UI felületen, a mérés közben
+@Lock(LockType.WRITE)
 public class GlassFishMonitorController {
 
     @EJB
@@ -98,7 +106,7 @@ public class GlassFishMonitorController {
                 new TimerConfig("GFMon-Timer", false) //ne legyen perzisztens a timer!
         );
 
-        log.trace("A timer felhúzva {} másodpercenként", sampleIntervalSec);
+        log.trace("A(z) {} timer felhúzva {} másodpercenként", this.timer, sampleIntervalSec);
     }
 
     /**
@@ -114,22 +122,21 @@ public class GlassFishMonitorController {
 
         try {
             this.timer.cancel();
+            log.trace("A(z) {} timer leállítva", this.timer);
         } catch (IllegalStateException | EJBException e) {
             log.error("Nem állítható le a Timer: {}", this.timer, e);
         } finally {
             this.timer = null;
-
         }
 
         //A singleton vezérlés miatt inkább mindig lookup-olunk, mert csak így lesz StateLess a monitor vezérlő
-        Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class
-        );
+        Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class);
         if (monitors != null) {
             monitors.forEach((monitor) -> {
                 monitor.afterStopTimer();
             });
         }
-
+        log.trace("Monitorozó példányok leállítva");
     }
 
     /**
@@ -145,6 +152,8 @@ public class GlassFishMonitorController {
      *
      * @return
      */
+    @RolesAllowed("APP_GFMON_USER")
+    @Lock(LockType.READ)
     public boolean isRunningTimer() {
         return (this.timer != null);
     }

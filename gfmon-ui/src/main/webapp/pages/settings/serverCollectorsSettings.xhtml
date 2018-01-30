@@ -95,7 +95,7 @@
                                  var="joiner"
 
                                  scrollable="true"
-                                 scrollWidth="180%"
+
                                  scrollHeight="600"
 
                                  multiViewState="false"
@@ -119,7 +119,7 @@
                         <p:column headerText="active"
                                   styleClass="alignCenter"
                                   sortBy="{joiner.active}"
-                                  style="width: 1em"
+                                  style="width: 3em"
                                   >
                             <p:selectBooleanCheckbox value="#{joiner.active}">
                                 <p:ajax event="valueChange"  update="cdusTable" listener="#{collectorSettingsView.joinerActiveChanged(joiner.svrCollectorDataUnitId)}"/>
@@ -130,7 +130,7 @@
                         <p:column headerText="!!"
                                   styleClass="alignCenter"
                                   sortBy="#{joiner.additionalMessage}"
-                                  style="width: 1em; color: #{collectorSettingsView.warningExisInDcus() ? 'orange' : null}; font-weight: #{collectorSettingsView.warningExisInDcus() ? 'bold' : null}">
+                                  style="width: 2em; color: #{collectorSettingsView.warningExisInDcus() ? 'orange' : 'silver'}; font-weight: #{collectorSettingsView.warningExisInDcus() ? 'bold' : null}">
 
                             <p:outputLabel id="emptyLabel"
                                            rendered="#{not empty joiner.additionalMessage}">
@@ -177,7 +177,7 @@
                         -->
 
                         <p:column headerText="restPath"
-                                  style="width: 18vh"
+                                  style="width: 20em"
                                   sortBy="#{joiner.svrCollectorDataUnit.restPath}"
                                   filterBy="#{joiner.svrCollectorDataUnit.restPath}"
                                   filterStyle="width: 10em; font-size: 0.6em"
@@ -187,7 +187,7 @@
                         </p:column>
 
                         <p:column headerText="dataName"
-                                  style="width: 14vh"
+                                  style="width: 15em"
                                   sortBy="#{joiner.svrCollectorDataUnit.dataName}"
                                   filterBy="#{joiner.svrCollectorDataUnit.dataName}"
                                   filterStyle="width: 10em; font-size: 0.6em"
@@ -197,13 +197,13 @@
                         </p:column>
 
                         <p:column headerText="unit"
-                                  style="width: 4vh"
+                                  style="width: 6em"
                                   sortBy="#{joiner.svrCollectorDataUnit.unit}"
                                   >
                             <h:outputText value="#{joiner.svrCollectorDataUnit.unit}" />
                         </p:column>
 
-                        <p:column headerText="description">
+                        <p:column headerText="description" style="width: 80em">
                             <h:outputText value="#{joiner.svrCollectorDataUnit.description}" />
                         </p:column>
                     </p:dataTable>

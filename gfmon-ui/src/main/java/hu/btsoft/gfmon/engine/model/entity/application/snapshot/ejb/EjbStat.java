@@ -16,6 +16,7 @@ import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
+import java.util.LinkedList;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -106,7 +107,7 @@ public class EjbStat extends AppSnapshotBase {
     @OneToMany(mappedBy = "ejbStat", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "APP_EJBMETHOD_STAT_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 23)
-    private List<EjbBeanMethodStat> ejbBeanMethodStats;
+    private List<EjbBeanMethodStat> ejbBeanMethodStats = new LinkedList<>();
 
     /**
      * EJB Bean pool Stat
@@ -114,7 +115,7 @@ public class EjbStat extends AppSnapshotBase {
     @OneToMany(mappedBy = "ejbStat", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "APP_EJBPOOL_STAT_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 22)
-    private List<EjbBeanPoolStat> ejbBeanPoolStats;
+    private List<EjbBeanPoolStat> ejbBeanPoolStats = new LinkedList<>();
 
     /**
      * EJB Timers Stat
@@ -122,7 +123,7 @@ public class EjbStat extends AppSnapshotBase {
     @OneToMany(mappedBy = "ejbStat", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "APP_EJBTIMERS_STAT_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 22)
-    private List<EjbTimerStat> ejbTimersStats;
+    private List<EjbTimerStat> ejbTimersStats = new LinkedList<>();
 
     /**
      * EJB BeanCache Stat
@@ -130,6 +131,6 @@ public class EjbStat extends AppSnapshotBase {
     @OneToMany(mappedBy = "ejbStat", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "APP_EJBBEANCACHE_STAT_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 22)
-    private List<EjbBeanCacheStat> ejbBeanCacheStat;
+    private List<EjbBeanCacheStat> ejbBeanCacheStat = new LinkedList<>();
 
 }

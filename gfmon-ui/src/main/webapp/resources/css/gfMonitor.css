@@ -2,45 +2,22 @@
 
 /** --- Layout definíciók ------------------------------------------------------------------------------------------------------------------------------------*/
 
-html,body {
-
-    /*font-family: Verdana, "Verdana CE",  Arial, "Arial CE", "Lucida Grande CE", lucida, "Helvetica CE", sans-serif;*/
-    font-family: "Segoe UI";
-
-    /* https://www.w3schools.com/css/css_font.asp:
+/*
+     https://www.w3schools.com/css/css_font.asp:
         Az 1em egyenlő az aktuális betűmérettel.
         A böngészők alapértelmezett szövegmérete 16 oldal.
         Így az 1em alapértelmezett mérete 16px.
         0.75em = 10px :)
-    */
-    /*font-size: 1em;*/
-    font-size: 1.5vh !important;
-
-    padding: 0;
+*/
+html,
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
     margin: 0;
 }
 
-
-root {
-    font-size: 1em;
-    font-family: 'Segoe UI', Arial, sans-serif;
+.ui-widget, .ui-widget .ui-widget {
+    font-size: 90% !important;
 }
-
-.ui-widget {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 1em;
-}
-.ui-widget .ui-widget {
-    font-size: 1em;
-}
-.ui-widget input,
-.ui-widget select,
-.ui-widget textarea,
-.ui-widget button {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 0.8em;
-}
-
 
 /** --- Layout definíciók ------------------------------------------------------------------------------------------------------------------------------------*/
 #simple-body {
@@ -122,10 +99,10 @@ root {
     color: teal;
 }
 .header-detail-prompt {
-    font-size: 0.6em;
+    font-size: 0.7em;
 }
 .header-detail-value {
-    font-size: 0.6em;
+    font-size: 0.7em;
     margin-left: 0.5em
 }
 
@@ -176,6 +153,16 @@ root {
     text-align: right;
 }
 
+/** cellatartalom közlépre */
+.rigth-aligned-columns td{
+    text-align: center;
+}
+
+/** cellatartalom balra */
+.rigth-aligned-columns td{
+    text-align: left;
+}
+
 /** --- Nézegetős Dialógusok PanelGrid ------------------------------------------------------------------------------------------------------------*/
 .viewDlgTblPrompt{
     text-align: right;
@@ -187,8 +174,59 @@ root {
 
 
 /** --- DataTable ---------------------------------------------------------------------------------------------------------------------------------*/
+.ui-datatable,
+.ui-datatable .ui-datatable-tablewrapper table {
+    font-size: 1em !important;
+}
+
+/* For Paginator */
+.ui-datatable .ui-paginator .ui-paginator-first,
+.ui-datatable .ui-paginator .ui-paginator-prev,
+.ui-datatable .ui-paginator .ui-paginator-pages .ui-paginator-page,
+.ui-datatable .ui-paginator .ui-paginator-next,
+.ui-datatable .ui-paginator .ui-paginator-last,
+.ui-datatable .ui-paginator .ui-paginator-rpp-options {
+    font-size: 1em !important;
+}
+.ui-datatable .ui-paginator .ui-paginator-current {
+    font-size: 1em !important;
+}
+
+
 /* filter a header text után */
 .ui-datatable th .ui-column-filter {
     display: inline;
     margin-left: 0.5em;
 }
+
+/* Header */
+/*.ui-datatable .ui-datatable-header {
+    font-size: 1em !important;
+}*/
+
+/* lábléc */
+/*.ui-datatable-footer {
+    font-size: 0.9em !important;
+}*/
+
+/* tábla Fejléc */
+/*.ui-datatable th {
+    font-size: 0.7em !important;
+}*/
+
+/* adatsorok */
+/*.ui-datatable td {
+    font-size: 0.7em !important;
+}*/
+
+/* paginator */
+/*.ui-paginator {
+    font-size: 0.9em !important;
+    font-weight: normal;
+}*/
+
+/* kijelölt cellatartalom text shadow*/
+.ui-datatable .ui-state-highlight {
+    text-shadow: none !important;
+}
+/** -----------------------------------------------------------------------------------------------------------------------------------------------*/

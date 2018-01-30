@@ -18,6 +18,7 @@ import hu.btsoft.gfmon.engine.model.entity.application.snapshot.app.AppStatistic
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbStat;
 import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnectionPoolAppStatistic;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.persistence.Cacheable;
@@ -59,7 +60,7 @@ import lombok.extern.slf4j.Slf4j;
     @NamedQuery(name = "Application.findByServerIdAndAppShortName", query = "SELECT a FROM Application a WHERE a.server.id = :serverId AND a.appShortName = :appShortName"), //
 })
 @Data
-@ToString(callSuper = true, exclude = {"server", "ejbStatistics", "appStatistics"})
+@ToString(callSuper = true, exclude = {"server", "ejbStats", "appStatistics"})
 @EqualsAndHashCode(callSuper = true, of = {"appShortName", "appRealName", "moduleShortName", "moduleRealName", "enabled", "contextRoot", "description"}) //az 'active' nem számít bele az azonosságba!
 @NoArgsConstructor
 @Slf4j
@@ -162,15 +163,15 @@ public class Application extends ModifiableEntityBase {
 
     //-- Alkalmazás statisztika Mérési eredmények
     @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AppStatistic> appStatistics;
+    private List<AppStatistic> appStatistics = new LinkedList<>();
 
     //-- EJB statisztika eredmények
     @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<EjbStat> ejbStatistics;
+    private List<EjbStat> ejbStats = new LinkedList<>();
 
     //-- ConnectionPool usage statisztika mérése eredmények
     @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ConnectionPoolAppStatistic> connectionPoolAppStatistics;
+    private List<ConnectionPoolAppStatistic> connectionPoolAppStatistics = new LinkedList<>();
 
     /**
      * Konstruktor
