@@ -13,6 +13,7 @@ package hu.btsoft.gfmon.engine.model.entity.server.snapshot;
 
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
+import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -35,73 +36,82 @@ public abstract class ConnectionQueueFieldsBase extends SnapshotBase {
 
     /**
      * • countopenconnections
-     *
+     * <p>
      * The number of open/active connections
      */
-    @ColumnPosition(position = 20)
+    @Column(name = "COUNT_OPEN_CONNECTIONS")
+    @ColumnPosition(position = 30)
     private Long countOpenConnections;
 
     /**
      * • countoverflows
-     *
+     * <p>
      * Number of times the queue has been too full to accommodate a connection
      */
-    @ColumnPosition(position = 21)
+    @Column(name = "COUNT_OWERFLOWS")
+    @ColumnPosition(position = 31)
     private Long countOverflows;
 
     /**
      * • countqueued
-     *
+     * <p>
      * Number of connections currently in the queue
      */
-    @ColumnPosition(position = 22)
+    @Column(name = "COUNT_QUEUED")
+    @ColumnPosition(position = 32)
     private Long countQueued;
 
     /**
      * • countqueued15minutesaverage
-     *
+     * <p>
      * Average number of connections queued in the last 15 minutes
      */
-    @ColumnPosition(position = 23)
+    @Column(name = "COUNT_QUEUED_15MINUTES_AVERAGE")
+    @ColumnPosition(position = 33)
     private Long countQueued15MinutesAverage;
 
     /**
      * • countqueued1minutesaverage
-     *
+     * <p>
      * Average number of connections queued in the last 1 minute
      */
-    @ColumnPosition(position = 24)
+    @Column(name = "COUNT_QUEUED_1MINUTE_AVERAGE")
+    @ColumnPosition(position = 34)
     private Long countQueued1MinuteAverage;
 
     /**
      * • countqueued5minutesaverage
-     *
+     * <p>
      * Average number of connections queued in the last 5 minute
      */
-    @ColumnPosition(position = 25)
+    @Column(name = "COUNT_QUEUED_5MINUTES_AVERAGE")
+    @ColumnPosition(position = 35)
     private Long countQueued5MinutesAverage;
 
     /**
      * • counttotalconnections
-     *
+     * <p>
      * Total number of connections that have been accepted
      */
-    @ColumnPosition(position = 26)
+    @Column(name = "COUNT_TOTAL_QUEUED")
+    @ColumnPosition(position = 36)
     private Long countTotalQueued;
 
     /**
      * • maxqueued
-     *
+     * <p>
      * Maximum size of the connection queue
      */
-    @ColumnPosition(position = 27)
+    @Column(name = "MAX_QUEUED")
+    @ColumnPosition(position = 37)
     private Long maxQueued;
 
     /**
      * • peakqueued
-     *
+     * <p>
      * Largest number of connections that were in the queue simultaneously
      */
+    @Column(name = "PEAK_QUEUED")
     @ColumnPosition(position = 27)
     private Long peakQueued;
 

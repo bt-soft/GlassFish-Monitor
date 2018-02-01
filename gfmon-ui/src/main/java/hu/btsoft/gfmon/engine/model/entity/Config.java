@@ -55,7 +55,7 @@ public class Config extends ModifiableEntityBase {
     @NotNull(message = "A keyClassName nem lehet null")
     @Column(name = "KEYCLASS_NAME", length = 30, nullable = false)
     @XmlElement(required = true)
-    @ColumnPosition(position = 10)
+    @ColumnPosition(position = 30)
     private String keyClassName;
 
     /**
@@ -64,7 +64,7 @@ public class Config extends ModifiableEntityBase {
     @NotNull(message = "A keyName nem lehet null")
     @Column(name = "KEY_NAME", length = 30, nullable = false)
     @XmlElement(required = true)
-    @ColumnPosition(position = 11)
+    @ColumnPosition(position = 31)
     private String keyName;
 
     /**
@@ -74,7 +74,7 @@ public class Config extends ModifiableEntityBase {
     @Column(name = "VALUE_TYPE", length = 2, nullable = false)
     @XmlElement(required = true)
     @Enumerated(EnumType.STRING)
-    @ColumnPosition(position = 12)
+    @ColumnPosition(position = 32)
     private ConfigValueType valueType;
 
     /**
@@ -82,6 +82,6 @@ public class Config extends ModifiableEntityBase {
      */
     @Column(name = "KEY_VALUE", length = 1024, nullable = true)
     @XmlElement(required = false)
-    @ColumnPosition(position = 13)
+    @ColumnPosition(position = 33)
     private String keyValue;
 }

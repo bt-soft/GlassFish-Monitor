@@ -43,7 +43,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.modelmapper.ModelMapper;
 import org.primefaces.context.RequestContext;
 
 /**
@@ -249,7 +248,7 @@ public class SettingsView extends ViewBase {
         try {
             //Config mentése
             configs.forEach((Config config) -> {
-                configService.save(config);
+                configService.save(config, currentUser);
             });
 
             //Szerver tényleges törlése, ha a deleteServersFromDb-ben van törléendő
@@ -275,8 +274,7 @@ public class SettingsView extends ViewBase {
                 }
 
                 //Szerver mentése, az alkalmazások update automatikusan megtörténik
-                serverService.save(server);
-
+                serverService.save(server, currentUser);
             });
 
             //Újra betöltünk mindent
@@ -341,7 +339,7 @@ public class SettingsView extends ViewBase {
     /**
      * Új vagy módosított szerver mentése a listába
      */
-    public void save() {
+    public void saveEditedServer() {
 
         //Duplikált a mentendő szerver adata?
         if (isDuplicateNewServer(editedServer)) {
@@ -374,22 +372,19 @@ public class SettingsView extends ViewBase {
     /**
      * Módosítást kezdünk
      */
-    public void modifyBegin() {
+    public void modifySelectedServerBegin() {
         if (selectedServer == null) {
             return;
         }
-        ModelMapper mapper = new ModelMapper();
-        editedServer = new Server();
-        mapper.map(selectedServer, editedServer);
-        editServerDialogHeaderText = "Szerver módosítása: " + selectedServer.getUrl();
-
+        editedServer = selectedServer;
+        editServerDialogHeaderText = "Szerver módosítása";
         underModifyProcess = true;
     }
 
     /**
      * Módosítások eldobása
      */
-    public void cancel() {
+    public void cancelEditedServer() {
         editedServer = null;
         addJsfMessage("growl", FacesMessage.SEVERITY_WARN, "A adatok eldobva");
         underModifyProcess = false;
@@ -398,7 +393,7 @@ public class SettingsView extends ViewBase {
     /**
      * Kiválasztott szerver törlése a listából
      */
-    public void delete() {
+    public void deleteSelectedServer() {
         servers.remove(selectedServer); //A kiválasztot szerver példányt töröljük a listából
 
         //Ha a szerver szerepel már az adatbázisban, akkor egy külön listában vezetjük
@@ -492,12 +487,12 @@ public class SettingsView extends ViewBase {
             List<Application> applicationsList = applicationsMonitor.getApplicationsList(selectedServer);
             //Beállítjuk, hogy ki vette fel őket
             if (applicationsList != null) {
-                for (Application app : applicationsList) {
-                    if (app.getCreatedBy() == null) {
-                        //beállítjuk, hogy melyik szerveren fut az alkalmazás
-                        app.setCreatedBy(currentUser);
-                    }
-                }
+                applicationsList.stream()
+                        .filter((app) -> (app.getCreatedBy() == null))
+                        .forEachOrdered((app) -> {
+                            //beállítjuk, hogy melyik szerveren fut az alkalmazás
+                            app.setCreatedBy(currentUser);
+                        });
             }
 
             selectedServer.setApplications(applicationsList);
@@ -511,7 +506,7 @@ public class SettingsView extends ViewBase {
         applicationsMonitor.maintenanceServerAplicationInDataBase(selectedServer);
 
         //Újra kikeressük az adatbázisból a szervert, hogy az alkalmazások lista frissűljön
-        Server refreshedServer = serverService.find(selectedServer.getId());
+        Server refreshedServer = (Server) serverService.find(selectedServer.getId());
 
         //Ugyan arra a runtimeSequId-re állítjuk
         refreshedServer.setRuntimeSeqId(selectedServer.getRuntimeSeqId());
@@ -548,15 +543,14 @@ public class SettingsView extends ViewBase {
             List<JdbcConnectionPool> jdbcConnectionPools = jdbcConnectionPoolMonitor.getJdbcConnectionPoolsList(selectedServer);
             //Beállítjuk, hogy ki vette fel őket
             if (jdbcConnectionPools != null) {
-                for (JdbcConnectionPool app : jdbcConnectionPools) {
-                    if (app.getCreatedBy() == null) {
-                        //beállítjuk, hogy melyik szerveren fut az alkalmazás
-                        app.setCreatedBy(currentUser);
-                    }
-                }
+                jdbcConnectionPools.stream()
+                        .filter((app) -> (app.getCreatedBy() == null))
+                        .forEachOrdered((app) -> {
+                            app.setCreatedBy(currentUser); //beállítjuk, hogy melyik szerveren fut az alkalmazás
+                        });
             }
 
-            selectedServer.setJdbcConnectionPool(jdbcConnectionPools);
+            selectedServer.setJdbcConnectionPools(jdbcConnectionPools);
             return;
         }
 
@@ -567,7 +561,7 @@ public class SettingsView extends ViewBase {
         jdbcConnectionPoolMonitor.maintenanceServerJdbcResourcesInDataBase(selectedServer);
 
         //Újra kikeressük az adatbázisból a szervert, hogy a JDBC lista frissűljön
-        Server refreshedServer = serverService.find(selectedServer.getId());
+        Server refreshedServer = (Server) serverService.find(selectedServer.getId());
 
         //Ugyan arra a runtimeSequId-re állítjuk
         refreshedServer.setRuntimeSeqId(selectedServer.getRuntimeSeqId());
@@ -587,7 +581,7 @@ public class SettingsView extends ViewBase {
      */
     public void toggleAllConPoolActiveFlag(boolean newActiveFlag) {
 
-        selectedServer.getJdbcConnectionPool()
+        selectedServer.getJdbcConnectionPools()
                 .forEach((app) -> {
                     app.setActive(newActiveFlag);
                 });

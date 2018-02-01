@@ -15,6 +15,7 @@ import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -44,7 +45,7 @@ public class EjbBeanPoolStat extends AppSnapshotBase {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "APP_EJBSTAT_ID", referencedColumnName = "ID", nullable = false)
-    @ColumnPosition(position = 11)
+    @ColumnPosition(position = 20)
     private EjbStat ejbStat;
 
     /**
@@ -52,7 +53,8 @@ public class EjbBeanPoolStat extends AppSnapshotBase {
      * <p>
      * Provides the maximum number of messages to load into a JMS session, at a time.
      */
-    @ColumnPosition(position = 20)
+    @Column(name = "JMS_MAX_MESSAGE_LOAD")
+    @ColumnPosition(position = 30)
     private Long jmsMaxMessagesLoad;
 
     /**
@@ -60,23 +62,58 @@ public class EjbBeanPoolStat extends AppSnapshotBase {
      * <p>
      * Number of EJBs in associated pool
      */
-    @ColumnPosition(position = 21)
+    @Column(name = "NUM_BEANS_IN_POOL")
+    @ColumnPosition(position = 31)
     private Long numBeansInPool;  //HW-LW érték!
+
+    @Column(name = "NUM_BEANS_IN_POOL_LW")
+    @ColumnPosition(position = 32)
+    private Long numBeansInPoolLw;
+
+    @Column(name = "NUM_BEANS_IN_POOL_HW")
+    @ColumnPosition(position = 33)
+    private Long numBeansInPoolHw;
+
+    @Column(name = "NUM_BEANS_IN_POOL_LB")
+    @ColumnPosition(position = 34)
+    private Long numBeansInPoolLb;
+
+    @Column(name = "NUM_BEANS_IN_POOL_UB")
+    @ColumnPosition(position = 35)
+    private Long numBeansInPoolUb;
 
     /**
      * • NumThreadsWaiting
      * <p>
      * Number of threads waiting for free beans
      */
-    @ColumnPosition(position = 22)
+    @Column(name = "NUM_THREADS_WAITING")
+    @ColumnPosition(position = 36)
     private Long numThreadsWaiting;
+
+    @Column(name = "NUM_THREADS_WAITING_LW")
+    @ColumnPosition(position = 37)
+    private Long numThreadsWaitingLw;
+
+    @Column(name = "NUM_THREADS_WAITING_HW")
+    @ColumnPosition(position = 38)
+    private Long numThreadsWaitingHw;
+
+    @Column(name = "NUM_THREADS_WAITING_LB")
+    @ColumnPosition(position = 39)
+    private Long numThreadsWaitingLb;
+
+    @Column(name = "NUM_THREADS_WAITING_UB")
+    @ColumnPosition(position = 40)
+    private Long numThreadsWaitingUb;
 
     /**
      * • TotalBeansCreated
      * <p>
      * Number of beans created in the associated pool
      */
-    @ColumnPosition(position = 23)
+    @Column(name = "TOTAL_BEANS_CREATED")
+    @ColumnPosition(position = 41)
     private Long totalBeansCreated;
 
     /**
@@ -84,7 +121,8 @@ public class EjbBeanPoolStat extends AppSnapshotBase {
      * <p>
      * Number of beans destroyed from the associated pool
      */
-    @ColumnPosition(position = 24)
+    @Column(name = "TOTAL_BEANS_DESTROYED")
+    @ColumnPosition(position = 42)
     private Long totalBeansDestroyed;
 
 }

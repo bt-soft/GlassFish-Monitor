@@ -1,17 +1,17 @@
 /*
- Copyright 2012 Adam Bien, adam-bien.com
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
- http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+ * Copyright 2012 Adam Bien, adam-bien.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.lightfish.business.servermonitoring.boundary;
 
@@ -56,8 +56,10 @@ public class MonitoringAdmin {
 
     @Inject
     private Client client;
+
     private String baseUri;
-    private String modules[] = new String[]{"connectorConnectionPool", "connectorService", "deployment", "ejbContainer", "httpService", "jdbcConnectionPool", "jersey", "jmsService", "jpa", "jvm", "orb", "security", "threadPool", "transactionService", "webContainer", "webServicesContainer"};
+
+    private final String MODULES[] = new String[]{"connectorConnectionPool", "connectorService", "deployment", "ejbContainer", "httpService", "jdbcConnectionPool", "jersey", "jmsService", "jpa", "jvm", "orb", "security", "threadPool", "transactionService", "webContainer", "webServicesContainer"};
 
     @PostConstruct
     public void initializeClient() {
@@ -75,7 +77,7 @@ public class MonitoringAdmin {
     private boolean changeMonitoringState(String state) {
         authenticator.get().addAuthenticator(client, username, password);
         MultivaluedMap formData = new MultivaluedHashMap();
-        for (String module : modules) {
+        for (String module : MODULES) {
             formData.add(module, state);
         }
         return postForms(formData);
@@ -89,7 +91,7 @@ public class MonitoringAdmin {
                 response = this.client.target(this.baseUri).path(getEnableMonitoringURI_312(instanceName)).request().header("X-Requested-By", "LightFish").post(Entity.form(form));
                 status = response.getStatus();
             } catch (Exception ex) {
-                LOG.severe("Problem sending request: " + ex);
+                LOG.log(Level.SEVERE, "Problem sending request: {0}", ex);
             }
             LOG.log(Level.INFO, "Got status: {0} for path: {1}  form: {2}", new Object[]{status, getEnableMonitoringURI_312(instanceName), form});
             if (response == null || 200 != response.getStatus()) {

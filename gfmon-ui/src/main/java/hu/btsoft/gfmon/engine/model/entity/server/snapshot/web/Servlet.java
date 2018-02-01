@@ -16,6 +16,7 @@ import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SnapshotBase;
 import javax.persistence.Cacheable;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import lombok.Data;
@@ -42,38 +43,43 @@ public class Servlet extends SnapshotBase {
 
     /**
      * • activeservletsloadedcount
-     *
+     * <p>
      * Number of Servlets loaded
      */
-    @ColumnPosition(position = 20)
+    @Column(name = "ACTIVE_SERVLETS_LOADED")
+    @ColumnPosition(position = 30)
     private Long activeServletsLoaded;
 
     /**
      * LowWatermark
      */
-    @ColumnPosition(position = 21)
+    @Column(name = "ACTIVE_SERVLETS_LOADED_LW")
+    @ColumnPosition(position = 31)
     private Long activeServletsLoadedLw;
 
     /**
      * HighWatermark
      */
-    @ColumnPosition(position = 22)
+    @Column(name = "ACTIVE_SERVLETS_LOADED_HW")
+    @ColumnPosition(position = 32)
     private Long activeServletsLoadedHw;
 
     /**
      * • servletprocessingtimes
-     *
+     * <p>
      * Cumulative Servlet processing times
      */
-    @ColumnPosition(position = 23)
+    @Column(name = "SERVLET_PROCESSING_TIMES")
+    @ColumnPosition(position = 33)
     private Long servletProcessingTimes;
 
     /**
      * • totalservletsloadedcount
-     *
+     * <p>
      * Total number of Servlets ever loaded
      */
-    @ColumnPosition(position = 24)
+    @Column(name = "TOTAL_SERVLETS_LOADED")
+    @ColumnPosition(position = 44)
     private Long totalServletsLoaded;
 
 }

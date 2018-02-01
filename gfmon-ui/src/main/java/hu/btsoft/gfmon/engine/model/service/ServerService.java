@@ -38,7 +38,7 @@ public class ServerService extends ServiceBase<Server> {
     @EJB
     private SvrCollectorDataUnitService svrCollectorDataUnitService;
 
-    @PersistenceContext(unitName = "gfmon_PU")
+    @PersistenceContext
     private EntityManager em;
 
     /**
@@ -59,7 +59,7 @@ public class ServerService extends ServiceBase<Server> {
     }
 
     /**
-     * Az összes ismert DataCollectorUnit hozzáadása a aszerverhez
+     * Az összes ismert DataCollectorUnit hozzáadása a a szerverhez
      *
      * @param server      szerver példány
      * @param creatorUser ha nem interaktív user hívott, akkor ezzel az userrel legyen az audit logolás
@@ -76,14 +76,14 @@ public class ServerService extends ServiceBase<Server> {
                 if (server.getJoiners() == null) {
                     server.setJoiners(new LinkedList<>());
                 }
-                super.save(server);
+                super.save(server, creatorUser);
             }
 
             //Hozzáadjuk az összes DataUnit-et egy Join tábla segítségével, default esetben minden CDU aktív
             allCdus.forEach((cdu) -> {
 
                 //Létrehozuk a kapcsolótábla entitását
-                ServerSvrCollDataUnitJoiner joiner = new ServerSvrCollDataUnitJoiner(server, cdu, super.getSessionUser(creatorUser), Boolean.TRUE);
+                ServerSvrCollDataUnitJoiner joiner = new ServerSvrCollDataUnitJoiner(server, cdu, creatorUser, Boolean.TRUE);
                 em.persist(joiner);
 
                 //Behuzalozzuk a szerverbe és le is mentjük
@@ -135,14 +135,13 @@ public class ServerService extends ServiceBase<Server> {
      */
     public void clearRuntimeValuesAndSave(String modifierUser) {
 
-        super.findAll().stream().map((server) -> {
+        for (Server server : (List<Server>) super.findAll()) {
             server.setSessionToken(null);
             server.setMonitoringServiceReady(null);
             server.setRuntimeSeqId(null);
-            return server;
-        }).forEachOrdered((server) -> {
             super.save(server, modifierUser);
-        });
+        }
+
     }
 
     /**
@@ -173,7 +172,7 @@ public class ServerService extends ServiceBase<Server> {
         entity.setAdditionalInformation(additionalMessage);
 
         //Az esetleges optimisticLocking elkerülése végett a Version-t átmásoljuk az adatbzisból imént felolvasott értékre
-        Server lastVersion = super.find(entity.getId());
+        Server lastVersion = (Server) super.find(entity.getId());
         entity.setOptLockVersion(lastVersion.getOptLockVersion());
 
         //Le is mentjük az adatbázisba az állapotot
@@ -189,7 +188,7 @@ public class ServerService extends ServiceBase<Server> {
     public void clearAdditionalMessage(Server entity, String modifierUser) {
 
         //Rákeresünk, hogy ne legyen optimisticLocking
-        Server lastVersion = super.find(entity.getId());
+        Server lastVersion = (Server) super.find(entity.getId());
 
         //Ha nme üres a kieginfo-ja, akkor most töröljük!
         if (!StringUtils.isEmpty(lastVersion.getAdditionalInformation())) {

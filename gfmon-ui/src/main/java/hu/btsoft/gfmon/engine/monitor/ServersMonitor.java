@@ -16,6 +16,7 @@ import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.entity.server.SvrCollectorDataUnit;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SnapshotBase;
+import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
 import hu.btsoft.gfmon.engine.model.service.SvrCollectorDataUnitService;
 import hu.btsoft.gfmon.engine.model.service.SvrSnapshotService;
 import hu.btsoft.gfmon.engine.monitor.management.ServerMonitoringServiceStatus;
@@ -28,7 +29,6 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
 
 /**
  * GF szerver adatokat összegyűjtő SLSB
@@ -184,7 +184,7 @@ public class ServersMonitor extends MonitorsBase {
             return server;
         }).forEachOrdered((server) -> {
             //lementjük az adatbázisba a szerver megváltozott állapotát
-            serverService.save(server);
+            serverService.save(server, DB_MODIFICATOR_USER);
         });
     }
 
@@ -254,7 +254,7 @@ public class ServersMonitor extends MonitorsBase {
                     })
                     .map((snapshot) -> {
                         //lementjük az adatbázisba
-                        svrSnapshotService.save(snapshot);
+                        svrSnapshotService.save(snapshot, DB_MODIFICATOR_USER);
                         return snapshot;
                     }).forEachOrdered((snapshot) -> {
                 ///////////////////////////////////////////////////log.trace("Server Snapshot: {}", snapshot);

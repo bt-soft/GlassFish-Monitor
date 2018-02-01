@@ -20,6 +20,7 @@ import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.service.ApplicationCollectorDataUnitService;
 import hu.btsoft.gfmon.engine.model.service.ApplicationService;
 import hu.btsoft.gfmon.engine.model.service.ApplicationSnapshotService;
+import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
 import hu.btsoft.gfmon.engine.monitor.management.ApplicationsDiscoverer;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -31,7 +32,6 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
 
 /**
  *
@@ -269,7 +269,7 @@ public class ApplicationsMonitor extends MonitorsBase {
                     //.parallel()  nem jó ötlet a paralel -> lock hiba lesz tőle
                     .map((snapshot) -> {
                         //lementjük az adatbázisba
-                        applicationSnapshotService.save(snapshot);
+                        applicationSnapshotService.save(snapshot, DB_MODIFICATOR_USER);
                         return snapshot;
                     }).forEachOrdered((snapshot) -> {
                 //log.trace("Application Snapshot: {}", snapshot);

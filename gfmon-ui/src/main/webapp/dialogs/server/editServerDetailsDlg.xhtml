@@ -7,6 +7,27 @@
                 xmlns:pe="http://primefaces.org/ui/extensions"
                 >
 
+    <script type="text/javascript">
+        //<![CDATA[
+        /**
+         * Ha nincs kitöltve az UserName, akkor letiltjuk a password mezőt!
+         *
+         * @returns {undefined} -
+         */
+        function userNameChanged() {
+            var userName = $('#editServerDetailsDlgForm\\:user').val();
+
+            //Ha üres az userName, akkor tiltjuk a password mezőt
+            if ((!userName || /^\s*$/.test(userName))) {
+                $('#editServerDetailsDlgForm\\:password').addClass('ui-state-disabled').attr('disabled', 'disabled');
+            } else {
+                $('#editServerDetailsDlgForm\\:password').removeClass('ui-state-disabled').removeAttr('disabled');
+            }
+        }
+
+        //]]>
+    </script>
+
     <p:dialog id="editServerDetailsDlg"
               widgetVar="editServerDetailsDlg"
               modal="true"
@@ -21,6 +42,7 @@
               hideEffect="fold"
 
               focus="editServerDetailsDlgForm:cancelBtn"
+              onShow="userNameChanged();"
               >
 
 
@@ -44,22 +66,33 @@
                 <p:inputText value="#{settingsView.editedServer.ipAddress}" disabled="true"/>
 
                 <h:outputLabel value="Port" />
-                <p:inputNumber id="port" value="#{settingsView.editedServer.portNumber}" onfocus="this.select();" required="true" thousandSeparator="" inputStyle="" decimalPlaces="0"/>
+                <p:inputNumber id="port"
+                               value="#{settingsView.editedServer.portNumber}"
+                               onfocus="this.select();"
+                               required="true"
+                               thousandSeparator=""
+                               inputStyle=""
+                               decimalPlaces="0"/>
 
                 <h:outputLabel value="App regExp filter" />
-                <p:inputText value="#{settingsView.editedServer.regExpFilter}"/>
+                <p:inputText value="#{settingsView.editedServer.appRegExpFilter}"/>
 
                 <h:outputLabel value="User" />
-                <p:inputText id="user" value="#{settingsView.editedServer.userName}" onfocus="this.select();">
-                    <p:ajax event="keyup" update="password" />
-                </p:inputText>
+                <p:inputText id="user"
+                             value="#{settingsView.editedServer.userName}"
+                             onfocus="this.select();"
+                             onkeyup="userNameChanged();" />
 
                 <h:outputLabel value="Jelszó" />
-                <p:password id="password" value="#{settingsView.editedServer.plainPassword}" onfocus="this.select();" disabled="#{empty settingsView.editedServer.userName}"
-                            redisplay="true"/>
+                <p:password  id="password"
+                             value="#{settingsView.editedServer.plainPassword}"
+                             onfocus="this.select();"
+                             redisplay="true"/>
 
                 <h:outputLabel value="Leírás" />
-                <p:inputText id="desc" value="#{settingsView.editedServer.description}" onfocus="this.select();"/>
+                <p:inputText id="desc"
+                             value="#{settingsView.editedServer.description}"
+                             onfocus="this.select();"/>
             </p:panelGrid>
 
 
@@ -69,25 +102,18 @@
                              icon="fa fa-ban"
                              value="Mégsem"
                              style="float: right"
-
-                             actionListener="#{settingsView.cancel()}"
-
+                             actionListener="#{settingsView.cancelEditedServer()}"
                              onsuccess="PF('editServerDetailsDlg').hide();"
                              update="settingsForm :growl"
-
                              resetValues="true"
-
                              immediate="true"
                              />
 
             <p:commandButton value="OK"
                              icon="fa fa-check"
                              style="float: right"
-
-                             actionListener="#{settingsView.save()}"
-
+                             actionListener="#{settingsView.saveEditedServer()}"
                              update="settingsForm :growl"
-
                              resetValues="true"
                              />
 

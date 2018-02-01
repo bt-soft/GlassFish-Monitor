@@ -15,6 +15,7 @@ import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -44,7 +45,7 @@ public class EjbBeanCacheStat extends AppSnapshotBase {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "APP_EJBSTAT_ID", referencedColumnName = "ID", nullable = false)
-    @ColumnPosition(position = 11)
+    @ColumnPosition(position = 20)
     private EjbStat ejbStat;
 
     /**
@@ -52,31 +53,83 @@ public class EjbBeanCacheStat extends AppSnapshotBase {
      * <p>
      * Provides the number of times a user request hits an EJB in associated EJB cache instance
      */
-    @ColumnPosition(position = 20)
+    @Column(name = "CACHE_HITS")
+    @ColumnPosition(position = 30)
     private Long cacheHits;
+
+    @Column(name = "CACHE_HITS_LW")
+    @ColumnPosition(position = 30)
+    private Long cacheHitsLw;
+
+    @Column(name = "CACHE_HITS_HW")
+    @ColumnPosition(position = 30)
+    private Long cacheHitsHw;
+
+    @Column(name = "CACHE_HITS_LB")
+    @ColumnPosition(position = 30)
+    private Long cacheHitsLb;
+
+    @Column(name = "CACHE_HITS_UB")
+    @ColumnPosition(position = 30)
+    private Long cacheHitsUb;
 
     /**
      * • CacheMisses
      * <p>
      * Provides the number of times a user request fails to find an EJB in associated EJB cache instance
      */
-    @ColumnPosition(position = 21)
+    @Column(name = "CACHE_MISSES")
+    @ColumnPosition(position = 31)
     private Long cacheMisses;
+
+    @Column(name = "CACHE_MISSES_LW")
+    @ColumnPosition(position = 31)
+    private Long cacheMissesLw;
+
+    @Column(name = "CACHE_MISSES_HW")
+    @ColumnPosition(position = 31)
+    private Long cacheMissesHw;
+
+    @Column(name = "CACHE_MISSES_LB")
+    @ColumnPosition(position = 31)
+    private Long cacheMissesLb;
+
+    @Column(name = "CACHE_MISSES_UB")
+    @ColumnPosition(position = 31)
+    private Long cacheMissesUb;
 
     /**
      * • NumBeansInCache
      * <p>
      * Provides total number of EJBs in the associated EJB Cache.
      */
-    @ColumnPosition(position = 22)
+    @Column(name = "NUM_BEANS_IN_CACHE")
+    @ColumnPosition(position = 32)
     private Long numBeansInCache;
+
+    @Column(name = "NUM_BEANS_IN_CACHE_LW")
+    @ColumnPosition(position = 32)
+    private Long numBeansInCacheLw;
+
+    @Column(name = "NUM_BEANS_IN_CACHE_HW")
+    @ColumnPosition(position = 32)
+    private Long numBeansInCacheHw;
+
+    @Column(name = "NUM_BEANS_IN_CACHE_LB")
+    @ColumnPosition(position = 32)
+    private Long numBeansInCacheLb;
+
+    @Column(name = "NUM_BEANS_IN_CACHE_UB")
+    @ColumnPosition(position = 32)
+    private Long numBeansInCacheUb;
 
     /**
      * • NumExpiredSessionsRemoved
      * <p>
      * Provides a count value reflecting the number of expired sessions that were removed from the bean cache.
      */
-    @ColumnPosition(position = 23)
+    @Column(name = "NUM_EXPIRED_SESSIONS_REMOVED")
+    @ColumnPosition(position = 33)
     private Long numExpiredSessionsRemoved;
 
     /**
@@ -84,7 +137,8 @@ public class EjbBeanCacheStat extends AppSnapshotBase {
      * <p>
      * Provides a count value reflecting the number of errors that occured while passivating a StatefulSessionBean from the bean cache.
      */
-    @ColumnPosition(position = 24)
+    @Column(name = "NUM_PASSIVATIONS_ERRORS")
+    @ColumnPosition(position = 34)
     private Long numPassivationErrors;
 
     /**
@@ -92,7 +146,8 @@ public class EjbBeanCacheStat extends AppSnapshotBase {
      * <p>
      * Provides a count value reflecting the number of passivations for a StatefulSessionBean from the bean cache.
      */
-    @ColumnPosition(position = 25)
+    @Column(name = "NUM_PASSIVATIONS")
+    @ColumnPosition(position = 35)
     private Long numPassivations;
 
     /**
@@ -100,7 +155,8 @@ public class EjbBeanCacheStat extends AppSnapshotBase {
      * <p>
      * Provides a count value reflecting the number of passivations for a StatefulSessionBean from the bean cache that succeeded
      */
-    @ColumnPosition(position = 26)
+    @Column(name = "NUM_PASSIVATION_SUCCESS")
+    @ColumnPosition(position = 36)
     private Long numPassivationSuccess;
 
 }

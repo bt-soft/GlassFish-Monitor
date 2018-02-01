@@ -38,6 +38,7 @@ import javax.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.eclipse.persistence.annotations.Customizer;
 
 /**
@@ -50,6 +51,7 @@ import org.eclipse.persistence.annotations.Customizer;
 @Table(name = "SERVER_SRV_CDU", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
 @Data
 @EqualsAndHashCode(exclude = {"server", "svrCollectorDataUnit"})
+@ToString(exclude = {"server", "svrCollectorDataUnit"})
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
 @IdClass(ServerSvrCollDataUnitJoinerPK.class)

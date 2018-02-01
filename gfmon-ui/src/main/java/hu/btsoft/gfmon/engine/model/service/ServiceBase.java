@@ -11,8 +11,8 @@
  */
 package hu.btsoft.gfmon.engine.model.service;
 
+import hu.btsoft.gfmon.corelib.model.audit.EntityAuditListener;
 import hu.btsoft.gfmon.engine.model.entity.EntityBase;
-import hu.btsoft.gfmon.engine.model.entity.ModifiableEntityBase;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -63,17 +63,16 @@ public abstract class ServiceBase<T extends EntityBase> {
      *
      * @param defaultUser, ha nincs sessionContext, akkor ez lesz az user
      *
-     * @return interaktív user, vagy null
      */
-    protected String getSessionUser(String defaultUser) {
+    protected void setAutitUser(String defaultUser) {
         if (ejbContext != null) {
-            String user = ejbContext.getCallerPrincipal().getName();
-            if (user != null && !"ANONYMOUS".equals(user)) {
-                return user;
+            String ejbContectUser = ejbContext.getCallerPrincipal().getName();
+            if (ejbContectUser != null && !"ANONYMOUS".equals(ejbContectUser)) {
+                EntityAuditListener.setCurrentAuditUser(ejbContectUser);
+                return;
             }
         }
-
-        return defaultUser;
+        EntityAuditListener.setCurrentAuditUser(defaultUser);
     }
 
     /**
@@ -108,23 +107,10 @@ public abstract class ServiceBase<T extends EntityBase> {
             return;
         }
 
-        //Ha nincs sessionContext (pl.: nem WEB-ből/interaktívan hívták), akkor a paraméterben megadott userrel mentünk
-        if (entity instanceof ModifiableEntityBase) {
-            if (entity.getId() == null) {
-                ((ModifiableEntityBase) entity).setCreatedBy(this.getSessionUser(user));
+        //Átadjuk az usert az Audit Listener-nek
+        this.setAutitUser(user);
 
-            } else {
-                //Csak akkor mentünk, ha valóban van változás az entitásban
-                T t = find(entity.getId());
-                if (t != null && t.equals(entity)) {
-                    return;
-                }
-                //Mehet a mentés
-                //Ha nincs sessionContext, akkor a paraméterben megadott usereel mentünk
-                ((ModifiableEntityBase) entity).setModifiedBy(this.getSessionUser(user));
-            }
-        }
-
+        //Mehet a mentés, vagy a módosítás
         this.save(entity);
     }
 
@@ -137,30 +123,18 @@ public abstract class ServiceBase<T extends EntityBase> {
      * @throws PersistenceException         JPA hiba
      * @throws DatabaseException            DB hiba
      */
-    public void save(T entity) throws RuntimeException {
+    private void save(T entity) throws RuntimeException {
 
         if (entity == null) {
             log.warn("null az entitás!");
             return;
         }
 
-        String _user = this.getSessionUser(null);
-
         try {
             //Új entitás lesz?
             if (entity.getId() == null) {
-                //Ha ki tudjuk nyerni az usert, és még nincs beállítva, akkor használjuk
-                if (_user != null && entity instanceof ModifiableEntityBase && ((ModifiableEntityBase) entity).getCreatedBy() == null) {
-                    ((ModifiableEntityBase) entity).setCreatedBy(_user);
-                }
-//                log.trace("Persist -> {}", entity);
                 getEntityManager().persist(entity);
             } else {
-                //Ha ki tudjuk nyerni az usert, és még nincs beállítva, akkor használjuk
-                if (_user != null && entity instanceof ModifiableEntityBase && ((ModifiableEntityBase) entity).getModifiedBy() == null) {
-                    ((ModifiableEntityBase) entity).setModifiedBy(_user);
-                }
-//                log.trace("Merge -> {}", entity);
                 getEntityManager().merge(entity);
             }
         } catch (ConstraintViolationException e) {

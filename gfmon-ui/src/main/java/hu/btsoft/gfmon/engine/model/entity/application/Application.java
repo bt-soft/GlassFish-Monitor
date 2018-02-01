@@ -71,7 +71,7 @@ public class Application extends ModifiableEntityBase {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SVR_ID", referencedColumnName = "ID", nullable = false)
-    @ColumnPosition(position = 10)
+    @ColumnPosition(position = 20)
     private Server server;
 
     /**
@@ -82,7 +82,7 @@ public class Application extends ModifiableEntityBase {
     @NotNull(message = "Az appShortName nem lehet null")
     @Size(min = 5, max = 255, message = "Az appShortName mező hossza {min} és {max} között lehet")
     @Column(name = "SHORT_NAME", length = 255, nullable = false)
-    @ColumnPosition(position = 11)
+    @ColumnPosition(position = 30)
     private String appShortName;
 
     /**
@@ -93,7 +93,7 @@ public class Application extends ModifiableEntityBase {
     @NotNull(message = "Az appRealName nem lehet null")
     @Size(min = 5, max = 255, message = "Az appRealName mező hossza {min} és {max} között lehet")
     @Column(name = "REAL_NAME", length = 255, nullable = false)
-    @ColumnPosition(position = 12)
+    @ColumnPosition(position = 31)
     private String appRealName;
 
     /**
@@ -104,7 +104,7 @@ public class Application extends ModifiableEntityBase {
     @NotNull(message = "A moduleRealName nem lehet null")
     @Size(min = 1, max = 255, message = "A moduleRealName mező hossza {min} és {max} között lehet")
     @Column(name = "MODULE_REAL_NAME", length = 255, nullable = false)
-    @ColumnPosition(position = 13)
+    @ColumnPosition(position = 32)
     private String moduleRealName;
 
     /**
@@ -116,7 +116,7 @@ public class Application extends ModifiableEntityBase {
     @NotNull(message = "A moduleShortName nem lehet null")
     @Size(min = 1, max = 255, message = "A moduleShortName mező hossza {min} és {max} között lehet")
     @Column(name = "MODULE_SHORT_NAME", length = 255, nullable = false)
-    @ColumnPosition(position = 14)
+    @ColumnPosition(position = 33)
     private String moduleShortName;
 
     /**
@@ -129,48 +129,56 @@ public class Application extends ModifiableEntityBase {
     @MapKeyColumn(name = "APPLICATION_ID")
     @Column(name = "MODULE_ENGINE_NAME", length = 512)
     @CollectionTable(name = "APPLICATION_MODULE_ENGINE", joinColumns = @JoinColumn(name = "APPLICATION_ID"))
-    @ColumnPosition(position = 15)
+    @ColumnPosition(position = 34)
     private Set<String> moduleEngines;
 
     /**
      * A monitorozás aktív erre az alkalmazásra?
      */
-    @Column(nullable = false)
-    @ColumnPosition(position = 16)
+    @Column(name = "ACTIVE", nullable = false)
+    @ColumnPosition(position = 35)
     private Boolean active;
 
     //---- Glassfish descriptoból jövő adatok /management/domain/applications/application/{appRealName}
     /**
      * Az alkalmazás engedélyezett?
      */
-    @Column(nullable = false)
-    @ColumnPosition(position = 17)
+    @Column(name = "ENABLED", nullable = false)
+    @ColumnPosition(position = 40)
     private boolean enabled;
 
     /**
      * Context Root
      */
-    @Column(length = 128)
-    @ColumnPosition(position = 18)
+    @Column(name = "CONTEXT_ROOT", length = 128)
+    @ColumnPosition(position = 41)
     private String contextRoot;
 
     /**
      * Az alkalmazás leírása
      */
-    @Column(length = 256)
-    @ColumnPosition(position = 19)
+    @Column(name = "DESCRIPTION", length = 512)
+    @ColumnPosition(position = 42)
     private String description;
-
+//
+//
+//
     //-- Alkalmazás statisztika Mérési eredmények
     @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "APP_STAT_ID", referencedColumnName = "ID", nullable = false)
+    @ColumnPosition(position = 70)
     private List<AppStatistic> appStatistics = new LinkedList<>();
 
     //-- EJB statisztika eredmények
     @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "APP_EJBSTAT_ID", referencedColumnName = "ID", nullable = false)
+    @ColumnPosition(position = 71)
     private List<EjbStat> ejbStats = new LinkedList<>();
 
     //-- ConnectionPool usage statisztika mérése eredmények
     @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "JDBC_CONECTION_POOL_APP_STAT_ID", referencedColumnName = "ID", nullable = false)
+    @ColumnPosition(position = 72)
     private List<ConnectionPoolAppStatistic> connectionPoolAppStatistics = new LinkedList<>();
 
     /**
@@ -212,7 +220,7 @@ public class Application extends ModifiableEntityBase {
     public static String createAppShortName(String _appRealName) {
 
         //Képezzük a rövid nevet
-//                Pattern pattern = Pattern.compile(server.getRegExpFilter());
+//                Pattern pattern = Pattern.compile(server.getAppRegExpFilter());
 //                String appShortName = "";
 //                Matc_her matcher = pattern.matcher(appRealName);
 //                if (matcher.matches() && matcher.groupCount() >= 1) {

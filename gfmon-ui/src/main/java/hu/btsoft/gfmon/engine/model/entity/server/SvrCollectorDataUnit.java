@@ -35,9 +35,9 @@ import org.eclipse.persistence.annotations.Customizer;
 
 /**
  * A gyűjtött adatok neve, mértékeygsége és leírása a GF REST Path-ból kinyerve
- *
+ * <p>
  * pl.: http://localhost:4848/monitoring/domain/server/jvm/memory
- *
+ * <p>
  * • committedheapsize-count
  * ◦ unit : bytes
  * ◦ lastsampletime : 1515250670904
@@ -53,8 +53,8 @@ import org.eclipse.persistence.annotations.Customizer;
 @Cacheable(true)
 @Table(name = "SRV_CDU", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,
         indexes = {
-            @Index(name = "IDX_SVR_CDU_RESTPATH", columnList = "RESTPATH", unique = false),
-            @Index(name = "IDX_SVR_CDU_ENTITYNAME", columnList = "ENTITYNAME", unique = false)
+            @Index(name = "IDX_SVR_CDU_REST_PATH", columnList = "REST_PATH", unique = false),
+            @Index(name = "IDX_SVR_CDU_ENTITY_NAME", columnList = "ENTITY_NAME", unique = false)
         })
 @NamedQueries({
     @NamedQuery(name = "SvrCollectorDataUnit.findAll", query = "SELECT scdu from SvrCollectorDataUnit scdu ORDER BY scdu.restPath, scdu.dataName"),//
@@ -75,7 +75,7 @@ public class SvrCollectorDataUnit extends EntityBase {
      */
     @ColumnPosition(position = 20)
     @NotNull(message = "A restPath nem lehet null")
-    @Column(length = 1024, nullable = false)
+    @Column(name = "REST_PATH", length = 1024, nullable = false)
     private String restPath;
 
     /**
@@ -83,7 +83,7 @@ public class SvrCollectorDataUnit extends EntityBase {
      */
     @ColumnPosition(position = 21)
     @NotNull(message = "Az entityName nem lehet null")
-    @Column(length = 50, nullable = false)
+    @Column(name = "ENTITY_NAME", length = 50, nullable = false)
     private String entityName;
 
     /**
@@ -91,7 +91,7 @@ public class SvrCollectorDataUnit extends EntityBase {
      */
     @ColumnPosition(position = 22)
     @NotNull(message = "A name nem lehet null")
-    @Column(length = 50, nullable = false)
+    @Column(name = "DATA_NAME", length = 50, nullable = false)
     private String dataName;
 
     /**
@@ -99,7 +99,7 @@ public class SvrCollectorDataUnit extends EntityBase {
      */
     @ColumnPosition(position = 23)
     @NotNull(message = "Az unit nem lehet null")
-    @Column(length = 15, nullable = false)
+    @Column(name = "UNIT", length = 15, nullable = false)
     private String unit;
 
     /**
@@ -107,7 +107,7 @@ public class SvrCollectorDataUnit extends EntityBase {
      */
     @ColumnPosition(position = 24)
     @NotNull(message = "A description nem lehet null")
-    @Column(length = 512, nullable = false)
+    @Column(name = "DESCRIPTION", length = 512, nullable = false)
     private String description;
 
     /**

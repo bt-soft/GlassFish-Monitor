@@ -66,14 +66,14 @@ public class JdbcConnectionPool extends ModifiableEntityBase {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SVR_ID", referencedColumnName = "ID", nullable = false)
-    @ColumnPosition(position = 10)
+    @ColumnPosition(position = 20)
     private Server server;
 
     /**
      * A monitorozás aktív rá?
      */
-    @Column(nullable = false)
-    @ColumnPosition(position = 10)
+    @Column(name = "ACTIVE", nullable = false)
+    @ColumnPosition(position = 30)
     private Boolean active;
 
     /**
@@ -83,58 +83,71 @@ public class JdbcConnectionPool extends ModifiableEntityBase {
     @NotNull(message = "A poolName nem lehet null")
     @Size(min = 5, max = 255, message = "A poolName mező hossza {min} és {max} között lehet")
     @Column(name = "POOL_NAME", length = 255, nullable = false)
-    @ColumnPosition(position = 11)
+    @ColumnPosition(position = 31)
     private String poolName;
 
-    @ColumnPosition(position = 12)
+    @Column(name = "DESCRIPTION")
+    @ColumnPosition(position = 32)
     private String description;
 
-    @ColumnPosition(position = 13)
+    @Column(name = "DATASOURCE_CLASS_NAME")
+    @ColumnPosition(position = 33)
     private String datasourceClassname;
 
-//    @ColumnPosition(position = 14)
-//    private String driverClassname;
-    @ColumnPosition(position = 15)
+    @Column(name = "IDDLE_TIMEOUT_IN_SECONDS")
+    @ColumnPosition(position = 34)
     private String idleTimeoutInSeconds;
 
-    @ColumnPosition(position = 16)
+    @Column(name = "INIT_SQL")
+    @ColumnPosition(position = 35)
     private String initSql;
 
-    @ColumnPosition(position = 17)
+    @Column(name = "MAC_CONNECTION_USAGE_COUNT")
+    @ColumnPosition(position = 36)
     private String maxConnectionUsageCount;
 
-    @ColumnPosition(position = 18)
+    @Column(name = "MAX_POOL_SIZE")
+    @ColumnPosition(position = 37)
     private String maxPoolSize;
 
-    @ColumnPosition(position = 19)
+    @Column(name = "MAX_WAIT_TIME_IN_MILLIS")
+    @ColumnPosition(position = 38)
     private String maxWaitTimeInMillis;
 
-    @ColumnPosition(position = 20)
+    @Column(name = "POOL_RESIZE_QUANTITY")
+    @ColumnPosition(position = 39)
     private String poolResizeQuantity;
 
-    @ColumnPosition(position = 21)
+    @Column(name = "POOLING")
+    @ColumnPosition(position = 40)
     private boolean pooling;
 
-    @ColumnPosition(position = 22)
+    @Column(name = "RESTYPE")
+    @ColumnPosition(position = 41)
     private String resType;
 
-    @ColumnPosition(position = 23)
+    @Column(name = "STATEMENT_CACHE_SIZE")
+    @ColumnPosition(position = 42)
     private String statementCacheSize;
 
-    @ColumnPosition(position = 25)
+    @Column(name = "STEADY_POOL_SIZE")
+    @ColumnPosition(position = 43)
     private String steadyPoolSize;
 
-    @ColumnPosition(position = 26)
+    @Column(name = "STATEMENT_TIMEOUT_IN_SECONDS")
+    @ColumnPosition(position = 44)
     private String statementTimeoutInSeconds;
 
     //Milyen jdbcResources használja?
     @OneToMany(mappedBy = "jdbcConnectionPool", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "JDBC_RESOURCE_ID", referencedColumnName = "ID", nullable = false)
+    @ColumnPosition(position = 70)
     private List<JdbcResource> jdbcResources;
 
     //-- Milyen statisztikái vannak?
     @OneToMany(mappedBy = "jdbcConnectionPool", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "JDBC_CONPOOL_STAT_ID", referencedColumnName = "ID", nullable = false)
+    @JoinColumn(name = "JDBC_CONECTION_POOL_STAT", referencedColumnName = "ID", nullable = false)
+    @ColumnPosition(position = 71)
     private List<ConnectionPoolStatistic> connectionPoolStatistics;
 
 }

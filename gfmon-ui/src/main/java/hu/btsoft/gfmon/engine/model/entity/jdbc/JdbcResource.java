@@ -61,7 +61,7 @@ public class JdbcResource extends ModifiableEntityBase {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "JDBC_CONNECTION_POOL_ID", referencedColumnName = "ID", nullable = false)
-    @ColumnPosition(position = 10)
+    @ColumnPosition(position = 20)
     private JdbcConnectionPool jdbcConnectionPool;
 
     /**
@@ -71,19 +71,21 @@ public class JdbcResource extends ModifiableEntityBase {
     @NotNull(message = "A jndiName nem lehet null")
     @Size(min = 5, max = 255, message = "A jndiName mező hossza {min} és {max} között lehet")
     @Column(name = "JNDI_NAME", length = 255, nullable = false)
-    @ColumnPosition(position = 11)
+    @ColumnPosition(position = 31)
     private String jndiName;
 
     /**
      * Leírás
      */
-    @ColumnPosition(position = 12)
+    @Column(name = "DESCRIPTION")
+    @ColumnPosition(position = 32)
     private String description;
 
     /**
      * Engedélyezett?
      */
-    @ColumnPosition(position = 13)
+    @Column(name = "ENABLED")
+    @ColumnPosition(position = 33)
     private boolean enabled;
 
     //ezt a jdbcConnectionPool hordozza, csak a kigyűjtéskor használjuk

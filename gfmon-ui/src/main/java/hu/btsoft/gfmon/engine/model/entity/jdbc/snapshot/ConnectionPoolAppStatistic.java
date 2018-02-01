@@ -16,6 +16,7 @@ import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
 import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcResourceSnapshotBase;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -33,7 +34,7 @@ import org.eclipse.persistence.annotations.Customizer;
  * @author BT
  */
 @Entity
-@Table(name = "JDBC_CONPOOL_APP_STAT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
+@Table(name = "JDBC_CONECTION_POOL_APP_STAT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
 @Data
 @ToString(callSuper = true, exclude = {"connectionPoolStatistic", "application"})
 @EqualsAndHashCode(callSuper = true, exclude = {"connectionPoolStatistic", "application"})
@@ -46,8 +47,8 @@ public class ConnectionPoolAppStatistic extends JdbcResourceSnapshotBase {
      * (automatikusan index képződik rá)
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "JDBC_CONPOOL_STAT_ID")
-    @ColumnPosition(position = 10)
+    @JoinColumn(name = "JDNC_CONECTION_POOL_STAT_ID")
+    @ColumnPosition(position = 20)
     private ConnectionPoolStatistic connectionPoolStatistic;
 
     /**
@@ -56,17 +57,13 @@ public class ConnectionPoolAppStatistic extends JdbcResourceSnapshotBase {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "APPLICATION_ID")
-    @ColumnPosition(position = 11)
+    @ColumnPosition(position = 21)
     private Application application;
 
     /**
      * Az alkalmazás neve neve, ami használja a ConnectionPool-t
      */
-//    @NotNull(message = "A appName nem lehet null")
-//    @Size(min = 3, max = 255, message = "A appName mező hossza {min} és {max} között lehet")
-//    @Column(name = "APP_NAME", length = 255, nullable = false)
-//    @ColumnPosition(position = 20)
-    @Transient //Ezt az 'application'-ból ki lehet találni, felesleges tárolni
+    @Transient //Ezt az 'application'-ból ki lehet találni, felesleges tárolni, csak runtime használjuk
     private String appName;
 
     /**
@@ -74,7 +71,8 @@ public class ConnectionPoolAppStatistic extends JdbcResourceSnapshotBase {
      * <p>
      * Number of logical connections acquired from the pool.
      */
-    @ColumnPosition(position = 21)
+    @Column(name = "NUM_CONN_ACQUIRED")
+    @ColumnPosition(position = 30)
     private Long numConnAcquired;
 
     /**
@@ -82,7 +80,8 @@ public class ConnectionPoolAppStatistic extends JdbcResourceSnapshotBase {
      * <p>
      * Number of logical connections released to the pool.
      */
-    @ColumnPosition(position = 22)
+    @Column(name = "NUM_CONN_RELEASED")
+    @ColumnPosition(position = 31)
     private Long numConnReleased;
 
     /**
@@ -92,13 +91,16 @@ public class ConnectionPoolAppStatistic extends JdbcResourceSnapshotBase {
      * The total number of connections that are currently being used, as well as information about the maximum number
      * of connections that were used (the high water mark).
      */
-    @ColumnPosition(position = 23)
+    @Column(name = "NUM_CONN_USED")
+    @ColumnPosition(position = 32)
     private Long numConnUsed;
 
-    @ColumnPosition(position = 24)
+    @Column(name = "NUM_CONN_USED_LW")
+    @ColumnPosition(position = 33)
     private Long numConnUsedLw;
 
-    @ColumnPosition(position = 25)
+    @Column(name = "NUM_CONN_USED_HW")
+    @ColumnPosition(position = 34)
     private Long numConnUsedHw;
 
 }

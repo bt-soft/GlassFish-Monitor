@@ -51,19 +51,19 @@ public class DefaultConfigCreator {
 
         boolean dropCalled = false;
 
-//        //Induláskor kell séma legyártás?
-//        if (propertiesConfig.getConfig().getBoolean(PropertiesConfig.STARTUP_JPA_DROPANDCREATE_KEY, false)) {
-//            configService.dropAndCreate();
-//            dropCalled = true;
-//        }
-//
-//        //Megnézzük, hogy létezik-e bármilyen beállítás rekord az adatbázisban
-//        if (!configService.checkEntityTableExist()) {
-//            if (!dropCalled) {
-//                configService.dropAndCreate();
-//            }
-        createDefaultConfig();
-//        }
+        //Induláskor kell séma legyártás?
+        if (propertiesConfig.getConfig().getBoolean(PropertiesConfig.STARTUP_JPA_DROPANDCREATE_KEY, false)) {
+            configService.dropAndCreate();
+            dropCalled = true;
+        }
+
+        //Megnézzük, hogy létezik-e bármilyen beállítás rekord az adatbázisban
+        if (!configService.checkEntityTableExist()) {
+            if (!dropCalled) {
+                configService.dropAndCreate();
+            }
+            createDefaultConfig();
+        }
 
     }
 

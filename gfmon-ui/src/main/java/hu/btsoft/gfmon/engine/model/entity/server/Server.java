@@ -33,12 +33,14 @@ import hu.btsoft.gfmon.engine.model.entity.server.snapshot.web.Jsp;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.web.Request;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.web.Servlet;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.web.Session;
+import java.util.LinkedList;
 import java.util.List;
 import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -79,7 +81,7 @@ import org.apache.commons.lang3.StringUtils;
 })
 @Data
 @ToString(callSuper = true, of = {"hostName", "ipAddress", "portNumber", "active"})
-@EqualsAndHashCode(callSuper = true, of = {"active", "hostName", "ipAddress", "portNumber"})
+@EqualsAndHashCode(callSuper = true, of = {"hostName", "ipAddress", "portNumber", "active"})
 @NoArgsConstructor
 @Slf4j
 public class Server extends ModifiableEntityBase {
@@ -88,8 +90,8 @@ public class Server extends ModifiableEntityBase {
      * A monitorozás aktív rá?
      */
     @Column(nullable = false)
-    @ColumnPosition(position = 10)
-    private boolean active;
+    @ColumnPosition(position = 20)
+    private Boolean active;
 
     /**
      * Szerver host neve
@@ -97,7 +99,7 @@ public class Server extends ModifiableEntityBase {
     @NotNull(message = "A hostName nem lehet null")
     @Size(min = 5, max = 255, message = "A hostName mező hossza {min} és {max} között lehet")
     @Column(name = "HOST_NAME", length = 255, nullable = false)
-    @ColumnPosition(position = 11)
+    @ColumnPosition(position = 30)
     private String hostName;
 
     /**
@@ -105,7 +107,7 @@ public class Server extends ModifiableEntityBase {
      */
     @Size(min = 6, max = 255, message = "Az ipAddress mező hossza {min} és {max} között lehet")
     @Column(name = "IP_ADDRESS", length = 255, nullable = true)
-    @ColumnPosition(position = 12)
+    @ColumnPosition(position = 31)
     private String ipAddress;
 
     /**
@@ -115,44 +117,45 @@ public class Server extends ModifiableEntityBase {
     @Min(value = 1024, message = "A portNumber minimális értéke {value}")
     @Max(value = 65535, message = "A portNumber maximális értéke {value}")
     @Column(name = "PORT_NUM", nullable = false)
-    @ColumnPosition(position = 13)
+    @ColumnPosition(position = 32)
     private int portNumber;
 
     /**
      * Alkalmazások regExp szűrője
      */
-    @NotNull(message = "A regExpFilter nem lehet null")
-    @Column(length = 80, nullable = false)
-    @ColumnPosition(position = 14)
-    private String regExpFilter;
+    @NotNull(message = "A appRegExpFilter nem lehet null")
+    @Column(name = "APP_REGEXP_FILTER", length = 80, nullable = false)
+    @ColumnPosition(position = 33)
+    private String appRegExpFilter;
 
     /**
      * UserName
      */
-    @Column(length = 80, nullable = true)
-    @ColumnPosition(position = 15)
+    @Column(name = "USER_NAME", length = 80, nullable = true)
+    @ColumnPosition(position = 34)
     private String userName;
 
     /**
      * UserName
      */
     @Column(name = "PASSWD", length = 80, nullable = true)
-    @ColumnPosition(position = 16)
+    @ColumnPosition(position = 35)
     private String encPasswd;
 
     /**
      * Leírás
      */
     @Size(max = 255, message = "A description mező hossza maximum {max} lehet")
-    @ColumnPosition(position = 17)
+    @Column(name = "DESCRIPTION")
+    @ColumnPosition(position = 36)
     private String description;
 
     /**
      * Kiegészítő információk
      * (pl.: miért lett tiltva a szerver monitorozása, stb...)
      */
-    @Column(name = "ADDITIONAL_INFO", nullable = true)
-    @ColumnPosition(position = 18)
+    @Column(name = "TMP_ADDITIONAL_INFO", nullable = true)
+    @ColumnPosition(position = 37)
     private String additionalInformation;
 
     /**
@@ -160,7 +163,7 @@ public class Server extends ModifiableEntityBase {
      * Induláskor töröljük
      */
     @Column(name = "TMP_SESSION_TOKEN", nullable = true)
-    @ColumnPosition(position = 19)
+    @ColumnPosition(position = 38)
     private String sessionToken;
 
     /**
@@ -168,7 +171,7 @@ public class Server extends ModifiableEntityBase {
      * Induláskor töröljük
      */
     @Column(name = "TMP_MONSVCE_RDY", nullable = true)
-    @ColumnPosition(position = 20)
+    @ColumnPosition(position = 39)
     private Boolean monitoringServiceReady;
 
     /**
@@ -177,18 +180,20 @@ public class Server extends ModifiableEntityBase {
      * - cascade: update, merge menjen rájuk is, ha a szervert töröljük, akkor törlődjönenek az alkalmazások is
      * - orphanRemoval: izomból törlés lesz
      */
-    @OneToMany(mappedBy = "server", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ServerSvrCollDataUnitJoiner> joiners;
 
     /**
-     * A szerveren miylen alkalmazásk vannak?
+     * A szerveren milyen alkalmazásk vannak?
      * - eager: mindig kell -> mindig felolvassuk
      * - cascade: update, merge menjen rájuk is, ha a szervert töröljük, akkor törlődjönenek az alkalmazások is
      * - orphanRemoval: izomból törlés lesz
      */
-    @OrderBy("appRealName DESC") //JPA nevet kell megadni
+    @OrderBy("appRealName ASC") //JPA nevet kell megadni
     @OneToMany(mappedBy = "server", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Application> applications;
+    @JoinColumn(name = "APPLICATION_ID", referencedColumnName = "ID", nullable = false)
+    @ColumnPosition(position = 70)
+    private List<Application> applications = new LinkedList<>();
 
     /**
      * A szerveren milyen JDBC ConnectionPool-ok vannak?
@@ -197,11 +202,13 @@ public class Server extends ModifiableEntityBase {
      * - orphanRemoval: izomból törlés lesz
      */
     @OrderBy("poolName DESC")//JPA nevet kell megadni
-    @OneToMany(mappedBy = "server", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<JdbcConnectionPool> jdbcConnectionPool;
+    @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "JDBC_CONNECTION_POOL_ID", referencedColumnName = "ID", nullable = false)
+    @ColumnPosition(position = 71)
+    private List<JdbcConnectionPool> jdbcConnectionPools = new LinkedList<>();
 
     /**
-     * Szerver statisztika mérési eredméynek
+     * Szerver statisztika mérési eredméynek, visszairány nem kell
      */
     @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HttpServiceRequest> httpServiceRequests;
@@ -258,21 +265,21 @@ public class Server extends ModifiableEntityBase {
     /**
      * Konstruktor - csak a sima jelszót lehet kezelni
      *
-     * @param hostName      a monitorozandó szerver host neve
-     * @param portNumber    IP címe
-     * @param description   leírása
-     * @param userName      a monitorozó user
-     * @param plainPassword kódolatlan jelszava
-     * @param regExpFilter  alkalmazások reguláris kifejezés filtere
-     * @param active        monitorozás aktív rá?
+     * @param hostName        a monitorozandó szerver host neve
+     * @param portNumber      IP címe
+     * @param description     leírása
+     * @param userName        a monitorozó user
+     * @param plainPassword   kódolatlan jelszava
+     * @param appRegExpFilter alkalmazások reguláris kifejezés filtere
+     * @param active          monitorozás aktív rá?
      */
-    public Server(String hostName, int portNumber, String description, String userName, String plainPassword, String regExpFilter, boolean active) {
+    public Server(String hostName, int portNumber, String description, String userName, String plainPassword, String appRegExpFilter, boolean active) {
         this.hostName = hostName;
         this.portNumber = portNumber;
         this.description = description;
         this.userName = userName;
         this.plainPassword = plainPassword;
-        this.regExpFilter = regExpFilter;
+        this.appRegExpFilter = appRegExpFilter;
         this.active = active;
 
         this.ipAddress = NetworkUtils.getIpAddressByHostName(hostName);
@@ -286,8 +293,6 @@ public class Server extends ModifiableEntityBase {
     @Override
     protected void prePersist() {
         super.prePersist();
-        // Jelszó kezelése
-        // mentés előtt kódolunk egyet
         this.encPasswd = CryptUtil.encrypt(plainPassword);
     }
 
@@ -298,9 +303,10 @@ public class Server extends ModifiableEntityBase {
     @PreUpdate
     @Override
     protected void preUpdate() {
-        // Jelszó kezelése
-        // mentés előtt kódolunk egyet
-        this.encPasswd = CryptUtil.encrypt(plainPassword);
+        super.preUpdate();
+        if (!StringUtils.isEmpty(plainPassword)) {
+            this.encPasswd = CryptUtil.encrypt(plainPassword);
+        }
     }
 
     /**
@@ -310,9 +316,9 @@ public class Server extends ModifiableEntityBase {
     @PostLoad
     @PostUpdate
     protected void post() {
-        // Jelszó kezelése
-        // beolvasás után dekódolunk egyet
-        plainPassword = CryptUtil.decrypt(this.encPasswd);
+        if (!StringUtils.isEmpty(encPasswd)) {
+            plainPassword = CryptUtil.decrypt(this.encPasswd);
+        }
     }
 
     /**
@@ -330,7 +336,7 @@ public class Server extends ModifiableEntityBase {
      * @return http(s)://server:port
      */
     public String getUrl() {
-        return String.format("%s%s:%d", getProtocol(), hostName, portNumber);
+        return String.format("%s%s:%d", this.getProtocol(), hostName, portNumber);
     }
 
     /**

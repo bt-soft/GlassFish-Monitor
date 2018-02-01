@@ -35,7 +35,7 @@ import org.eclipse.persistence.annotations.Customizer;
  * @author BT
  */
 @Entity
-@Table(name = "SVR_THRDSYS", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
+@Table(name = "SVR_THREAD_SYSTEM", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
 @Cacheable(false)
 @Data
 @ToString(callSuper = true)
@@ -51,9 +51,9 @@ public class ThreadSystem extends SnapshotBase {
      * <p>
      * Returns all live thread IDs
      */
-    @ColumnPosition(position = 20)
     @Size(max = STRING_FIELD_LENGHT, message = "A liveThreads mező hossza nem lehet nagyobb mint {max}")
-    @Column(length = STRING_FIELD_LENGHT)
+    @Column(name = "LIVE_THREADS", length = STRING_FIELD_LENGHT)
+    @ColumnPosition(position = 30)
     private String liveThreads;
 
     /**
@@ -61,7 +61,8 @@ public class ThreadSystem extends SnapshotBase {
      * <p>
      * Returns the total CPU time for the current thread in nanoseconds
      */
-    @ColumnPosition(position = 21)
+    @Column(name = "CURRENT_THREAD_CPU_TIME")
+    @ColumnPosition(position = 31)
     private Long currentThreadCpuTime;
 
     /**
@@ -69,7 +70,8 @@ public class ThreadSystem extends SnapshotBase {
      * <p>
      * Returns the CPU time that the current thread has executed in user mode in nanoseconds
      */
-    @ColumnPosition(position = 22)
+    @Column(name = "CURRENT_THREAD_USER_TIME")
+    @ColumnPosition(position = 32)
     private Long currentThreadUserTime;
 
     /**
@@ -77,7 +79,8 @@ public class ThreadSystem extends SnapshotBase {
      * <p>
      * Returns the current number of live daemon threads
      */
-    @ColumnPosition(position = 23)
+    @Column(name = "DAEMON_THREAD_COUNT")
+    @ColumnPosition(position = 33)
     private Long daemonThreadCount;
 
     /**
@@ -85,9 +88,9 @@ public class ThreadSystem extends SnapshotBase {
      * <p>
      * Finds cycles of threads that are in deadlock waiting to acquire object monitors or ownable synchronizers
      */
-    @ColumnPosition(position = 24)
     @Size(max = STRING_FIELD_LENGHT, message = "A DeadlockedThreads mező hossza nem lehet nagyobb mint {max}")
-    @Column(length = STRING_FIELD_LENGHT)
+    @Column(name = "DEADLOCKED_THREADS", length = STRING_FIELD_LENGHT)
+    @ColumnPosition(position = 34)
     private String deadlockedThreads;
 
     /**
@@ -95,9 +98,9 @@ public class ThreadSystem extends SnapshotBase {
      * <p>
      * Finds cycles of threads that are in deadlock waiting to acquire object monitors
      */
-    @ColumnPosition(position = 25)
     @Size(max = STRING_FIELD_LENGHT, message = "A monitorDeadlockedThreads mező hossza nem lehet nagyobb mint {max}")
-    @Column(length = STRING_FIELD_LENGHT)
+    @Column(name = "MONITOR_DEADLOCKED_THREADS", length = STRING_FIELD_LENGHT)
+    @ColumnPosition(position = 35)
     private String monitorDeadlockedThreads;
 
     /**
@@ -105,7 +108,8 @@ public class ThreadSystem extends SnapshotBase {
      * <p>
      * Returns the peak live thread count since the Java virtual machine started or peak was reset
      */
-    @ColumnPosition(position = 26)
+    @Column(name = "PEAK_THREAD_COUNT")
+    @ColumnPosition(position = 36)
     private Long peakThreadCount;
 
     /**
@@ -113,7 +117,8 @@ public class ThreadSystem extends SnapshotBase {
      * <p>
      * Returns the current number of live threads including both daemon and non-daemon threads
      */
-    @ColumnPosition(position = 27)
+    @Column(name = "THREAD_COUNT")
+    @ColumnPosition(position = 37)
     private Long threadCount;
 
     /**
@@ -121,7 +126,8 @@ public class ThreadSystem extends SnapshotBase {
      * <p>
      * Returns the total number of threads created and also started since the Java virtual machine started
      */
-    @ColumnPosition(position = 28)
+    @Column(name = "TOTAL_STARTED_THREAD_COUNT")
+    @ColumnPosition(position = 38)
     private Long totalStartedThreadCount;
 
     /**

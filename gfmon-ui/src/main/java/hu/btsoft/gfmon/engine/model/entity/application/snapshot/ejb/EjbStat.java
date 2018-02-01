@@ -53,7 +53,7 @@ public class EjbStat extends AppSnapshotBase {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "APPLICATION_ID")
-    @ColumnPosition(position = 10)
+    @ColumnPosition(position = 20)
     private Application application;
 
     /**
@@ -62,7 +62,7 @@ public class EjbStat extends AppSnapshotBase {
     @NotNull(message = "Az ejbName nem lehet null")
     @Size(min = 3, max = 255, message = "Az ejbName mező hossza {min} és {max} között lehet")
     @Column(name = "EJB_NAME", length = 255, nullable = false)
-    @ColumnPosition(position = 19)
+    @ColumnPosition(position = 30)
     private String ejbName;
 
     /**
@@ -70,7 +70,8 @@ public class EjbStat extends AppSnapshotBase {
      * <p>
      * Number of times EJB create method is called or 3.x bean is looked up
      */
-    @ColumnPosition(position = 20)
+    @Column(name = "CREATE_COUNT")
+    @ColumnPosition(position = 31)
     private Long createCount;
 
     /**
@@ -78,19 +79,24 @@ public class EjbStat extends AppSnapshotBase {
      * <p>
      * Number of stateless session beans in MethodReady state
      */
-    @ColumnPosition(position = 21)
+    @Column(name = "METHOD_READY_COUNT")
+    @ColumnPosition(position = 32)
     private Long methodReadyCount;      //HW-LW + LoweBound-UpperBound érték
 
-    @ColumnPosition(position = 22)
+    @Column(name = "METHOD_READY_COUNT_LW")
+    @ColumnPosition(position = 33)
     private Long methodReadyCountLw;      //LowWaterMark
 
-    @ColumnPosition(position = 23)
+    @Column(name = "METHOD_READY_COUNT_HW")
+    @ColumnPosition(position = 34)
     private Long methodReadyCountHw;      //HighWaterMark
 
-    @ColumnPosition(position = 24)
+    @Column(name = "METHOD_READY_COUNT_LB")
+    @ColumnPosition(position = 35)
     private Long methodReadyCountLb;      //LowerBound
 
-    @ColumnPosition(position = 25)
+    @Column(name = "METHOD_READY_COUNT_UB")
+    @ColumnPosition(position = 36)
     private Long methodReadyCountUb;      //UpperBound
 
     /**
@@ -98,15 +104,18 @@ public class EjbStat extends AppSnapshotBase {
      * <p>
      * Number of times EJB remove method is called
      */
-    @ColumnPosition(position = 26)
+    @Column(name = "REMOVE_COUNT")
+    @ColumnPosition(position = 37)
     private Long removeCount;
-
+//
+//
+//
     /**
      * EJB Methode stat
      */
     @OneToMany(mappedBy = "ejbStat", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "APP_EJBMETHOD_STAT_ID", referencedColumnName = "ID", nullable = false)
-    @ColumnPosition(position = 23)
+    @ColumnPosition(position = 70)
     private List<EjbBeanMethodStat> ejbBeanMethodStats = new LinkedList<>();
 
     /**
@@ -114,7 +123,7 @@ public class EjbStat extends AppSnapshotBase {
      */
     @OneToMany(mappedBy = "ejbStat", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "APP_EJBPOOL_STAT_ID", referencedColumnName = "ID", nullable = false)
-    @ColumnPosition(position = 22)
+    @ColumnPosition(position = 71)
     private List<EjbBeanPoolStat> ejbBeanPoolStats = new LinkedList<>();
 
     /**
@@ -122,7 +131,7 @@ public class EjbStat extends AppSnapshotBase {
      */
     @OneToMany(mappedBy = "ejbStat", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "APP_EJBTIMERS_STAT_ID", referencedColumnName = "ID", nullable = false)
-    @ColumnPosition(position = 22)
+    @ColumnPosition(position = 72)
     private List<EjbTimerStat> ejbTimersStats = new LinkedList<>();
 
     /**
@@ -130,7 +139,7 @@ public class EjbStat extends AppSnapshotBase {
      */
     @OneToMany(mappedBy = "ejbStat", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "APP_EJBBEANCACHE_STAT_ID", referencedColumnName = "ID", nullable = false)
-    @ColumnPosition(position = 22)
+    @ColumnPosition(position = 73)
     private List<EjbBeanCacheStat> ejbBeanCacheStat = new LinkedList<>();
 
 }

@@ -13,6 +13,7 @@ package hu.btsoft.gfmon.engine.model.entity.server.snapshot;
 
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
+import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -35,58 +36,65 @@ public abstract class KeepAliveFieldsBase extends SnapshotBase {
 
     /**
      * • countconnections
-     *
+     * <p>
      * Number of connections in keep-alive mode
      */
-    @ColumnPosition(position = 20)
+    @Column(name = "COUNT_CONNECTIONS")
+    @ColumnPosition(position = 30)
     private Long countConnections;
 
     /**
      * • countflushes
-     *
+     * <p>
      * Number of keep-alive connections that were closed
      */
-    @ColumnPosition(position = 21)
+    @Column(name = "COUNT_FLUSHES")
+    @ColumnPosition(position = 31)
     private Long countFlushes;
 
     /**
      * • counthits
-     *
+     * <p>
      * Number of requests received by connections in keep-alive mode
      */
-    @ColumnPosition(position = 22)
+    @Column(name = "COUNT_HITS")
+    @ColumnPosition(position = 32)
     private Long countHits;
 
     /**
      * • countrefusals
-     *
+     * <p>
      * Number of keep-alive connections that were rejected
      */
-    @ColumnPosition(position = 23)
+    @Column(name = "COUNT_REFUSALS")
+    @ColumnPosition(position = 33)
     private Long countRefusals;
 
     /**
      * • counttimeouts
-     *
+     * <p>
      * Number of keep-alive connections that timed out
      */
-    @ColumnPosition(position = 24)
+    @Column(name = "COUNT_TIMEOUTS")
+    @ColumnPosition(position = 34)
     private Long countTimeouts;
 
     /**
      * • maxrequests
-     *
+     * <p>
      * Maximum number of requests allowed on a single keep-alive connection
      */
-    @ColumnPosition(position = 25)
+    @Column(name = "MAX_REQUESTS")
+    @ColumnPosition(position = 35)
     private Long maxRequests;
 
     /**
      * • secondstimeouts
-     *
+     * <p>
      * Keep-alive timeout value in seconds
      */
-    @ColumnPosition(position = 26)
+    @Column(name = "SECONDS_TIMEOUTS")
+    @ColumnPosition(position = 36)
     private Long secondsTimeouts;
 
 }

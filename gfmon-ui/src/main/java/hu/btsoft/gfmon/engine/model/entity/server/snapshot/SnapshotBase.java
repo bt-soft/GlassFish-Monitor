@@ -42,6 +42,6 @@ public abstract class SnapshotBase extends EntityBase {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SERVER_ID")
-    @ColumnPosition(position = 10)
+    @ColumnPosition(position = 20)
     private Server server;
 }

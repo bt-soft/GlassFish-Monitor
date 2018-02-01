@@ -33,7 +33,7 @@ import org.eclipse.persistence.annotations.Customizer;
  * @author BT
  */
 @Entity
-@Table(name = "SVR_TASERVICE", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
+@Table(name = "SVR_TRANSACT_SERVICE", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
 @Cacheable(false)
 @Data
 @ToString(callSuper = true)
@@ -46,46 +46,49 @@ public class TransActionService extends SnapshotBase {
 
     /**
      * • activecount
-     *
+     * <p>
      * Provides the number of transactions that are currently active
      */
-    @ColumnPosition(position = 20)
+    @Column(name = "ACTIVE_COUNT")
+    @ColumnPosition(position = 30)
     private Long activeCount;
 
     /**
      * • activeids
-     *
+     * <p>
      * Provides the IDs of the transactions that are currently active a.k.a. in-flight transactions.
      * Every such transaction can be rolled back after freezing the transaction service
      */
-    @ColumnPosition(position = 21)
     @Size(max = STRING_FIELD_LENGHT, message = "Az activeIds mező hossza nem lehet nagyobb mint {max}")
-    @Column(length = STRING_FIELD_LENGHT)
+    @Column(name = "ACTIVE_IDS", length = STRING_FIELD_LENGHT)
+    @ColumnPosition(position = 31)
     private String activeIds;
 
     /**
      * • committedcount
-     *
+     * <p>
      * Provides the number of transactions that have been committed.
      */
-    @ColumnPosition(position = 22)
+    @Column(name = "COMMITTED_COUNT")
+    @ColumnPosition(position = 32)
     private Long committedCount;
 
     /**
      * • rolledbackcount
-     *
+     * <p>
      * Provides the number of transactions that have been rolled back.
      */
-    @ColumnPosition(position = 23)
+    @Column(name = "ROLLEDBACK_COUNT")
+    @ColumnPosition(position = 33)
     private Long rolledbackCount;
 
     /**
      * • state
-     *
+     * <p>
      * Indicates if the transaction service has been frozen.
      */
-    @ColumnPosition(position = 24)
     @Size(max = STRING_FIELD_LENGHT, message = "A state mező hossza nem lehet nagyobb mint {max}")
-    @Column(length = STRING_FIELD_LENGHT)
+    @Column(name = "TRANSACT_STATE", length = STRING_FIELD_LENGHT)
+    @ColumnPosition(position = 34)
     private String state;
 }

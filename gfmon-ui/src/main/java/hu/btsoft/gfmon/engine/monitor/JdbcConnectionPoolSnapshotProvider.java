@@ -85,6 +85,8 @@ public class JdbcConnectionPoolSnapshotProvider {
 
         ConnectionPoolStatistic connectionPoolStatistic = (ConnectionPoolStatistic) jSonEntityToSnapshotEntityMapper.map(valuesList);
         if (connectionPoolStatistic == null) {
+            //log.warn("Null az '{}' szerver '{}' JDBC Connection Pool statisztikása!", server.getSimpleUrl(), poolName);
+            //Nincs róla statisztika, nem érdekes
             return null;
         }
 
@@ -153,7 +155,7 @@ public class JdbcConnectionPoolSnapshotProvider {
         Set<ConnectionPoolStatistic> snapshots = null;
 
         //Véégigmegyünk a szerver alkalmazásain
-        for (JdbcConnectionPool jdbcConnectionPool : server.getJdbcConnectionPool()) {
+        for (JdbcConnectionPool jdbcConnectionPool : server.getJdbcConnectionPools()) {
 
             //Ha monitorozásra aktív, akkor meghívjuk rá az adatgyűjtőt
             if (jdbcConnectionPool.getActive() != null && Objects.equals(jdbcConnectionPool.getActive(), Boolean.TRUE)) {

@@ -16,6 +16,7 @@ import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SnapshotBase;
 import javax.persistence.Cacheable;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import lombok.Data;
@@ -31,7 +32,7 @@ import org.eclipse.persistence.annotations.Customizer;
  * @author BT
  */
 @Entity
-@Table(name = "SVR_JVMMEMORY", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
+@Table(name = "SVR_JVM_MEMORY", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
 @Cacheable(false)
 @Data
 @ToString(callSuper = true)
@@ -42,73 +43,82 @@ public class JvmMemory extends SnapshotBase {
 
     /**
      * • committedheapsize-count
-     *
+     * <p>
      * Amount of memory in bytes that is committed for the Java virtual machine to use
      */
-    @ColumnPosition(position = 20)
+    @Column(name = "COMMITTED_HEAP_SIZE")
+    @ColumnPosition(position = 30)
     private Long committedHeapSize;
 
     /**
      * • committednonheapsize-count
-     *
+     * <p>
      * Amount of memory in bytes that is committed for the Java virtual machine to use
      */
-    @ColumnPosition(position = 21)
+    @Column(name = "COMMITTED_NON_HEAP_SIZE")
+    @ColumnPosition(position = 31)
     private Long committedNonHeapSize;
 
     /**
      * • initheapsize-count
-     *
+     * <p>
      * Amount of memory in bytes that the Java virtual machine initially requests from the operating system for memory management
      */
-    @ColumnPosition(position = 22)
+    @Column(name = "INITIAL_HEAP_SIZE")
+    @ColumnPosition(position = 32)
     private Long initialHeapSize;
 
     /**
      * • initnonheapsize-count
-     *
+     * <p>
      * Amount of memory in bytes that the Java virtual machine initially requests from the operating system for memory management
      */
-    @ColumnPosition(position = 23)
+    @Column(name = "INITIAL_NON_HEAP_SIZE")
+    @ColumnPosition(position = 33)
     private Long initialNonHeapSize;
 
     /**
      * • maxheapsize-count
-     *
+     * <p>
      * Maximum amount of memory in bytes that can be used for memory management
      */
-    @ColumnPosition(position = 24)
+    @Column(name = "MAX_HEAP_SIZE")
+    @ColumnPosition(position = 34)
     private Long maxHeapSize;
 
     /**
      * • maxnonheapsize-count
-     *
+     * <p>
      * Maximum amount of memory in bytes that can be used for memory management
      */
-    @ColumnPosition(position = 25)
+    @Column(name = "MAX_NON_HEAP_SIZE")
+    @ColumnPosition(position = 35)
     private Long maxNonHeapSize;
 
     /**
      * • objectpendingfinalizationcount-count
-     *
+     * <p>
      * Approximate number of objects for which finalization is pending
      */
-    @ColumnPosition(position = 26)
+    @Column(name = "OBJECTS_PENDING_FINALIZATION")
+    @ColumnPosition(position = 36)
     private Long objectsPendingFinalization;
 
     /**
      * • usedheapsize-count
-     *
+     * <p>
      * Amount of used memory in bytes
      */
-    @ColumnPosition(position = 27)
+    @Column(name = "USED_HEAP_SIZE")
+    @ColumnPosition(position = 37)
     private Long usedHeapSize;
 
     /**
      * • usednonheapsize-count
-     *
+     * <p>
      * Amount of used memory in bytes
      */
-    @ColumnPosition(position = 28)
+    @Column(name = "USED_NON_HEAP_SIZE")
+    @ColumnPosition(position = 38)
     private Long usedNonHeapSize;
 }

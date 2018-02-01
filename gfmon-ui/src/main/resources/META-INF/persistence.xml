@@ -5,35 +5,36 @@
         <jta-data-source>jdbc/gf-monitor-ds</jta-data-source>
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <properties>
+            <property name="eclipselink.target-database" value="Derby"/>
             <!-- GF 4.1.x esetén -->
             <property name="eclipselink.logging.logger" value="JavaLogger"/>
             <!-- GF 5 esetén -->
             <!--<property name="eclipselink.logging.logger" value="org.eclipse.persistence.logging.slf4j.SLF4JLogger"/>-->
-            <property name="eclipselink.logging.level" value="WARNING"/>
-            <property name="eclipselink.logging.level.sql" value="WARNING"/>
-            <!--<property name="eclipselink.logging.level.event" value="WARNING"/>-->
-            <!--<property name="eclipselink.logging.level.sequencing" value="WARNING"/>-->
-            <!--<property name="eclipselink.logging.level.connection" value="WARNING"/>-->
-            <!--<property name="eclipselink.logging.level.jpa" value="FINE"/>-->
-            <!--<property name="eclipselink.logging.level.query" value="FINEST"/>-->
-            <!--<property name="eclipselink.logging.level.transaction" value="FINEST"/>-->
-            <!--<property name="eclipselink.logging.level.cache" value="FINEST"/>-->
-            <!--<property name="eclipselink.logging.level.propagation" value="FINEST"/>-->
-            <!--<property name="eclipselink.logging.level.ejb" value="FINEST"/>-->
-            <!--<property name="eclipselink.logging.level.dms" value="FINEST"/>-->
-            <!--<property name="eclipselink.logging.level.metadata" value="FINEST"/>-->
-            <!--<property name="eclipselink.logging.level.monitoring" value="FINEST"/>-->
-            <!--<property name="eclipselink.logging.level.misc" value="FINEST"/>-->
-            <!--<property name="eclipselink.logging.level.metamodel" value="FINEST"/>-->
-            <!--<property name="eclipselink.logging.level.weaver" value="OFF"/>-->
-            <!--<property name="eclipselink.logging.level.properties" value="FINEST"/>-->
-            <!--<property name="eclipselink.logging.level.ddl" value="FINEST"/>-->
-            <!--<property name="eclipselink.logging.level.jpars" value="FINEST"/>-->
+            <property name="eclipselink.logging.level" value="ALL"/>
+            <property name="eclipselink.logging.level.sql" value="ALL"/>
+            <property name="eclipselink.logging.level.event" value="ALL"/>
+            <property name="eclipselink.logging.level.sequencing" value="ALL"/>
+            <property name="eclipselink.logging.level.connection" value="ALL"/>
+            <property name="eclipselink.logging.level.jpa" value="ALL"/>
+            <property name="eclipselink.logging.level.query" value="ALL"/>
+            <property name="eclipselink.logging.level.transaction" value="ALL"/>
+            <property name="eclipselink.logging.level.cache" value="ALL"/>
+            <property name="eclipselink.logging.level.propagation" value="ALL"/>
+            <property name="eclipselink.logging.level.ejb" value="ALL"/>
+            <property name="eclipselink.logging.level.dms" value="ALL"/>
+            <property name="eclipselink.logging.level.metadata" value="ALL"/>
+            <property name="eclipselink.logging.level.monitoring" value="ALL"/>
+            <property name="eclipselink.logging.level.misc" value="ALL"/>
+            <property name="eclipselink.logging.level.metamodel" value="ALL"/>
+            <property name="eclipselink.logging.level.weaver" value="ALL"/>
+            <property name="eclipselink.logging.level.properties" value="ALL"/>
+            <property name="eclipselink.logging.level.ddl" value="ALL"/>
+            <property name="eclipselink.logging.level.jpars" value="ALL"/>
             <property name="eclipselink.logging.parameters" value="true"/>
             <property name="eclipselink.logging.connection" value="true"/>
             <property name="eclipselink.logging.session" value="true"/>
             <property name="eclipselink.logging.timestamp" value="false"/>
-            <property name="eclipselink.logging.thread" value="false"/>
+            <property name="eclipselink.logging.thread" value="true"/>
             <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
         </properties>
     </persistence-unit>

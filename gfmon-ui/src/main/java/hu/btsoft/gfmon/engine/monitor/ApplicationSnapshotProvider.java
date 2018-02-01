@@ -138,11 +138,13 @@ public class ApplicationSnapshotProvider {
         }
 
         AppStatistic appStatistic = (AppStatistic) jSonEntityToSnapshotEntityMapper.map(valuesList);
-        if (appStatistic != null) {
-            appStatistic.setApplication(app);
-            app.getAppStatistics().add(appStatistic);
-            snapshots.add(appStatistic);
+        if (appStatistic == null) {
+            return null;
         }
+
+        appStatistic.setApplication(app);
+        app.getAppStatistics().add(appStatistic);
+        snapshots.add(appStatistic);
 
         //Miylen Servlet-jei vannak?
         Map<String, String> servletsMap = GFJsonUtils.getChildResourcesMap(rootJsonObject);

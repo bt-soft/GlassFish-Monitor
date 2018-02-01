@@ -54,6 +54,18 @@ public abstract class CollectorBase implements ICollectorBase {
     }
 
     /**
+     * A Json válasz rendben van?
+     *
+     * @param jsonObject
+     *
+     * @return true -> igen
+     */
+    private boolean isSuccessJsonResponse(JsonObject jsonObject) {
+        String exitCode = jsonObject.getString("exit_code");
+        return ("SUCCESS".equals(exitCode));
+    }
+
+    /**
      * A REST válaszokból kinyeri az adatneveket és leírásukat
      *
      * @param entities JSon entitás
@@ -253,6 +265,11 @@ public abstract class CollectorBase implements ICollectorBase {
     private JsonObject getEntitiesFromResponse(Response response) {
         //JSon válasz leszedése
         JsonObject rootJsonObject = response.readEntity(JsonObject.class);
+        if (!isSuccessJsonResponse(rootJsonObject)) {
+            log.error("hiba a JSon válaszban! Message:'{}', Command:'{}', ExitCode:'{}'",
+                    rootJsonObject.getString("message"), rootJsonObject.getString("command"), rootJsonObject.getString("exit_code"));
+            return null;
+        }
 
         //Entitások kiszedése a jSon válaszból
         JsonObject entities = GFJsonUtils.getEntities(rootJsonObject);

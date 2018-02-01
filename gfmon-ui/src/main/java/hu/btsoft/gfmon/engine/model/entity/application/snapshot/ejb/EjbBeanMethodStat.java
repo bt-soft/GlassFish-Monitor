@@ -47,7 +47,7 @@ public class EjbBeanMethodStat extends AppSnapshotBase {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "APP_EJBSTAT_ID", referencedColumnName = "ID", nullable = false)
-    @ColumnPosition(position = 11)
+    @ColumnPosition(position = 20)
     private EjbStat ejbStat;
 
     /**
@@ -56,7 +56,7 @@ public class EjbBeanMethodStat extends AppSnapshotBase {
     @NotNull(message = "A methodName nem lehet null")
     @Size(min = 3, max = 255, message = "A methodName mező hossza {min} és {max} között lehet")
     @Column(name = "METHOD_NAME", length = 255, nullable = false)
-    @ColumnPosition(position = 19)
+    @ColumnPosition(position = 30)
     private String methodName;
 
     /**
@@ -64,7 +64,8 @@ public class EjbBeanMethodStat extends AppSnapshotBase {
      * <p>
      * Provides the time in milliseconds spent during the last successful/unsuccessful attempt to execute the operation.
      */
-    @ColumnPosition(position = 20)
+    @Column(name = "EXECTION_TIME")
+    @ColumnPosition(position = 31)
     private Long executionTime;
 
     /**
@@ -72,25 +73,20 @@ public class EjbBeanMethodStat extends AppSnapshotBase {
      * <p>
      * Provides the number of times an operation was called, the total time that was spent during the invocation and so on
      */
-    @ColumnPosition(position = 20)
+    @Column(name = "METHOD_STATISTICS")
+    @ColumnPosition(position = 32)
     private Long methodStatistic;
 
-    /**
-     * Mintime
-     */
-    @ColumnPosition(position = 21)
+    @Column(name = "METHOD_STATISTICS_TMIN")
+    @ColumnPosition(position = 33)
     private Long methodStatisticTmin;
 
-    /**
-     * MaxTime
-     */
-    @ColumnPosition(position = 22)
+    @Column(name = "METHOD_STATISTICS_TMAX")
+    @ColumnPosition(position = 34)
     private Long methodStatisticTmax;
 
-    /**
-     * TotoalTime
-     */
-    @ColumnPosition(position = 23)
+    @Column(name = "METHOD_STATISTICS_TTOT")
+    @ColumnPosition(position = 35)
     private Long methodStatisticTtot;
 
     /**
@@ -98,7 +94,8 @@ public class EjbBeanMethodStat extends AppSnapshotBase {
      * <p>
      * Provides the total number of errors that occured during invocation or execution of an operation.
      */
-    @ColumnPosition(position = 24)
+    @Column(name = "TOTAL_NUM_ERRORS")
+    @ColumnPosition(position = 36)
     private Long totalNumErrors;
 
     /**
@@ -106,7 +103,8 @@ public class EjbBeanMethodStat extends AppSnapshotBase {
      * <p>
      * Provides the total number of successful invocations of the method.
      */
-    @ColumnPosition(position = 25)
+    @Column(name = "TOTAL_NUM_SUCCESS")
+    @ColumnPosition(position = 37)
     private Long totalNumSuccess;
 
 }

@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ApplicationSnapshotService extends ServiceBase<AppSnapshotBase> {
 
-    @PersistenceContext(unitName = "gfmon_PU")
+    @PersistenceContext
     private EntityManager em;
 
     /**

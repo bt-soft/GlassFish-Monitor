@@ -68,6 +68,8 @@
 
                 <p:panel style="background: transparent; border: none;">
                     <h:outputText value="Általános beállítások" styleClass="category-header-text"/>
+
+
                     <p:commandButton value="Beállítások mentése"
                                      icon="fa fa-save"
                                      title="Beállítások mentése az adatbázisba"
@@ -113,12 +115,9 @@
                                          value="Frissít"
                                          title="Szerver lista frissítése"
                                          icon="fa fa-refresh"
-
                                          actionListener="#{settingsView.refreshServers()}"
-
                                          onstart="PF('blockUI').block();"
                                          oncomplete="PF('blockUI').unblock();"
-
                                          update="tableButtonsPanelGrid serversTable appsTable"
                                          />
 
@@ -134,9 +133,7 @@
                                          value="Új"
                                          title="Új szerver felvétele a listába"
                                          icon="fa fa-plus"
-
                                          actionListener="#{settingsView.newServerBegin()}"
-
                                          onsuccess="GfMon.updateAndShowDialog('settingsForm:newBtn', 'settingsForm', 'editServerDetailsDlg');"
                                          />
 
@@ -145,9 +142,7 @@
                                          title="A kiválasztott szerver adatainak módosítása"
                                          icon="fa fa-pencil"
                                          disabled="#{empty settingsView.selectedServer}"
-
-                                         actionListener="#{settingsView.modifyBegin()}"
-
+                                         actionListener="#{settingsView.modifySelectedServerBegin()}"
                                          onsuccess="GfMon.updateAndShowDialog('settingsForm:editBtn', 'settingsForm', 'editServerDetailsDlg');"
                                          />
 
@@ -156,9 +151,7 @@
                                          title="A kiválasztott szerver törlése a listából"
                                          icon="fa fa-trash"
                                          disabled="#{empty settingsView.selectedServer}"
-
-                                         actionListener="#{settingsView.delete()}"
-
+                                         actionListener="#{settingsView.deleteSelectedServer()}"
                                          update="tableButtonsPanelGrid serversTable appsTable"
                                          >
                             <p:confirm header="Törlés"
@@ -168,81 +161,86 @@
                         </p:commandButton>
                     </p:panel>
 
-                    <p:dataTable id="serversTable"
-                                 value="#{settingsView.servers}"
-                                 var="server"
+                    <p:scrollPanel  mode="native" style="border: none; padding: 0; margin: 0">
+                        <p:dataTable id="serversTable"
+                                     value="#{settingsView.servers}"
+                                     var="server"
 
-                                 disabledTextSelection="false"
+                                     disabledTextSelection="false"
 
-                                 selectionMode="single"
-                                 selection="#{settingsView.selectedServer}"
+                                     selectionMode="single"
+                                     selection="#{settingsView.selectedServer}"
 
-                                 rowIndexVar="rowNdx"
-                                 rowKey="#{server.url}"
+                                     rowIndexVar="rowNdx"
+                                     rowKey="#{server.url}"
 
-                                 emptyMessage="Nincs monitorozott szerver"
-                                 >
-
-
-                        <p:ajax event="rowSelect"  update="settingsForm:tableButtonsPanelGrid settingsForm:applicationsPanel settingsForm:connPoolPanel :growl" />
-                        <p:ajax event="rowUnselect"  update="settingsForm:tableButtonsPanelGrid settingsForm:applicationsPanel settingsForm:connPoolPanel :growl" />
-
-                        <p:column headerText="No#"
-                                  styleClass="alignCenter"
-                                  style="width: 1.5em">
-                            <h:outputText value="#{rowNdx + 1}" />
-                        </p:column>
+                                     emptyMessage="Nincs monitorozott szerver"
+                                     >
 
 
-                        <p:column headerText="DB id"
-                                  rendered="#{isDeveloperMode}"
-                                  styleClass="alignCenter"
-                                  style="width: 3em"
-                                  >
-                            <h:outputText value="#{server.id}"/>
-                        </p:column>
+                            <p:ajax event="rowSelect"  update="settingsForm:tableButtonsPanelGrid settingsForm:applicationsPanel settingsForm:connPoolPanel :growl" />
+                            <p:ajax event="rowUnselect"  update="settingsForm:tableButtonsPanelGrid settingsForm:applicationsPanel settingsForm:connPoolPanel :growl" />
 
-                        <p:column headerText="DB ver"
-                                  rendered="#{isDeveloperMode}"
-                                  styleClass="alignCenter"
-                                  style="width: 3em"
-                                  >
-                            <h:outputText value="#{server.optLockVersion}"/>
-                        </p:column>
+                            <p:column headerText="No#"
+                                      styleClass="alignCenter"
+                                      style="width: 1.5em">
+                                <h:outputText value="#{rowNdx + 1}" />
+                            </p:column>
 
-                        <p:column headerText="RT Seq"
-                                  rendered="#{isDeveloperMode}"
-                                  styleClass="alignCenter"
-                                  style="width: 3em"
-                                  >
-                            <h:outputText value="#{server.runtimeSeqId}"/>
-                        </p:column>
 
-                        <p:column headerText="Aktív"
-                                  styleClass="alignCenter"
-                                  style="width: 3em"
-                                  >
-                            <i class="fa #{server.active ? 'fa-check-square-o' : 'fa-square-o'}" aria-hidden="true"/>
-                        </p:column>
+                            <p:column headerText="DB id"
+                                      rendered="#{isDeveloperMode}"
+                                      styleClass="alignCenter"
+                                      style="width: 3em"
+                                      >
+                                <h:outputText value="#{server.id}"/>
+                            </p:column>
 
-                        <p:column headerText="URL">
-                            <h:outputText value="#{server.url}"/>
-                        </p:column>
+                            <p:column headerText="DB ver"
+                                      rendered="#{isDeveloperMode}"
+                                      styleClass="alignCenter"
+                                      style="width: 3em"
+                                      >
+                                <h:outputText value="#{server.optLockVersion}"/>
+                            </p:column>
 
-                        <p:column headerText="App RexExp filter">
-                            <h:outputText value="#{server.regExpFilter}"/>
-                        </p:column>
+                            <p:column headerText="RT Seq"
+                                      rendered="#{isDeveloperMode}"
+                                      styleClass="alignCenter"
+                                      style="width: 3em"
+                                      >
+                                <h:outputText value="#{server.runtimeSeqId}"/>
+                            </p:column>
 
-                        <p:column headerText="Leírás">
-                            <h:outputText value="#{server.description}"/>
-                        </p:column>
+                            <p:column headerText="Aktív"
+                                      styleClass="alignCenter"
+                                      style="width: 3em"
+                                      >
+                                <i class="fa #{server.active ? 'fa-check-square-o' : 'fa-square-o'}" aria-hidden="true"/>
+                            </p:column>
 
-                        <p:column headerText="KiegInfó">
-                            <h:outputText value="#{server.additionalInformation}"/>
-                        </p:column>
+                            <p:column headerText="URL">
+                                <h:outputText value="#{server.url}"/>
+                            </p:column>
 
-                    </p:dataTable>
+                            <p:column headerText="App RexExp filter">
+                                <h:outputText value="#{server.appRegExpFilter}"/>
+                            </p:column>
 
+                            <p:column headerText="User">
+                                <h:outputText value="#{server.userName}"/>
+                            </p:column>
+
+                            <p:column headerText="Leírás">
+                                <h:outputText value="#{server.description}"/>
+                            </p:column>
+
+                            <p:column headerText="KiegInfó" >
+                                <h:outputText value="#{server.additionalInformation}"/>
+                            </p:column>
+
+                        </p:dataTable>
+                    </p:scrollPanel>
 
 
 
@@ -473,7 +471,7 @@
                                          oncomplete="PF('blockUI').unblock();"
                                          actionListener="#{settingsView.toggleAllConPoolActiveFlag(true)}"
                                          update="conPoolTable :growl"
-                                         disabled="#{empty settingsView.selectedServer or not settingsView.selectedServer.active or empty settingsView.selectedServer.jdbcConnectionPool}"
+                                         disabled="#{empty settingsView.selectedServer or not settingsView.selectedServer.active or empty settingsView.selectedServer.jdbcConnectionPools}"
                                          />
 
 
@@ -484,14 +482,14 @@
                                          onstart="PF('blockUI').block();"
                                          oncomplete="PF('blockUI').unblock();"
                                          update="conPoolTable :growl"
-                                         disabled="#{empty settingsView.selectedServer or not settingsView.selectedServer.active or empty settingsView.selectedServer.jdbcConnectionPool}"
+                                         disabled="#{empty settingsView.selectedServer or not settingsView.selectedServer.active or empty settingsView.selectedServer.jdbcConnectionPools}"
                                          />
 
 
                         <p:dataTable id="conPoolTable"
                                      widgetVar="conPoolTable"
 
-                                     value="#{settingsView.selectedServer.jdbcConnectionPool}"
+                                     value="#{settingsView.selectedServer.jdbcConnectionPools}"
                                      var="conPool"
 
                                      multiViewState="false"

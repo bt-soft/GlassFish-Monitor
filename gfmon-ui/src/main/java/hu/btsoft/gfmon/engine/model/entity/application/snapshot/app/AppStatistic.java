@@ -19,6 +19,7 @@ import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
 import java.util.LinkedList;
 import java.util.List;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -54,35 +55,38 @@ public class AppStatistic extends AppSnapshotBase {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "APPLICATION_ID")
-    @ColumnPosition(position = 10)
+    @ColumnPosition(position = 20)
     private Application application;
 
     /**
-     * • ActivatedSessionsTotal
+     * • maxtime
      * <p>
-     * Total number of sessions ever activated
+     * Longest response time for a request; not a cumulative value, but the largest response time from among the response times
      * <p>
      */
-    @ColumnPosition(position = 20)
-    private Long activatedSessionsTotal;
+    @Column(name = "MAX_TIME")
+    @ColumnPosition(position = 30)
+    private Long maxTime;
 
     /**
-     * • activeservletsloadedcount
+     * • processingtime
      * <p>
-     * Number of Servlets loaded
+     * Average request processing time
      * <p>
      */
-    @ColumnPosition(position = 21)
-    private Long activeServletsLoaded;
+    @Column(name = "PROCESSING_TIME")
+    @ColumnPosition(position = 31)
+    private Long processingTime;
 
     /**
-     * • activesessionscurrent
+     * • requestcount
      * <p>
-     * Number of active sessions
+     * Cumulative number of requests processed so far
      * <p>
      */
-    @ColumnPosition(position = 22)
-    private Long activeSessions;
+    @Column(name = "REQUEST_COUNT")
+    @ColumnPosition(position = 32)
+    private Long requestCount;
 
     /**
      * • errorcount
@@ -90,8 +94,57 @@ public class AppStatistic extends AppSnapshotBase {
      * Cumulative value of the error count, with error count representing the number of cases where the response code was greater than or equal to 400
      * <p>
      */
-    @ColumnPosition(position = 23)
+    @Column(name = "ERROR_COUNT")
+    @ColumnPosition(position = 33)
     private Long errorCount;
+
+    /**
+     * • ActivatedSessionsTotal
+     * <p>
+     * Total number of sessions ever activated
+     * <p>
+     */
+    @Column(name = "ACTIVATED_SESSIONS_TOTAL")
+    @ColumnPosition(position = 34)
+    private Long activatedSessionsTotal;
+
+    /**
+     * • sessionstotal
+     * <p>
+     * Total number of sessions ever created
+     * <p>
+     */
+    @Column(name = "SESSIONS_TOTAL")
+    @ColumnPosition(position = 35)
+    private Long sessionsTotal;
+
+    /**
+     * • activesessionscurrent
+     * <p>
+     * Number of active sessions
+     * <p>
+     */
+    @Column(name = "ACTIVE_SESSIONS")
+    @ColumnPosition(position = 36)
+    private Long activeSessions;
+
+    @Column(name = "ACTIVE_SESSIONS_LW")
+    @ColumnPosition(position = 37)
+    private Long activeSessionsLw;
+
+    @Column(name = "ACTIVE_SESSIONS_HW")
+    @ColumnPosition(position = 38)
+    private Long activeSessionsHw;
+
+    /**
+     * • passivatedsessionstotal
+     * <p>
+     * Total number of sessions ever passivated
+     * <p>
+     */
+    @Column(name = "PASSIVATED_SESSIONS_TOTAL")
+    @ColumnPosition(position = 39)
+    private Long passivatedSessionsTotal;
 
     /**
      * • expiredsessionstotal
@@ -99,8 +152,19 @@ public class AppStatistic extends AppSnapshotBase {
      * Total number of sessions ever expired
      * <p>
      */
-    @ColumnPosition(position = 24)
+    @Column(name = "EXPIRED_SESSIONS_TOTAL")
+    @ColumnPosition(position = 40)
     private Long expiredSessionsTotal;
+
+    /**
+     * • rejectedsessionstotal
+     * <p>
+     * Total number of sessions ever rejected
+     * <p>
+     */
+    @Column(name = "REJECTED_SESSIONS_TOTAL")
+    @ColumnPosition(position = 41)
+    private Long rejectedSessionsTotal;
 
     /**
      * • jspcount
@@ -108,8 +172,17 @@ public class AppStatistic extends AppSnapshotBase {
      * Number of active JSP pages
      * <p>
      */
-    @ColumnPosition(position = 25)
+    @Column(name = "JSP_COUNT")
+    @ColumnPosition(position = 42)
     private Long jspCount;
+
+    @Column(name = "JSP_COUNT_LW")
+    @ColumnPosition(position = 43)
+    private Long jspCountLw;
+
+    @Column(name = "JSP_COUNT_HW")
+    @ColumnPosition(position = 44)
+    private Long jspCountHw;
 
     /**
      * • jsperrorcount
@@ -117,7 +190,8 @@ public class AppStatistic extends AppSnapshotBase {
      * Total number of errors triggered by JSP page invocations
      * <p>
      */
-    @ColumnPosition(position = 26)
+    @Column(name = "JSP_ERROR_COUNT")
+    @ColumnPosition(position = 45)
     private Long jspErrorCount;
 
     /**
@@ -126,71 +200,9 @@ public class AppStatistic extends AppSnapshotBase {
      * Total number of JSP pages that were reloaded
      * <p>
      */
-    @ColumnPosition(position = 27)
+    @Column(name = "JSP_RELOADED_COUNT")
+    @ColumnPosition(position = 46)
     private Long jspReloadedCount;
-
-    /**
-     * • maxtime
-     * <p>
-     * Longest response time for a request; not a cumulative value, but the largest response time from among the response times
-     * <p>
-     */
-    @ColumnPosition(position = 28)
-    private Long maxTime;
-
-    /**
-     * • passivatedsessionstotal
-     * <p>
-     * Total number of sessions ever passivated
-     * <p>
-     */
-    @ColumnPosition(position = 29)
-    private Long passivatedSessionsTotal;
-
-    /**
-     * • processingtime
-     * <p>
-     * Average request processing time
-     * <p>
-     */
-    @ColumnPosition(position = 30)
-    private Long processingTime;
-
-    /**
-     * • rejectedsessionstotal
-     * <p>
-     * Total number of sessions ever rejected
-     * <p>
-     */
-    @ColumnPosition(position = 31)
-    private Long rejectedSessionsTotal;
-
-    /**
-     * • requestcount
-     * <p>
-     * Cumulative number of requests processed so far
-     * <p>
-     */
-    @ColumnPosition(position = 32)
-    private Long requestCount;
-
-    /**
-     * • servletprocessingtimes
-     * <p>
-     * Cumulative Servlet processing times
-     * <p>
-     */
-    @ColumnPosition(position = 33)
-    private Long servletProcessingTimes;
-
-    /**
-     * • sessionstotal
-     * <p>
-     * Total number of sessions ever created
-     * <p>
-     */
-    @ColumnPosition(position = 34)
-    private Long sessionsTotal;
 
     /**
      * • totaljspcount
@@ -198,8 +210,37 @@ public class AppStatistic extends AppSnapshotBase {
      * Total number of JSP pages ever loaded
      * <p>
      */
-    @ColumnPosition(position = 35)
+    @Column(name = "TOTAL_JSP_COUNT")
+    @ColumnPosition(position = 47)
     private Long totalJspCount;
+
+    /**
+     * • activeservletsloadedcount
+     * <p>
+     * Number of Servlets loaded
+     * <p>
+     */
+    @Column(name = "ACTIVE_SERVLETS_LOADED")
+    @ColumnPosition(position = 48)
+    private Long activeServletsLoaded;
+
+    @Column(name = "ACTIVE_SERVLETS_LOADED_LW")
+    @ColumnPosition(position = 49)
+    private Long activeServletsLoadedLw;
+
+    @Column(name = "ACTIVE_SERVLETS_LOADED_HW")
+    @ColumnPosition(position = 50)
+    private Long activeServletsLoadedHw;
+
+    /**
+     * • servletprocessingtimes
+     * <p>
+     * Cumulative Servlet processing times
+     * <p>
+     */
+    @Column(name = "SERVLET_PROCESSING_TIMES")
+    @ColumnPosition(position = 51)
+    private Long servletProcessingTimes;
 
     /**
      * • totalservletsloadedcount
@@ -207,12 +248,16 @@ public class AppStatistic extends AppSnapshotBase {
      * Total number of Servlets ever loaded
      * <p>
      */
-    @ColumnPosition(position = 36)
+    @Column(name = "TOTAL_SERVLETS_LOADED")
+    @ColumnPosition(position = 52)
     private Long totalServletsLoaded;
 
+//
+//
     //-- Servlet mérési eredmények
     @OneToMany(mappedBy = "appStatistic", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "APP_SERVLET_STAT_ID", referencedColumnName = "ID", nullable = false)
+    @ColumnPosition(position = 70)
     private List<AppServletStatistic> appServletStatistics = new LinkedList<>();
 
 }

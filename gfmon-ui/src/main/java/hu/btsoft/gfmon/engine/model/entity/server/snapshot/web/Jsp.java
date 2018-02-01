@@ -16,6 +16,7 @@ import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SnapshotBase;
 import javax.persistence.Cacheable;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import lombok.Data;
@@ -42,46 +43,52 @@ public class Jsp extends SnapshotBase {
 
     /**
      * • jspcount
-     *
+     * <p>
      * Number of active JSP pages
      */
-    @ColumnPosition(position = 20)
+    @Column(name = "JSP_COUNT")
+    @ColumnPosition(position = 30)
     private Long jspCount;
 
     /**
      * • jspcount - low watermark
      */
-    @ColumnPosition(position = 21)
+    @Column(name = "JSP_COUNT_LW")
+    @ColumnPosition(position = 31)
     private Long jspCountLw;
 
     /**
      * • jspcount - low watermark
      */
-    @ColumnPosition(position = 22)
+    @Column(name = "JSP_COUNT_HW")
+    @ColumnPosition(position = 32)
     private Long jspCountHw;
 
     /**
      * • jsperrorcount
-     *
+     * <p>
      * Total number of errors triggered by JSP page invocations
      */
-    @ColumnPosition(position = 23)
+    @Column(name = "JSP_ERROR_COUNT")
+    @ColumnPosition(position = 33)
     private Long jspErrorCount;
 
     /**
      * • jspreloadedcount
-     *
+     * <p>
      * Total number of JSP pages that were reloaded
      */
-    @ColumnPosition(position = 24)
+    @Column(name = "JSP_RELOADED_COUNT")
+    @ColumnPosition(position = 34)
     private Long jspReloadedCount;
 
     /**
      * • totaljspcount
-     *
+     * <p>
      * Total number of JSP pages ever loaded
      */
-    @ColumnPosition(position = 25)
+    @Column(name = "TOTAL_JSP_COUNT")
+    @ColumnPosition(position = 35)
     private Long totalJspCount;
 
 }

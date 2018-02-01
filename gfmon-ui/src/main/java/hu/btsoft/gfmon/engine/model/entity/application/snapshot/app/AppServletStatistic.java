@@ -52,7 +52,7 @@ public class AppServletStatistic extends AppSnapshotBase {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "APP_STAT_ID")
-    @ColumnPosition(position = 10)
+    @ColumnPosition(position = 20)
     private AppStatistic appStatistic;
 
     /**
@@ -61,7 +61,7 @@ public class AppServletStatistic extends AppSnapshotBase {
     @NotNull(message = "A servletName nem lehet null")
     @Size(min = 3, max = 255, message = "A servletName mező hossza {min} és {max} között lehet")
     @Column(name = "SERVLET_NAME", length = 255, nullable = false)
-    @ColumnPosition(position = 12)
+    @ColumnPosition(position = 30)
     private String servletName;
 
     /**
@@ -69,7 +69,8 @@ public class AppServletStatistic extends AppSnapshotBase {
      * <p>
      * Number of error responses (that is, responses with a status code greater than or equal to 400)
      */
-    @ColumnPosition(position = 21)
+    @Column(name = "ERROR_COUNT")
+    @ColumnPosition(position = 30)
     private Long errorCount;
 
     /**
@@ -77,7 +78,8 @@ public class AppServletStatistic extends AppSnapshotBase {
      * <p>
      * Maximum response time
      */
-    @ColumnPosition(position = 22)
+    @Column(name = "MAX_TIME")
+    @ColumnPosition(position = 31)
     private Long maxTime;
 
     /**
@@ -85,7 +87,8 @@ public class AppServletStatistic extends AppSnapshotBase {
      * <p>
      * ProcessingTime
      */
-    @ColumnPosition(position = 23)
+    @Column(name = "PROCESSING_TIME")
+    @ColumnPosition(position = 32)
     private Long processingTime;
 
     /**
@@ -93,7 +96,8 @@ public class AppServletStatistic extends AppSnapshotBase {
      * <p>
      * Number of requests processed
      */
-    @ColumnPosition(position = 24)
+    @Column(name = "REQUEST_COUNT")
+    @ColumnPosition(position = 33)
     private Long requestCount;
 
     /**
@@ -101,7 +105,8 @@ public class AppServletStatistic extends AppSnapshotBase {
      * <p>
      * Aggregate response time
      */
-    @ColumnPosition(position = 25)
+    @Column(name = "SERVICE_TIME")
+    @ColumnPosition(position = 34)
     private Long ServiceTime;
 
 }

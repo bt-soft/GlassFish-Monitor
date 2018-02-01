@@ -37,8 +37,8 @@ import org.eclipse.persistence.annotations.Customizer;
 @Cacheable(true)
 @Table(name = "JDBC_CONNPOOL_CDU", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,
         indexes = {
-            @Index(name = "IDX_JDBC_CONPOOL_CDU_RESTPATHMASK", columnList = "RESTPATHMASK", unique = false),
-            @Index(name = "IDX_JDBC_CONPOOL_CDU_ENTITYNAME", columnList = "ENTITYNAME", unique = false)
+            @Index(name = "IDX_JDBC_CONPOOL_CDU_REST_PATH_MASK", columnList = "REST_PATH_MASK", unique = false),
+            @Index(name = "IDX_JDBC_CONPOOL_CDU_ENTITY_NAME", columnList = "ENTITY_NAME", unique = false)
         })
 @NamedQueries({
     @NamedQuery(name = "JdbcConnectionPoolCollectorDataUnit.findAll", query = "SELECT jdbcCdu from JdbcConnectionPoolCollectorDataUnit jdbcCdu ORDER BY jdbcCdu.restPathMask, jdbcCdu.dataName"),//
@@ -55,45 +55,45 @@ public class JdbcConnectionPoolCollectorDataUnit extends EntityBase {
     /**
      * A mértékegység milyen REST Path-on van?
      */
-    @ColumnPosition(position = 20)
+    @ColumnPosition(position = 30)
     @NotNull(message = "A restPathMask nem lehet null")
-    @Column(length = 1024, nullable = false)
+    @Column(name = "REST_PATH_MASK", length = 1024, nullable = false)
     private String restPathMask;
 
     /**
      * Milyen entitás használja?
      */
-    @ColumnPosition(position = 21)
+    @ColumnPosition(position = 31)
     @NotNull(message = "Az entityName nem lehet null")
-    @Column(length = 50, nullable = false)
+    @Column(name = "ENTITY_NAME", length = 50, nullable = false)
     private String entityName;
 
     /**
      * Az adat megnevezése
      */
-    @ColumnPosition(position = 22)
+    @ColumnPosition(position = 32)
     @NotNull(message = "A name nem lehet null")
-    @Column(length = 50, nullable = false)
+    @Column(name = "DATA_NAME", length = 50, nullable = false)
     private String dataName;
 
     /**
      * Mértékegység megnevezése
      */
-    @ColumnPosition(position = 23)
+    @ColumnPosition(position = 33)
     @NotNull(message = "Az unit nem lehet null")
-    @Column(length = 15, nullable = false)
+    @Column(name = "UNIT", length = 15, nullable = false)
     private String unit;
 
     /**
      * Az adat leírása
      */
-    @ColumnPosition(position = 24)
+    @ColumnPosition(position = 34)
     @NotNull(message = "A description nem lehet null")
-    @Column(length = 512, nullable = false)
+    @Column(name = "DESCRIPTION", length = 512, nullable = false)
     private String description;
 
     /**
-     * Konstrujtor
+     * Konstruktor
      *
      * @param restPathMask REST path maszk
      * @param entityName   entitás neve

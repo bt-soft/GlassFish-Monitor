@@ -29,7 +29,7 @@ import org.eclipse.persistence.tools.schemaframework.SchemaManager;
 @Slf4j
 public class ConfigService extends ServiceBase<Config> {
 
-    @PersistenceContext(unitName = "gfmon_PU")
+    @PersistenceContext
     private EntityManager em;
 
     /**

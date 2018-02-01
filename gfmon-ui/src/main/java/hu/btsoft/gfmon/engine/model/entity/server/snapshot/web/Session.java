@@ -16,6 +16,7 @@ import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SnapshotBase;
 import javax.persistence.Cacheable;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import lombok.Data;
@@ -42,58 +43,73 @@ public class Session extends SnapshotBase {
 
     /**
      * • activatedsessionstotal
-     *
+     * <p>
      * Total number of sessions ever activated
      */
-    @ColumnPosition(position = 20)
+    @Column(name = "ACTIVATED_SESSIONS_TOTAL")
+    @ColumnPosition(position = 30)
     private Long activatedSessionsTotal;
 
     /**
-     * • activesessionscurrent
-     *
+     * • activesessionscurrent (más a változó neve!!)
+     * <p>
      * Number of active sessions
      */
-    @ColumnPosition(position = 21)
+    @Column(name = "ACTIVE_SESSIONS")
+    @ColumnPosition(position = 31)
     private Long activeSessions;
+
+    @Column(name = "ACTIVE_SESSIONS_LW")
+    @ColumnPosition(position = 32)
+    private Long activeSessionsLw;
+
+    @Column(name = "ACTIVE_SESSIONS_HW")
+    @ColumnPosition(position = 33)
+    private Long activeSessionsHw;
 
     /**
      * • expiredsessionstotal
-     *
+     * <p>
      * Total number of sessions ever expired
      */
-    @ColumnPosition(position = 22)
+    @Column(name = "EXPIRED_SESSIONS_TOTAL")
+    @ColumnPosition(position = 34)
     private Long expiredSessionsTotal;
 
     /**
      * • passivatedsessionstotal
-     *
+     * <p>
      * Total number of sessions ever passivated
      */
-    @ColumnPosition(position = 23)
+    @Column(name = "PASSIVATED_SESSIONS_TOTAL")
+    @ColumnPosition(position = 35)
     private Long passivatedSessionsTotal;
 
     /**
      * • persistedsessionstotal
-     *
+     * <p>
      * Total number of sessions ever persisted
      */
-    @ColumnPosition(position = 24)
+    @Column(name = "PERSISTED_SESSIONS_TOTAL")
+    @ColumnPosition(position = 35)
     private Long persistedSessionsTotal;
 
     /**
      * • rejectedsessionstotal
-     *
+     * <p>
      * Total number of sessions ever rejected
      */
-    @ColumnPosition(position = 25)
+    @Column(name = "REJECTED_SESSIONS_TOTAL")
+    @ColumnPosition(position = 36)
     private Long rejectedSessionsTotal;
 
     /**
      * • sessionstotal
-     *
+     * <p>
      * Total number of sessions ever created
      */
-    @ColumnPosition(position = 26)
+    @Column(name = "SESSIONS_TOTAL")
+    @ColumnPosition(position = 37)
     private Long sessionsTotal;
 
 }

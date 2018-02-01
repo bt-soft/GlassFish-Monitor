@@ -18,6 +18,7 @@ import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcConnectionPool;
 import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcResourceSnapshotBase;
 import java.util.List;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -35,7 +36,7 @@ import org.eclipse.persistence.annotations.Customizer;
  * @author BT
  */
 @Entity
-@Table(name = "JDBC_CONPOOL_STAT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
+@Table(name = "JDBC_CONECTION_POOL_STAT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
 @Data
 @ToString(callSuper = true, exclude = {"jdbcConnectionPool", "connectionPoolAppStatistic"})
 @EqualsAndHashCode(callSuper = true, exclude = {"jdbcConnectionPool", "connectionPoolAppStatistic"})
@@ -48,7 +49,7 @@ public class ConnectionPoolStatistic extends JdbcResourceSnapshotBase {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "JDBC_CONNECTION_POOL_ID", referencedColumnName = "ID", nullable = false)
-    @ColumnPosition(position = 10)
+    @ColumnPosition(position = 20)
     private JdbcConnectionPool jdbcConnectionPool;
 
     /**
@@ -56,7 +57,8 @@ public class ConnectionPoolStatistic extends JdbcResourceSnapshotBase {
      * <p>
      * Average wait-time-duration per successful connection request
      */
-    @ColumnPosition(position = 21)
+    @Column(name = "AVERAGE_CONN_WAIT_TIME")
+    @ColumnPosition(position = 30)
     private Long averageConnWaitTime;
 
     /**
@@ -64,13 +66,16 @@ public class ConnectionPoolStatistic extends JdbcResourceSnapshotBase {
      * <p>
      * The longest and shortest wait times of connection requests. The current value indicates the wait time of the last request that was serviced by the pool.
      */
-    @ColumnPosition(position = 22)
+    @Column(name = "CONN_REQUEST_WAIT_TIME")
+    @ColumnPosition(position = 31)
     private Long connRequestWaitTime;
 
-    @ColumnPosition(position = 23)
+    @Column(name = "CONN_REQUEST_WAIT_TIME_LW")
+    @ColumnPosition(position = 32)
     private Long connRequestWaitTimeLw;
 
-    @ColumnPosition(position = 24)
+    @Column(name = "CONN_REQUEST_WAIT_TIME_HW")
+    @ColumnPosition(position = 33)
     private Long connRequestWaitTimeHw;
 
     /**
@@ -78,7 +83,8 @@ public class ConnectionPoolStatistic extends JdbcResourceSnapshotBase {
      * <p>
      * Number of logical connections acquired from the pool.
      */
-    @ColumnPosition(position = 25)
+    @Column(name = "NUM_CONN_ACQUIRED")
+    @ColumnPosition(position = 34)
     private Long numConnAcquired;
 
     /**
@@ -86,7 +92,8 @@ public class ConnectionPoolStatistic extends JdbcResourceSnapshotBase {
      * <p>
      * The number of physical connections that were created since the last reset.
      */
-    @ColumnPosition(position = 26)
+    @Column(name = "NUM_CONN_CREATED")
+    @ColumnPosition(position = 35)
     private Long numConnCreated;
 
     /**
@@ -94,7 +101,8 @@ public class ConnectionPoolStatistic extends JdbcResourceSnapshotBase {
      * <p>
      * Number of physical connections that were destroyed since the last reset.
      */
-    @ColumnPosition(position = 27)
+    @Column(name = "NUM_CONN_DESTROYED")
+    @ColumnPosition(position = 36)
     private Long numConnDestroyed;
 
     /**
@@ -102,7 +110,8 @@ public class ConnectionPoolStatistic extends JdbcResourceSnapshotBase {
      * <p>
      * The total number of connections in the connection pool that failed validation from the start time until the last sample time.
      */
-    @ColumnPosition(position = 28)
+    @Column(name = "NUM_CONN_FAILED_VERIFICATION")
+    @ColumnPosition(position = 37)
     private Long numConnFailedValidation;
 
     /**
@@ -110,13 +119,16 @@ public class ConnectionPoolStatistic extends JdbcResourceSnapshotBase {
      * <p>
      * The total number of free connections in the pool as of the last sampling.
      */
-    @ColumnPosition(position = 28)
+    @Column(name = "NUM_CONN_FREE")
+    @ColumnPosition(position = 38)
     private Long numConnFree;
 
-    @ColumnPosition(position = 29)
+    @Column(name = "NUM_CONN_FREE_LW")
+    @ColumnPosition(position = 39)
     private Long numConnFreeLw;
 
-    @ColumnPosition(position = 30)
+    @Column(name = "NUM_CONN_FREE_HW")
+    @ColumnPosition(position = 40)
     private Long numConnFreeHw;
 
     /**
@@ -124,7 +136,8 @@ public class ConnectionPoolStatistic extends JdbcResourceSnapshotBase {
      * <p>
      * Number of connections rejected during matching
      */
-    @ColumnPosition(position = 31)
+    @Column(name = "NUM_CONN_NOT_SUCCESSFULLY_MATCHED")
+    @ColumnPosition(position = 41)
     private Long numConnNotSuccessfullyMatched;
 
     /**
@@ -132,7 +145,8 @@ public class ConnectionPoolStatistic extends JdbcResourceSnapshotBase {
      * <p>
      * Number of logical connections released to the pool.
      */
-    @ColumnPosition(position = 32)
+    @Column(name = "NUM_CONN_RELEASED")
+    @ColumnPosition(position = 42)
     private Long numConnReleased;
 
     /**
@@ -140,7 +154,8 @@ public class ConnectionPoolStatistic extends JdbcResourceSnapshotBase {
      * <p>
      * Number of connections succesfully matched
      */
-    @ColumnPosition(position = 33)
+    @Column(name = "NUM_CONN_SUCCESSFULLY_MATCHED")
+    @ColumnPosition(position = 43)
     private Long numConnSuccessfullyMatched;
 
     /**
@@ -148,7 +163,8 @@ public class ConnectionPoolStatistic extends JdbcResourceSnapshotBase {
      * <p>
      * The total number of connections in the pool that timed out between the start time and the last sample time.
      */
-    @ColumnPosition(position = 34)
+    @Column(name = "NUM_CONN_TIMED_OUT")
+    @ColumnPosition(position = 44)
     private Long numConnTimedOut;
 
     /**
@@ -158,13 +174,16 @@ public class ConnectionPoolStatistic extends JdbcResourceSnapshotBase {
      * The total number of connections that are currently being used, as well as information about the maximum number
      * of connections that were used (the high water mark).
      */
-    @ColumnPosition(position = 35)
+    @Column(name = "NUM_CONN_USED")
+    @ColumnPosition(position = 45)
     private Long numConnUsed;
 
-    @ColumnPosition(position = 35)
+    @Column(name = "NUM_CONN_USED_LW")
+    @ColumnPosition(position = 46)
     private Long numConnUsedLw;
 
-    @ColumnPosition(position = 36)
+    @Column(name = "NUM_CONN_USED_HW")
+    @ColumnPosition(position = 47)
     private Long numConnUsedHw;
 
     /**
@@ -172,7 +191,8 @@ public class ConnectionPoolStatistic extends JdbcResourceSnapshotBase {
      * <p>
      * Number of potential connection leaks
      */
-    @ColumnPosition(position = 37)
+    @Column(name = "NUM_POTENTIAL_CONN_LEAK")
+    @ColumnPosition(position = 47)
     private Long numPotentialConnLeak;
 
     /**
@@ -180,11 +200,13 @@ public class ConnectionPoolStatistic extends JdbcResourceSnapshotBase {
      * <p>
      * Number of potential connection leaks
      */
-    @ColumnPosition(position = 37)
+    @Column(name = "WAIT_QUEUE_LENGTH")
+    @ColumnPosition(position = 49)
     private Long waitQueueLength;
 
     //-- Az alkalmazások ConnectionPool statisztika mérési eredményei
     @OneToMany(mappedBy = "connectionPoolStatistic", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "JDBC_CONPOOL_APP_STAT_ID", referencedColumnName = "ID", nullable = false)
+    @JoinColumn(name = "JDBC_CONECTION_POOL_APP_STAT_ID", referencedColumnName = "ID", nullable = false)
+    @ColumnPosition(position = 70)
     private List<ConnectionPoolAppStatistic> connectionPoolAppStatistic;
 }

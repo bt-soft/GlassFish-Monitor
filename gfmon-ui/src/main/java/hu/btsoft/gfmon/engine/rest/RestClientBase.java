@@ -183,6 +183,18 @@ public abstract class RestClientBase implements Serializable {
     }
 
     /**
+     * A Json válasz rendben van?
+     *
+     * @param jsonObject
+     *
+     * @return true -> igen
+     */
+    private boolean isSuccessJsonResponse(JsonObject jsonObject) {
+        String exitCode = jsonObject.getString("exit_code");
+        return ("SUCCESS".equals(exitCode));
+    }
+
+    /**
      * A megadott full url-ről leszedi a választ
      *
      * @param fullUrl      teljes URL (http[s]://localhost:4848/....)
@@ -212,14 +224,19 @@ public abstract class RestClientBase implements Serializable {
 
             Response response = builder.get(Response.class);
             if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
-                //Nem jött válasz -> valószínűleg nincs engedélyezve az alkalmazás
-                log.warn("A(z) '{}' url hívására {} hibakód jött", fullUrl, response.getStatusInfo().getReasonPhrase());
+                //Nem jött válasz -> valószínűleg nincs statisztika/beállítás róla
+                //log.warn("A(z) '{}' url hívására {} hibakód jött", fullUrl, response.getStatusInfo().getReasonPhrase());
                 return null;
             }
 
-            JsonObject jsonObject = response.readEntity(JsonObject.class);
+            JsonObject rootJsonObject = response.readEntity(JsonObject.class);
+            if (!isSuccessJsonResponse(rootJsonObject)) {
+                log.error("hiba a JSon válaszban! Message:'{}', Command:'{}', ExitCode:'{}'",
+                        rootJsonObject.getString("message"), rootJsonObject.getString("command"), rootJsonObject.getString("exit_code"));
+                return null;
+            }
 
-            return jsonObject;
+            return rootJsonObject;
         } catch (MalformedURLException | URISyntaxException e) {
             log.error("URL hiba", e);
         }
