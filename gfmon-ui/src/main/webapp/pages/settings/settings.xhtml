@@ -1,0 +1,795 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition  xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                 xmlns:h="http://xmlns.jcp.org/jsf/html"
+                 xmlns:p="http://primefaces.org/ui"
+                 xmlns:pe="http://primefaces.org/ui/extensions"
+                 xmlns:f="http://xmlns.jcp.org/jsf/core"
+                 xmlns:bt="http://bt-soft.hu/jsf/ui"
+                 template="./../../templates/pageTemplate.xhtml"
+                 >
+
+    <ui:define name="title">
+        #{GFMonUIConstants.SHORT_APP_NAME} - Beállítások
+    </ui:define>
+
+    <ui:define name="htmlHead">
+        <style type="text/css">
+            .category-header-text {
+                font-size: 2em;
+                font-family: Arial;
+                font-weight: bold;
+            }
+            .sub-category-header-text {
+                font-size: 1.4em;
+                font-family: Arial;
+            }
+
+            .column2Padding tr td:nth-child(even) {
+                padding-right: 3em;
+            }
+
+            .column3Padding tr td:nth-child(3n+0) {
+                padding-right: 3em;
+            }
+
+        </style>
+    </ui:define>
+
+    <ui:define name="content">
+
+
+
+        <bt:disablePanel disabled="#{not isAdmin}">
+            <h:form id="settingsForm">
+
+
+                <p:panel style="margin-bottom: 0.5em; height: 2.5em; background: transparent; border: none">
+                    <p:commandButton value="Beállítások mentése"
+                                     icon="fa fa-save"
+                                     title="Beállítások mentése az adatbázisba"
+                                     actionListener="#{settingsView.saveSettings()}"
+                                     onstart="PF('blockUI').block();"
+                                     oncomplete="PF('blockUI').unblock();"
+                                     update="@form :growl"
+                                     style="float: right"
+                                     />
+                    <!--disabled="#{not settingsView.settingsDataChanged}"-->
+                </p:panel>
+
+                <p:panel style="margin-bottom: 0.5em; background: whitesmoke">
+                    <h:outputText value="Vezérlés" styleClass="sub-category-header-text" />
+
+                    <h:panelGrid columns="3">
+
+                        <h:outputLabel value="Monitor futás: " />
+                        <p:inputSwitch id="monitorRunningStatusSwitch" value="#{settingsView.currentMonitorControllerTimerStatus}" offLabel="Áll" onLabel="Fut">
+                            <p:ajax onstart="PF('blockUI').block();"
+                                    oncomplete="PF('blockUI').unblock();"
+                                    listener="#{settingsView.toggleMonitorControllerTimerStatus}"
+                                    update="monitorRunningStatusSwitch monitorRunningStatusText"/>
+                        </p:inputSwitch>
+                        <h:outputText id="monitorRunningStatusText"
+                                      value="#{settingsView.currentMonitorControllerTimerStatus ? 'fut' :'áll'}"
+                                      style="font-weight: bold; color: #{settingsView.currentMonitorControllerTimerStatus ? 'green': 'red'}"/>
+                    </h:panelGrid>
+                </p:panel>
+
+
+
+                <p:panel style="margin-bottom: 0.5em; background: whitesmoke">
+                    <h:outputText value="Működés" styleClass="sub-category-header-text" />
+
+                    <h:panelGrid columns="6" styleClass="column2Padding">
+                        <h:outputLabel value="Automatikus indítás: " />
+                        <p:inputSwitch value="#{settingsView.autoStart}" offLabel="ki" onLabel="be"/>
+
+
+                        <h:outputLabel value="Mintavétel [mp]: "/>
+                        <p:spinner  value="#{settingsView.sampleInterval}" min="10" max="300" stepFactor="5" size="1" />
+
+
+                        <h:outputLabel value="Megőrzendő napok száma [db]: "/>
+                        <p:spinner  value="#{settingsView.keepDays}" min="10" max="300" stepFactor="1" size="1" />
+                    </h:panelGrid>
+                </p:panel>
+
+
+                <br/>
+
+                <h:outputText value="Monitorozott szerverek" styleClass="sub-category-header-text"/>
+                <p:panel id="tableButtonsPanelGrid"
+                         style="background: transparent; border: none;">
+
+                    <p:commandButton id="serverRefreshBtn"
+                                     value="Frissít"
+                                     title="Szerver lista frissítése"
+                                     icon="fa fa-refresh"
+                                     actionListener="#{settingsView.refreshServers()}"
+                                     onstart="PF('blockUI').block();"
+                                     oncomplete="PF('blockUI').unblock();"
+                                     update="tableButtonsPanelGrid serversTable childItemsForm"
+                                     />
+
+                    <p:commandButton id="viewBtn"
+                                     value="Részletek"
+                                     title="A kiválasztott szerver részleteinek megtekintése"
+                                     icon="fa fa-id-card-o"
+                                     disabled="#{empty settingsView.selectedServer}"
+                                     onstart="GfMon.updateAndShowDialog('settingsForm:viewBtn', 'settingsForm', 'viewServerDetailsDlg');"
+                                     />
+
+                    <p:commandButton id="newBtn"
+                                     value="Új"
+                                     title="Új szerver felvétele a listába"
+                                     icon="fa fa-plus"
+                                     actionListener="#{settingsView.newServerBegin()}"
+                                     onsuccess="GfMon.updateAndShowDialog('settingsForm:newBtn', 'settingsForm', 'editServerDetailsDlg');"
+                                     />
+
+                    <p:commandButton id="editBtn"
+                                     value="Módosítás"
+                                     title="A kiválasztott szerver adatainak módosítása"
+                                     icon="fa fa-pencil"
+                                     disabled="#{empty settingsView.selectedServer}"
+                                     actionListener="#{settingsView.modifySelectedServerBegin()}"
+                                     onsuccess="GfMon.updateAndShowDialog('settingsForm:editBtn', 'settingsForm', 'editServerDetailsDlg');"
+                                     />
+
+                    <p:commandButton id="deleteBtn"
+                                     value="Törlés"
+                                     title="A kiválasztott szerver törlése a listából"
+                                     icon="fa fa-trash"
+                                     disabled="#{empty settingsView.selectedServer}"
+                                     actionListener="#{settingsView.deleteSelectedServer()}"
+                                     update="tableButtonsPanelGrid serversTable childItemsForm"
+                                     >
+                        <p:confirm header="Törlés"
+                                   message="Biztosan törölni kívánja a(z) '#{settingsView.selectedServer.url}' szervert a listából?"
+                                   icon="fa fa-question-circle-o"
+                                   />
+                    </p:commandButton>
+                </p:panel>
+
+                <p:scrollPanel  mode="native" style="border: none; padding: 0; margin: 0">
+                    <p:dataTable id="serversTable"
+                                 value="#{settingsView.servers}"
+                                 var="server"
+
+                                 disabledTextSelection="false"
+
+                                 selectionMode="single"
+                                 selection="#{settingsView.selectedServer}"
+
+                                 rowIndexVar="rowNdx"
+                                 rowKey="#{server.url}"
+
+                                 emptyMessage="Nincs monitorozott szerver"
+                                 >
+
+                        <p:ajax event="rowSelect"
+                                onstart="PF('blockUI').block();"
+                                oncomplete="PF('blockUI').unblock();"
+                                update="settingsForm:tableButtonsPanelGrid childItemsForm :growl" />
+
+                        <p:ajax event="rowUnselect"
+                                onstart="PF('blockUI').block();"
+                                oncomplete="PF('blockUI').unblock();"
+                                update="settingsForm:tableButtonsPanelGrid childItemsForm :growl" />
+
+                        <p:column headerText="No#"
+                                  styleClass="alignCenter"
+                                  style="width: 1.5em">
+                            <h:outputText value="#{rowNdx + 1}" />
+                        </p:column>
+
+                        <!--
+                        <p:column headerText="DB id"
+                                  rendered="#{isDeveloperMode}"
+                                  styleClass="alignCenter"
+                                  style="width: 3em"
+                                  >
+                            <h:outputText value="#{server.id}"/>
+                        </p:column>
+                        <p:column headerText="DB ver"
+                                  rendered="#{isDeveloperMode}"
+                                  styleClass="alignCenter"
+                                  style="width: 3em"
+                                  >
+                            <h:outputText value="#{server.optLockVersion}"/>
+                        </p:column>
+                        -->
+
+                        <p:column headerText="RT Seq"
+                                  rendered="#{isDeveloperMode}"
+                                  styleClass="alignCenter"
+                                  style="width: 3em"
+                                  >
+                            <h:outputText value="#{server.runtimeSeqId}"/>
+                        </p:column>
+
+                        <!--
+                        <p:column headerText="Aktív"
+                                  styleClass="alignCenter"
+                                  style="width: 3em"
+                                  >
+                            <i class="fa #{server.active ? 'fa-check-square-o' : 'fa-square-o'}" aria-hidden="true"/>
+                        </p:column>
+                        -->
+                        <p:column headerText="Monable"
+                                  styleClass="alignCenter"
+                                  style="width: 4em"
+                                  >
+                            <p:selectBooleanButton value="#{server.active}"
+                                                   onLabel="Igen"
+                                                   offLabel="Nem"
+                                                   onIcon="ui-icon-check"
+                                                   offIcon="ui-icon-close">
+                            </p:selectBooleanButton>
+                        </p:column>
+
+
+                        <p:column headerText="URL">
+                            <h:outputText value="#{server.url}"/>
+                        </p:column>
+
+                        <p:column headerText="App RexExp filter">
+                            <h:outputText value="#{server.appRegExpFilter}"/>
+                        </p:column>
+
+                        <p:column headerText="User">
+                            <h:outputText value="#{server.userName}"/>
+                        </p:column>
+
+                        <p:column headerText="Leírás">
+                            <h:outputText value="#{server.description}"/>
+                        </p:column>
+
+                        <p:column headerText="KiegInfó" >
+                            <h:outputText value="#{server.additionalInformation}"/>
+                        </p:column>
+
+                    </p:dataTable>
+                </p:scrollPanel>
+
+            </h:form>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <h:form id="childItemsForm">
+
+
+                <h:outputText value="Monitorozott komponensek"
+                              styleClass="sub-category-header-text"
+                              rendered="#{not empty settingsView.selectedServer}"/>
+
+                <p:tabView id="childCategoriesTabView"
+                           rendered="#{not empty settingsView.selectedServer}"
+                           style="padding: 0"
+                           >
+                    <p:ajax event="tabChange"
+                            listener="#{settingsView.onChildCategoriesTabView}"
+                            onstart="PF('blockUI').block();"
+                            oncomplete="PF('blockUI').unblock();"
+                            update="childItemsForm:tabViewScrollPanel"
+                            />
+
+                    <p:tab id="serverValues">
+                        <f:facet name="title">
+                            <i class="fa fa-puzzle-piece" style="height: 15px; width: 15px;"/>
+                            <h:outputText value="Szerver"/>
+                        </f:facet>
+                    </p:tab>
+
+                    <p:tab id="applications">
+
+                        <f:facet name="title">
+                            <i class="fa fa-fighter-jet" style="height: 15px; width: 15px;"/>
+                            <h:outputText value="Alkalmazások"/>
+                        </f:facet>
+                    </p:tab>
+
+                    <p:tab id="jdbcConnectionPool">
+                        <f:facet name="title">
+                            <i class="fa fa-wifi" style="height: 15px; width: 15px;"/>
+                            <h:outputText value="JDBC Connection Pool"/>
+                        </f:facet>
+                    </p:tab>
+
+                </p:tabView>
+
+
+
+                <p:scrollPanel  id="tabViewScrollPanel"
+                                mode="native"
+                                style="border: none; padding: 0; margin: 0"
+                                >
+
+                    <!-- Szerver komponensek -->
+                    <p:panel id="serverComponentsPanel"
+                             rendered="#{not empty settingsView.selectedServer and 0 eq settingsView.childCategoriesTabViewIndex}"
+                             style="background: transparent; border: none;">
+
+                        <p:commandButton value="Összes aktív"
+                                         icon="fa fa-check-square-o"
+                                         title="Minden gyűjtendő adatnév aktív"
+                                         actionListener="#{settingsView.toggleAllDcuActiveFlag(true)}"
+                                         disabled="#{empty settingsView.selectedServer or empty settingsView.selectedServer.joiners}"
+                                         onstart="PF('blockUI').block();"
+                                         oncomplete="PF('blockUI').unblock();"
+                                         update="cdusTable :growl"
+                                         />
+
+                        <p:commandButton value="Összes inaktív"
+                                         icon="fa fa-square-o"
+                                         title="Minden gyűjtendő adatnév inaktív"
+                                         actionListener="#{settingsView.toggleAllDcuActiveFlag(false)}"
+                                         disabled="#{empty settingsView.selectedServer or empty settingsView.selectedServer.joiners}"
+                                         onstart="PF('blockUI').block();"
+                                         oncomplete="PF('blockUI').unblock();"
+                                         update="cdusTable :growl"
+                                         />
+
+                        <p:dataTable id="cdusTable"
+                                     widgetVar="cdusTable"
+
+                                     value="#{settingsView.selectedServer.joiners}"
+                                     var="joiner"
+
+                                     multiViewState="false"
+                                     disabledTextSelection="false"
+
+                                     editable="true"
+                                     editMode="cell"
+
+                                     rowIndexVar="rowNdx"
+                                     rowKey="#{app.id}"
+
+                                     emptyMessage="Nincsenek monitorozható szerver komponensek"
+                                     >
+
+                            <p:column headerText="No#"
+                                      styleClass="alignCenter"
+                                      style="width: 1.5em">
+                                <h:outputText value="#{rowNdx + 1}" />
+                            </p:column>
+
+                            <p:column headerText="active"
+                                      styleClass="alignCenter"
+                                      sortBy="{joiner.active}"
+                                      style="width: 3em"
+                                      >
+                                <p:selectBooleanCheckbox value="#{joiner.active}">
+                                    <p:ajax event="valueChange"  update="cdusTable" listener="#{settingsView.joinerActiveChanged(joiner.svrCollectorDataUnitId)}"/>
+                                </p:selectBooleanCheckbox>
+                            </p:column>
+
+
+                            <p:column headerText="!!"
+                                      styleClass="alignCenter"
+                                      sortBy="#{joiner.additionalMessage}"
+                                      style="width: 2em; color: #{settingsView.warningExisInDcus() ? 'orange' : 'silver'}; font-weight: #{settingsView.warningExisInDcus() ? 'bold' : null}">
+
+                                <p:outputLabel id="emptyLabel"
+                                               rendered="#{not empty joiner.additionalMessage}">
+                                    <i id="warningIcon"
+                                       class="fa fa-exclamation-triangle"
+                                       style="color: orange"
+                                       />
+                                    <pe:tooltip for="emptyLabel"
+                                                showEffect="fadeIn" hideEffect="slideToggle"
+                                                header="Figyelem">
+                                        <h:panelGrid columns="2" styleClass="top-aligned-columns" columnClasses="viewDlgTblPrompt">
+                                            <p:outputLabel value="Módosító: "/>
+                                            <h:outputText value="#{joiner.modifiedBy}" escape="false"/>
+
+                                            <p:outputLabel value="Időpont: "/>
+                                            <h:outputText value="#{joiner.modifiedDate}" escape="false">
+                                                <f:convertDateTime pattern="yyyy.MM.dd HH:mm:ss"
+                                                                   timeZone="Europe/Budapest"
+                                                                   locale="hu_HU"/>
+                                            </h:outputText>
+
+                                            <p:outputLabel value="KiegInfó: "/>
+                                            <h:outputText value="#{joiner.additionalMessage}" escape="false"/>
+                                        </h:panelGrid>
+                                    </pe:tooltip>
+                                </p:outputLabel>
+
+                            </p:column>
+
+
+
+                            <!--
+                            <p:column headerText="srvId"
+                                      style="width: 4em"
+                                      rendered="#{isDeveloperMode}">
+                                <h:outputText value="#{joiner.serverId}" />
+                            </p:column>
+
+                            <p:column headerText="dcuId"
+                                      style="width: 4em"
+                                      rendered="#{isDeveloperMode}">
+                                <h:outputText value="#{joiner.svrCollectorDataUnitId}" />
+                            </p:column>
+                            -->
+
+                            <p:column headerText="restPath"
+                                      style="width: 20em"
+                                      sortBy="#{joiner.svrCollectorDataUnit.restPath}"
+                                      filterBy="#{joiner.svrCollectorDataUnit.restPath}"
+                                      filterStyle="width: 10em;"
+                                      filterMatchMode="contains"
+                                      >
+                                <h:outputText value="#{joiner.svrCollectorDataUnit.restPath}" />
+                            </p:column>
+
+                            <p:column headerText="dataName"
+                                      style="width: 15em"
+                                      sortBy="#{joiner.svrCollectorDataUnit.dataName}"
+                                      filterBy="#{joiner.svrCollectorDataUnit.dataName}"
+                                      filterStyle="width: 10em;"
+                                      filterMatchMode="contains"
+                                      >
+                                <h:outputText value="#{joiner.svrCollectorDataUnit.dataName}" />
+                            </p:column>
+
+                            <p:column headerText="unit"
+                                      style="width: 6em"
+                                      sortBy="#{joiner.svrCollectorDataUnit.unit}"
+                                      >
+                                <h:outputText value="#{joiner.svrCollectorDataUnit.unit}" />
+                            </p:column>
+
+                            <p:column headerText="description" style="width: 80em">
+                                <h:outputText value="#{joiner.svrCollectorDataUnit.description}" />
+                            </p:column>
+                        </p:dataTable>
+
+                    </p:panel>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <!-- Alkalmazások -->
+                    <p:panel id="applicationsPanel"
+                             rendered="#{not empty settingsView.selectedServer and 1 eq settingsView.childCategoriesTabViewIndex}"
+                             style="background: transparent; border: none;">
+
+                        <p:commandButton id="appRefreshBtn"
+                                         value="Frissít"
+                                         icon="fa fa-refresh"
+                                         title="A szerver alkalmazásainak újbóli lekérdezése"
+                                         actionListener="#{settingsView.refreshApplications}"
+                                         onstart="PF('blockUI').block();"
+                                         oncomplete="PF('blockUI').unblock();"
+                                         disabled="#{empty settingsView.selectedServer or not settingsView.selectedServer.active}"
+                                         update="applicationsPanel"
+                                         />
+
+                        <p:commandButton value="Összes aktív"
+                                         icon="fa fa-check-square-o"
+                                         title="Minden alkalmazás monitorozható"
+                                         onstart="PF('blockUI').block();"
+                                         oncomplete="PF('blockUI').unblock();"
+                                         actionListener="#{settingsView.toggleAllAppActiveFlag(true)}"
+                                         update="appsTable :growl"
+                                         disabled="#{empty settingsView.selectedServer or not settingsView.selectedServer.active or empty settingsView.selectedServer.applications}"
+                                         />
+
+
+                        <p:commandButton value="Összes inaktív"
+                                         icon="fa fa-square-o"
+                                         title="Egyik alkalmazás sem monitorozható"
+                                         actionListener="#{settingsView.toggleAllAppActiveFlag(false)}"
+                                         onstart="PF('blockUI').block();"
+                                         oncomplete="PF('blockUI').unblock();"
+                                         update="appsTable :growl"
+                                         disabled="#{empty settingsView.selectedServer or not settingsView.selectedServer.active or empty settingsView.selectedServer.applications}"
+                                         />
+
+
+                        <p:dataTable id="appsTable"
+                                     widgetVar="appsTable"
+
+                                     value="#{settingsView.selectedServer.applications}"
+                                     var="app"
+
+                                     multiViewState="false"
+                                     disabledTextSelection="false"
+
+                                     editable="true"
+                                     editMode="cell"
+
+                                     rowIndexVar="rowNdx"
+                                     rowKey="#{app.id}"
+
+                                     emptyMessage="Nincsenek alkalmazások"
+                                     >
+
+                            <p:column headerText="No#"
+                                      styleClass="alignCenter"
+                                      style="width: 1.5em">
+                                <h:outputText value="#{rowNdx + 1}" />
+                            </p:column>
+
+                            <!--
+                            <p:column headerText="id"
+                                      style="width: 4em"
+                                      rendered="#{isDeveloperMode}">
+                                <h:outputText value="#{app.id}" />
+                            </p:column>
+                            <p:column headerText="srvId"
+                                      style="width: 4em"
+                                      rendered="#{isDeveloperMode}">
+                                <h:outputText value="#{app.server.id}" />
+                            </p:column>
+                            -->
+
+                            <p:column headerText="Monable"
+                                      styleClass="alignCenter"
+                                      style="width: 4em"
+                                      >
+                                <p:selectBooleanCheckbox value="#{app.active}"/>
+                            </p:column>
+
+
+                            <p:column headerText="App SName"
+                                      style="width: 15em"
+                                      sortBy="#{app.appShortName}"
+                                      filterBy="#{app.appShortName}"
+                                      filterStyle="width: 10em; font-size: 0.6em"
+                                      filterMatchMode="contains"
+                                      >
+                                <h:outputText value="#{app.appShortName}" />
+                            </p:column>
+                            <p:column headerText="App RName"
+                                      style="width: 15em"
+                                      sortBy="#{app.appRealName}"
+                                      filterBy="#{app.appRealName}"
+                                      filterStyle="width: 10em; font-size: 0.6em"
+                                      filterMatchMode="contains"
+                                      >
+                                <h:outputText value="#{app.appRealName}" />
+                            </p:column>
+
+                            <p:column headerText="Module SName"
+                                      style="width: 15em"
+                                      sortBy="#{app.moduleShortName}"
+                                      filterBy="#{app.moduleShortName}"
+                                      filterStyle="width: 10em; font-size: 0.6em"
+                                      filterMatchMode="contains"
+                                      >
+                                <h:outputText value="#{app.moduleShortName}" />
+                            </p:column>
+                            <p:column headerText="Module RName"
+                                      style="width: 15em"
+                                      sortBy="#{app.moduleRealName}"
+                                      filterBy="#{app.moduleRealName}"
+                                      filterStyle="width: 10em; font-size: 0.6em"
+                                      filterMatchMode="contains"
+                                      >
+                                <h:outputText value="#{app.moduleRealName}" />
+                            </p:column>
+
+                            <p:column headerText="ContextRoot">
+                                <h:outputText value="#{app.contextRoot}" />
+                            </p:column>
+                            <p:column headerText="Enabled"
+                                      style="width: 4em"
+                                      styleClass="alignCenter">
+                                <p:selectBooleanCheckbox value="#{app.enabled}" disabled="true"/>
+                            </p:column>
+                            <p:column headerText="Leírás">
+                                <h:outputText value="#{app.description}"/>
+                            </p:column>
+
+                            <p:column headerText="Létrehozva"
+                                      style="width: 10em"
+                                      >
+                                <h:outputText value="#{app.createdDate}">
+                                    <f:convertDateTime pattern="yyyy.MM.dd HH:mm:ss"
+                                                       timeZone="Europe/Budapest"
+                                                       locale="hu_HU"/>
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="Létrehozó"
+                                      style="width: 8em"
+                                      >
+                                <h:outputText value="#{app.createdBy}"/>
+                            </p:column>
+
+                            <p:column headerText="Módosítva"
+                                      style="width: 10em"
+                                      >
+                                <h:outputText value="#{app.modifiedDate}">
+                                    <f:convertDateTime pattern="yyyy.MM.dd HH:mm:ss"
+                                                       timeZone="Europe/Budapest"
+                                                       locale="hu_HU"/>
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="Módosító"
+                                      style="width: 8em"
+                                      >
+                                <h:outputText value="#{app.modifiedBy}"/>
+                            </p:column>
+
+
+                        </p:dataTable>
+                    </p:panel>
+
+
+
+
+
+
+                    <!-- JDBC Connection Pool -->
+                    <p:panel id="jdbcConnectionPoolPanel"
+                             rendered="#{not empty settingsView.selectedServer and 2 eq settingsView.childCategoriesTabViewIndex}"
+                             style="background: transparent; border: none;">
+
+                        <p:commandButton id="conPoolRefreshBtn"
+                                         value="Frissít"
+                                         icon="fa fa-refresh"
+                                         title="A szerver JDBC ConnectionPool újbóli lekérdezése"
+                                         actionListener="#{settingsView.refreshConnectionPools}"
+                                         onstart="PF('blockUI').block();"
+                                         oncomplete="PF('blockUI').unblock();"
+                                         disabled="#{empty settingsView.selectedServer or not settingsView.selectedServer.active}"
+                                         update="jdbcConnectionPoolPanel"
+                                         />
+
+                        <p:commandButton value="Összes aktív"
+                                         icon="fa fa-check-square-o"
+                                         title="Minden ConnectionPool monitorozható"
+                                         onstart="PF('blockUI').block();"
+                                         oncomplete="PF('blockUI').unblock();"
+                                         actionListener="#{settingsView.toggleAllConPoolActiveFlag(true)}"
+                                         update="conPoolTable :growl"
+                                         disabled="#{empty settingsView.selectedServer or not settingsView.selectedServer.active or empty settingsView.selectedServer.jdbcConnectionPools}"
+                                         />
+
+
+                        <p:commandButton value="Összes inaktív"
+                                         icon="fa fa-square-o"
+                                         title="Egyik ConnectionPool sem monitorozható"
+                                         actionListener="#{settingsView.toggleAllConPoolActiveFlag(false)}"
+                                         onstart="PF('blockUI').block();"
+                                         oncomplete="PF('blockUI').unblock();"
+                                         update="conPoolTable :growl"
+                                         disabled="#{empty settingsView.selectedServer or not settingsView.selectedServer.active or empty settingsView.selectedServer.jdbcConnectionPools}"
+                                         />
+
+
+                        <p:dataTable id="conPoolTable"
+                                     widgetVar="conPoolTable"
+
+                                     value="#{settingsView.selectedServer.jdbcConnectionPools}"
+                                     var="conPool"
+
+                                     multiViewState="false"
+                                     disabledTextSelection="false"
+
+                                     editable="true"
+                                     editMode="cell"
+
+                                     rowIndexVar="rowNdx"
+                                     rowKey="#{app.id}"
+
+                                     emptyMessage="Nincsenek JDBC ConnectionPool-ok"
+                                     >
+
+                            <p:column headerText="No#"
+                                      styleClass="alignCenter"
+                                      style="width: 1.5em">
+                                <h:outputText value="#{rowNdx + 1}" />
+                            </p:column>
+                            <!--
+                            <p:column headerText="id"
+                                      style="width: 4em"
+                                      rendered="#{isDeveloperMode}">
+                                <h:outputText value="#{conPool.id}" />
+                            </p:column>
+                            <p:column headerText="srvId"
+                                      style="width: 4em"
+                                      rendered="#{isDeveloperMode}">
+                                <h:outputText value="#{conPool.server.id}" />
+                            </p:column>
+                            -->
+
+                            <p:column headerText="Monable"
+                                      styleClass="alignCenter"
+                                      style="width: 4em"
+                                      >
+                                <p:selectBooleanCheckbox value="#{conPool.active}"/>
+                            </p:column>
+
+
+                            <p:column headerText="PoolName"
+                                      style="width: 20em"
+                                      sortBy="#{conPool.poolName}"
+                                      filterBy="#{conPool.poolName}"
+                                      filterStyle="width: 10em; font-size: 0.6em"
+                                      filterMatchMode="contains"
+                                      >
+                                <h:outputText value="#{conPool.poolName}" />
+                            </p:column>
+
+                            <p:column headerText="Leírás" style="width: 25em">
+                                <h:outputText value="#{conPool.description}"/>
+                            </p:column>
+
+                            <p:column headerText="Létrehozva"
+                                      style="width: 10em"
+                                      >
+                                <h:outputText value="#{conPool.createdDate}">
+                                    <f:convertDateTime pattern="yyyy.MM.dd HH:mm:ss"
+                                                       timeZone="Europe/Budapest"
+                                                       locale="hu_HU"/>
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="Létrehozó"
+                                      style="width: 8em"
+                                      >
+                                <h:outputText value="#{conPool.createdBy}"/>
+                            </p:column>
+
+                            <p:column headerText="Módosítva"
+                                      style="width: 10em"
+                                      >
+                                <h:outputText value="#{conPool.modifiedDate}">
+                                    <f:convertDateTime pattern="yyyy.MM.dd HH:mm:ss"
+                                                       timeZone="Europe/Budapest"
+                                                       locale="hu_HU"/>
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="Módosító"
+                                      style="width: 8em"
+                                      >
+                                <h:outputText value="#{conPool.modifiedBy}"/>
+                            </p:column>
+                        </p:dataTable>
+                    </p:panel>
+                </p:scrollPanel>
+            </h:form>
+
+
+
+        </bt:disablePanel>
+
+        <ui:include src="../../dialogs/server/viewServerDetailsDlg.xhtml" />
+        <ui:include src="../../dialogs/server/editServerDetailsDlg.xhtml" />
+
+    </ui:define>
+
+</ui:composition>

@@ -21,10 +21,7 @@
 
             </p:submenu>
 
-            <p:submenu label="Beállítások" icon="fa fa-gears">
-                <p:menuitem value="Általános" icon="fa fa-anchor" action="/pages/settings/baseSettings.xhtml?faces-redirect=true"/>
-                <p:menuitem value="Gyűjtendó adatok" icon="fa fa-shopping-cart" action="/pages/settings/serverCollectorsSettings.xhtml?faces-redirect=true"/>
-            </p:submenu>
+            <p:menuitem value="Beállítások" icon="fa fa-gears" action="/pages/settings/settings.xhtml?faces-redirect=true"/>
 
             <p:submenu label="Kilépés" style="float: right" icon="fa fa-sign-out" >
                 <p:menuitem value="Logout" icon="fa fa-sign-out" action="#{gfMonJsfLib.logout()}">

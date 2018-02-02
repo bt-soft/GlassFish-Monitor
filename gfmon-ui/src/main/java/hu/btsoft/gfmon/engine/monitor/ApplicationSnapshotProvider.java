@@ -33,6 +33,7 @@ import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbBeanMethod
 import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbBeanPoolCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbTimersCollector;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -115,6 +116,7 @@ public class ApplicationSnapshotProvider {
 
     /**
      * Alkalmazás WEB statisztika kigyűjtése
+     * http://localhost:4848/monitoring/domain/server/applications/gfmon/server + /Faces Servlet|Jsp|default|...
      *
      * @param app          alkalmazás DB entitás
      * @param fullUrl      teljes URL
@@ -127,6 +129,9 @@ public class ApplicationSnapshotProvider {
         Set<AppSnapshotBase> snapshots = new HashSet<>();
 
         JsonObject rootJsonObject = restDataCollector.getRootJsonObject(fullUrl, userName, sessionToken);
+
+        //Beállítjuk az adatgyűjtőnek, hogy mi a gyűjtendő szervlet neve, ez az DCU-hoz kell (eltűntetjük a '{servletName}' maszkot)
+        appServletStatisticCollector.setCurrentPath(Collections.singletonMap("{servletName}", ""));
         List<CollectedValueDto> valuesList = appWebStatisticCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
 
         //Ha kell dataUnitokat is gyűjteni
@@ -154,6 +159,10 @@ public class ApplicationSnapshotProvider {
                 String serrvletFullUrl = servletsMap.get(servletName);
 
                 rootJsonObject = restDataCollector.getRootJsonObject(serrvletFullUrl, userName, sessionToken);
+
+                //Beállítjuk az adatgyűjtőnek, hogy mi a gyűjtendő szervlet neve, ez az DCU-hoz kell (beállítjuk a szervlet nevét)
+                appServletStatisticCollector.setCurrentPath(Collections.singletonMap("{servletName}", servletName));
+
                 valuesList = appServletStatisticCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
 
                 //Ha kell dataUnitokat is gyűjteni

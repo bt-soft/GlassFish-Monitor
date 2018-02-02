@@ -30,7 +30,7 @@ public class AppEjbTimersCollector extends AppStatCollectorBase {
      * @return path
      */
     @Override
-    public String getPath() {
+    public String getPathForEntityMapping() {
         return PATH;
     }
 }

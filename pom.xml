@@ -31,7 +31,7 @@
             GlassFish 4.1.x: 2.6.1
             GlassFish 4.1.x: 2.7.0
         -->
-        <eclipselink.version>2.6.1</eclipselink.version>
+        <eclipselink.version>2.7.0</eclipselink.version>
 
     </properties>
 

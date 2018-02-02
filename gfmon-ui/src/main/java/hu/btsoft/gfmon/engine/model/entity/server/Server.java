@@ -81,7 +81,7 @@ import org.apache.commons.lang3.StringUtils;
 })
 @Data
 @ToString(callSuper = true, of = {"hostName", "ipAddress", "portNumber", "active"})
-@EqualsAndHashCode(callSuper = true, of = {"hostName", "ipAddress", "portNumber", "active"})
+@EqualsAndHashCode(callSuper = true, of = {"hostName", "ipAddress", "portNumber"}) //Az 'active' ne tartozzon bele, mert nem fogjuk megtalálni a UI felületen, ha billegtetjük az állapotát
 @NoArgsConstructor
 @Slf4j
 public class Server extends ModifiableEntityBase {

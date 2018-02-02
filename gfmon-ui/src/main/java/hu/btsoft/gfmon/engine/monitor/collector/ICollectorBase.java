@@ -28,6 +28,13 @@ public interface ICollectorBase {
     String getPath();
 
     /**
+     * A gyűjtöt adatok DTO -> JPS entitás mappinghez
+     *
+     * @return a mapping azonosítását lehetővé tévő path
+     */
+    String getPathForEntityMapping();
+
+    /**
      * A mért adatok neve/mértékegysége/leírása lista
      *
      * @param restDataCollector REST Data Collector példány

@@ -28,6 +28,17 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class ServerCollectorBase extends CollectorBase implements IServerCollector {
 
     /**
+     * A JPA entitás mappinghez
+     * (Csak az alkalmazásoknál van jelentősége)
+     *
+     * @return
+     */
+    @Override
+    public String getPathForEntityMapping() {
+        return this.getPath();
+    }
+
+    /**
      * REST JSon monitor adatok összegyűjtése
      *
      * @param restDataCollector  REST adatgyűjtó példány

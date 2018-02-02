@@ -85,8 +85,8 @@ public abstract class CollectorBase implements ICollectorBase {
                 .map((entityName) -> entities.getJsonObject(entityName))
                 .map((jsonValueEntity) -> {
                     DataUnitDto dto = new DataUnitDto();
-                    dto.setRestPath(this.getPath());
-                    Class entityClass = RestPathToJpaEntityClassMap.getJpaEntityClass(this.getPath());
+                    dto.setRestPath(this.getPathForEntityMapping());
+                    Class entityClass = RestPathToJpaEntityClassMap.getJpaEntityClass(this.getPathForEntityMapping());
                     dto.setEntityName(entityClass != null ? entityClass.getSimpleName() : "unknown");
                     dto.setDataName(jsonValueEntity.getJsonString("name").getString());
                     dto.setUnit(jsonValueEntity.getJsonString("unit").getString());
@@ -183,7 +183,8 @@ public abstract class CollectorBase implements ICollectorBase {
             dto.setLastSampleTime(long2Date(jsonValueEntity.getJsonNumber("lastsampletime").longValue()));
             dto.setName(dataName);
             dto.setStartTime(long2Date(jsonValueEntity.getJsonNumber("starttime").longValue()));
-            dto.setPath(getPath());
+            dto.setPath(this.getPath());
+            dto.setPathForEntityMapping(this.getPathForEntityMapping());
 
             //Érték típushelyes leszedése
             switch (valueUnitType) {

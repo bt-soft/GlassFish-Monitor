@@ -33,7 +33,7 @@ import org.eclipse.persistence.annotations.Customizer;
  * Alkalmazás szerver (jsp|defaul|server|FacesServlet|ThemeServlet) adatai
  * <p>
  * pl.:
- * http://localhost:4848/monitoring/domain/server/applications/{appname}/server/(jsp|defaul|server|FacesServlet|ThemeServlet)
+ * http://localhost:4848/monitoring/domain/server/applications/{appname}/server/(jsp|defaul|FacesServlet|ThemeServlet)
  *
  * @author BT
  */

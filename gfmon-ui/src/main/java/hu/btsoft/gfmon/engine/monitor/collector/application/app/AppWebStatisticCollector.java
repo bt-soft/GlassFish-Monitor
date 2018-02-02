@@ -26,12 +26,11 @@ public class AppWebStatisticCollector extends AppStatCollectorBase {
     public static final String PATH = "/applications/{appRealName}/server";
 
     /**
-     * Path elkérése
      *
-     * @return path
+     * @return
      */
     @Override
-    public String getPath() {
+    public String getPathForEntityMapping() {
         return PATH;
     }
 }

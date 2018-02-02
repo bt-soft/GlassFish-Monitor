@@ -23,16 +23,15 @@ public class JdbcConnectionPoolCollector extends AppStatCollectorBase {
     /**
      * path
      */
-    public static final String PATH = "/resources/{connectionPoolname}";
+    public static final String PATH = "/resources/{connectionPoolName}";
 
     /**
-     * Path elkérése
+     * JPA entitás map-hez
      *
-     * @return path
+     * @return
      */
     @Override
-    public String getPath() {
+    public String getPathForEntityMapping() {
         return PATH;
     }
-
 }

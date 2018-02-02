@@ -251,7 +251,7 @@ public class JSonEntityToSnapshotEntityMapper {
             //A JPA entitás típusát attól függően hozzuk létre, hogy mely uri-ról származik a mérés
             if (jpaEntityClass == null) {
                 //Leszedjük a mért értéket
-                jpaEntityClass = RestPathToJpaEntityClassMap.getJpaEntityClass(dto.getPath());
+                jpaEntityClass = RestPathToJpaEntityClassMap.getJpaEntityClass(dto.getPathForEntityMapping());
             }
 
             if (jpaEntityClass != null) {

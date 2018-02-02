@@ -144,7 +144,7 @@ public class RestPathToJpaEntityClassMap {
                 clazz = Session.class;
                 break;
 
-            // --- Alkalmazás entitások
+// --- Alkalmazás entitások
             case AppWebStatisticCollector.PATH:
                 clazz = AppStatistic.class;
                 break;
@@ -173,7 +173,7 @@ public class RestPathToJpaEntityClassMap {
                 clazz = EjbBeanCacheStat.class;
                 break;
 
-            //JDBC erőforrások
+// --- JDBC Connection Pool
             case JdbcConnectionPoolCollector.PATH:
                 clazz = ConnectionPoolStatistic.class;
                 break;

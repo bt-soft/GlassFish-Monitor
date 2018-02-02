@@ -73,6 +73,7 @@ public class JdbcConnectionPoolSnapshotProvider {
 
         String resourceUri = restDataCollector.getSubUri() + "resources/" + poolName;
         JsonObject rootJsonObject = restDataCollector.getRootJsonObject(simpleUrl, resourceUri, userName, sessionToken);
+
         List<CollectedValueDto> valuesList = jdbcConnectionPoolCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
 
         //Ha kell dataUnitokat is gyűjteni

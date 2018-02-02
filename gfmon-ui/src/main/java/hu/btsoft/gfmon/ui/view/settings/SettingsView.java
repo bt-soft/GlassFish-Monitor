@@ -17,6 +17,7 @@ import hu.btsoft.gfmon.engine.model.entity.Config;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
 import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcConnectionPool;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
+import hu.btsoft.gfmon.engine.model.entity.server.ServerSvrCollDataUnitJoiner;
 import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
 import hu.btsoft.gfmon.engine.model.service.ServerService;
@@ -32,6 +33,7 @@ import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
@@ -43,7 +45,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.primefaces.component.tabview.TabView;
 import org.primefaces.context.RequestContext;
+import org.primefaces.event.TabChangeEvent;
 
 /**
  * Beállítások LAP JSF Managed Bean
@@ -162,6 +166,16 @@ public class SettingsView extends ViewBase {
      */
     public void refreshServers() {
         servers = serverService.findAllAndSetRuntimeSeqId();
+        this.sortAllServerJoinersList();
+    }
+
+    /**
+     * Minden frissítése
+     */
+    private void refreshAll() {
+        loadAllFromDb();
+        refreshApplications();
+        refreshConnectionPools();
     }
 
     /**
@@ -273,13 +287,15 @@ public class SettingsView extends ViewBase {
                     serverService.addDefaultAllCollectorDataUnits(server, currentUser);
                 }
 
+                //CDU-k mentése
+///                serverService.updateJoiners(server, currentUser);
                 //Szerver mentése, az alkalmazások update automatikusan megtörténik
                 serverService.save(server, currentUser);
             });
 
             //Újra betöltünk mindent
             clearAll();
-            loadAllFromDb();
+            refreshAll();
 
             addJsfMessage("growl", FacesMessage.SEVERITY_INFO, "Adatbázisba mentés OK");
 
@@ -468,6 +484,11 @@ public class SettingsView extends ViewBase {
      */
     public void refreshApplications() {
 
+        //nincs szerver
+        if (selectedServer == null) {
+            return;
+        }
+
         //Ha még zsír új a szerver, akkor nem turkálunk az adatbázisban
         if (StringUtils.isEmpty(selectedServer.getSessionToken())) {
 
@@ -512,18 +533,25 @@ public class SettingsView extends ViewBase {
         refreshedServer.setRuntimeSeqId(selectedServer.getRuntimeSeqId());
 
         //Kicseréljük a listában az újonnan felolvasott szervert
-        int ndx = servers.indexOf(selectedServer);
-        servers.set(ndx, refreshedServer);
+        for (int ndx = 0; ndx < servers.size(); ndx++) {
+            if (Objects.equals(servers.get(ndx).getId(), selectedServer.getId())) {
+                servers.set(ndx, refreshedServer);
 
-        //Átállítjuk a selectedServer referenciát is, hogy az alkalmazások tábla is frissűlhessen
-        selectedServer = refreshedServer;
-
+                //Átállítjuk a selectedServer referenciát is, hogy az összes gyerek tábla is frissűlhessen
+                selectedServer = refreshedServer;
+                break;
+            }
+        }
     }
 
     /**
      * JDBC ConncetionPool frissítése
      */
     public void refreshConnectionPools() {
+
+        if (selectedServer == null) {
+            return;
+        }
 
         //Ha még zsír új a szerver, akkor nem turkálunk az adatbázisban
         if (StringUtils.isEmpty(selectedServer.getSessionToken())) {
@@ -585,6 +613,87 @@ public class SettingsView extends ViewBase {
                 .forEach((app) -> {
                     app.setActive(newActiveFlag);
                 });
+    }
+
+    @Getter
+    private int childCategoriesTabViewIndex = 0;
+
+    public void onChildCategoriesTabView(final TabChangeEvent event) {
+        TabView tv = (TabView) event.getComponent();
+        childCategoriesTabViewIndex = tv.getActiveIndex();
+    }
+
+    //--------------------------------------------------------
+    /**
+     * Az összes szerver joiner tábláját lerendezzük a szerverDCU-k path és adatnevei szerint
+     * <p>
+     * Mivel kapcsolótábla van a Server és a DCU között, így a szerver DCU listájánál nincs a kezünkben a mező
+     * amivel kiadhatnánk a JPA @OrderBy("jpaProperty DESC") annotációt.
+     * Emiatt kézzel rendezünk
+     */
+    private void sortAllServerJoinersList() {
+
+        servers.forEach((server) -> {
+            server.getJoiners().sort((o1, o2) -> {
+                ServerSvrCollDataUnitJoiner j1 = (ServerSvrCollDataUnitJoiner) o1;
+                ServerSvrCollDataUnitJoiner j2 = (ServerSvrCollDataUnitJoiner) o2;
+
+                //Először a Path szerint hasonlítjuk össze
+                int result = j1.getSvrCollectorDataUnit().getRestPath().compareTo(j2.getSvrCollectorDataUnit().getRestPath());
+
+                //Ha a Path azonos, akkor az adatnév szerint hasonlítunk
+                if (result == 0) {
+                    result = j1.getSvrCollectorDataUnit().getDataName().compareTo(j2.getSvrCollectorDataUnit().getDataName());
+                }
+
+                return result;
+            });
+        });
+    }
+
+    /**
+     * A kiválasztott szerver összes cdu adatának aktív flagjának állítgatása
+     *
+     * @param newActiveFlag 'true'/'false'
+     */
+    public void toggleAllDcuActiveFlag(boolean newActiveFlag) {
+
+        selectedServer.getJoiners()
+                .forEach((joiner) -> {
+                    joiner.setActive(newActiveFlag);
+                    joiner.setAdditionalMessage(null);  //töröljük a kieginfót
+                });
+    }
+
+    /**
+     * Van figyelmeztető üzenet?
+     *
+     * @return true -> van
+     */
+    public boolean warningExisInDcus() {
+        if (selectedServer != null) {
+            for (ServerSvrCollDataUnitJoiner joiner : selectedServer.getJoiners()) {
+                if (joiner.getAdditionalMessage() != null) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Egy joiner-t állítgattak -> töröljük a kieginfót!
+     *
+     * @param svrCollectorDataUnitId a joiner id-je
+     */
+    public void joinerActiveChanged(Long svrCollectorDataUnitId) {
+
+        for (ServerSvrCollDataUnitJoiner joiner : selectedServer.getJoiners()) {
+            if (joiner.getSvrCollectorDataUnit().getId().equals(svrCollectorDataUnitId)) {
+                joiner.setModifiedBy(currentUser);
+                joiner.setAdditionalMessage(null);
+            }
+        }
     }
 
 }

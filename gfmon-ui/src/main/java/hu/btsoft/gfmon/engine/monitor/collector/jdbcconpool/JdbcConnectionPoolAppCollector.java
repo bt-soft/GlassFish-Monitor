@@ -15,7 +15,7 @@ import hu.btsoft.gfmon.engine.monitor.collector.application.AppStatCollectorBase
 
 /**
  * A JDBC ConncetionPool-t használó alklamazások statisztikájának kigyűjtóje
- *
+ * <p>
  * http://localhost:4848/monitoring/domain/server/resources/{connectionPoolName}/{appname}
  *
  * @author BT
@@ -25,15 +25,15 @@ public class JdbcConnectionPoolAppCollector extends AppStatCollectorBase {
     /**
      * path
      */
-    public static final String PATH = "/resources/{connectionPoolname}/{appname}";
+    public static final String PATH = "/resources/{connectionPoolName}/{appName}";
 
     /**
-     * Path elkérése
+     * JPA entitás map-hez
      *
-     * @return path
+     * @return
      */
     @Override
-    public String getPath() {
+    public String getPathForEntityMapping() {
         return PATH;
     }
 

@@ -29,6 +29,11 @@ public class CollectedValueDto {
     private String path;
 
     /**
+     * Mi a JPA mapping azonosítási path-ja?
+     */
+    private String pathForEntityMapping;
+
+    /**
      * Mértékegység
      */
     private ValueUnitType unit;

@@ -61,7 +61,8 @@ import lombok.extern.slf4j.Slf4j;
 })
 @Data
 @ToString(callSuper = true, exclude = {"server", "ejbStats", "appStatistics"})
-@EqualsAndHashCode(callSuper = true, of = {"appShortName", "appRealName", "moduleShortName", "moduleRealName", "enabled", "contextRoot", "description"}) //az 'active' nem számít bele az azonosságba!
+
+@EqualsAndHashCode(callSuper = true, of = {"appShortName", "appRealName", "moduleShortName", "moduleRealName", "enabled", "contextRoot", "description", "active"})
 @NoArgsConstructor
 @Slf4j
 public class Application extends ModifiableEntityBase {

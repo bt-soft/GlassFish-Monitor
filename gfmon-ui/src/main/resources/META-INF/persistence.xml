@@ -10,32 +10,32 @@
             <property name="eclipselink.logging.logger" value="JavaLogger"/>
             <!-- GF 5 esetén -->
             <!--<property name="eclipselink.logging.logger" value="org.eclipse.persistence.logging.slf4j.SLF4JLogger"/>-->
-            <property name="eclipselink.logging.level" value="ALL"/>
-            <property name="eclipselink.logging.level.sql" value="ALL"/>
-            <property name="eclipselink.logging.level.event" value="ALL"/>
-            <property name="eclipselink.logging.level.sequencing" value="ALL"/>
-            <property name="eclipselink.logging.level.connection" value="ALL"/>
-            <property name="eclipselink.logging.level.jpa" value="ALL"/>
-            <property name="eclipselink.logging.level.query" value="ALL"/>
-            <property name="eclipselink.logging.level.transaction" value="ALL"/>
-            <property name="eclipselink.logging.level.cache" value="ALL"/>
-            <property name="eclipselink.logging.level.propagation" value="ALL"/>
-            <property name="eclipselink.logging.level.ejb" value="ALL"/>
-            <property name="eclipselink.logging.level.dms" value="ALL"/>
-            <property name="eclipselink.logging.level.metadata" value="ALL"/>
-            <property name="eclipselink.logging.level.monitoring" value="ALL"/>
-            <property name="eclipselink.logging.level.misc" value="ALL"/>
-            <property name="eclipselink.logging.level.metamodel" value="ALL"/>
-            <property name="eclipselink.logging.level.weaver" value="ALL"/>
-            <property name="eclipselink.logging.level.properties" value="ALL"/>
-            <property name="eclipselink.logging.level.ddl" value="ALL"/>
-            <property name="eclipselink.logging.level.jpars" value="ALL"/>
+            <property name="eclipselink.logging.level" value="WARNING"/>
+            <property name="eclipselink.logging.level.sql" value="OFF"/>
+            <property name="eclipselink.logging.level.event" value="OFF"/>
+            <property name="eclipselink.logging.level.sequencing" value="OFF"/>
+            <property name="eclipselink.logging.level.connection" value="OFF"/>
+            <property name="eclipselink.logging.level.jpa" value="OFF"/>
+            <property name="eclipselink.logging.level.query" value="OFF"/>
+            <property name="eclipselink.logging.level.transaction" value="OFF"/>
+            <property name="eclipselink.logging.level.cache" value="OFF"/>
+            <property name="eclipselink.logging.level.propagation" value="OFF"/>
+            <property name="eclipselink.logging.level.ejb" value="OFF"/>
+            <property name="eclipselink.logging.level.dms" value="OFF"/>
+            <property name="eclipselink.logging.level.metadata" value="OFF"/>
+            <property name="eclipselink.logging.level.monitoring" value="OFF"/>
+            <property name="eclipselink.logging.level.misc" value="OFF"/>
+            <property name="eclipselink.logging.level.metamodel" value="OFF"/>
+            <property name="eclipselink.logging.level.weaver" value="OFF"/>
+            <property name="eclipselink.logging.level.properties" value="OFF"/>
+            <property name="eclipselink.logging.level.ddl" value="OFF"/>
+            <property name="eclipselink.logging.level.jpars" value="OFF"/>
             <property name="eclipselink.logging.parameters" value="true"/>
             <property name="eclipselink.logging.connection" value="true"/>
             <property name="eclipselink.logging.session" value="true"/>
             <property name="eclipselink.logging.timestamp" value="false"/>
             <property name="eclipselink.logging.thread" value="true"/>
-            <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
+            <property name="javax.persistence.schema-generation.database.action" value="create"/>
         </properties>
     </persistence-unit>
 </persistence>
