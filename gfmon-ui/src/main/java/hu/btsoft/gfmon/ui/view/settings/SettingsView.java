@@ -284,7 +284,7 @@ public class SettingsView extends ViewBase {
                 //Beállítjuk a mérendő adatok listáját
                 if (server.getJoiners() == null || server.getJoiners().isEmpty()) {
                     //Default esetben mindent mérjünk rajta!
-                    serverService.addDefaultAllCollectorDataUnits(server, currentUser);
+                    serverService.assignServerToCdu(server, currentUser);
                 }
 
                 //CDU-k mentése

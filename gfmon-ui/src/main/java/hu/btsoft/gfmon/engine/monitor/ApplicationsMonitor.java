@@ -14,7 +14,6 @@ package hu.btsoft.gfmon.engine.monitor;
 import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
-import hu.btsoft.gfmon.engine.model.entity.application.ApplicationCollectorDataUnit;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.service.ApplicationCollectorDataUnitService;
@@ -203,26 +202,6 @@ public class ApplicationsMonitor extends MonitorsBase {
     }
 
     /**
-     * Összegyűjtött adatnevek mentése
-     *
-     * @param dataUnits összegyűjtött adatnevek halmaza
-     */
-    private void processCollectedDataUnits(Set<DataUnitDto> dataUnits) {
-
-        log.info("Alkalmazás monitor adatnevek táblájának felépítése indul");
-        long start = Elapsed.nowNano();
-
-        //Végigmegyünk az összes adatneven és jól beírjuk az adatbázisba őket
-        dataUnits.stream()
-                .map((dto) -> new ApplicationCollectorDataUnit(dto.getRestPath(), dto.getEntityName(), dto.getDataName(), dto.getUnit(), dto.getDescription()))
-                .forEachOrdered((cdu) -> {
-                    applicationCollectorDataUnitService.save(cdu, DB_MODIFICATOR_USER);
-                });
-
-        log.info("Alkalmazás monitor adatnevek felépítése OK, adatnevek: {}db, elapsed: {}", dataUnits.size(), Elapsed.getElapsedNanoStr(start));
-    }
-
-    /**
      * Kell a CDU-kat gyűjteni?
      *
      * @return true -> igen
@@ -255,7 +234,12 @@ public class ApplicationsMonitor extends MonitorsBase {
 
             //Kellett gyűjteni a mértékegységeket?
             if (dataUnits != null && !dataUnits.isEmpty()) {
-                this.processCollectedDataUnits(dataUnits);
+                applicationCollectorDataUnitService.saveCollectedDataUnits(dataUnits, DB_MODIFICATOR_USER);
+
+                //Alkalmazás <-> Cdu összerendelés
+                server.getApplications().forEach((app) -> {
+                    applicationService.assignApplicationToCdu(app, DB_MODIFICATOR_USER);
+                });
             }
 
             measuredServerCnt++;

@@ -162,7 +162,16 @@ public class Application extends ModifiableEntityBase {
     @ColumnPosition(position = 42)
     private String description;
 //
-//
+
+    /**
+     * Az alkalmazás mérendő adatai
+     * - eager: mindig kell -> mindig felolvassuk
+     * - cascade: update, merge menjen rájuk is, ha a szervert töröljük, akkor törlődjönenek az alkalmazások is
+     * - orphanRemoval: izomból törlés lesz
+     */
+    @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ApplicationAppCollDataUnitJoiner> joiners;
+
 //
     //-- Alkalmazás statisztika Mérési eredmények
     @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)

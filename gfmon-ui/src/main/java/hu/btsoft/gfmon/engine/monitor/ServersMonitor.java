@@ -179,7 +179,7 @@ public class ServersMonitor extends MonitorsBase {
             //Emiatt a DefaultConfigCreator-ban létrehozott szervereknél itt kapcsoljuk be a gyűjtendő adatneveket
             if (server.getJoiners() == null || server.getJoiners().isEmpty()) {
                 //Mindent mérjünk rajta!
-                serverService.addDefaultAllCollectorDataUnits(server, DB_MODIFICATOR_USER);
+                serverService.assignServerToCdu(server, DB_MODIFICATOR_USER);
             }
             return server;
         }).forEachOrdered((server) -> {

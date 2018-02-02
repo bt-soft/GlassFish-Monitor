@@ -59,12 +59,12 @@ public class ServerService extends ServiceBase<Server> {
     }
 
     /**
-     * Az összes ismert DataCollectorUnit hozzáadása a a szerverhez
+     * Az összes ismert CDU hozzáadása a a szerverhez
      *
      * @param server      szerver példány
      * @param creatorUser ha nem interaktív user hívott, akkor ezzel az userrel legyen az audit logolás
      */
-    public void addDefaultAllCollectorDataUnits(Server server, String creatorUser) {
+    public void assignServerToCdu(Server server, String creatorUser) {
 
         List<SvrCollectorDataUnit> allCdus = svrCollectorDataUnitService.findAll();
 

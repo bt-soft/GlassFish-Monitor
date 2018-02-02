@@ -4,7 +4,7 @@
  *  GF Monitor project
  *
  *  Module:  gfmon (gfmon)
- *  File:    ApplicationCollectorDataUnit.java
+ *  File:    AppCollectorDataUnit.java
  *  Created: 2018.01.19. 17:22:20
  *
  *  ------------------------------------------------------------------------------------
@@ -15,12 +15,16 @@ import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.EntityBase;
+import java.util.List;
 import javax.persistence.Cacheable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
@@ -41,16 +45,16 @@ import org.eclipse.persistence.annotations.Customizer;
             @Index(name = "IDX_APP_CDU_ENTITY_NAME", columnList = "ENTITY_NAME", unique = false)
         })
 @NamedQueries({
-    @NamedQuery(name = "ApplicationCollectorDataUnit.findAll", query = "SELECT acdu from ApplicationCollectorDataUnit acdu ORDER BY acdu.restPathMask, acdu.dataName"),//
-    @NamedQuery(name = "ApplicationCollectorDataUnit.findAllRestPathMasks", query = "SELECT acdu.restPathMask from ApplicationCollectorDataUnit acdu GROUP BY acdu.restPathMask ORDER BY acdu.restPathMask, acdu.dataName"),//
-    @NamedQuery(name = "ApplicationCollectorDataUnit.findByRestPathMask", query = "SELECT acdu from ApplicationCollectorDataUnit acdu WHERE acdu.restPathMask = :restPathMask ORDER BY acdu.dataName"),//
+    @NamedQuery(name = "AppCollectorDataUnit.findAll", query = "SELECT acdu from AppCollectorDataUnit acdu ORDER BY acdu.restPathMask, acdu.dataName"),//
+    @NamedQuery(name = "AppCollectorDataUnit.findAllRestPathMasks", query = "SELECT acdu.restPathMask from AppCollectorDataUnit acdu GROUP BY acdu.restPathMask ORDER BY acdu.restPathMask, acdu.dataName"),//
+    @NamedQuery(name = "AppCollectorDataUnit.findByRestPathMask", query = "SELECT acdu from AppCollectorDataUnit acdu WHERE acdu.restPathMask = :restPathMask ORDER BY acdu.dataName"),//
 })
 @Data
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-public class ApplicationCollectorDataUnit extends EntityBase {
+public class AppCollectorDataUnit extends EntityBase {
 
     /**
      * A mértékegység milyen REST Path-on van?
@@ -93,6 +97,12 @@ public class ApplicationCollectorDataUnit extends EntityBase {
     private String description;
 
     /**
+     * A visszairány az alkalmazáshoz
+     */
+    @OneToMany(mappedBy = "appCollectorDataUnit", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ApplicationAppCollDataUnitJoiner> joiners;
+
+    /**
      * Kontruktor
      *
      * @param restPathMask rest path mask
@@ -101,7 +111,7 @@ public class ApplicationCollectorDataUnit extends EntityBase {
      * @param unit         mértékegység
      * @param description  leírás
      */
-    public ApplicationCollectorDataUnit(String restPathMask, String entityName, String dataName, String unit, String description) {
+    public AppCollectorDataUnit(String restPathMask, String entityName, String dataName, String unit, String description) {
         this.restPathMask = restPathMask;
         this.entityName = entityName;
         this.dataName = dataName;
