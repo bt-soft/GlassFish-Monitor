@@ -15,6 +15,7 @@ import hu.btsoft.gfmon.corelib.exception.GfMonException;
 import hu.btsoft.gfmon.engine.model.RuntimeSequenceGenerator;
 import hu.btsoft.gfmon.engine.model.entity.Config;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
+import hu.btsoft.gfmon.engine.model.entity.application.ApplicationAppCollDataUnitJoiner;
 import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcConnectionPool;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.entity.server.ServerSvrCollDataUnitJoiner;
@@ -131,6 +132,11 @@ public class SettingsView extends ViewBase {
     @Setter
     private boolean currentMonitorControllerTimerStatus;
 
+    //---------------------
+    @Getter
+    @Setter
+    private Application selectedApplication;
+
     /**
      * JSF ManagedBean init
      */
@@ -158,6 +164,8 @@ public class SettingsView extends ViewBase {
         editServerDialogHeaderText = null;
         settingsDataChanged = false;
 
+        selectedApplication = null;
+
         deleteServersFromDb.clear();
     }
 
@@ -167,6 +175,7 @@ public class SettingsView extends ViewBase {
     public void refreshServers() {
         servers = serverService.findAllAndSetRuntimeSeqId();
         this.sortAllServerJoinersList();
+        this.sortAllApplicationJoinersList();
     }
 
     /**
@@ -625,7 +634,7 @@ public class SettingsView extends ViewBase {
 
     //--------------------------------------------------------
     /**
-     * Az összes szerver joiner tábláját lerendezzük a szerverDCU-k path és adatnevei szerint
+     * Az összes szerver joiner tábláját lerendezzük a CDU path és adatnevei szerint
      * <p>
      * Mivel kapcsolótábla van a Server és a DCU között, így a szerver DCU listájánál nincs a kezünkben a mező
      * amivel kiadhatnánk a JPA @OrderBy("jpaProperty DESC") annotációt.
@@ -652,11 +661,43 @@ public class SettingsView extends ViewBase {
     }
 
     /**
+     * Az összes alkalmazás joiner tábláját lerendezzük a CDU path és adatnevei szerint
+     * <p>
+     * Mivel kapcsolótábla van a Server és a DCU között, így a szerver DCU listájánál nincs a kezünkben a mező
+     * amivel kiadhatnánk a JPA @OrderBy("jpaProperty DESC") annotációt.
+     * Emiatt kézzel rendezünk
+     */
+    private void sortAllApplicationJoinersList() {
+
+        servers.forEach((server) -> {
+            server.getApplications().forEach((app) -> {
+
+                app.getJoiners().sort((o1, o2) -> {
+                    ApplicationAppCollDataUnitJoiner j1 = (ApplicationAppCollDataUnitJoiner) o1;
+                    ApplicationAppCollDataUnitJoiner j2 = (ApplicationAppCollDataUnitJoiner) o2;
+
+                    //Először a Path szerint hasonlítjuk össze
+                    int result = j1.getAppCollectorDataUnit().getRestPathMask().compareTo(j2.getAppCollectorDataUnit().getRestPathMask());
+
+                    //Ha a Path azonos, akkor az adatnév szerint hasonlítunk
+                    if (result == 0) {
+                        result = j1.getAppCollectorDataUnit().getDataName().compareTo(j2.getAppCollectorDataUnit().getDataName());
+                    }
+
+                    return result;
+                });
+
+            });
+
+        });
+    }
+
+    /**
      * A kiválasztott szerver összes cdu adatának aktív flagjának állítgatása
      *
      * @param newActiveFlag 'true'/'false'
      */
-    public void toggleAllDcuActiveFlag(boolean newActiveFlag) {
+    public void toggleAllServerDcuActiveFlag(boolean newActiveFlag) {
 
         selectedServer.getJoiners()
                 .forEach((joiner) -> {
@@ -666,34 +707,81 @@ public class SettingsView extends ViewBase {
     }
 
     /**
-     * Van figyelmeztető üzenet?
+     * Egy szerver joiner-t állítgattak -> töröljük a kieginfót!
+     *
+     * @param svrCollectorDataUnitId a joiner id-je
+     */
+    public void serverJoinerActiveChanged(Long svrCollectorDataUnitId) {
+
+        selectedServer.getJoiners().stream()
+                .filter((joiner) -> (joiner.getSvrCollectorDataUnit().getId().equals(svrCollectorDataUnitId)))
+                .map((joiner) -> {
+                    joiner.setModifiedBy(currentUser);
+                    return joiner;
+                }).forEachOrdered((joiner) -> {
+            joiner.setAdditionalMessage(null);
+        });
+    }
+
+    /**
+     * Van figyelmeztető üzenet a szerver CDU listában?
      *
      * @return true -> van
      */
-    public boolean warningExisInDcus() {
+    public boolean warningExisInServerDcus() {
         if (selectedServer != null) {
-            for (ServerSvrCollDataUnitJoiner joiner : selectedServer.getJoiners()) {
-                if (joiner.getAdditionalMessage() != null) {
-                    return true;
-                }
+            if (selectedServer.getJoiners().stream()
+                    .anyMatch((joiner) -> (joiner.getAdditionalMessage() != null))) {
+                return true;
             }
         }
         return false;
     }
 
     /**
-     * Egy joiner-t állítgattak -> töröljük a kieginfót!
+     * A kiválasztott alkalmazás összes cdu adatának aktív flagjának állítgatása
      *
-     * @param svrCollectorDataUnitId a joiner id-je
+     * @param newActiveFlag 'true'/'false'
      */
-    public void joinerActiveChanged(Long svrCollectorDataUnitId) {
+    public void toggleAllApplicationDcuActiveFlag(boolean newActiveFlag) {
 
-        for (ServerSvrCollDataUnitJoiner joiner : selectedServer.getJoiners()) {
-            if (joiner.getSvrCollectorDataUnit().getId().equals(svrCollectorDataUnitId)) {
-                joiner.setModifiedBy(currentUser);
-                joiner.setAdditionalMessage(null);
+        selectedApplication.getJoiners()
+                .forEach((joiner) -> {
+                    joiner.setActive(newActiveFlag);
+                    joiner.setAdditionalMessage(null);  //töröljük a kieginfót
+                });
+    }
+
+    /**
+     * Egy szerver joiner-t állítgattak -> töröljük a kieginfót!
+     *
+     * @param appCollectorDataUnitId a joiner id-je
+     */
+    public void applicationJoinerActiveChanged(Long appCollectorDataUnitId) {
+
+        selectedApplication.getJoiners().stream()
+                .filter((joiner) -> (joiner.getAppCollectorDataUnit().getId().equals(appCollectorDataUnitId)))
+                .map((joiner) -> {
+                    joiner.setModifiedBy(currentUser);
+                    return joiner;
+                }).forEachOrdered((joiner) -> {
+            joiner.setAdditionalMessage(null);
+        });
+    }
+
+    /**
+     * Van figyelmeztető üzenet a szerver CDU listában?
+     *
+     * @return true -> van
+     */
+    public boolean warningExisInApplicationDcus() {
+        if (selectedApplication != null) {
+            if (selectedApplication.getJoiners().stream()
+                    .anyMatch((joiner) -> (joiner.getAdditionalMessage() != null))) {
+                return true;
             }
         }
+        return false;
     }
 
 }
