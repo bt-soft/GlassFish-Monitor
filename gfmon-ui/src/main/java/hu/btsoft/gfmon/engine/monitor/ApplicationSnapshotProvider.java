@@ -386,7 +386,7 @@ public class ApplicationSnapshotProvider {
     /**
      * Kigyűjtjük a szerver beállításaiban található monitorozandó path-okat és adatneveket
      *
-     * @param server Szerver
+     * @param app Alkalmazás
      *
      * @return Map, key: monitorozando Path, value: gyűjtendő adatnevek Set-je
      */

@@ -157,18 +157,18 @@ public class ConnPoolSnapshotProvider {
     /**
      * Kigyűjtjük a szerver beállításaiban található monitorozandó path-okat és adatneveket
      *
-     * @param server Szerver
+     * @param connPool JDBC Connection Pool
      *
      * @return Map, key: monitorozando Path, value: gyűjtendő adatnevek Set-je
      */
-    private Map<String/*path*/, Set<String> /*dataNames*/> createCollectedDatatNamesMap(Application app) {
+    private Map<String/*path*/, Set<String> /*dataNames*/> createCollectedDatatNamesMap(ConnPool connPool) {
 
         //Az egyes Path-ok alatti gyűjtendő adatnevek halmaza, ezzel az adott kollektor munkáját tudjuk szűkíteni
         Map<String/*path*/, Set<String> /*dataNames*/> map = new HashMap<>();
 
-        app.getJoiners().stream()
+        connPool.getJoiners().stream()
                 .filter((joiner) -> (joiner.isActive()))
-                .map((joiner) -> joiner.getAppCollectorDataUnit())
+                .map((joiner) -> joiner.getConnPoolCollDataUnit())
                 .forEachOrdered((svrCdu) -> {
                     String path = svrCdu.getRestPathMask();
                     if (!map.containsKey(path)) {
@@ -206,6 +206,8 @@ public class ConnPoolSnapshotProvider {
             if (connPool.getActive() == null || Objects.equals(connPool.getActive(), Boolean.FALSE)) {
                 continue;
             }
+
+            collectedDatatNamesMap = this.createCollectedDatatNamesMap(connPool);
 
             ConnPoolStat connPoolStat = this.start(server, connPool.getPoolName());
 
