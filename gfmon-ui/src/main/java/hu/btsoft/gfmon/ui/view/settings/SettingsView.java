@@ -17,6 +17,7 @@ import hu.btsoft.gfmon.engine.model.entity.Config;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
 import hu.btsoft.gfmon.engine.model.entity.application.ApplicationAppCollDataUnitJoiner;
 import hu.btsoft.gfmon.engine.model.entity.jdbc.ConnPool;
+import hu.btsoft.gfmon.engine.model.entity.jdbc.ConnPoolConnPoolCollDataUnitJoiner;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.entity.server.ServerSvrCollDataUnitJoiner;
 import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
@@ -79,6 +80,21 @@ public class SettingsView extends ViewBase {
     @Getter
     private List<Config> configs;
 
+    /**
+     * Változott valamilyen adat, amit menteni kellene?
+     */
+    @Getter
+    private boolean settingsDataChanged;
+
+    /**
+     * Módosítás van folyamatban?
+     */
+    private boolean underModifyProcess;
+
+    @Getter
+    @Setter
+    private boolean currentMonitorControllerTimerStatus;
+
     // --- Server -----------------------------------
     @EJB
     private ServerService serverService;
@@ -109,33 +125,29 @@ public class SettingsView extends ViewBase {
     @Getter
     private String editServerDialogHeaderText;
 
-    /**
-     * Változott valamilyen adat, amit menteni kellene?
-     */
-    @Getter
-    private boolean settingsDataChanged;
-
-    /**
-     * Módosítás van folyamatban?
-     */
-    private boolean underModifyProcess;
-
+    //---------------------
     // --- Applications
     @EJB
     private ApplicationsMonitor applicationsMonitor;
 
+    /**
+     * A kiválasztott alkalmazás
+     */
+    @Getter
+    @Setter
+    private Application selectedApplication;
+
+    //--------------------------
     //--- JDBC Connection pool
     @EJB
     private ConnPoolMonitor connPoolMonitor;
 
+    /**
+     * A kiválasztott JDBC Connection Pool
+     */
     @Getter
     @Setter
-    private boolean currentMonitorControllerTimerStatus;
-
-    //---------------------
-    @Getter
-    @Setter
-    private Application selectedApplication;
+    private ConnPool selectedConnPool;
 
     /**
      * JSF ManagedBean init
@@ -165,6 +177,7 @@ public class SettingsView extends ViewBase {
         settingsDataChanged = false;
 
         selectedApplication = null;
+        selectedConnPool = null;
 
         deleteServersFromDb.clear();
     }
@@ -176,15 +189,16 @@ public class SettingsView extends ViewBase {
         servers = serverService.findAllAndSetRuntimeSeqId();
         this.sortAllServerJoinersList();
         this.sortAllApplicationJoinersList();
+        this.sortAllConnPoolJoinersList();
     }
 
     /**
      * Minden frissítése
      */
     private void refreshAll() {
-        loadAllFromDb();
-        refreshApplications();
-        refreshConnectionPools();
+        this.loadAllFromDb();
+        this.refreshApplications();
+        this.refreshConnectionPools();
     }
 
     /**
@@ -632,7 +646,7 @@ public class SettingsView extends ViewBase {
         childCategoriesTabViewIndex = tv.getActiveIndex();
     }
 
-    //--------------------------------------------------------
+//------------------------
     /**
      * Az összes szerver joiner tábláját lerendezzük a CDU path és adatnevei szerint
      * <p>
@@ -657,38 +671,6 @@ public class SettingsView extends ViewBase {
 
                 return result;
             });
-        });
-    }
-
-    /**
-     * Az összes alkalmazás joiner tábláját lerendezzük a CDU path és adatnevei szerint
-     * <p>
-     * Mivel kapcsolótábla van a Server és a DCU között, így a szerver DCU listájánál nincs a kezünkben a mező
-     * amivel kiadhatnánk a JPA @OrderBy("jpaProperty DESC") annotációt.
-     * Emiatt kézzel rendezünk
-     */
-    private void sortAllApplicationJoinersList() {
-
-        servers.forEach((server) -> {
-            server.getApplications().forEach((app) -> {
-
-                app.getJoiners().sort((o1, o2) -> {
-                    ApplicationAppCollDataUnitJoiner j1 = (ApplicationAppCollDataUnitJoiner) o1;
-                    ApplicationAppCollDataUnitJoiner j2 = (ApplicationAppCollDataUnitJoiner) o2;
-
-                    //Először a Path szerint hasonlítjuk össze
-                    int result = j1.getAppCollectorDataUnit().getRestPathMask().compareTo(j2.getAppCollectorDataUnit().getRestPathMask());
-
-                    //Ha a Path azonos, akkor az adatnév szerint hasonlítunk
-                    if (result == 0) {
-                        result = j1.getAppCollectorDataUnit().getDataName().compareTo(j2.getAppCollectorDataUnit().getDataName());
-                    }
-
-                    return result;
-                });
-
-            });
-
         });
     }
 
@@ -737,6 +719,39 @@ public class SettingsView extends ViewBase {
         }
         return false;
     }
+//------------------------
+
+    /**
+     * Az összes alkalmazás joiner tábláját lerendezzük a CDU path és adatnevei szerint
+     * <p>
+     * Mivel kapcsolótábla van az Application és a DCU között, így a Application DCU listájánál nincs a kezünkben a mező
+     * amivel kiadhatnánk a JPA @OrderBy("jpaProperty DESC") annotációt.
+     * Emiatt kézzel rendezünk
+     */
+    private void sortAllApplicationJoinersList() {
+
+        servers.forEach((server) -> {
+            server.getApplications().forEach((app) -> {
+
+                app.getJoiners().sort((o1, o2) -> {
+                    ApplicationAppCollDataUnitJoiner j1 = (ApplicationAppCollDataUnitJoiner) o1;
+                    ApplicationAppCollDataUnitJoiner j2 = (ApplicationAppCollDataUnitJoiner) o2;
+
+                    //Először a Path szerint hasonlítjuk össze
+                    int result = j1.getAppCollectorDataUnit().getRestPathMask().compareTo(j2.getAppCollectorDataUnit().getRestPathMask());
+
+                    //Ha a Path azonos, akkor az adatnév szerint hasonlítunk
+                    if (result == 0) {
+                        result = j1.getAppCollectorDataUnit().getDataName().compareTo(j2.getAppCollectorDataUnit().getDataName());
+                    }
+
+                    return result;
+                });
+
+            });
+
+        });
+    }
 
     /**
      * A kiválasztott alkalmazás összes cdu adatának aktív flagjának állítgatása
@@ -753,7 +768,7 @@ public class SettingsView extends ViewBase {
     }
 
     /**
-     * Egy szerver joiner-t állítgattak -> töröljük a kieginfót!
+     * Egy application joiner-t állítgattak -> töröljük a kieginfót!
      *
      * @param appCollectorDataUnitId a joiner id-je
      */
@@ -770,13 +785,92 @@ public class SettingsView extends ViewBase {
     }
 
     /**
-     * Van figyelmeztető üzenet a szerver CDU listában?
+     * Van figyelmeztető üzenet az Applications CDU listában?
      *
      * @return true -> van
      */
     public boolean warningExisInApplicationDcus() {
         if (selectedApplication != null) {
             if (selectedApplication.getJoiners().stream()
+                    .anyMatch((joiner) -> (joiner.getAdditionalMessage() != null))) {
+                return true;
+            }
+        }
+        return false;
+    }
+//-------------------------
+
+    /**
+     * Az összes JDBC Connection Pool joiner tábláját lerendezzük a CDU path és adatnevei szerint
+     * <p>
+     * Mivel kapcsolótábla van a ConnPool és a DCU között, így a ConnPool DCU listájánál nincs a kezünkben a mező
+     * amivel kiadhatnánk a JPA @OrderBy("jpaProperty DESC") annotációt.
+     * Emiatt kézzel rendezünk
+     */
+    private void sortAllConnPoolJoinersList() {
+
+        servers.forEach((server) -> {
+            server.getConnPools().forEach((connPool) -> {
+
+                connPool.getJoiners().sort((o1, o2) -> {
+                    ConnPoolConnPoolCollDataUnitJoiner j1 = (ConnPoolConnPoolCollDataUnitJoiner) o1;
+                    ConnPoolConnPoolCollDataUnitJoiner j2 = (ConnPoolConnPoolCollDataUnitJoiner) o2;
+
+                    //Először a Path szerint hasonlítjuk össze
+                    int result = j1.getConnPoolCollDataUnit().getRestPathMask().compareTo(j2.getConnPoolCollDataUnit().getRestPathMask());
+
+                    //Ha a Path azonos, akkor az adatnév szerint hasonlítunk
+                    if (result == 0) {
+                        result = j1.getConnPoolCollDataUnit().getDataName().compareTo(j2.getConnPoolCollDataUnit().getDataName());
+                    }
+
+                    return result;
+                });
+
+            });
+
+        });
+    }
+
+    /**
+     * A kiválasztott ConnPool összes cdu adatának aktív flagjának állítgatása
+     *
+     * @param newActiveFlag 'true'/'false'
+     */
+    public void toggleAllConnPoolDcuActiveFlag(boolean newActiveFlag) {
+
+        selectedConnPool.getJoiners()
+                .forEach((joiner) -> {
+                    joiner.setActive(newActiveFlag);
+                    joiner.setAdditionalMessage(null);  //töröljük a kieginfót
+                });
+    }
+
+    /**
+     * Egy application joiner-t állítgattak -> töröljük a kieginfót!
+     *
+     * @param connPoolCollectorDataUnitId a joiner id-je
+     */
+    public void connPoolJoinerActiveChanged(Long connPoolCollectorDataUnitId) {
+
+        selectedConnPool.getJoiners().stream()
+                .filter((joiner) -> (joiner.getConnPoolCollDataUnit().getId().equals(connPoolCollectorDataUnitId)))
+                .map((joiner) -> {
+                    joiner.setModifiedBy(currentUser);
+                    return joiner;
+                }).forEachOrdered((joiner) -> {
+            joiner.setAdditionalMessage(null);
+        });
+    }
+
+    /**
+     * Van figyelmeztető üzenet a ConnPool CDU listában?
+     *
+     * @return true -> van
+     */
+    public boolean warningExisInConnPoolDcus() {
+        if (selectedConnPool != null) {
+            if (selectedConnPool.getJoiners().stream()
                     .anyMatch((joiner) -> (joiner.getAdditionalMessage() != null))) {
                 return true;
             }
