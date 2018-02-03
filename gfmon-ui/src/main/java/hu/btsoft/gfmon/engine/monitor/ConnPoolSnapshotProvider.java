@@ -224,14 +224,12 @@ public class ConnPoolSnapshotProvider {
                             .filter((app) -> (Objects.equals(app.getAppRealName(), conAppStat.getAppName()))) //Kikeressük a  névre azonosságot
                             .map((app) -> {
 //
-// TODO: Ezt nem szabad beállítani, mert nem lehet menteni a ConnectionPool CDU-kat, ha magunk gyűjtjük össze
-// Majd fixálni!!!!
+// FIXME: Ezt nem szabad beállítani, mert nem lehet menteni a ConnectionPool CDU-kat, ha magunk gyűjtjük össze
 //
 //                                    if (app.getConnPoolAppStats() == null) {
 //                                        app.setConnPoolAppStats(new LinkedList<>());
 //                                    }
 //                                    app.getConnPoolAppStats().add(conAppStat);   //beállítjuk az alkalmazásnak, hogy van ConnectionPool statisztikája
-
                                 return app;
                             }).forEachOrdered((app) -> {
                         conAppStat.setApplication(app);                                 //beállítjuk a COnnectionPoolApplStatnak is az allamazást
