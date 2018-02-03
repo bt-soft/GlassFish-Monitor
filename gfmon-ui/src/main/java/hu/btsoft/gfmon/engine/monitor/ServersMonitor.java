@@ -211,8 +211,6 @@ public class ServersMonitor extends MonitorsBase {
                 continue;
             }
 
-            log.trace("Adatgyűjtés indul: {}", server.getUrl());
-
             erroredPaths.clear();
             Set<SnapshotBase> serverSnapshots = serverSnapshotProvider.fetchSnapshot(server, erroredPaths);
 
@@ -262,9 +260,11 @@ public class ServersMonitor extends MonitorsBase {
 
             //Kiíratjuk a változásokat az adatbázisba
             svrSnapshotService.flush();
+
+            log.trace("Szerver Stat: szerver url: {}, Server snapshots: {}, elapsed: {}", server.getUrl(), serverSnapshots.size(), Elapsed.getElapsedNanoStr(start));
         }
 
-        log.trace("Szerver adatok kigyűjtve {} db szerverre, elapsed: {}", measuredServerCnt, Elapsed.getElapsedNanoStr(start));
+        log.trace("Szerver Stat összesen: szerver: {}db, elapsed: {}", measuredServerCnt, Elapsed.getElapsedNanoStr(start));
     }
 
     /**

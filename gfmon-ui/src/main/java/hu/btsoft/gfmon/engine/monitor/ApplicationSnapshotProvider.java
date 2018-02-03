@@ -431,7 +431,7 @@ public class ApplicationSnapshotProvider {
         for (Application app : server.getApplications()) {
 
             //Ha nem aktív az alkalmazás, akkor nem foglalkozunk vele
-            if (app.getActive() == null || Objects.equals(app.getActive(), Boolean.TRUE)) {
+            if (app.getActive() == null || Objects.equals(app.getActive(), Boolean.FALSE)) {
                 continue;
             }
 

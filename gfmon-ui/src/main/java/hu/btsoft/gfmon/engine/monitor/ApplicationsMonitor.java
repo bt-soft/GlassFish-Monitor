@@ -223,12 +223,14 @@ public class ApplicationsMonitor extends MonitorsBase {
     public void startMonitoring() {
         long start = Elapsed.nowNano();
 
+        //Hibára futott mérési oldalak, automatikusan tiltjuk őket
+        //Itt FULL URL-eket kapunk vissza
+        Set<String> fullUrlErroredPaths = new HashSet<>();
+
         int measuredServerCnt = 0;
         for (Server server : serverService.findAllActiveServer()) {
 
-            //Hibára futott mérési oldalak, automatikusan tiltjuk őket
-            //Itt FULL URL-eket kapunk vissza
-            Set<String> fullUrlErroredPaths = new HashSet<>();
+            fullUrlErroredPaths.clear();
 
             //Kell gyűjteni a mértékegységeket?
             Set<DataUnitDto> dataUnits = null;
@@ -292,10 +294,10 @@ public class ApplicationsMonitor extends MonitorsBase {
             //Kiíratjuk a változásokat az adatbázisba
             applicationSnapshotService.flush();
 
-            log.trace("server url: {}, snapshots: {}, elapsed: {}", server.getUrl(), applicationSnapshots.size(), Elapsed.getElapsedNanoStr(start));
+            log.trace("Application Stat: server url: {}, Aplication snapshots: {}, elapsed: {}", server.getUrl(), applicationSnapshots.size(), Elapsed.getElapsedNanoStr(start));
         }
 
-        log.trace("Alkalmazás adatok kigyűjtve {} db szerverre, elapsed: {}", measuredServerCnt, Elapsed.getElapsedNanoStr(start));
+        log.trace("Application Stat összesen: szerver: {}db, elapsed: {}", measuredServerCnt, Elapsed.getElapsedNanoStr(start));
     }
 
     /**

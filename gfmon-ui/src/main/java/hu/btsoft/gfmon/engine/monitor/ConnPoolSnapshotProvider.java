@@ -23,6 +23,8 @@ import hu.btsoft.gfmon.engine.monitor.collector.CollectedValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.connpool.ConnPoolAppCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.connpool.ConnPoolCollector;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -153,6 +155,33 @@ public class ConnPoolSnapshotProvider {
     }
 
     /**
+     * Kigyűjtjük a szerver beállításaiban található monitorozandó path-okat és adatneveket
+     *
+     * @param server Szerver
+     *
+     * @return Map, key: monitorozando Path, value: gyűjtendő adatnevek Set-je
+     */
+    private Map<String/*path*/, Set<String> /*dataNames*/> createCollectedDatatNamesMap(Application app) {
+
+        //Az egyes Path-ok alatti gyűjtendő adatnevek halmaza, ezzel az adott kollektor munkáját tudjuk szűkíteni
+        Map<String/*path*/, Set<String> /*dataNames*/> map = new HashMap<>();
+
+        app.getJoiners().stream()
+                .filter((joiner) -> (joiner.isActive()))
+                .map((joiner) -> joiner.getAppCollectorDataUnit())
+                .forEachOrdered((svrCdu) -> {
+                    String path = svrCdu.getRestPathMask();
+                    if (!map.containsKey(path)) {
+                        map.put(path, new HashSet<>());
+                    }
+                    Set<String> collectedDatatNames = map.get(path);
+                    collectedDatatNames.add(svrCdu.getDataName());
+                });
+
+        return map;
+    }
+
+    /**
      * Az összes JDBC resource kollektor adatait összegyűjti, majd egy új Jdbcresource Snapshot entitásba rakja az eredményeket
      *
      * @param server              a monitorozandó Server entitása
@@ -174,24 +203,26 @@ public class ConnPoolSnapshotProvider {
         for (ConnPool connPool : server.getConnPools()) {
 
             //Ha monitorozásra aktív, akkor meghívjuk rá az adatgyűjtőt
-            if (connPool.getActive() != null && Objects.equals(connPool.getActive(), Boolean.TRUE)) {
+            if (connPool.getActive() == null || Objects.equals(connPool.getActive(), Boolean.FALSE)) {
+                continue;
+            }
 
-                ConnPoolStat connPoolStat = this.start(server, connPool.getPoolName());
+            ConnPoolStat connPoolStat = this.start(server, connPool.getPoolName());
 
-                if (connPoolStat == null) {
-                    continue;
-                }
+            if (connPoolStat == null) {
+                continue;
+            }
 
-                //Beállítjuk, hog ymelyik conectionPool-hoz tartozik a mérés
-                connPoolStat.setConnPool(connPool);
+            //Beállítjuk, hog ymelyik conectionPool-hoz tartozik a mérés
+            connPoolStat.setConnPool(connPool);
 
-                //Ha a connectionPool->ConnPoolAppStat nem null, akkor megkeresük, és beállítjuk az Application <-> ConnPoolAppStat relációkat is
-                if (connPoolStat.getConnPoolAppStats() != null && !connPoolStat.getConnPoolAppStats().isEmpty()) {
-                    for (ConnPoolAppStat conAppStat : connPoolStat.getConnPoolAppStats()) {
+            //Ha a connectionPool->ConnPoolAppStat nem null, akkor megkeresük, és beállítjuk az Application <-> ConnPoolAppStat relációkat is
+            if (connPoolStat.getConnPoolAppStats() != null && !connPoolStat.getConnPoolAppStats().isEmpty()) {
+                for (ConnPoolAppStat conAppStat : connPoolStat.getConnPoolAppStats()) {
 
-                        server.getApplications().stream()
-                                .filter((app) -> (Objects.equals(app.getAppRealName(), conAppStat.getAppName()))) //Kikeressük a  névre azonosságot
-                                .map((app) -> {
+                    server.getApplications().stream()
+                            .filter((app) -> (Objects.equals(app.getAppRealName(), conAppStat.getAppName()))) //Kikeressük a  névre azonosságot
+                            .map((app) -> {
 //
 // TODO: Ezt nem szabad beállítani, mert nem lehet menteni a ConnectionPool CDU-kat, ha magunk gyűjtjük össze
 // Majd fixálni!!!!
@@ -201,19 +232,18 @@ public class ConnPoolSnapshotProvider {
 //                                    }
 //                                    app.getConnPoolAppStats().add(conAppStat);   //beállítjuk az alkalmazásnak, hogy van ConnectionPool statisztikája
 
-                                    return app;
-                                }).forEachOrdered((app) -> {
-                            conAppStat.setApplication(app);                                 //beállítjuk a COnnectionPoolApplStatnak is az allamazást
-                        });
-                    }
+                                return app;
+                            }).forEachOrdered((app) -> {
+                        conAppStat.setApplication(app);                                 //beállítjuk a COnnectionPoolApplStatnak is az allamazást
+                    });
                 }
-
-                if (snapshots == null) {
-                    snapshots = new LinkedHashSet<>();
-                }
-                snapshots.add(connPoolStat);
-
             }
+
+            if (snapshots == null) {
+                snapshots = new LinkedHashSet<>();
+            }
+            snapshots.add(connPoolStat);
+
         }
 
         log.info("JDBC ConnectionPool statisztika kigyűjtése elapsed: {}", Elapsed.getElapsedNanoStr(start));

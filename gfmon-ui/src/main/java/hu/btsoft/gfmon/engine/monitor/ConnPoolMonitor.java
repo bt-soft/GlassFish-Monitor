@@ -201,11 +201,14 @@ public class ConnPoolMonitor extends MonitorsBase {
 
         long start = Elapsed.nowNano();
 
+        //Hibára futott mérési oldalak, automatikusan tiltjuk őket
+        //Itt FULL URL-eket kapunk vissza
+        Set<String> fullUrlErroredPaths = new HashSet<>();
+
         int measuredServerCnt = 0;
         for (Server server : serverService.findAllActiveServer()) {
 
-            //Hibára futott mérési oldalak, automatikusan tiltjuk őket
-            Set<String> fullUrlErroredPaths = new HashSet<>();
+            fullUrlErroredPaths.clear();
 
             //Kell gyűjteni a mértékegységeket?
             Set<DataUnitDto> dataUnits = null;
@@ -270,10 +273,10 @@ public class ConnPoolMonitor extends MonitorsBase {
 
             //Kiíratjuk a változásokat az adatbázisba
             jdbcResourcesSnapshotService.flush();
-            log.trace("server url: {}, JDBC snapshots: {}, elapsed: {}", server.getUrl(), connPoolStats.size(), Elapsed.getElapsedNanoStr(start));
+            log.trace("Connection Pool Stat: server url: {}, JDBC Connection Pool snapshots: {}, elapsed: {}", server.getUrl(), connPoolStats.size(), Elapsed.getElapsedNanoStr(start));
         }
 
-        log.trace("JDBC erőforrás adatok kigyűjtve {} db szerverre, elapsed: {}", measuredServerCnt, Elapsed.getElapsedNanoStr(start));
+        log.trace("Connection Pool Stat összesen: szerver: {}db, elapsed: {}", measuredServerCnt, Elapsed.getElapsedNanoStr(start));
 
     }
 

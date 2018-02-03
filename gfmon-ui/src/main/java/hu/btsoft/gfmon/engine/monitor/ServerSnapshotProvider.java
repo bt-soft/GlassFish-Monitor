@@ -157,7 +157,7 @@ public class ServerSnapshotProvider {
             }
         }
 
-        log.trace("server url: {}, elapsed: {}", server.getUrl(), Elapsed.getElapsedNanoStr(start));
+        log.info("Szerver adatok kigyűjtése elapsed: {}", Elapsed.getElapsedNanoStr(start));
 
         return snapshots;
     }
