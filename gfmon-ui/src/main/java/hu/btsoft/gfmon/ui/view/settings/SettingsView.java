@@ -16,15 +16,15 @@ import hu.btsoft.gfmon.engine.model.RuntimeSequenceGenerator;
 import hu.btsoft.gfmon.engine.model.entity.Config;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
 import hu.btsoft.gfmon.engine.model.entity.application.ApplicationAppCollDataUnitJoiner;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcConnectionPool;
+import hu.btsoft.gfmon.engine.model.entity.jdbc.ConnPool;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.entity.server.ServerSvrCollDataUnitJoiner;
 import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
 import hu.btsoft.gfmon.engine.model.service.ServerService;
 import hu.btsoft.gfmon.engine.monitor.ApplicationsMonitor;
+import hu.btsoft.gfmon.engine.monitor.ConnPoolMonitor;
 import hu.btsoft.gfmon.engine.monitor.GlassFishMonitorController;
-import hu.btsoft.gfmon.engine.monitor.JdbcConnectionPoolMonitor;
 import hu.btsoft.gfmon.engine.monitor.management.ServerUptime;
 import hu.btsoft.gfmon.engine.monitor.management.ServerVersion;
 import hu.btsoft.gfmon.engine.security.SessionTokenAcquirer;
@@ -126,7 +126,7 @@ public class SettingsView extends ViewBase {
 
     //--- JDBC Connection pool
     @EJB
-    private JdbcConnectionPoolMonitor jdbcConnectionPoolMonitor;
+    private ConnPoolMonitor connPoolMonitor;
 
     @Getter
     @Setter
@@ -577,17 +577,17 @@ public class SettingsView extends ViewBase {
         }
         //Ha a szerver még nincs az adatbázisban, akkor on-the-fly kérdezzük le az alkalmazásait
         if (selectedServer.getId() == null) {
-            List<JdbcConnectionPool> jdbcConnectionPools = jdbcConnectionPoolMonitor.getJdbcConnectionPoolsList(selectedServer);
+            List<ConnPool> connPools = connPoolMonitor.getConnPools(selectedServer);
             //Beállítjuk, hogy ki vette fel őket
-            if (jdbcConnectionPools != null) {
-                jdbcConnectionPools.stream()
+            if (connPools != null) {
+                connPools.stream()
                         .filter((app) -> (app.getCreatedBy() == null))
                         .forEachOrdered((app) -> {
                             app.setCreatedBy(currentUser); //beállítjuk, hogy melyik szerveren fut az alkalmazás
                         });
             }
 
-            selectedServer.setJdbcConnectionPools(jdbcConnectionPools);
+            selectedServer.setConnPools(connPools);
             return;
         }
 
@@ -595,7 +595,7 @@ public class SettingsView extends ViewBase {
         // A kiválasztott szerver az adatbázisban van, így abban kel a JDBC ConnectionPool karbantartását elvégezni
         //
         //Feltérképezzük a szerver JDBC COnnectionPool-jait -> ez beírja az adatbázisba azt, amit épp lát
-        jdbcConnectionPoolMonitor.maintenanceServerJdbcResourcesInDataBase(selectedServer);
+        connPoolMonitor.maintenanceServerJdbcResourcesInDataBase(selectedServer);
 
         //Újra kikeressük az adatbázisból a szervert, hogy a JDBC lista frissűljön
         Server refreshedServer = (Server) serverService.find(selectedServer.getId());
@@ -618,7 +618,7 @@ public class SettingsView extends ViewBase {
      */
     public void toggleAllConPoolActiveFlag(boolean newActiveFlag) {
 
-        selectedServer.getJdbcConnectionPools()
+        selectedServer.getConnPools()
                 .forEach((app) -> {
                     app.setActive(newActiveFlag);
                 });

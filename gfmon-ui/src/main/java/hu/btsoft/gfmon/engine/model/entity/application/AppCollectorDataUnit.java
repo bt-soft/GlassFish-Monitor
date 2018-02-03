@@ -50,8 +50,8 @@ import org.eclipse.persistence.annotations.Customizer;
     @NamedQuery(name = "AppCollectorDataUnit.findByRestPathMask", query = "SELECT acdu from AppCollectorDataUnit acdu WHERE acdu.restPathMask = :restPathMask ORDER BY acdu.dataName"),//
 })
 @Data
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = {"joiners"})
+@EqualsAndHashCode(callSuper = true, exclude = {"joiners"})
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
 public class AppCollectorDataUnit extends EntityBase {
@@ -97,7 +97,7 @@ public class AppCollectorDataUnit extends EntityBase {
     private String description;
 
     /**
-     * A visszairány az alkalmazáshoz
+     * A visszairány az alkalmazáshoz a kapcsolótáblán keresztül
      */
     @OneToMany(mappedBy = "appCollectorDataUnit", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ApplicationAppCollDataUnitJoiner> joiners;

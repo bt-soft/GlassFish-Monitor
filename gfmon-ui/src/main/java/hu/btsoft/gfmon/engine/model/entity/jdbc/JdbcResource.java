@@ -46,11 +46,11 @@ import org.eclipse.persistence.annotations.Customizer;
 @Table(name = "JDBC_RESOURCE",
         catalog = "",
         schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,
-        uniqueConstraints = @UniqueConstraint(columnNames = {"JDBC_CONNECTION_POOL_ID", "JNDI_NAME"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"CONNPOOL_ID", "JNDI_NAME"})
 )
 @Data
-@ToString(callSuper = true, exclude = {"jdbcConnectionPool"})
-@EqualsAndHashCode(callSuper = true, exclude = {"jdbcConnectionPool"})
+@ToString(callSuper = true, exclude = {"connPool"})
+@EqualsAndHashCode(callSuper = true, exclude = {"connPool"})
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
 @Slf4j
@@ -60,9 +60,9 @@ public class JdbcResource extends ModifiableEntityBase {
      * A JDBC resource melyik connectio Pool-t használja?
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "JDBC_CONNECTION_POOL_ID", referencedColumnName = "ID", nullable = false)
+    @JoinColumn(name = "CONNPOOL_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 20)
-    private JdbcConnectionPool jdbcConnectionPool;
+    private ConnPool connPool;
 
     /**
      * A JDBC ConnectionPool neve

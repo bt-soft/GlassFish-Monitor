@@ -813,8 +813,7 @@
                                          oncomplete="PF('blockUI').unblock();"
                                          actionListener="#{settingsView.toggleAllConPoolActiveFlag(true)}"
                                          update="conPoolTable :growl"
-                                         disabled="#{empty settingsView.selectedServer or not settingsView.selectedServer.active or empty settingsView.selectedServer.jdbcConnectionPools}"
-                                         />
+                                         disabled="#{empty settingsView.selectedServer or not settingsView.selectedServer.active or empty settingsView.selectedServer.connPools}"                           />
 
 
                         <p:commandButton value="Összes inaktív"
@@ -824,14 +823,14 @@
                                          onstart="PF('blockUI').block();"
                                          oncomplete="PF('blockUI').unblock();"
                                          update="conPoolTable :growl"
-                                         disabled="#{empty settingsView.selectedServer or not settingsView.selectedServer.active or empty settingsView.selectedServer.jdbcConnectionPools}"
+                                         disabled="#{empty settingsView.selectedServer or not settingsView.selectedServer.active or empty settingsView.selectedServer.connPools}"
                                          />
 
 
                         <p:dataTable id="conPoolTable"
                                      widgetVar="conPoolTable"
 
-                                     value="#{settingsView.selectedServer.jdbcConnectionPools}"
+                                     value="#{settingsView.selectedServer.connPools}"
                                      var="conPool"
 
                                      multiViewState="false"

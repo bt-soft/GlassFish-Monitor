@@ -17,7 +17,7 @@ import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.network.NetworkUtils;
 import hu.btsoft.gfmon.engine.model.entity.ModifiableEntityBase;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcConnectionPool;
+import hu.btsoft.gfmon.engine.model.entity.jdbc.ConnPool;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.httpservice.HttpServiceRequest;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.jvm.JvmMemory;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.jvm.ThreadSystem;
@@ -203,9 +203,9 @@ public class Server extends ModifiableEntityBase {
      */
     @OrderBy("poolName DESC")//JPA nevet kell megadni
     @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "JDBC_CONNECTION_POOL_ID", referencedColumnName = "ID", nullable = false)
+    @JoinColumn(name = "CONNPOOL_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 71)
-    private List<JdbcConnectionPool> jdbcConnectionPools = new LinkedList<>();
+    private List<ConnPool> connPools = new LinkedList<>();
 
     /**
      * Szerver statisztika mérési eredméynek, visszairány nem kell

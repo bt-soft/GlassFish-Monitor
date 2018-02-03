@@ -4,7 +4,7 @@
  *  GF Monitor project
  *
  *  Module:  gfmon (gfmon)
- *  File:    JdbcConnectionPoolSnapshotProvider.java
+ *  File:    ConnPoolSnapshotProvider.java
  *  Created: 2018.01.21. 10:52:41
  *
  *  ------------------------------------------------------------------------------------
@@ -15,14 +15,14 @@ import hu.btsoft.gfmon.corelib.json.GFJsonUtils;
 import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcConnectionPool;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnectionPoolAppStatistic;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnectionPoolStatistic;
+import hu.btsoft.gfmon.engine.model.entity.jdbc.ConnPool;
+import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnPoolAppStat;
+import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnPoolStat;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.monitor.collector.CollectedValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
-import hu.btsoft.gfmon.engine.monitor.collector.jdbcconpool.JdbcConnectionPoolAppCollector;
-import hu.btsoft.gfmon.engine.monitor.collector.jdbcconpool.JdbcConnectionPoolCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.connpool.ConnPoolAppCollector;
+import hu.btsoft.gfmon.engine.monitor.collector.connpool.ConnPoolCollector;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,16 +39,16 @@ import lombok.extern.slf4j.Slf4j;
  * @author BT
  */
 @Slf4j
-public class JdbcConnectionPoolSnapshotProvider {
+public class ConnPoolSnapshotProvider {
 
     @Inject
     private RestDataCollector restDataCollector;
 
     @Inject
-    private JdbcConnectionPoolCollector jdbcConnectionPoolCollector;
+    private ConnPoolCollector connPoolCollector;
 
     @Inject
-    private JdbcConnectionPoolAppCollector jdbcConnectionPooApplCollector;
+    private ConnPoolAppCollector connPoolAppCollector;
 
     @Inject
     private JSonEntityToSnapshotEntityMapper jSonEntityToSnapshotEntityMapper;
@@ -64,7 +64,7 @@ public class JdbcConnectionPoolSnapshotProvider {
      *
      * @return
      */
-    private ConnectionPoolStatistic start(Server server, String poolName) {
+    private ConnPoolStat start(Server server, String poolName) {
 
         List<Application> applications = server.getApplications();
         String simpleUrl = server.getSimpleUrl();
@@ -74,17 +74,17 @@ public class JdbcConnectionPoolSnapshotProvider {
         String resourceUri = restDataCollector.getSubUri() + "resources/" + poolName;
         JsonObject rootJsonObject = restDataCollector.getRootJsonObject(simpleUrl, resourceUri, userName, sessionToken);
 
-        List<CollectedValueDto> valuesList = jdbcConnectionPoolCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
+        List<CollectedValueDto> valuesList = connPoolCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
 
         //Ha kell dataUnitokat is gyűjteni
         if (collectDataUnits != null) {
-            List<DataUnitDto> dataUnits = jdbcConnectionPoolCollector.fetchDataUnits(GFJsonUtils.getEntities(rootJsonObject));
+            List<DataUnitDto> dataUnits = connPoolCollector.fetchDataUnits(GFJsonUtils.getEntities(rootJsonObject));
             if (dataUnits != null && !dataUnits.isEmpty()) {
                 collectDataUnits.addAll(dataUnits);
             }
         }
 
-        ConnectionPoolStatistic connectionPoolStatistic = (ConnectionPoolStatistic) jSonEntityToSnapshotEntityMapper.map(valuesList);
+        ConnPoolStat connectionPoolStatistic = (ConnPoolStat) jSonEntityToSnapshotEntityMapper.map(valuesList);
         if (connectionPoolStatistic == null) {
             //log.warn("Null az '{}' szerver '{}' JDBC Connection Pool statisztikása!", server.getSimpleUrl(), poolName);
             //Nincs róla statisztika, nem érdekes
@@ -111,27 +111,27 @@ public class JdbcConnectionPoolSnapshotProvider {
                 String connPoolFullUrl = applicationsMap.get(appname);
 
                 rootJsonObject = restDataCollector.getRootJsonObject(connPoolFullUrl, userName, sessionToken);
-                valuesList = jdbcConnectionPooApplCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
+                valuesList = connPoolAppCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
 
                 //Ha kell dataUnitokat is gyűjteni
                 if (collectDataUnits != null) {
-                    List<DataUnitDto> dataUnits = jdbcConnectionPooApplCollector.fetchDataUnits(GFJsonUtils.getEntities(rootJsonObject));
+                    List<DataUnitDto> dataUnits = connPoolAppCollector.fetchDataUnits(GFJsonUtils.getEntities(rootJsonObject));
                     if (dataUnits != null && !dataUnits.isEmpty()) {
                         collectDataUnits.addAll(dataUnits);
                     }
                 }
 
-                ConnectionPoolAppStatistic connectionPoolAppStatistic = (ConnectionPoolAppStatistic) jSonEntityToSnapshotEntityMapper.map(valuesList);
+                ConnPoolAppStat connPoolAppStat = (ConnPoolAppStat) jSonEntityToSnapshotEntityMapper.map(valuesList);
 
-                if (connectionPoolAppStatistic != null) {
-                    connectionPoolAppStatistic.setAppName(appname); //Az alkalmazás neve
-                    connectionPoolAppStatistic.setConnectionPoolStatistic(connectionPoolStatistic); //melyik connectionPool statisztikához tartozik
+                if (connPoolAppStat != null) {
+                    connPoolAppStat.setAppName(appname); //Az alkalmazás neve
+                    connPoolAppStat.setConnPoolStat(connectionPoolStatistic); //melyik connectionPool statisztikához tartozik
 
                     //Hozzáadjuk a Connectionpool statisztikáhozs az connectionPoolAppStatistic statisztikát is
-                    if (connectionPoolStatistic.getConnectionPoolAppStatistic() == null) {
-                        connectionPoolStatistic.setConnectionPoolAppStatistic(new LinkedList<>());
+                    if (connectionPoolStatistic.getConnPoolAppStats() == null) {
+                        connectionPoolStatistic.setConnPoolAppStats(new LinkedList<>());
                     }
-                    connectionPoolStatistic.getConnectionPoolAppStatistic().add(connectionPoolAppStatistic);
+                    connectionPoolStatistic.getConnPoolAppStats().add(connPoolAppStat);
                 }
             }
         }
@@ -147,40 +147,44 @@ public class JdbcConnectionPoolSnapshotProvider {
      *
      * @return JDBC resource Snapshot példányok halmaza, az adatgyűjtés eredménye (new/detach entitás)
      */
-    public Set<ConnectionPoolStatistic> fetchSnapshot(Server server, Set<DataUnitDto> dataUnits) {
+    public Set<ConnPoolStat> fetchSnapshot(Server server, Set<DataUnitDto> dataUnits) {
 
         this.collectDataUnits = dataUnits;
 
         long start = Elapsed.nowNano();
 
-        Set<ConnectionPoolStatistic> snapshots = null;
+        Set<ConnPoolStat> snapshots = null;
 
         //Véégigmegyünk a szerver alkalmazásain
-        for (JdbcConnectionPool jdbcConnectionPool : server.getJdbcConnectionPools()) {
+        for (ConnPool connPool : server.getConnPools()) {
 
             //Ha monitorozásra aktív, akkor meghívjuk rá az adatgyűjtőt
-            if (jdbcConnectionPool.getActive() != null && Objects.equals(jdbcConnectionPool.getActive(), Boolean.TRUE)) {
+            if (connPool.getActive() != null && Objects.equals(connPool.getActive(), Boolean.TRUE)) {
 
-                ConnectionPoolStatistic connectionPoolStatisticSnapshot = this.start(server, jdbcConnectionPool.getPoolName());
+                ConnPoolStat connPoolStat = this.start(server, connPool.getPoolName());
 
-                if (connectionPoolStatisticSnapshot == null) {
+                if (connPoolStat == null) {
                     continue;
                 }
 
                 //Beállítjuk, hog ymelyik conectionPool-hoz tartozik a mérés
-                connectionPoolStatisticSnapshot.setJdbcConnectionPool(jdbcConnectionPool);
+                connPoolStat.setConnPool(connPool);
 
-                //Ha a connectionPool->ConnectionPoolAppStatistic nem null, akkor megkeresük, és beállítjuk az Application <-> ConnectionPoolAppStatistic relációkat is
-                if (connectionPoolStatisticSnapshot.getConnectionPoolAppStatistic() != null && !connectionPoolStatisticSnapshot.getConnectionPoolAppStatistic().isEmpty()) {
-                    for (ConnectionPoolAppStatistic conAppStat : connectionPoolStatisticSnapshot.getConnectionPoolAppStatistic()) {
+                //Ha a connectionPool->ConnPoolAppStat nem null, akkor megkeresük, és beállítjuk az Application <-> ConnPoolAppStat relációkat is
+                if (connPoolStat.getConnPoolAppStats() != null && !connPoolStat.getConnPoolAppStats().isEmpty()) {
+                    for (ConnPoolAppStat conAppStat : connPoolStat.getConnPoolAppStats()) {
 
                         server.getApplications().stream()
                                 .filter((app) -> (Objects.equals(app.getAppRealName(), conAppStat.getAppName()))) //Kikeressük a  névre azonosságot
                                 .map((app) -> {
-                                    if (app.getConnectionPoolAppStatistics() == null) {
-                                        app.setConnectionPoolAppStatistics(new LinkedList<>());
-                                    }
-                                    app.getConnectionPoolAppStatistics().add(conAppStat);   //beállítjuk az alkalmazásnak, hogy van ConnectionPool statisztikája
+//
+// TODO: Ezt nem szabad beállítani, mert nem lehet menteni a ConnectionPool CDU-kat, ha magunk gyűjtjük össze
+// Majd fixálni!!!!
+//
+//                                    if (app.getConnPoolAppStats() == null) {
+//                                        app.setConnPoolAppStats(new LinkedList<>());
+//                                    }
+//                                    app.getConnPoolAppStats().add(conAppStat);   //beállítjuk az alkalmazásnak, hogy van ConnectionPool statisztikája
 
                                     return app;
                                 }).forEachOrdered((app) -> {
@@ -192,7 +196,7 @@ public class JdbcConnectionPoolSnapshotProvider {
                 if (snapshots == null) {
                     snapshots = new LinkedHashSet<>();
                 }
-                snapshots.add(connectionPoolStatisticSnapshot);
+                snapshots.add(connPoolStat);
 
             }
         }

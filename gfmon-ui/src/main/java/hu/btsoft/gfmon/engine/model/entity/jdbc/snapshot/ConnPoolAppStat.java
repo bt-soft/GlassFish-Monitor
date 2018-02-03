@@ -4,7 +4,7 @@
  *  GF Monitor project
  *
  *  Module:  gfmon (gfmon)
- *  File:    ConnectionPoolAppStatistic.java
+ *  File:    ConnPoolAppStat.java
  *  Created: 2018.01.27. 19:01:46
  *
  *  ------------------------------------------------------------------------------------
@@ -34,25 +34,25 @@ import org.eclipse.persistence.annotations.Customizer;
  * @author BT
  */
 @Entity
-@Table(name = "JDBC_CONECTION_POOL_APP_STAT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
+@Table(name = "CONNPOOL_APP_STAT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
 @Data
-@ToString(callSuper = true, exclude = {"connectionPoolStatistic", "application"})
-@EqualsAndHashCode(callSuper = true, exclude = {"connectionPoolStatistic", "application"})
+@ToString(callSuper = true, exclude = {"connPoolStat"/*, "application"*/})
+@EqualsAndHashCode(callSuper = true, exclude = {"connPoolStat"/*, "application"*/})
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-public class ConnectionPoolAppStatistic extends JdbcResourceSnapshotBase {
+public class ConnPoolAppStat extends JdbcResourceSnapshotBase {
 
     /**
      * A mérés melyik ConnectionPool statisztikához tartozik?
      * (automatikusan index képződik rá)
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "JDNC_CONECTION_POOL_STAT_ID")
+    @JoinColumn(name = "CONNPOOL_STAT_ID")
     @ColumnPosition(position = 20)
-    private ConnectionPoolStatistic connectionPoolStatistic;
+    private ConnPoolStat connPoolStat;
 
     /**
-     * A ConnectionPool Allmaazásstsisztika melyik alklamazáshoz?
+     * A ConnectionPool Alkalmazásstsisztika melyik alkalmazáshoz?
      * (automatikusan index képződik rá)
      */
     @ManyToOne(fetch = FetchType.LAZY)

@@ -4,12 +4,12 @@
  *  GF Monitor project
  *
  *  Module:  gfmon (gfmon)
- *  File:    ApplicationAppCollDataUnitJoiner.java
- *  Created: 2018.02.02. 16:25:42
+ *  File:    ConnPoolConnPoolCollDataUnitJoiner.java
+ *  Created: 2018.02.03. 9:04:50
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.model.entity.application;
+package hu.btsoft.gfmon.engine.model.entity.jdbc;
 
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.audit.EntityAuditListener;
@@ -43,30 +43,29 @@ import lombok.ToString;
 import org.eclipse.persistence.annotations.Customizer;
 
 /**
- * Application <-> AppCollectorDataUnit Kapcsolótábla extra mezőkkel
  *
  * @author BT
  */
 @Entity
 @Cacheable(false)
-@Table(name = "APPLICATION_APP_CDU", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
+@Table(name = "CONNPOOL_CONNPOOL_CDU", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
 @Data
-@EqualsAndHashCode(exclude = {"application", "appCollectorDataUnit"})
-@ToString(exclude = {"application", "appCollectorDataUnit"})
+@EqualsAndHashCode(exclude = {"connPool", "connPoolCollDataUnit"})
+@ToString(exclude = {"connPool", "connPoolCollDataUnit"})
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-@IdClass(ApplicationAppCollDataUnitJoinerPK.class)
-public class ApplicationAppCollDataUnitJoiner implements Serializable {
+@IdClass(ConnPoolConnPoolCollDataUnitJoinerPK.class)
+public class ConnPoolConnPoolCollDataUnitJoiner implements Serializable {
 
     @Id
-    @Column(name = "APPLICATION_ID", insertable = false, updatable = false)
+    @Column(name = "CONNPOOL_ID", insertable = false, updatable = false)
     @ColumnPosition(position = 1)
-    private Long applicationId;
+    private Long connPoolId;
 
     @Id
-    @Column(name = "APP_CDU_ID", insertable = false, updatable = false)
+    @Column(name = "CONNPOOL_CDU_ID", insertable = false, updatable = false)
     @ColumnPosition(position = 2)
-    private Long appCollectorDataUnitId;
+    private Long connPoolCollectorDataUnitId;
 
     /**
      * Az adott alkalmazásban aktív az adatnév gyűjtése?
@@ -83,19 +82,19 @@ public class ApplicationAppCollDataUnitJoiner implements Serializable {
     private String additionalMessage;
 
     /**
-     * Application
+     * ConnPool
      */
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "APPLICATION_ID", referencedColumnName = "ID")
-    private Application application;
+    @JoinColumn(name = "CONNPOOL_ID", referencedColumnName = "ID")
+    private ConnPool connPool;
 
     /**
      * CDU
      * Itt nem szabad kiadni a "cascade = CascadeType.ALL"-t mert végigtörli az összes mértékegységet is :)
      */
     @ManyToOne
-    @JoinColumn(name = "APP_CDU_ID", referencedColumnName = "ID")
-    private AppCollectorDataUnit appCollectorDataUnit;
+    @JoinColumn(name = "CONNPOOL_CDU_ID", referencedColumnName = "ID")
+    private ConnPoolCollDataUnit connPoolCollDataUnit;
 
     /**
      * A létrehozás dátuma és ideje
@@ -150,14 +149,14 @@ public class ApplicationAppCollDataUnitJoiner implements Serializable {
     /**
      * Konstruktor
      *
-     * @param application          szerver
-     * @param appCollectorDataUnit a szerver CDU-ja
+     * @param connPool             JDBC Connection Pool
+     * @param connPoolCollDataUnit a JDBC Connection Pool CDU-ja
      * @param createdBy            létrehozó user
      * @param active               aktív az adott szerveren a CDU?
      */
-    public ApplicationAppCollDataUnitJoiner(Application application, AppCollectorDataUnit appCollectorDataUnit, String createdBy, Boolean active) {
-        this.application = application;
-        this.appCollectorDataUnit = appCollectorDataUnit;
+    public ConnPoolConnPoolCollDataUnitJoiner(ConnPool connPool, ConnPoolCollDataUnit connPoolCollDataUnit, String createdBy, Boolean active) {
+        this.connPool = connPool;
+        this.connPoolCollDataUnit = connPoolCollDataUnit;
         this.createdBy = createdBy;
         this.active = active;
     }

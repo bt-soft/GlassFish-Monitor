@@ -4,7 +4,7 @@
  *  GF Monitor project
  *
  *  Module:  gfmon (gfmon)
- *  File:    JdbcConnectionPoolCollectorDataUnit.java
+ *  File:    ConnPoolCollDataUnit.java
  *  Created: 2018.01.19. 17:22:20
  *
  *  ------------------------------------------------------------------------------------
@@ -15,12 +15,17 @@ import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.EntityBase;
+import java.util.LinkedList;
+import java.util.List;
 import javax.persistence.Cacheable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
@@ -35,22 +40,22 @@ import org.eclipse.persistence.annotations.Customizer;
  */
 @Entity
 @Cacheable(true)
-@Table(name = "JDBC_CONNPOOL_CDU", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,
+@Table(name = "CONNPOOL_CDU", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,
         indexes = {
             @Index(name = "IDX_JDBC_CONPOOL_CDU_REST_PATH_MASK", columnList = "REST_PATH_MASK", unique = false),
             @Index(name = "IDX_JDBC_CONPOOL_CDU_ENTITY_NAME", columnList = "ENTITY_NAME", unique = false)
         })
 @NamedQueries({
-    @NamedQuery(name = "JdbcConnectionPoolCollectorDataUnit.findAll", query = "SELECT jdbcCdu from JdbcConnectionPoolCollectorDataUnit jdbcCdu ORDER BY jdbcCdu.restPathMask, jdbcCdu.dataName"),//
-    @NamedQuery(name = "JdbcConnectionPoolCollectorDataUnit.findAllRestPathMasks", query = "SELECT jdbcCdu.restPathMask from JdbcConnectionPoolCollectorDataUnit jdbcCdu GROUP BY jdbcCdu.restPathMask ORDER BY jdbcCdu.restPathMask, jdbcCdu.dataName"),//
-    @NamedQuery(name = "JdbcConnectionPoolCollectorDataUnit.findByRestPathMask", query = "SELECT jdbcCdu from JdbcConnectionPoolCollectorDataUnit jdbcCdu WHERE jdbcCdu.restPathMask = :restPathMask ORDER BY jdbcCdu.dataName"),//
+    @NamedQuery(name = "ConnPoolCollDataUnit.findAll", query = "SELECT cpCdu from ConnPoolCollDataUnit cpCdu ORDER BY cpCdu.restPathMask, cpCdu.dataName"),//
+    @NamedQuery(name = "ConnPoolCollDataUnit.findAllRestPathMasks", query = "SELECT cpCdu.restPathMask from ConnPoolCollDataUnit cpCdu GROUP BY cpCdu.restPathMask ORDER BY cpCdu.restPathMask, cpCdu.dataName"),//
+    @NamedQuery(name = "ConnPoolCollDataUnit.findByRestPathMask", query = "SELECT cpCdu from ConnPoolCollDataUnit cpCdu WHERE cpCdu.restPathMask = :restPathMask ORDER BY cpCdu.dataName"),//
 })
 @Data
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = {"joiners"})
+@EqualsAndHashCode(callSuper = true, exclude = {"joiners"})
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-public class JdbcConnectionPoolCollectorDataUnit extends EntityBase {
+public class ConnPoolCollDataUnit extends EntityBase {
 
     /**
      * A mértékegység milyen REST Path-on van?
@@ -93,6 +98,12 @@ public class JdbcConnectionPoolCollectorDataUnit extends EntityBase {
     private String description;
 
     /**
+     * A visszairány a JDBC Connection Pool-hoz a kapcsolótáblán keresztül
+     */
+    @OneToMany(mappedBy = "connPoolCollDataUnit", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ConnPoolConnPoolCollDataUnitJoiner> joiners = new LinkedList<>();
+
+    /**
      * Konstruktor
      *
      * @param restPathMask REST path maszk
@@ -101,7 +112,7 @@ public class JdbcConnectionPoolCollectorDataUnit extends EntityBase {
      * @param unit         mértékegység
      * @param description  leírás
      */
-    public JdbcConnectionPoolCollectorDataUnit(String restPathMask, String entityName, String dataName, String unit, String description) {
+    public ConnPoolCollDataUnit(String restPathMask, String entityName, String dataName, String unit, String description) {
         this.restPathMask = restPathMask;
         this.entityName = entityName;
         this.dataName = dataName;

@@ -4,7 +4,7 @@
  *  GF Monitor project
  *
  *  Module:  gfmon (gfmon)
- *  File:    JdbcConnectionPoolMonitor.java
+ *  File:    ConnPoolMonitor.java
  *  Created: 2018.01.28. 10:44:19
  *
  *  ------------------------------------------------------------------------------------
@@ -13,15 +13,14 @@ package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcConnectionPool;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcConnectionPoolCollectorDataUnit;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnectionPoolStatistic;
+import hu.btsoft.gfmon.engine.model.entity.jdbc.ConnPool;
+import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnPoolStat;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
-import hu.btsoft.gfmon.engine.model.service.JdbcConnectionPoolCollectorDataUnitService;
-import hu.btsoft.gfmon.engine.model.service.JdbcConnectionPoolService;
+import hu.btsoft.gfmon.engine.model.service.ConnPoolCollectorDataUnitService;
+import hu.btsoft.gfmon.engine.model.service.ConnPoolService;
 import hu.btsoft.gfmon.engine.model.service.JdbcResourcesSnapshotService;
-import hu.btsoft.gfmon.engine.monitor.management.JdbcConnectionPoolDiscoverer;
+import hu.btsoft.gfmon.engine.monitor.management.ConnPoolDiscoverer;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -40,24 +39,24 @@ import lombok.extern.slf4j.Slf4j;
 @Stateless
 @Slf4j
 @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW) //A BEAN-be záródik a tranzakció
-public class JdbcConnectionPoolMonitor extends MonitorsBase {
+public class ConnPoolMonitor extends MonitorsBase {
 
-    private static final String DB_MODIFICATOR_USER = "jdbc-mon-ctrl";
+    private static final String DB_MODIFICATOR_USER = "connpool-mon-ctrl";
 
     @Inject
-    private JdbcConnectionPoolDiscoverer jdbcConnectionPoolDiscoverer;
+    private ConnPoolDiscoverer connPoolDiscoverer;
 
     @EJB
-    private JdbcConnectionPoolService jdbcConnectionPoolService;
+    private ConnPoolService connPoolService;
 
     @EJB
     private JdbcResourcesSnapshotService jdbcResourcesSnapshotService;
 
     @Inject
-    private JdbcConnectionPoolSnapshotProvider jdbcConnectionPoolSnapshotProvider;
+    private ConnPoolSnapshotProvider connPoolSnapshotProvider;
 
     @EJB
-    private JdbcConnectionPoolCollectorDataUnitService jdbcConnectionPoolCollectorDataUnitService;
+    private ConnPoolCollectorDataUnitService connPoolCollectorDataUnitService;
 
     @Override
     protected String getDbModificationUser() {
@@ -66,7 +65,7 @@ public class JdbcConnectionPoolMonitor extends MonitorsBase {
 
     @Override
     protected String getControllerName() {
-        return "Res-Monitor";
+        return "Resrc-Monitor";
     }
 
     @Override
@@ -85,50 +84,50 @@ public class JdbcConnectionPoolMonitor extends MonitorsBase {
     public void maintenanceServerJdbcResourcesInDataBase(Server server) {
 
         //A szerver aktuális alkalmazás listája
-        List<JdbcConnectionPool> runtimeJdbcConnectionPools = this.getJdbcConnectionPoolsList(server);
+        List<ConnPool> runtimeConnPools = this.getConnPools(server);
 
         //A szerver eltárolt alkalmazás listája
-        List<JdbcConnectionPool> dbJdbcConnectionPools = jdbcConnectionPoolService.findByServer(server.getId());
+        List<ConnPool> dbConnPools = connPoolService.findByServer(server.getId());
 
         //Ha a szerveren nincs alkalmazás de az adatbázisban mégis van, akkor töröljük az adatbázis beli adatokat
-        if ((runtimeJdbcConnectionPools == null || runtimeJdbcConnectionPools.isEmpty()) && (dbJdbcConnectionPools != null && !dbJdbcConnectionPools.isEmpty())) {
-            dbJdbcConnectionPools.forEach((dbJdbcConnectionPool) -> {
+        if ((runtimeConnPools == null || runtimeConnPools.isEmpty()) && (dbConnPools != null && !dbConnPools.isEmpty())) {
+            dbConnPools.forEach((dbJdbcConnectionPool) -> {
                 log.warn("Server: {} -> már nem létező JDBC ConnectionPool törlése az adatbázisból", server.getSimpleUrl());
-                jdbcConnectionPoolService.remove(dbJdbcConnectionPool);
+                connPoolService.remove(dbJdbcConnectionPool);
             });
             return;
         }
 
         //Hasem a szerveren, sem az adatbázisban nincs alkalmazás, akkor nem megyünk tovább
-        if (runtimeJdbcConnectionPools == null) {
+        if (runtimeConnPools == null) {
             return;
         }
 
         //Végigmegyünk a runtime JDBC erőforrások listáján
-        runtimeJdbcConnectionPools.forEach((runtimeJdbcConnectionPool) -> {
+        runtimeConnPools.forEach((runtimeConnPool) -> {
 
             boolean needPersistNewEntity = true; //Kell új entitást felvenni?
-            boolean existDbJdbcConnectionPoolActiveStatus = false;
+            boolean existDbConnPoolActiveStatus = false;
 
             //A poolName alapján kikeressük az adatbázis listából az jdbcPool-t
-            if (dbJdbcConnectionPools != null) {
-                for (JdbcConnectionPool dbJdbcConnectionPool : dbJdbcConnectionPools) {
+            if (dbConnPools != null) {
+                for (ConnPool dbConnPool : dbConnPools) {
                     //Ha névre megvan, akkor tételesen összehasonlítjuk a két objektumot
-                    if (Objects.equals(dbJdbcConnectionPool.getPoolName(), runtimeJdbcConnectionPool.getPoolName())) { //név egyezik?
+                    if (Objects.equals(dbConnPool.getPoolName(), runtimeConnPool.getPoolName())) { //név egyezik?
 
                         //Ha tételesen már NEM egyezik a két objektum, akkor az adatbázisbelit töröljük, de az 'active' státuszát megőrizzük!
                         //A monitoring státusz nem része az @EquaslAndhashCode()-nak!
-                        if (Objects.equals(dbJdbcConnectionPool, runtimeJdbcConnectionPool)) {
+                        if (Objects.equals(dbConnPool, runtimeConnPool)) {
 
                             //Elmentjük a státuszt
-                            existDbJdbcConnectionPoolActiveStatus = dbJdbcConnectionPool.getActive();
+                            existDbConnPoolActiveStatus = dbConnPool.getActive();
 
                             //Beállítjuk, hogy kell menteni az új entitást
                             needPersistNewEntity = true;
 
                             //töröljük az adatbázisból!
-                            log.info("Server: {} -> a(z) '{}' JDBC ConnectionPool törlése az adatbázisból", server.getSimpleUrl(), dbJdbcConnectionPool.getPoolName());
-                            jdbcConnectionPoolService.remove(dbJdbcConnectionPool);
+                            log.info("Server: {} -> a(z) '{}' JDBC ConnectionPool törlése az adatbázisból", server.getSimpleUrl(), dbConnPool.getPoolName());
+                            connPoolService.remove(dbConnPool);
 
                         } else {
 
@@ -143,9 +142,9 @@ public class JdbcConnectionPoolMonitor extends MonitorsBase {
 
             if (needPersistNewEntity) {
                 //Új JDBC erőforrás felvétele
-                runtimeJdbcConnectionPool.setActive(existDbJdbcConnectionPoolActiveStatus); //beállítjuk a korábbi monitoring státuszt
-                jdbcConnectionPoolService.save(runtimeJdbcConnectionPool, DB_MODIFICATOR_USER);
-                log.info("Server: {} -> a(z) '{}' új JDBC ConnectionPool felvétele az adatbázisba", server.getSimpleUrl(), runtimeJdbcConnectionPool.getPoolName());
+                runtimeConnPool.setActive(existDbConnPoolActiveStatus); //beállítjuk a korábbi monitoring státuszt
+                connPoolService.save(runtimeConnPool, DB_MODIFICATOR_USER);
+                log.info("Server: {} -> a(z) '{}' új JDBC ConnectionPool felvétele az adatbázisba", server.getSimpleUrl(), runtimeConnPool.getPoolName());
             }
         });
     }
@@ -171,32 +170,12 @@ public class JdbcConnectionPoolMonitor extends MonitorsBase {
      *
      * @return resources listája vagy null
      */
-    public List<JdbcConnectionPool> getJdbcConnectionPoolsList(Server server) {
+    public List<ConnPool> getConnPools(Server server) {
 
         //Runime lekérjük a szervertől az alkalmazások listáját
-        List<JdbcConnectionPool> jdbcResources = jdbcConnectionPoolDiscoverer.getJdbcresourcess(server);
+        List<ConnPool> connPools = connPoolDiscoverer.disover(server);
 
-        return jdbcResources;
-    }
-
-    /**
-     * Összegyűjtött adatnevek mentése
-     *
-     * @param dataUnits összegyűjtött adatnevek halmaza
-     */
-    private void processCollectedDataUnits(Set<DataUnitDto> dataUnits) {
-
-        log.info("JDBC ConnectionPool monitor adatnevek táblájának felépítése indul");
-        long start = Elapsed.nowNano();
-
-        //Végigmegyünk az összes adatneven és jól beírjuk az adatbázisba őket
-        dataUnits.stream()
-                .map((dto) -> new JdbcConnectionPoolCollectorDataUnit(dto.getRestPath(), dto.getEntityName(), dto.getDataName(), dto.getUnit(), dto.getDescription()))
-                .forEachOrdered((cdu) -> {
-                    jdbcConnectionPoolCollectorDataUnitService.save(cdu, DB_MODIFICATOR_USER);
-                });
-
-        log.info("JDBC ConnectionPool monitor adatnevek felépítése OK, adatnevek: {}db, elapsed: {}", dataUnits.size(), Elapsed.getElapsedNanoStr(start));
+        return connPools;
     }
 
     /**
@@ -206,7 +185,7 @@ public class JdbcConnectionPoolMonitor extends MonitorsBase {
      */
     private boolean wantCollectCDU() {
 
-        if (jdbcConnectionPoolCollectorDataUnitService.count() < 1) {
+        if (connPoolCollectorDataUnitService.count() < 1) {
             log.info("A JDBC ConnectionPool 'adatnevek' táblájának felépítése szükséges!");
             return true;
         }
@@ -230,21 +209,27 @@ public class JdbcConnectionPoolMonitor extends MonitorsBase {
                 dataUnits = new LinkedHashSet<>();
             }
 
-            Set<ConnectionPoolStatistic> jdbcConnectionPoolSnashots = jdbcConnectionPoolSnapshotProvider.fetchSnapshot(server, dataUnits);
+            Set<ConnPoolStat> connPoolStats = connPoolSnapshotProvider.fetchSnapshot(server, dataUnits);
             measuredServerCnt++;
 
             //Kellett gyűjteni a mértékegységeket?
             if (dataUnits != null && !dataUnits.isEmpty()) {
-                this.processCollectedDataUnits(dataUnits);
+                //Elmentjük a CDU-kat az adatbázisba
+                connPoolCollectorDataUnitService.saveCollectedDataUnits(dataUnits, DB_MODIFICATOR_USER);
+
+                //ConnPool <-> Cdu összerendelés
+                server.getConnPools().forEach((connPool) -> {
+                    connPoolService.assignConnPoolToCdu(connPool, DB_MODIFICATOR_USER);
+                });
             }
 
-            if (jdbcConnectionPoolSnashots == null || jdbcConnectionPoolSnashots.isEmpty()) {
+            if (connPoolStats == null || connPoolStats.isEmpty()) {
                 log.warn("Szerver: {} -> Nincsenek menthető JDBC erőforrás pillanatfelvételek!", server.getSimpleUrl());
                 return;
             }
 
             //JPA mentés
-            jdbcConnectionPoolSnashots.stream()
+            connPoolStats.stream()
                     //.parallel()  nem jó ötlet a paralel -> lock hiba lesz tőle
                     .map((snapshot) -> {
                         //lementjük az adatbázisba
@@ -256,7 +241,7 @@ public class JdbcConnectionPoolMonitor extends MonitorsBase {
 
             //Kiíratjuk a változásokat az adatbázisba
             jdbcResourcesSnapshotService.flush();
-            log.trace("server url: {}, JDBC snapshots: {}, elapsed: {}", server.getUrl(), jdbcConnectionPoolSnashots.size(), Elapsed.getElapsedNanoStr(start));
+            log.trace("server url: {}, JDBC snapshots: {}, elapsed: {}", server.getUrl(), connPoolStats.size(), Elapsed.getElapsedNanoStr(start));
         }
 
         log.trace("JDBC erőforrás adatok kigyűjtve {} db szerverre, elapsed: {}", measuredServerCnt, Elapsed.getElapsedNanoStr(start));
@@ -278,6 +263,7 @@ public class JdbcConnectionPoolMonitor extends MonitorsBase {
         start = Elapsed.nowNano();
         Integer keepDays = configService.getInteger(ConfigKeyNames.SAMPLE_DATA_KEEP_DAYS);
         log.info("JDBC erőforrások mérési adatok pucolása indul, keepDays: {}", keepDays);
+
         //Összes régi rekord törlése
         int deletedRecords = jdbcResourcesSnapshotService.deleteOldRecords(keepDays);
         log.info("JDBC erőforrások mérési adatok pucolása OK, törölt rekord: {}, elapsed: {}", deletedRecords, Elapsed.getElapsedNanoStr(start));

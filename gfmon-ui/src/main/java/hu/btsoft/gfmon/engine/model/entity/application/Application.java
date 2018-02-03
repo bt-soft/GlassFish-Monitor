@@ -16,7 +16,7 @@ import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.engine.model.entity.ModifiableEntityBase;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.app.AppStatistic;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbStat;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnectionPoolAppStatistic;
+import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnPoolAppStat;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import java.util.LinkedList;
 import java.util.List;
@@ -173,23 +173,29 @@ public class Application extends ModifiableEntityBase {
     private List<ApplicationAppCollDataUnitJoiner> joiners;
 
 //
-    //-- Alkalmazás statisztika Mérési eredmények
+    /**
+     * Alkalmazás statisztika Mérési eredmények
+     */
     @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "APP_STAT_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 70)
     private List<AppStatistic> appStatistics = new LinkedList<>();
 
-    //-- EJB statisztika eredmények
+    /**
+     * EJB statisztika eredmények
+     */
     @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "APP_EJBSTAT_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 71)
     private List<EjbStat> ejbStats = new LinkedList<>();
 
-    //-- ConnectionPool usage statisztika mérése eredmények
+    /**
+     * ConnectionPool usage statisztika mérése eredmények
+     */
     @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "JDBC_CONECTION_POOL_APP_STAT_ID", referencedColumnName = "ID", nullable = false)
+    @JoinColumn(name = "CONNPOOL_APP_STAT_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 72)
-    private List<ConnectionPoolAppStatistic> connectionPoolAppStatistics = new LinkedList<>();
+    private List<ConnPoolAppStat> connPoolAppStats = new LinkedList<>();
 
     /**
      * Konstruktor

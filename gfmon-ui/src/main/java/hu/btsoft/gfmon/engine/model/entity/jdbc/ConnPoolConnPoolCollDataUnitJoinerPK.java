@@ -4,12 +4,12 @@
  *  GF Monitor project
  *
  *  Module:  gfmon (gfmon)
- *  File:    ApplicationAppCollDataUnitJoinerPK.java
+ *  File:    ConnPoolConnPoolCollDataUnitJoinerPK.java
  *  Created: 2018.02.02. 16:24:03
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.model.entity.application;
+package hu.btsoft.gfmon.engine.model.entity.jdbc;
 
 import java.io.Serializable;
 import lombok.AllArgsConstructor;
@@ -17,23 +17,23 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Kompozik kulcs Application <-> AppCollectorDataUnit kapcsolótáblához
+ * Kompozik kulcs JdbcConnectionPool <-> JdbcConnectionPoolCollectorDataUnit kapcsolótáblához
  *
  * @author BT
  */
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class ApplicationAppCollDataUnitJoinerPK implements Serializable {
+public class ConnPoolConnPoolCollDataUnitJoinerPK implements Serializable {
 
     /**
-     * Application ID
+     * JdbcConnectionPool ID
      */
-    private Long applicationId;
+    private Long connPoolId;
 
     /**
-     * Application CDU ID
+     * JdbcConnectionPoolCollectorDataUnit CDU ID
      */
-    private Long appCollectorDataUnitId;
+    private Long connPoolCollectorDataUnitId;
 
 }

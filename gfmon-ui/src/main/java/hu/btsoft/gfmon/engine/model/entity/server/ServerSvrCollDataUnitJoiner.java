@@ -42,7 +42,7 @@ import lombok.ToString;
 import org.eclipse.persistence.annotations.Customizer;
 
 /**
- * Server -> SvrCollectorDataUnit @OneTomany kapcsolótábla extra oszloppal
+ * Server <-> SvrCollectorDataUnit kapcsolótábla extra mezőkkel
  *
  * @author BT
  */

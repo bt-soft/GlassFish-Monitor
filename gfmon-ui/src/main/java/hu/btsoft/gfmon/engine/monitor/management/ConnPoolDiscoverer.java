@@ -4,7 +4,7 @@
  *  GF Monitor project
  *
  *  Module:  gfmon (gfmon)
- *  File:    JdbcConnectionPoolDiscoverer.java
+ *  File:    ConnPoolDiscoverer.java
  *  Created: 2018.01.28. 9:23:20
  *
  *  ------------------------------------------------------------------------------------
@@ -13,7 +13,7 @@ package hu.btsoft.gfmon.engine.monitor.management;
 
 import hu.btsoft.gfmon.corelib.json.GFJsonUtils;
 import hu.btsoft.gfmon.corelib.string.StrUtils;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcConnectionPool;
+import hu.btsoft.gfmon.engine.model.entity.jdbc.ConnPool;
 import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcResource;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.rest.RestClientBase;
@@ -37,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author BT
  */
 @Slf4j
-public class JdbcConnectionPoolDiscoverer extends RestClientBase {
+public class ConnPoolDiscoverer extends RestClientBase {
 
     private static final String SUB_URL_CONNECTION_POOL = "/management/domain/resources/jdbc-connection-pool";
     private static final String SUB_URL_JDBC_RESOURCE = "/management/domain/resources/jdbc-resource";
@@ -77,9 +77,9 @@ public class JdbcConnectionPoolDiscoverer extends RestClientBase {
      * @param userName     user név
      * @param sessionToken session token
      *
-     * @return új JPA JdbcConnectionPool példány
+     * @return új JPA ConnPool példány
      */
-    private JdbcConnectionPool createJdbcConnectionPool(Map.Entry<String /* JDBC ConnectionPoolName */, String /* url */> urlMapEntry, String userName, String sessionToken) {
+    private ConnPool createConnPool(Map.Entry<String /* JDBC ConnectionPoolName */, String /* url */> urlMapEntry, String userName, String sessionToken) {
 
         JsonObject rootJsonObject = super.getRootJsonObject(urlMapEntry.getValue(), userName, sessionToken);
         JsonObject entities = GFJsonUtils.getEntities(rootJsonObject);
@@ -87,7 +87,7 @@ public class JdbcConnectionPoolDiscoverer extends RestClientBase {
             return null;
         }
 
-        JdbcConnectionPool cp = new JdbcConnectionPool();
+        ConnPool cp = new ConnPool();
 
         cp.setPoolName(StrUtils.deNull(StrUtils.deQuote(entities.get("name").toString())));
         cp.setDescription(StrUtils.deNull(StrUtils.deQuote(entities.get("description").toString())));
@@ -117,7 +117,7 @@ public class JdbcConnectionPoolDiscoverer extends RestClientBase {
      *
      * @return JDBC erőforrások JPA entitás listája
      */
-    public List<JdbcConnectionPool> getJdbcresourcess(Server server) {
+    public List<ConnPool> disover(Server server) {
 
         String simpleUrl = server.getSimpleUrl();
         String userName = server.getUserName();
@@ -130,15 +130,15 @@ public class JdbcConnectionPoolDiscoverer extends RestClientBase {
             return null;
         }
 
-        List<JdbcConnectionPool> jdbcConnectionPools = new LinkedList<>();
+        List<ConnPool> connPools = new LinkedList<>();
         urlMap.entrySet().stream()
-                .map((jdbcConnectionPoolUrlMapEntry) -> createJdbcConnectionPool(jdbcConnectionPoolUrlMapEntry, userName, sessionToken))
+                .map((jdbcConnectionPoolUrlMapEntry) -> createConnPool(jdbcConnectionPoolUrlMapEntry, userName, sessionToken))
                 .map((jdbcConnectionPool) -> {
                     jdbcConnectionPool.setServer(server); //beállítjuk, hogy a connection pool melyik szerveren van
                     jdbcConnectionPool.setActive(null);  //MÉG nem döntöttünk a monitorozható állapotról!
                     return jdbcConnectionPool;
                 }).forEachOrdered((jdbcConnectionPool) -> {
-            jdbcConnectionPools.add(jdbcConnectionPool);
+            connPools.add(jdbcConnectionPool);
         });
 
         //Kigyűjtjük a jdbc-resources-eket
@@ -150,22 +150,22 @@ public class JdbcConnectionPoolDiscoverer extends RestClientBase {
 
             if (jdbcResource != null) {
                 //Megkeressük, hogy melyik connectionPool-t használja és beállítjuk mindkét oldalon
-                jdbcConnectionPools.stream()
-                        .filter((connectionPool) -> (connectionPool.getPoolName().equals(jdbcResource.getPoolName()))) //Ugyan az a connection pool neve?
-                        .map((connectionPool) -> {
-                            jdbcResource.setJdbcConnectionPool(connectionPool); //beállítjuk a resource-nak, a connectionpool-t
-                            return connectionPool;
-                        }).map((connectionPool) -> {
-                    if (connectionPool.getJdbcResources() == null) {
-                        connectionPool.setJdbcResources(new LinkedList<>());
+                connPools.stream()
+                        .filter((cp) -> (cp.getPoolName().equals(jdbcResource.getPoolName()))) //Ugyan az a connection pool neve?
+                        .map((cp) -> {
+                            jdbcResource.setConnPool(cp); //beállítjuk a resource-nak, a connectionpool-t
+                            return cp;
+                        }).map((cp) -> {
+                    if (cp.getJdbcResources() == null) {
+                        cp.setJdbcResources(new LinkedList<>());
                     }
-                    return connectionPool;
-                }).forEachOrdered((connectionPool) -> {
-                    connectionPool.getJdbcResources().add(jdbcResource);  //hozzáadjuk a connectionPool-hoz a resources-t
+                    return cp;
+                }).forEachOrdered((cp) -> {
+                    cp.getJdbcResources().add(jdbcResource);  //hozzáadjuk a connectionPool-hoz a resources-t
                 });
             }
         }
 
-        return jdbcConnectionPools;
+        return connPools;
     }
 }

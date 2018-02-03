@@ -17,7 +17,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Kompozik elsődleges kulcs a SERVER_COLLDATA_UNIT táblához
+ * Kompozit kulcs Server <-> SvrCollectorDataUnit kapcsolótáblához
  *
  * @author BT
  */

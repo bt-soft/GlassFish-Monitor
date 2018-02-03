@@ -14,8 +14,9 @@ package hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot;
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcConnectionPool;
+import hu.btsoft.gfmon.engine.model.entity.jdbc.ConnPool;
 import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcResourceSnapshotBase;
+import java.util.LinkedList;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -36,21 +37,21 @@ import org.eclipse.persistence.annotations.Customizer;
  * @author BT
  */
 @Entity
-@Table(name = "JDBC_CONECTION_POOL_STAT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
+@Table(name = "CONNPOOL_STAT", catalog = "", schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME)
 @Data
-@ToString(callSuper = true, exclude = {"jdbcConnectionPool", "connectionPoolAppStatistic"})
-@EqualsAndHashCode(callSuper = true, exclude = {"jdbcConnectionPool", "connectionPoolAppStatistic"})
+@ToString(callSuper = true, exclude = {"connPool", "connPoolAppStats"})
+@EqualsAndHashCode(callSuper = true, exclude = {"connPool", "connPoolAppStats"})
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-public class ConnectionPoolStatistic extends JdbcResourceSnapshotBase {
+public class ConnPoolStat extends JdbcResourceSnapshotBase {
 
     /**
-     * A ConnectionPool statisztika melyik JdbcConnectionPool-hoz tartozik?
+     * A ConnectionPool statisztika melyik ConnPool-hoz tartozik?
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "JDBC_CONNECTION_POOL_ID", referencedColumnName = "ID", nullable = false)
+    @JoinColumn(name = "CONNPOOL_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 20)
-    private JdbcConnectionPool jdbcConnectionPool;
+    private ConnPool connPool;
 
     /**
      * • AverageConnWaitTime
@@ -205,8 +206,8 @@ public class ConnectionPoolStatistic extends JdbcResourceSnapshotBase {
     private Long waitQueueLength;
 
     //-- Az alkalmazások ConnectionPool statisztika mérési eredményei
-    @OneToMany(mappedBy = "connectionPoolStatistic", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "JDBC_CONECTION_POOL_APP_STAT_ID", referencedColumnName = "ID", nullable = false)
+    @OneToMany(mappedBy = "connPoolStat", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "CONNPOOL_APP_STAT_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 70)
-    private List<ConnectionPoolAppStatistic> connectionPoolAppStatistic;
+    private List<ConnPoolAppStat> connPoolAppStats = new LinkedList<>();
 }

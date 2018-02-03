@@ -234,6 +234,7 @@ public class ApplicationsMonitor extends MonitorsBase {
 
             //Kellett gyűjteni a mértékegységeket?
             if (dataUnits != null && !dataUnits.isEmpty()) {
+                //Elmentjük a CDU-kat az adatbázisba
                 applicationCollectorDataUnitService.saveCollectedDataUnits(dataUnits, DB_MODIFICATOR_USER);
 
                 //Alkalmazás <-> Cdu összerendelés

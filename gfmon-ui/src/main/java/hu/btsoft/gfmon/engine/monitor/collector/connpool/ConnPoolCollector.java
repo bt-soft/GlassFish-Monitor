@@ -4,12 +4,12 @@
  *  GF Monitor project
  *
  *  Module:  gfmon (gfmon)
- *  File:    JdbcConnectionPoolCollector.java
+ *  File:    ConnPoolCollector.java
  *  Created: 2018.01.28. 12:12:47
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.monitor.collector.jdbcconpool;
+package hu.btsoft.gfmon.engine.monitor.collector.connpool;
 
 import hu.btsoft.gfmon.engine.monitor.collector.application.AppStatCollectorBase;
 
@@ -18,7 +18,7 @@ import hu.btsoft.gfmon.engine.monitor.collector.application.AppStatCollectorBase
  *
  * @author BT
  */
-public class JdbcConnectionPoolCollector extends AppStatCollectorBase {
+public class ConnPoolCollector extends AppStatCollectorBase {
 
     /**
      * path

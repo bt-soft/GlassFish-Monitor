@@ -4,7 +4,7 @@
  *  GF Monitor project
  *
  *  Module:  gfmon (gfmon)
- *  File:    JdbcConnectionPool.java
+ *  File:    ConnPool.java
  *  Created: 2018.01.27. 18:48:41
  *
  *  ------------------------------------------------------------------------------------
@@ -15,8 +15,9 @@ import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.ModifiableEntityBase;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnectionPoolStatistic;
+import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnPoolStat;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
+import java.util.LinkedList;
 import java.util.List;
 import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
@@ -45,24 +46,24 @@ import org.eclipse.persistence.annotations.Customizer;
  */
 @Entity
 @Cacheable(false)
-@Table(name = "JDBC_CONNECTION_POOL",
+@Table(name = "CONNPOOL",
         catalog = "",
         schema = IGFMonCoreLibConstants.DATABASE_SCHEMA_NAME,
         uniqueConstraints = @UniqueConstraint(columnNames = {"SVR_ID", "POOL_NAME"})
 )
 @NamedQueries({
-    @NamedQuery(name = "JdbcConnectionPool.findByServerId", query = "SELECT c FROM JdbcConnectionPool c WHERE c.server.id = :serverId ORDER BY c.poolName"), //
+    @NamedQuery(name = "ConnPool.findByServerId", query = "SELECT c FROM ConnPool c WHERE c.server.id = :serverId ORDER BY c.poolName"), //
 })
 @Data
-@ToString(callSuper = true, exclude = {"server", "jdbcResources", "connectionPoolStatistics"})
-@EqualsAndHashCode(callSuper = true, exclude = {"server", "active", "jdbcResources", "connectionPoolStatistics"}) //az 'active' nem számít bele az azonosságba!
+@ToString(callSuper = true, exclude = {"server", "jdbcResources", "connPoolStats", "joiners"})
+@EqualsAndHashCode(callSuper = true, exclude = {"server", "active", "jdbcResources", "connPoolStats", "joiners"}) //az 'active' nem számít bele az azonosságba!
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
 @Slf4j
-public class JdbcConnectionPool extends ModifiableEntityBase {
+public class ConnPool extends ModifiableEntityBase {
 
     /**
-     * A JdbcConnectionPool melyik szerveren van?
+     * A ConnPool melyik szerveren van?
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SVR_ID", referencedColumnName = "ID", nullable = false)
@@ -138,16 +139,29 @@ public class JdbcConnectionPool extends ModifiableEntityBase {
     @ColumnPosition(position = 44)
     private String statementTimeoutInSeconds;
 
-    //Milyen jdbcResources használja?
-    @OneToMany(mappedBy = "jdbcConnectionPool", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+//
+    /**
+     * A JDBC Connection Pool mérendő adatai
+     * - eager: mindig kell -> mindig felolvassuk
+     * - cascade: update, merge menjen rájuk is, ha a szervert töröljük, akkor törlődjönenek az alkalmazások is
+     * - orphanRemoval: izomból törlés lesz
+     */
+    @OneToMany(mappedBy = "connPool", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ConnPoolConnPoolCollDataUnitJoiner> joiners = new LinkedList<>();
+
+    /**
+     * Milyen jdbcResources használja?
+     */
+    @OneToMany(mappedBy = "connPool", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "JDBC_RESOURCE_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 70)
-    private List<JdbcResource> jdbcResources;
+    private List<JdbcResource> jdbcResources = new LinkedList<>();
 
-    //-- Milyen statisztikái vannak?
-    @OneToMany(mappedBy = "jdbcConnectionPool", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "JDBC_CONECTION_POOL_STAT", referencedColumnName = "ID", nullable = false)
+    /**
+     * Milyen statisztikái vannak?
+     */
+    @OneToMany(mappedBy = "connPool", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "CONNPOOL_STAT_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 71)
-    private List<ConnectionPoolStatistic> connectionPoolStatistics;
-
+    private List<ConnPoolStat> connPoolStats = new LinkedList<>();
 }
