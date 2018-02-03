@@ -56,6 +56,16 @@ public class ConnPoolSnapshotProvider {
     private Set<DataUnitDto> collectDataUnits;
 
     /**
+     * Gyűjtendő path-ok és az azalatti adatnevek
+     */
+    private Map<String/*path*/, Set<String> /*dataNames*/> collectedDatatNamesMap;
+
+    /**
+     * Az adatgyűjtés közben hibára futott path-ek, automatikusan tiltjuk őket
+     */
+    private Set<String> fullUrlErroredPaths;
+
+    /**
      *
      * @param simpleUrl
      * @param userName
@@ -67,12 +77,15 @@ public class ConnPoolSnapshotProvider {
     private ConnPoolStat start(Server server, String poolName) {
 
         List<Application> applications = server.getApplications();
+        String protocol = server.getProtocol();
         String simpleUrl = server.getSimpleUrl();
         String userName = server.getUserName();
         String sessionToken = server.getSessionToken();
 
         String resourceUri = restDataCollector.getSubUri() + "resources/" + poolName;
-        JsonObject rootJsonObject = restDataCollector.getRootJsonObject(simpleUrl, resourceUri, userName, sessionToken);
+        String fullUrl = protocol + simpleUrl + resourceUri;
+
+        JsonObject rootJsonObject = restDataCollector.getRootJsonObject(fullUrl, userName, sessionToken, fullUrlErroredPaths);
 
         List<CollectedValueDto> valuesList = connPoolCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
 
@@ -110,7 +123,7 @@ public class ConnPoolSnapshotProvider {
 
                 String connPoolFullUrl = applicationsMap.get(appname);
 
-                rootJsonObject = restDataCollector.getRootJsonObject(connPoolFullUrl, userName, sessionToken);
+                rootJsonObject = restDataCollector.getRootJsonObject(connPoolFullUrl, userName, sessionToken, fullUrlErroredPaths);
                 valuesList = connPoolAppCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
 
                 //Ha kell dataUnitokat is gyűjteni
@@ -142,17 +155,18 @@ public class ConnPoolSnapshotProvider {
     /**
      * Az összes JDBC resource kollektor adatait összegyűjti, majd egy új Jdbcresource Snapshot entitásba rakja az eredményeket
      *
-     * @param server       a monitorozandó Server entitása
-     * @param dataUnits    ha nem null, akkor ebbe kell gyűjteni az adtneveket
-     * @param erroredPaths a mérés közben hibára futott oldalak, automatikusan letiltjuk őket
+     * @param server              a monitorozandó Server entitása
+     * @param collectDataUnits    ha nem null, akkor ebbe kell gyűjteni az adtneveket
+     * @param fullUrlErroredPaths a mérés közben hibára futott oldalak, automatikusan letiltjuk őket
      *
      * @return JDBC resource Snapshot példányok halmaza, az adatgyűjtés eredménye (new/detach entitás)
      */
-    public Set<ConnPoolStat> fetchSnapshot(Server server, Set<DataUnitDto> dataUnits, Set<String> erroredPaths) {
-
-        this.collectDataUnits = dataUnits;
+    public Set<ConnPoolStat> fetchSnapshot(Server server, Set<DataUnitDto> collectDataUnits, Set<String> fullUrlErroredPaths) {
 
         long start = Elapsed.nowNano();
+
+        this.collectDataUnits = collectDataUnits;
+        this.fullUrlErroredPaths = fullUrlErroredPaths;
 
         Set<ConnPoolStat> snapshots = null;
 

@@ -90,7 +90,7 @@ public class ApplicationSnapshotProvider {
     /**
      * Az adatgyűjtés közben hibára futott path-ek, automatikusan tiltjuk őket
      */
-    private Set<String> erroredPaths;
+    private Set<String> fullUrlErroredPaths;
 
     /**
      * Alkalmazás path-jának kitalálása
@@ -139,7 +139,7 @@ public class ApplicationSnapshotProvider {
     private Set<AppSnapshotBase> collectWebStatistics(Application app, String fullUrl, String userName, String sessionToken) {
         Set<AppSnapshotBase> snapshots = new HashSet<>();
 
-        JsonObject rootJsonObject = restDataCollector.getRootJsonObject(fullUrl, userName, sessionToken);
+        JsonObject rootJsonObject = restDataCollector.getRootJsonObject(fullUrl, userName, sessionToken, fullUrlErroredPaths);
 
         //Beállítjuk az adatgyűjtőnek, hogy mi a gyűjtendő szervlet neve, ez az DCU-hoz kell (eltűntetjük a '{servletName}' maszkot)
         appServletStatisticCollector.setCurrentPath(Collections.singletonMap("{servletName}", ""));
@@ -169,7 +169,7 @@ public class ApplicationSnapshotProvider {
 
                 String serrvletFullUrl = servletsMap.get(servletName);
 
-                rootJsonObject = restDataCollector.getRootJsonObject(serrvletFullUrl, userName, sessionToken);
+                rootJsonObject = restDataCollector.getRootJsonObject(serrvletFullUrl, userName, sessionToken, fullUrlErroredPaths);
 
                 //Beállítjuk az adatgyűjtőnek, hogy mi a gyűjtendő szervlet neve, ez az DCU-hoz kell (beállítjuk a szervlet nevét)
                 appServletStatisticCollector.setCurrentPath(Collections.singletonMap("{servletName}", servletName));
@@ -212,7 +212,7 @@ public class ApplicationSnapshotProvider {
     private Set<AppSnapshotBase> collectEjbStatistics(Application app, String fullUrl, String userName, String sessionToken, String beanName) {
         Set<AppSnapshotBase> snapshots = new HashSet<>();
 
-        JsonObject rootJsonObject = restDataCollector.getRootJsonObject(fullUrl, userName, sessionToken);
+        JsonObject rootJsonObject = restDataCollector.getRootJsonObject(fullUrl, userName, sessionToken, fullUrlErroredPaths);
         List<CollectedValueDto> valuesList = appEjbCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
 
         //Ha kell dataUnitokat is gyűjteni
@@ -240,7 +240,7 @@ public class ApplicationSnapshotProvider {
             for (String ejbStatName : ejbStatisticsMap.keySet()) {
 
                 String ejbStatFullUrl = ejbStatisticsMap.get(ejbStatName);
-                rootJsonObject = restDataCollector.getRootJsonObject(ejbStatFullUrl, userName, sessionToken);
+                rootJsonObject = restDataCollector.getRootJsonObject(ejbStatFullUrl, userName, sessionToken, fullUrlErroredPaths);
 
                 switch (ejbStatName) {
                     case "bean-methods":
@@ -248,7 +248,7 @@ public class ApplicationSnapshotProvider {
                         if (beanMethodsMap != null && !beanMethodsMap.isEmpty()) {
                             for (String beanMethodName : beanMethodsMap.keySet()) {
                                 String beanMethodFullUrl = beanMethodsMap.get(beanMethodName);
-                                rootJsonObject = restDataCollector.getRootJsonObject(beanMethodFullUrl, userName, sessionToken);
+                                rootJsonObject = restDataCollector.getRootJsonObject(beanMethodFullUrl, userName, sessionToken, fullUrlErroredPaths);
                                 valuesList = appEjbBeanMethodCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
 
                                 //Ha kell dataUnitokat is gyűjteni
@@ -413,17 +413,17 @@ public class ApplicationSnapshotProvider {
     /**
      * Az összes alkalmazás kollektor adatait összegyűjti, majd egy új alkalmazás Snapshot entitásba rakja az eredményeket
      *
-     * @param server       a monitorozandó Server entitása
-     * @param dataUnits    ha nem null, akko ki kell gyűjteni a mért értékek mértékegységét is
-     * @param erroredPaths a mérés közben hibára futott oldalak, automatikusan letiltjuk őket
+     * @param server              a monitorozandó Server entitása
+     * @param collectDataUnits    ha nem null, akko ki kell gyűjteni a mért értékek mértékegységét is
+     * @param fullUrlErroredPaths a mérés közben hibára futott oldalak, automatikusan letiltjuk őket
      *
      * @return alkalmazás Snapshot példányok halmaza, az adatgyűjtés eredménye (new/detach entitás)
      */
-    public Set<AppSnapshotBase> fetchSnapshot(Server server, Set<DataUnitDto> dataUnits, Set<String> erroredPaths) {
+    public Set<AppSnapshotBase> fetchSnapshot(Server server, Set<DataUnitDto> collectDataUnits, Set<String> fullUrlErroredPaths) {
         long start = Elapsed.nowNano();
 
-        this.collectDataUnits = dataUnits;
-        this.erroredPaths = erroredPaths;
+        this.collectDataUnits = collectDataUnits;
+        this.fullUrlErroredPaths = fullUrlErroredPaths;
 
         Set<AppSnapshotBase> snapshots = null;
 

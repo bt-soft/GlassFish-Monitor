@@ -205,7 +205,7 @@ public class ConnPoolMonitor extends MonitorsBase {
         for (Server server : serverService.findAllActiveServer()) {
 
             //Hibára futott mérési oldalak, automatikusan tiltjuk őket
-            Set<String> erroredPaths = new HashSet<>();
+            Set<String> fullUrlErroredPaths = new HashSet<>();
 
             //Kell gyűjteni a mértékegységeket?
             Set<DataUnitDto> dataUnits = null;
@@ -213,7 +213,7 @@ public class ConnPoolMonitor extends MonitorsBase {
                 dataUnits = new LinkedHashSet<>();
             }
 
-            Set<ConnPoolStat> connPoolStats = connPoolSnapshotProvider.fetchSnapshot(server, dataUnits, erroredPaths);
+            Set<ConnPoolStat> connPoolStats = connPoolSnapshotProvider.fetchSnapshot(server, dataUnits, fullUrlErroredPaths);
 
             //Kellett gyűjteni a mértékegységeket?
             if (dataUnits != null && !dataUnits.isEmpty()) {
@@ -227,8 +227,16 @@ public class ConnPoolMonitor extends MonitorsBase {
             }
 
             //letiltjuk az alkalmazás gyűjtendő adat path-ját, ha nem sikerült elérni
-            if (!erroredPaths.isEmpty()) {
-                for (String erroredPath : erroredPaths) {
+            if (!fullUrlErroredPaths.isEmpty()) {
+
+                String serverPathBegin = server.getUrl();
+
+                for (String fullUrlErroredPath : fullUrlErroredPaths) {
+
+                    //A Full URL-t lecseréljük
+                    String erroredPath = fullUrlErroredPath.replace(serverPathBegin, "");
+
+                    //Megkeressük a CDU-ban, és letiltjuk
                     for (ConnPool connPool : server.getConnPools()) {
                         connPool.getJoiners().stream()
                                 .filter((joiner) -> (Objects.equals(joiner.getConnPoolCollDataUnit().getRestPathMask(), erroredPath)))

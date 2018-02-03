@@ -16,6 +16,7 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Set;
 import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.ws.rs.client.Client;
@@ -195,16 +196,17 @@ public abstract class RestClientBase implements Serializable {
     }
 
     /**
-     * A megadott full url-ről leszedi a választ
+     * Az adott full URL-ről leszedi a JSon választ
+     * A hibára futott URL-eket beteszi az erroredPaths halmazba
      *
-     * @param fullUrl      teljes URL (http[s]://localhost:4848/....)
-     * @param userName     REST hívás usere
-     * @param sessionToken GF session token
+     * @param fullUrl      full URL
+     * @param userName     username
+     * @param sessionToken sessionToken
+     * @param erroredPaths hibás URL-ek
      *
-     * @return Json Object
+     * @return JSOn object vagy null
      */
-    public JsonObject getRootJsonObject(String fullUrl, String userName, String sessionToken) {
-
+    public JsonObject getRootJsonObject(String fullUrl, String userName, String sessionToken, Set<String> erroredPaths) {
         try {
             String protocol = this.getProtocol(userName);
 
@@ -226,6 +228,9 @@ public abstract class RestClientBase implements Serializable {
             if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
                 //Nem jött válasz -> valószínűleg nincs statisztika/beállítás róla
                 //log.warn("A(z) '{}' url hívására {} hibakód jött", fullUrl, response.getStatusInfo().getReasonPhrase());
+                if (erroredPaths != null) {
+                    erroredPaths.add(fullUrl);
+                }
                 return null;
             }
 
@@ -242,6 +247,19 @@ public abstract class RestClientBase implements Serializable {
         }
 
         return null;
+    }
+
+    /**
+     * Az adott full URL-ről leszedi a JSon választ
+     *
+     * @param fullUrl      full URL
+     * @param userName     username
+     * @param sessionToken sessionToken
+     *
+     * @return JSOn object vagy null
+     */
+    public JsonObject getRootJsonObject(String fullUrl, String userName, String sessionToken) {
+        return this.getRootJsonObject(fullUrl, userName, sessionToken, (Set<String>) null);
     }
 
     /**
