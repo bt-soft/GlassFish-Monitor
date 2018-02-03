@@ -34,6 +34,7 @@ import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbBeanPoolCo
 import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.application.ejb.AppEjbTimersCollector;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -80,6 +81,16 @@ public class ApplicationSnapshotProvider {
     private JSonEntityToSnapshotEntityMapper jSonEntityToSnapshotEntityMapper;
 
     private Set<DataUnitDto> collectDataUnits;
+
+    /**
+     * Gyűjtendő path-ok és az azalatti adatnevek
+     */
+    private Map<String/*path*/, Set<String> /*dataNames*/> collectedDatatNamesMap;
+
+    /**
+     * Az adatgyűjtés közben hibára futott path-ek, automatikusan tiltjuk őket
+     */
+    private Set<String> erroredPaths;
 
     /**
      * Alkalmazás path-jának kitalálása
@@ -373,37 +384,70 @@ public class ApplicationSnapshotProvider {
     }
 
     /**
+     * Kigyűjtjük a szerver beállításaiban található monitorozandó path-okat és adatneveket
+     *
+     * @param server Szerver
+     *
+     * @return Map, key: monitorozando Path, value: gyűjtendő adatnevek Set-je
+     */
+    private Map<String/*path*/, Set<String> /*dataNames*/> createCollectedDatatNamesMap(Application app) {
+
+        //Az egyes Path-ok alatti gyűjtendő adatnevek halmaza, ezzel az adott kollektor munkáját tudjuk szűkíteni
+        Map<String/*path*/, Set<String> /*dataNames*/> map = new HashMap<>();
+
+        app.getJoiners().stream()
+                .filter((joiner) -> (joiner.isActive()))
+                .map((joiner) -> joiner.getAppCollectorDataUnit())
+                .forEachOrdered((svrCdu) -> {
+                    String path = svrCdu.getRestPathMask();
+                    if (!map.containsKey(path)) {
+                        map.put(path, new HashSet<>());
+                    }
+                    Set<String> collectedDatatNames = map.get(path);
+                    collectedDatatNames.add(svrCdu.getDataName());
+                });
+
+        return map;
+    }
+
+    /**
      * Az összes alkalmazás kollektor adatait összegyűjti, majd egy új alkalmazás Snapshot entitásba rakja az eredményeket
      *
-     * @param server    a monitorozandó Server entitása
-     * @param dataUnits ha nem null, akko ki kell gyűjteni a mért értékek mértékegységét is
+     * @param server       a monitorozandó Server entitása
+     * @param dataUnits    ha nem null, akko ki kell gyűjteni a mért értékek mértékegységét is
+     * @param erroredPaths a mérés közben hibára futott oldalak, automatikusan letiltjuk őket
      *
      * @return alkalmazás Snapshot példányok halmaza, az adatgyűjtés eredménye (new/detach entitás)
      */
-    public Set<AppSnapshotBase> fetchSnapshot(Server server, Set<DataUnitDto> dataUnits) {
+    public Set<AppSnapshotBase> fetchSnapshot(Server server, Set<DataUnitDto> dataUnits, Set<String> erroredPaths) {
+        long start = Elapsed.nowNano();
 
         this.collectDataUnits = dataUnits;
-
-        long start = Elapsed.nowNano();
+        this.erroredPaths = erroredPaths;
 
         Set<AppSnapshotBase> snapshots = null;
 
         //Véégigmegyünk a szerver alkalmazásain
         for (Application app : server.getApplications()) {
 
-            //Ha monitorozásra aktív, akkor meghívjuk rá az adatgyűjtőt
-            if (app.getActive() != null && Objects.equals(app.getActive(), Boolean.TRUE)) {
-
-                Set<AppSnapshotBase> appSnapshots = this.start(app);
-
-                if (appSnapshots != null && !appSnapshots.isEmpty()) {
-
-                    if (snapshots == null) {
-                        snapshots = new LinkedHashSet<>();
-                    }
-                    snapshots.addAll(appSnapshots);
-                }
+            //Ha nem aktív az alkalmazás, akkor nem foglalkozunk vele
+            if (app.getActive() == null || Objects.equals(app.getActive(), Boolean.TRUE)) {
+                continue;
             }
+
+            //Gyűjtendő path-ok alatti adatnevek
+            this.collectedDatatNamesMap = createCollectedDatatNamesMap(app);
+
+            Set<AppSnapshotBase> appSnapshots = this.start(app);
+
+            if (appSnapshots != null && !appSnapshots.isEmpty()) {
+
+                if (snapshots == null) {
+                    snapshots = new LinkedHashSet<>();
+                }
+                snapshots.addAll(appSnapshots);
+            }
+
         }
 
         log.info("Alkalmazások statisztika kigyűjtése elapsed: {}", Elapsed.getElapsedNanoStr(start));

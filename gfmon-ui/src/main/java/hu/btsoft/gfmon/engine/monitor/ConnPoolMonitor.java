@@ -21,6 +21,7 @@ import hu.btsoft.gfmon.engine.model.service.ConnPoolCollectorDataUnitService;
 import hu.btsoft.gfmon.engine.model.service.ConnPoolService;
 import hu.btsoft.gfmon.engine.model.service.JdbcResourcesSnapshotService;
 import hu.btsoft.gfmon.engine.monitor.management.ConnPoolDiscoverer;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -203,14 +204,16 @@ public class ConnPoolMonitor extends MonitorsBase {
         int measuredServerCnt = 0;
         for (Server server : serverService.findAllActiveServer()) {
 
+            //Hibára futott mérési oldalak, automatikusan tiltjuk őket
+            Set<String> erroredPaths = new HashSet<>();
+
             //Kell gyűjteni a mértékegységeket?
             Set<DataUnitDto> dataUnits = null;
             if (this.wantCollectCDU()) {
                 dataUnits = new LinkedHashSet<>();
             }
 
-            Set<ConnPoolStat> connPoolStats = connPoolSnapshotProvider.fetchSnapshot(server, dataUnits);
-            measuredServerCnt++;
+            Set<ConnPoolStat> connPoolStats = connPoolSnapshotProvider.fetchSnapshot(server, dataUnits, erroredPaths);
 
             //Kellett gyűjteni a mértékegységeket?
             if (dataUnits != null && !dataUnits.isEmpty()) {
@@ -223,6 +226,24 @@ public class ConnPoolMonitor extends MonitorsBase {
                 });
             }
 
+            //letiltjuk az alkalmazás gyűjtendő adat path-ját, ha nem sikerült elérni
+            if (!erroredPaths.isEmpty()) {
+                for (String erroredPath : erroredPaths) {
+                    for (ConnPool connPool : server.getConnPools()) {
+                        connPool.getJoiners().stream()
+                                .filter((joiner) -> (Objects.equals(joiner.getConnPoolCollDataUnit().getRestPathMask(), erroredPath)))
+                                .map((joiner) -> {
+                                    joiner.setActive(false);
+                                    return joiner;
+                                }).forEachOrdered((joiner) -> {
+                            joiner.setAdditionalMessage("A path nem érhető el, az adatgyűjtés letiltva");
+                        });
+                        connPoolService.save(connPool, DB_MODIFICATOR_USER);
+                    }
+                }
+            }
+
+            measuredServerCnt++;
             if (connPoolStats == null || connPoolStats.isEmpty()) {
                 log.warn("Szerver: {} -> Nincsenek menthető JDBC erőforrás pillanatfelvételek!", server.getSimpleUrl());
                 return;

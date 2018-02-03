@@ -21,6 +21,7 @@ import hu.btsoft.gfmon.engine.model.service.ApplicationService;
 import hu.btsoft.gfmon.engine.model.service.ApplicationSnapshotService;
 import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
 import hu.btsoft.gfmon.engine.monitor.management.ApplicationsDiscoverer;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -225,12 +226,15 @@ public class ApplicationsMonitor extends MonitorsBase {
         int measuredServerCnt = 0;
         for (Server server : serverService.findAllActiveServer()) {
 
+            //Hibára futott mérési oldalak, automatikusan tiltjuk őket
+            Set<String> erroredPaths = new HashSet<>();
+
             //Kell gyűjteni a mértékegységeket?
             Set<DataUnitDto> dataUnits = null;
             if (wantCollectCDU()) {
                 dataUnits = new LinkedHashSet<>();
             }
-            Set<AppSnapshotBase> applicationSnapshots = applicationSnapshotProvider.fetchSnapshot(server, dataUnits);
+            Set<AppSnapshotBase> applicationSnapshots = applicationSnapshotProvider.fetchSnapshot(server, dataUnits, erroredPaths);
 
             //Kellett gyűjteni a mértékegységeket?
             if (dataUnits != null && !dataUnits.isEmpty()) {
@@ -241,6 +245,23 @@ public class ApplicationsMonitor extends MonitorsBase {
                 server.getApplications().forEach((app) -> {
                     applicationService.assignApplicationToCdu(app, DB_MODIFICATOR_USER);
                 });
+            }
+
+            //letiltjuk az alkalmazás gyűjtendő adat path-ját, ha nem sikerült elérni
+            if (!erroredPaths.isEmpty()) {
+                for (String erroredPath : erroredPaths) {
+                    for (Application app : server.getApplications()) {
+                        app.getJoiners().stream()
+                                .filter((joiner) -> (Objects.equals(joiner.getAppCollectorDataUnit().getRestPathMask(), erroredPath)))
+                                .map((joiner) -> {
+                                    joiner.setActive(false);
+                                    return joiner;
+                                }).forEachOrdered((joiner) -> {
+                            joiner.setAdditionalMessage("A path nem érhető el, az adatgyűjtés letiltva");
+                        });
+                        applicationService.save(app, DB_MODIFICATOR_USER);
+                    }
+                }
             }
 
             measuredServerCnt++;

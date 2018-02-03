@@ -216,11 +216,11 @@ public class ServersMonitor extends MonitorsBase {
             erroredPaths.clear();
             Set<SnapshotBase> serverSnapshots = serverSnapshotProvider.fetchSnapshot(server, erroredPaths);
 
-            //letiltjuk a gyűjtendő adat pat-ját, ha nem sikerült elérni
+            //letiltjuk a gyűjtendő adat path-ját, ha nem sikerült elérni
             if (!erroredPaths.isEmpty()) {
-                for (String path : erroredPaths) {
+                for (String erroredPath : erroredPaths) {
                     server.getJoiners().stream()
-                            .filter((joiner) -> (joiner.getSvrCollectorDataUnit().getRestPath().equals(path)))
+                            .filter((joiner) -> (joiner.getSvrCollectorDataUnit().getRestPath().equals(erroredPath)))
                             .map((joiner) -> {
                                 joiner.setActive(false);
                                 return joiner;

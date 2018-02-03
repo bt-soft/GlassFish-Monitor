@@ -14,7 +14,6 @@ package hu.btsoft.gfmon.engine.monitor;
 import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
-import hu.btsoft.gfmon.engine.model.entity.server.SvrCollectorDataUnit;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SnapshotBase;
 import hu.btsoft.gfmon.engine.monitor.collector.CollectedValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
@@ -75,7 +74,36 @@ public class ServerSnapshotProvider {
         }
 
         return result;
+    }
 
+    /**
+     * Kigyűjtjük a szerver beállításaiban található monitorozandó path-okat és adatneveket
+     *
+     * @param server Szerver
+     *
+     * @return Map, key: monitorozando Path, value: gyűjtendő adatnevek Set-je
+     */
+    private Map<String/*path*/, Set<String> /*dataNames*/> createCollectedDatatNamesMap(Server server) {
+
+        //Az egyes Path-ok alatti gyűjtendő adatnevek halmaza, ezzel az adott kollektor munkáját tudjuk szűkíteni
+        Map<String/*path*/, Set<String> /*dataNames*/> collectedDatatNamesMap = new HashMap<>();
+
+        if (server.getJoiners() != null) {
+
+            server.getJoiners().stream()
+                    .filter((joiner) -> (joiner.isActive()))
+                    .map((joiner) -> joiner.getSvrCollectorDataUnit())
+                    .forEachOrdered((svrCdu) -> {
+                        String path = svrCdu.getRestPath();
+                        if (!collectedDatatNamesMap.containsKey(path)) {
+                            collectedDatatNamesMap.put(path, new HashSet<>());
+                        }
+                        Set<String> collectedDatatNames = collectedDatatNamesMap.get(path);
+                        collectedDatatNames.add(svrCdu.getDataName());
+                    });
+        }
+
+        return collectedDatatNamesMap;
     }
 
     /**
@@ -92,40 +120,13 @@ public class ServerSnapshotProvider {
 
         Set<SnapshotBase> snapshots = null;
 
-        //Kigyűjtjük a szerver beállításaiban található monitorozandó path-okat és adatneveket
-        //
-        //A path-al tudjuk eldönteni, hogy egy kolektort egyáltalán meg kell-e hívni?
-        Set<String> serverMonitorablePaths = new HashSet<>();
-
-        //Az egyes Path-ok alatti adatnevek halmaza, ezzel az adott kollektor munkáját tudjuk szűkíteni
-        Map<String, Set<String>> collectedDatatNamesMap = new HashMap<>();
-
-        if (server.getJoiners() != null) {
-            server.getJoiners().forEach((joiner) -> {
-
-                SvrCollectorDataUnit svrCdu = joiner.getSvrCollectorDataUnit();
-
-                //A kollektorok Path-jai
-                String path = svrCdu.getRestPath();
-                serverMonitorablePaths.add(path);
-
-                if (!collectedDatatNamesMap.containsKey(path)) {
-                    collectedDatatNamesMap.put(path, new HashSet<>());
-                }
-                Set<String> collectedDatatNames = collectedDatatNamesMap.get(path);
-
-                //Ha kell gyűjteni az adatnevet, akkor megjegyezzük
-                if (joiner.isActive()) {
-                    collectedDatatNames.add(svrCdu.getDataName());
-                }
-            });
-        }
+        Map<String/*path*/, Set<String> /*dataNames*/> collectedDatatNamesMap = createCollectedDatatNamesMap(server);
 
         //Végigmegyünk az összes adatgyűjtőn
         for (IServerCollector collector : serverCollectors) {
 
             //meg kell hívni ezt az adatgyűjtőt?
-            if (!serverMonitorablePaths.contains(collector.getPath())) {
+            if (!collectedDatatNamesMap.keySet().contains(collector.getPath())) {
                 continue;
             }
 

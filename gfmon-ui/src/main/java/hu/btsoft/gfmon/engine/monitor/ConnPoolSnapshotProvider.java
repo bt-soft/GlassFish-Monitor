@@ -142,12 +142,13 @@ public class ConnPoolSnapshotProvider {
     /**
      * Az összes JDBC resource kollektor adatait összegyűjti, majd egy új Jdbcresource Snapshot entitásba rakja az eredményeket
      *
-     * @param server    a monitorozandó Server entitása
-     * @param dataUnits ha nem null, akkor ebbe kell gyűjteni az adtneveket
+     * @param server       a monitorozandó Server entitása
+     * @param dataUnits    ha nem null, akkor ebbe kell gyűjteni az adtneveket
+     * @param erroredPaths a mérés közben hibára futott oldalak, automatikusan letiltjuk őket
      *
      * @return JDBC resource Snapshot példányok halmaza, az adatgyűjtés eredménye (new/detach entitás)
      */
-    public Set<ConnPoolStat> fetchSnapshot(Server server, Set<DataUnitDto> dataUnits) {
+    public Set<ConnPoolStat> fetchSnapshot(Server server, Set<DataUnitDto> dataUnits, Set<String> erroredPaths) {
 
         this.collectDataUnits = dataUnits;
 
