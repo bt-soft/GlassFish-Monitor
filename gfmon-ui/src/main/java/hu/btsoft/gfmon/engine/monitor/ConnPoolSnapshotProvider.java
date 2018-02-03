@@ -68,13 +68,14 @@ public class ConnPoolSnapshotProvider {
     private Set<String> fullUrlErroredPaths;
 
     /**
+     * Connection Pool statisztika kigyűjtése
      *
-     * @param simpleUrl
-     * @param userName
-     * @param sessionToken
-     * @param poolName
+     * @param simpleUrl    simple url
+     * @param userName     username
+     * @param sessionToken session token
+     * @param poolName     Connection Pool neve
      *
-     * @return
+     * @return Entitás
      */
     private ConnPoolStat start(Server server, String poolName) {
 
@@ -226,7 +227,7 @@ public class ConnPoolSnapshotProvider {
                             .filter((app) -> (Objects.equals(app.getAppRealName(), conAppStat.getAppName()))) //Kikeressük a  névre azonosságot
                             .map((app) -> {
 //
-// FIXME: Ezt nem szabad beállítani, mert nem lehet menteni a ConnectionPool CDU-kat, ha magunk gyűjtjük össze
+// FIXME: Ezt nem szabad beállítani, mert nem lehet menteni a ConnectionPool CDU-kat, ha beállítjuk:  app.getConnPoolAppStats().add(conAppStat)
 //
 //                                    if (app.getConnPoolAppStats() == null) {
 //                                        app.setConnPoolAppStats(new LinkedList<>());
