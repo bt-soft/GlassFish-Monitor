@@ -361,19 +361,19 @@ public class ApplicationSnapshotProvider {
         // Emiatt inkább ránézünk a childResourcesMap-ra és megnézzük, hogy a modulok nevében van-e ".jar" vagy ".war"
         // Ha van, akkor rekurzívan "beléjük megyünk", és csak utána gyűjtjük ki a statisztikákat
         //
-        boolean recursiveCall = false;
+        boolean wasRecursiveCall = false;
         for (String key : childResourcesMap.keySet()) {
             if (key.endsWith(".jar") || key.endsWith(".war")) {
                 String subFullUrl = childResourcesMap.get(key);
                 //Rekurzív hívás!!
-                recursiveCall = true;
+                wasRecursiveCall = true;
                 this.start(app, subFullUrl, snapshots);
             }
         }
 
         //Ha nem rekurzív hívásból jöttünk, akkor indulhat a statisztikák kigyűjtése
         //Magát a ".war"|".jar" végződésre elemzett oldalt nem érdemes átnézni, mert nem tartalmaz statisztikát, csak linkeket
-        if (!recursiveCall) {
+        if (!wasRecursiveCall) {
             this.collectSnapShots(app, childResourcesMap, snapshots);
         }
     }
