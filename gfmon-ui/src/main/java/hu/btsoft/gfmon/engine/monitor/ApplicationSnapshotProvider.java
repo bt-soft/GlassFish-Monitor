@@ -372,7 +372,7 @@ public class ApplicationSnapshotProvider {
         }
 
         //Ha nem rekurzív hívásból jöttünk, akkor indulhat a statisztikák kigyűjtése
-        //Magát a ".war"|".jar" végződésre elemzett oldalt nem érdemes átnézni, mert nem tartalmaz statisztikát, csak lineket
+        //Magát a ".war"|".jar" végződésre elemzett oldalt nem érdemes átnézni, mert nem tartalmaz statisztikát, csak linkeket
         if (!recursiveCall) {
             this.collectSnapShots(app, childResourcesMap, snapshots);
         }
