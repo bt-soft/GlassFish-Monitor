@@ -21,6 +21,8 @@ import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
@@ -230,18 +232,19 @@ public class Application extends ModifiableEntityBase {
      *
      * @return az alklamzás verzió és classifier nélküli neve
      */
+    //A verzió és az osztály kiszűrésére
+    private static final String VERSION_AND_CLASSIFIER_REGEXP = "((?:-(\\d+)\\.)?(?:(\\d+)\\.)?(?:(\\d+)\\.\\d+)(?:-.+))";
+    private static final Pattern VERSION_AND_CLASSIFIER_REGEXP_PATTERN = Pattern.compile(VERSION_AND_CLASSIFIER_REGEXP);
+
     public static String createAppShortName(String _appRealName) {
 
-        //Képezzük a rövid nevet
-//                Pattern pattern = Pattern.compile(server.getAppRegExpFilter());
-//                String appShortName = "";
-//                Matc_her matcher = pattern.matcher(appRealName);
-//                if (matcher.matches() && matcher.groupCount() >= 1) {
-//                    appShortName = matcher.group(1);
-//                }
-//
-//TODO: majd ha tudom képezni vhogy :(
-//
-        return _appRealName;
+        String _appShortName = _appRealName;
+
+        Matcher matcher = VERSION_AND_CLASSIFIER_REGEXP_PATTERN.matcher(_appRealName);
+        if (matcher.find()) {
+            _appShortName = _appRealName.substring(0, matcher.start());
+        }
+
+        return _appShortName;
     }
 }

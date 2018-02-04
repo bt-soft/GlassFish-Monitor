@@ -97,7 +97,7 @@ public class ApplicationSnapshotProvider {
      * Ha több modulból áll, akkor érdekes
      * <p>
      * Anomália:
-     * TODO: ezzel még kell kezdeni valamit....
+     * TODO: ezzel még kell kezdeni valamit, az alkalmazások rövid neveit ki kell találni....
      * - http://localhost:4848/monitoring/domain/server/applications/TestEar-ear/TestEar-ejb-0_0_3.jar
      * - http://localhost:4848/monitoring/domain/server/applications/TestEar-ear/TestEar-web-0.0.3.war
      *
