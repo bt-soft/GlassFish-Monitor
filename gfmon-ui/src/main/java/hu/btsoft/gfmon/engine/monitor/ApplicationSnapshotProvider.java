@@ -97,7 +97,7 @@ public class ApplicationSnapshotProvider {
      * Ha több modulból áll, akkor érdekes
      * <p>
      * Anomália:
-     * TODO: ezzel még kell kezdeni valamit, az alkalmazások rövid neveit ki kell találni....
+     * TODO: ezzel még kell kezdeni valamit, az alkalmazások rövid neveit ki kell találni: az EJB-nek a verziója '_' karakterekkel van ellátva
      * - http://localhost:4848/monitoring/domain/server/applications/TestEar-ear/TestEar-ejb-0_0_3.jar
      * - http://localhost:4848/monitoring/domain/server/applications/TestEar-ear/TestEar-web-0.0.3.war
      *
@@ -355,7 +355,9 @@ public class ApplicationSnapshotProvider {
 
         //Megnézzük, hogy milyen statisztikái vannak
         String resourceUri = restDataCollector.getSubUri() + "applications/" + this.getModulePath(app);
-        JsonObject rootJsonObject = restDataCollector.getRootJsonObject(simpleUrl, resourceUri, userName, sessionToken);
+        String fullUrl = server.getProtocol() + simpleUrl + resourceUri;
+
+        JsonObject rootJsonObject = restDataCollector.getRootJsonObject(fullUrl, userName, sessionToken, fullUrlErroredPaths);
         Map<String/* 'server', vagy a bean neve */, String /* full URL */> childResourcesMap = GFJsonUtils.getChildResourcesMap(rootJsonObject);
         if (childResourcesMap == null || childResourcesMap.isEmpty()) {
             return null;

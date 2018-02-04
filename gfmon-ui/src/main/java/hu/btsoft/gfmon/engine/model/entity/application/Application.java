@@ -233,7 +233,7 @@ public class Application extends ModifiableEntityBase {
      * @return az alklamzás verzió és classifier nélküli neve
      */
     //A verzió és az osztály kiszűrésére
-    private static final String VERSION_AND_CLASSIFIER_REGEXP = "((?:-(\\d+)\\.)?(?:(\\d+)\\.)?(?:(\\d+)\\.\\d+)(?:[-\\.].+))";
+    private static final String VERSION_AND_CLASSIFIER_REGEXP = "((?:-(\\d+)\\.)?(?:(\\d+)\\.)?(?:(\\d+)\\.\\d+)(?:[-\\.].+)?)";
     private static final Pattern VERSION_AND_CLASSIFIER_REGEXP_PATTERN = Pattern.compile(VERSION_AND_CLASSIFIER_REGEXP);
 
     public static String createAppShortName(String _appRealName) {
