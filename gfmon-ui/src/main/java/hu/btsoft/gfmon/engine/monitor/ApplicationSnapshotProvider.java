@@ -93,39 +93,6 @@ public class ApplicationSnapshotProvider {
     private Set<String> fullUrlErroredPaths;
 
     /**
-     * Alkalmazás path-jának kitalálása
-     * Ha több modulból áll, akkor érdekes
-     * <p>
-     * Anomália:
-     * TODO: ezzel még kell kezdeni valamit, az alkalmazások rövid neveit ki kell találni: az EJB-nek a verziója '_' karakterekkel van ellátva
-     * - http://localhost:4848/monitoring/domain/server/applications/TestEar-ear/TestEar-ejb-0_0_3.jar
-     * - http://localhost:4848/monitoring/domain/server/applications/TestEar-ear/TestEar-web-0.0.3.war
-     *
-     * @param app alkalmazás DB entitás
-     *
-     * @return modul path
-     */
-    private String getModulePath(Application app) {
-        String appRealName = app.getAppRealName();
-        String appModuleRealName = app.getModuleRealName();
-
-        if (appRealName.equals(appModuleRealName)) {
-            return appRealName;
-        }
-
-        if (appModuleRealName.contains(".")) {
-            int lastIndex = appModuleRealName.lastIndexOf(".");
-            String begin = appModuleRealName.substring(0, lastIndex);
-            String end = appModuleRealName.substring(lastIndex, appModuleRealName.length());
-
-            appModuleRealName = begin.replaceAll("\\.", "_");
-            appModuleRealName += end;
-        }
-
-        return appRealName + "/" + appModuleRealName;
-    }
-
-    /**
      * Alkalmazás WEB statisztika kigyűjtése
      * http://localhost:4848/monitoring/domain/server/applications/gfmon/server + /Faces Servlet|Jsp|default|...
      *
@@ -337,6 +304,35 @@ public class ApplicationSnapshotProvider {
     }
 
     /**
+     * Összegyűjti a childResourcesMap-ban megtalálható full URL alatti statisztikákat
+     *
+     * @param childResourcesMap JSOn chil map
+     * @param snapshots         ebbe gyűjtendő pillanatfelvételek
+     */
+    private void collectSnapShots(Application app, Map<String/* 'server', vagy a bean neve */, String /* full URL */> childResourcesMap, Set<AppSnapshotBase> snapshots) {
+
+        Server server = app.getServer();
+        String userName = server.getUserName();
+        String sessionToken = server.getSessionToken();
+
+        childResourcesMap.keySet().stream().map((key) -> {
+            Set<AppSnapshotBase> statisticsSnapshot;
+
+            if ("server".equals(key)) {
+                statisticsSnapshot = this.collectWebStatistics(app, childResourcesMap.get(key), userName, sessionToken);
+            } else {
+                statisticsSnapshot = this.collectEjbStatistics(app, childResourcesMap.get(key), userName, sessionToken, key);
+            }
+            return statisticsSnapshot;
+
+        }).filter((statisticsSnapshot) -> (statisticsSnapshot != null && !statisticsSnapshot.isEmpty()))
+                .forEachOrdered((statisticsSnapshot) -> {
+                    snapshots.addAll(statisticsSnapshot);
+                });
+
+    }
+
+    /**
      * Egy szerver egy alkalmazás teljes statisztika kigyűjtése
      *
      *
@@ -344,45 +340,42 @@ public class ApplicationSnapshotProvider {
      *
      * @return kigyűjtött adatok
      */
-    private Set<AppSnapshotBase> start(Application app) {
-
-        Set<AppSnapshotBase> snapshots = null;
+    private void start(Application app, String fullUrl, Set<AppSnapshotBase> snapshots) {
 
         Server server = app.getServer();
-        String simpleUrl = server.getSimpleUrl();
         String userName = server.getUserName();
         String sessionToken = server.getSessionToken();
-
-        //Megnézzük, hogy milyen statisztikái vannak
-        String resourceUri = restDataCollector.getSubUri() + "applications/" + this.getModulePath(app);
-        String fullUrl = server.getProtocol() + simpleUrl + resourceUri;
 
         JsonObject rootJsonObject = restDataCollector.getRootJsonObject(fullUrl, userName, sessionToken, fullUrlErroredPaths);
         Map<String/* 'server', vagy a bean neve */, String /* full URL */> childResourcesMap = GFJsonUtils.getChildResourcesMap(rootJsonObject);
         if (childResourcesMap == null || childResourcesMap.isEmpty()) {
-            return null;
+            return;
         }
 
+        //Megnézzük, hogy a childResourcesMap kulcsai ".war" | ".ejb" -re végződnek, azaz egy EAR-al van-e dolgunk?
+        //
+        // Egy EAR további modul tartalma sajnos elég változatos, a modul statisztika linkjében a
+        // modul nevének verziói hol'.', hol '_' karakterrel vanna jelölve, pl.:
+        // * - http://localhost:4848/monitoring/domain/server/applications/TestEar-ear/TestEar-ejb-0_0_3.jar
+        // * - http://localhost:4848/monitoring/domain/server/applications/TestEar-ear/TestEar-web-0.0.3.war
+        // Emiatt inkább ránézünk a childResourcesMap-ra és megnézzük, hogy a modulok nevében van-e ".jar" vagy ".war"
+        // Ha van, akkor rekurzívan "beléjük megyünk", és csak utána gyűjtjük ki a statisztikákat
+        //
+        boolean recursiveCall = false;
         for (String key : childResourcesMap.keySet()) {
-
-            Set<AppSnapshotBase> statistics;
-
-            if ("server".equals(key)) {
-                statistics = this.collectWebStatistics(app, childResourcesMap.get(key), userName, sessionToken);
-            } else {
-                statistics = this.collectEjbStatistics(app, childResourcesMap.get(key), userName, sessionToken, key);
-            }
-
-            if (statistics != null && !statistics.isEmpty()) {
-                if (snapshots == null) {
-                    snapshots = new HashSet<>();
-                }
-
-                snapshots.addAll(statistics);
+            if (key.endsWith(".jar") || key.endsWith(".war")) {
+                String subFullUrl = childResourcesMap.get(key);
+                //Rekurzív hívás!!
+                recursiveCall = true;
+                this.start(app, subFullUrl, snapshots);
             }
         }
 
-        return snapshots;
+        //Ha nem rekurzív hívásból jöttünk, akkor indulhat a statisztikák kigyűjtése
+        //Magát a ".war"|".jar" végződésre elemzett oldalt nem érdemes átnézni, mert nem tartalmaz statisztikát, csak lineket
+        if (!recursiveCall) {
+            this.collectSnapShots(app, childResourcesMap, snapshots);
+        }
     }
 
     /**
@@ -427,34 +420,26 @@ public class ApplicationSnapshotProvider {
         this.collectDataUnits = collectDataUnits;
         this.fullUrlErroredPaths = fullUrlErroredPaths;
 
-        Set<AppSnapshotBase> snapshots = null;
+        Set<AppSnapshotBase> snapshots = new LinkedHashSet<>();
 
         //Véégigmegyünk a szerver alkalmazásain
-        for (Application app : server.getApplications()) {
-
-            //Ha nem aktív az alkalmazás, akkor nem foglalkozunk vele
-            if (app.getActive() == null || Objects.equals(app.getActive(), Boolean.FALSE)) {
-                continue;
-            }
-
-            //Gyűjtendő path-ok alatti adatnevek
-            this.collectedDatatNamesMap = createCollectedDatatNamesMap(app);
-
-            Set<AppSnapshotBase> appSnapshots = this.start(app);
-
-            if (appSnapshots != null && !appSnapshots.isEmpty()) {
-
-                if (snapshots == null) {
-                    snapshots = new LinkedHashSet<>();
-                }
-                snapshots.addAll(appSnapshots);
-            }
-
-        }
+        server.getApplications().stream()
+                .filter((app) -> !(app.getActive() == null || Objects.equals(app.getActive(), Boolean.FALSE)))
+                .map((app) -> {
+                    //Ha nem aktív az alkalmazás, akkor nem foglalkozunk vele
+                    //Gyűjtendő path-ok alatti adatnevek
+                    this.collectedDatatNamesMap = createCollectedDatatNamesMap(app);
+                    return app;
+                }).forEachOrdered((app) -> {
+            //Megnézzük, hogy milyen statisztikái vannak
+            String resourceUri = restDataCollector.getSubUri() + "applications/" + app.getAppRealName();
+            String fullUrl = server.getProtocol() + server.getSimpleUrl() + resourceUri;
+            this.start(app, fullUrl, snapshots);
+        });
 
         log.info("Alkalmazások statisztika kigyűjtése elapsed: {}", Elapsed.getElapsedNanoStr(start));
 
-        return snapshots;
+        return snapshots.isEmpty() ? null : snapshots;
     }
 
 }

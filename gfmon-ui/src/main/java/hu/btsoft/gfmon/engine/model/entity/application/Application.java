@@ -62,8 +62,7 @@ import lombok.extern.slf4j.Slf4j;
     @NamedQuery(name = "Application.findByServerIdAndAppShortName", query = "SELECT a FROM Application a WHERE a.server.id = :serverId AND a.appShortName = :appShortName"), //
 })
 @Data
-@ToString(callSuper = true, exclude = {"server", "ejbStats", "appStatistics"})
-
+@ToString(callSuper = true, exclude = {"server", "moduleEngines", "joiners", "appStatistics", "ejbStats", "connPoolAppStats"})
 @EqualsAndHashCode(callSuper = true, of = {"appShortName", "appRealName", "moduleShortName", "moduleRealName", "enabled", "contextRoot", "description", "active"})
 @NoArgsConstructor
 @Slf4j
