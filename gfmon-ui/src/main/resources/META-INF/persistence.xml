@@ -35,6 +35,7 @@
             <property name="eclipselink.logging.session" value="true"/>
             <property name="eclipselink.logging.timestamp" value="false"/>
             <property name="eclipselink.logging.thread" value="true"/>
+            <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
         </properties>
     </persistence-unit>
 </persistence>

@@ -114,7 +114,6 @@ public class EjbStat extends AppSnapshotBase {
      * EJB Methode stat
      */
     @OneToMany(mappedBy = "ejbStat", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "APP_EJBMETHOD_STAT_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 70)
     private List<EjbBeanMethodStat> ejbBeanMethodStats = new LinkedList<>();
 
@@ -122,7 +121,6 @@ public class EjbStat extends AppSnapshotBase {
      * EJB Bean pool Stat
      */
     @OneToMany(mappedBy = "ejbStat", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "APP_EJBPOOL_STAT_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 71)
     private List<EjbBeanPoolStat> ejbBeanPoolStats = new LinkedList<>();
 
@@ -130,7 +128,6 @@ public class EjbStat extends AppSnapshotBase {
      * EJB Timers Stat
      */
     @OneToMany(mappedBy = "ejbStat", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "APP_EJBTIMERS_STAT_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 72)
     private List<EjbTimerStat> ejbTimersStats = new LinkedList<>();
 
@@ -138,7 +135,6 @@ public class EjbStat extends AppSnapshotBase {
      * EJB BeanCache Stat
      */
     @OneToMany(mappedBy = "ejbStat", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "APP_EJBBEANCACHE_STAT_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 73)
     private List<EjbBeanCacheStat> ejbBeanCacheStat = new LinkedList<>();
 

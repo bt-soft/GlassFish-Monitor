@@ -21,6 +21,7 @@ import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
@@ -92,7 +93,7 @@ public class ConnPoolConnPoolCollDataUnitJoiner implements Serializable {
      * CDU
      * Itt nem szabad kiadni a "cascade = CascadeType.ALL"-t mert végigtörli az összes mértékegységet is :)
      */
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CONNPOOL_CDU_ID", referencedColumnName = "ID")
     private ConnPoolCollDataUnit connPoolCollDataUnit;
 

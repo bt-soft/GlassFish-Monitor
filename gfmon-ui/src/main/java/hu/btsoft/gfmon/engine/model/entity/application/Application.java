@@ -177,7 +177,6 @@ public class Application extends ModifiableEntityBase {
      * Alkalmazás statisztika Mérési eredmények
      */
     @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "APP_STAT_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 70)
     private List<AppStatistic> appStatistics = new LinkedList<>();
 
@@ -185,7 +184,6 @@ public class Application extends ModifiableEntityBase {
      * EJB statisztika eredmények
      */
     @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "APP_EJBSTAT_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 71)
     private List<EjbStat> ejbStats = new LinkedList<>();
 
@@ -193,7 +191,6 @@ public class Application extends ModifiableEntityBase {
      * ConnectionPool usage statisztika mérése eredmények
      */
     @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "CONNPOOL_APP_STAT_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 72)
     private List<ConnPoolAppStat> connPoolAppStats = new LinkedList<>();
 

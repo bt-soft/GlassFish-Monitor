@@ -40,7 +40,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -191,7 +190,6 @@ public class Server extends ModifiableEntityBase {
      */
     @OrderBy("appRealName ASC") //JPA nevet kell megadni
     @OneToMany(mappedBy = "server", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "APPLICATION_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 70)
     private List<Application> applications = new LinkedList<>();
 
@@ -203,7 +201,6 @@ public class Server extends ModifiableEntityBase {
      */
     @OrderBy("poolName DESC")//JPA nevet kell megadni
     @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "CONNPOOL_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 71)
     private List<ConnPool> connPools = new LinkedList<>();
 

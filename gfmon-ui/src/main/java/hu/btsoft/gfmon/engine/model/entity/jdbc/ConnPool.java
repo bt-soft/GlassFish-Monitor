@@ -153,7 +153,6 @@ public class ConnPool extends ModifiableEntityBase {
      * Milyen jdbcResources használja?
      */
     @OneToMany(mappedBy = "connPool", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "JDBC_RESOURCE_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 70)
     private List<JdbcResource> jdbcResources = new LinkedList<>();
 
@@ -161,7 +160,6 @@ public class ConnPool extends ModifiableEntityBase {
      * Milyen statisztikái vannak?
      */
     @OneToMany(mappedBy = "connPool", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "CONNPOOL_STAT_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 71)
     private List<ConnPoolStat> connPoolStats = new LinkedList<>();
 }

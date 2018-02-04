@@ -207,7 +207,6 @@ public class ConnPoolStat extends JdbcResourceSnapshotBase {
 
     //-- Az alkalmazások ConnectionPool statisztika mérési eredményei
     @OneToMany(mappedBy = "connPoolStat", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "CONNPOOL_APP_STAT_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 70)
     private List<ConnPoolAppStat> connPoolAppStats = new LinkedList<>();
 }

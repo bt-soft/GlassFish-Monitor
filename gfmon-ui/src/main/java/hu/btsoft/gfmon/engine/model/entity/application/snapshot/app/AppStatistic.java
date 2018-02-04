@@ -256,7 +256,6 @@ public class AppStatistic extends AppSnapshotBase {
 //
     //-- Servlet mérési eredmények
     @OneToMany(mappedBy = "appStatistic", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "APP_SERVLET_STAT_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 70)
     private List<AppServletStatistic> appServletStatistics = new LinkedList<>();
 
