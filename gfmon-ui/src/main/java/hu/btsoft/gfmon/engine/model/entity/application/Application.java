@@ -129,7 +129,7 @@ public class Application extends ModifiableEntityBase {
     @ElementCollection
     @MapKeyColumn(name = "APPLICATION_ID")
     @Column(name = "MODULE_ENGINE_NAME", length = 512)
-    @CollectionTable(name = "APPLICATION_MODULE_ENGINE", joinColumns = @JoinColumn(name = "APPLICATION_ID"))
+    @CollectionTable(name = "APP_MODULE_ENGINE", joinColumns = @JoinColumn(name = "APPLICATION_ID", referencedColumnName = "ID", nullable = false))
     @ColumnPosition(position = 34)
     private Set<String> moduleEngines;
 

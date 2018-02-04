@@ -41,7 +41,7 @@ public abstract class SnapshotBase extends EntityBase {
      * (automatikusan index képződik rá)
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "SERVER_ID")
+    @JoinColumn(name = "SERVER_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 20)
     private Server server;
 }

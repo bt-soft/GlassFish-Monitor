@@ -86,7 +86,7 @@ public class ConnPoolConnPoolCollDataUnitJoiner implements Serializable {
      * ConnPool
      */
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "CONNPOOL_ID", referencedColumnName = "ID")
+    @JoinColumn(name = "CONNPOOL_ID", referencedColumnName = "ID", nullable = false)
     private ConnPool connPool;
 
     /**
@@ -94,7 +94,7 @@ public class ConnPoolConnPoolCollDataUnitJoiner implements Serializable {
      * Itt nem szabad kiadni a "cascade = CascadeType.ALL"-t mert végigtörli az összes mértékegységet is :)
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CONNPOOL_CDU_ID", referencedColumnName = "ID")
+    @JoinColumn(name = "CONNPOOL_CDU_ID", referencedColumnName = "ID", nullable = false)
     private ConnPoolCollDataUnit connPoolCollDataUnit;
 
     /**

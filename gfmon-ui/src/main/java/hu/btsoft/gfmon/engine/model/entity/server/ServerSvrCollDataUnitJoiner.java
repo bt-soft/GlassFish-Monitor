@@ -86,7 +86,7 @@ public class ServerSvrCollDataUnitJoiner implements Serializable {
      * Szerver
      */
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "SERVER_ID", referencedColumnName = "ID")
+    @JoinColumn(name = "SERVER_ID", referencedColumnName = "ID", nullable = false)
     private Server server;
 
     /**
@@ -94,7 +94,7 @@ public class ServerSvrCollDataUnitJoiner implements Serializable {
      * Itt nem szabad kiadni a "cascade = CascadeType.ALL"-t mert végigtörli az összes mértékegységet is :)
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "SVR_CDU_ID", referencedColumnName = "ID")
+    @JoinColumn(name = "SVR_CDU_ID", referencedColumnName = "ID", nullable = false)
     private SvrCollectorDataUnit svrCollectorDataUnit;
 
     /**

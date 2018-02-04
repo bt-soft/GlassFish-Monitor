@@ -54,7 +54,7 @@ public class AppStatistic extends AppSnapshotBase {
      * (automatikusan index képződik rá)
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "APPLICATION_ID")
+    @JoinColumn(name = "APPLICATION_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 20)
     private Application application;
 

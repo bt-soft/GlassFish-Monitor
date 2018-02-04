@@ -47,7 +47,7 @@ public class ConnPoolAppStat extends JdbcResourceSnapshotBase {
      * (automatikusan index képződik rá)
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CONNPOOL_STAT_ID")
+    @JoinColumn(name = "CONNPOOL_STAT_ID", referencedColumnName = "ID")
     @ColumnPosition(position = 20)
     private ConnPoolStat connPoolStat;
 
@@ -56,7 +56,7 @@ public class ConnPoolAppStat extends JdbcResourceSnapshotBase {
      * (automatikusan index képződik rá)
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "APPLICATION_ID")
+    @JoinColumn(name = "APPLICATION_ID", referencedColumnName = "ID", nullable = false)
     @ColumnPosition(position = 21)
     private Application application;
 

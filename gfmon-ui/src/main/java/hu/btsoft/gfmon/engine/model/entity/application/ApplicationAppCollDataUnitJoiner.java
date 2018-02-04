@@ -87,7 +87,7 @@ public class ApplicationAppCollDataUnitJoiner implements Serializable {
      * Application
      */
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "APPLICATION_ID", referencedColumnName = "ID")
+    @JoinColumn(name = "APPLICATION_ID", referencedColumnName = "ID", nullable = false)
     private Application application;
 
     /**
@@ -95,7 +95,7 @@ public class ApplicationAppCollDataUnitJoiner implements Serializable {
      * Itt nem szabad kiadni a "cascade = CascadeType.ALL"-t mert végigtörli az összes mértékegységet is :)
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "APP_CDU_ID", referencedColumnName = "ID")
+    @JoinColumn(name = "APP_CDU_ID", referencedColumnName = "ID", nullable = false)
     private AppCollectorDataUnit appCollectorDataUnit;
 
     /**
