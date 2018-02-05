@@ -15,9 +15,9 @@ import hu.btsoft.gfmon.corelib.json.GFJsonUtils;
 import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.ConnPool;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnPoolAppStat;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnPoolStat;
+import hu.btsoft.gfmon.engine.model.entity.connpool.ConnPool;
+import hu.btsoft.gfmon.engine.model.entity.connpool.snapshot.ConnPoolAppStat;
+import hu.btsoft.gfmon.engine.model.entity.connpool.snapshot.ConnPoolStat;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.monitor.collector.CollectedValueDto;
 import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
@@ -60,7 +60,7 @@ public class ConnPoolSnapshotProvider {
     /**
      * Gyűjtendő path-ok és az azalatti adatnevek
      */
-    private Map<String/*path*/, Set<String> /*dataNames*/> collectedDatatNamesMap;
+    private Map<String/* path */, Set<String> /* dataNames */> collectedDatatNamesMap;
 
     /**
      * Az adatgyűjtés közben hibára futott path-ek, automatikusan tiltjuk őket
@@ -108,9 +108,9 @@ public class ConnPoolSnapshotProvider {
         }
 
         //Milyen alkalmazások használják ezt a ConnectionPool-t?
-        Map<String, String> applicationsMap = GFJsonUtils.getChildResourcesMap(rootJsonObject);
-        if (applicationsMap != null && !applicationsMap.isEmpty()) {
-            for (String appname : applicationsMap.keySet()) {
+        Map<String, String> applicationsHateoasMap = GFJsonUtils.getChildResourcesMap(rootJsonObject);
+        if (applicationsHateoasMap != null && !applicationsHateoasMap.isEmpty()) {
+            for (String appname : applicationsHateoasMap.keySet()) {
 
                 //Ha a pool statisztika egy már nem élő alkalmazáshoz tartozik, akkor nem gyűjtjük róla az adatokat
                 boolean isLiveApplicationsConnectionPool = false;
@@ -124,7 +124,7 @@ public class ConnPoolSnapshotProvider {
                     continue;
                 }
 
-                String connPoolFullUrl = applicationsMap.get(appname);
+                String connPoolFullUrl = applicationsHateoasMap.get(appname);
 
                 rootJsonObject = restDataCollector.getRootJsonObject(connPoolFullUrl, userName, sessionToken, fullUrlErroredPaths);
                 valuesList = connPoolAppCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
@@ -162,10 +162,10 @@ public class ConnPoolSnapshotProvider {
      *
      * @return Map, key: monitorozando Path, value: gyűjtendő adatnevek Set-je
      */
-    private Map<String/*path*/, Set<String> /*dataNames*/> createCollectedDatatNamesMap(ConnPool connPool) {
+    private Map<String/* path */, Set<String> /* dataNames */> createCollectedDatatNamesMap(ConnPool connPool) {
 
         //Az egyes Path-ok alatti gyűjtendő adatnevek halmaza, ezzel az adott kollektor munkáját tudjuk szűkíteni
-        Map<String/*path*/, Set<String> /*dataNames*/> map = new HashMap<>();
+        Map<String/* path */, Set<String> /* dataNames */> map = new HashMap<>();
 
         connPool.getJoiners().stream()
                 .filter((joiner) -> (joiner.isActive()))

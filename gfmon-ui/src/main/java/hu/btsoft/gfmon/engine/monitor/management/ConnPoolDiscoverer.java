@@ -13,8 +13,8 @@ package hu.btsoft.gfmon.engine.monitor.management;
 
 import hu.btsoft.gfmon.corelib.json.GFJsonUtils;
 import hu.btsoft.gfmon.corelib.string.StrUtils;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.ConnPool;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcResource;
+import hu.btsoft.gfmon.engine.model.entity.connpool.ConnPool;
+import hu.btsoft.gfmon.engine.model.entity.connpool.JdbcResource;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.rest.RestClientBase;
 import java.util.LinkedList;

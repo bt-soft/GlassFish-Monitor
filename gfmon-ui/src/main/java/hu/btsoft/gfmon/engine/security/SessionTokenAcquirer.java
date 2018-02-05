@@ -29,7 +29,9 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * GF Session token megszerzése
  * <p>
- * A GF administration-guide.pdf-ból infó:
+ * ------------------
+ * ------------------ A GF administration-guide.pdf-ból infó:
+ * ------------------
  * <p>
  * Timport javax.ws.rs.client.Client;
  * import javax.ws.rs.client.Entity;
@@ -42,17 +44,18 @@ import lombok.extern.slf4j.Slf4j;
  * REST client not to cache credentials, your client must use session tokens for
  * authentication.
  * <p>
- * 1. Request a session token by using the GET method on the resource at
- * http://host:port/management/sessions. GlassFish Server uses basic
- * authentication to authenticate the client, generates a session token, and
- * passes the token to the client.
+ * 1.
+ * Request a session token by using the GET method on the resource at http://host:port/management/sessions.
+ * GlassFish Server uses basic authentication to authenticate the client, generates a session token, and passes the token to the client.
  * <p>
- * 2. In each subsequent request that requires authentication, use the token
- * toauthenticate the client. a. Create a cookie that is named gfresttoken the
- * value of which is the token. Using REST Interfaces to Administer GlassFish
- * Server General Administration 2-29 b. Send the cookie with the request. 3.
- * When the token is no longer required, retire the token by using the DELETE
- * method on the resource at http://host:port/management/sessions/{tokenvalue}.
+ * 2.
+ * In each subsequent request that requires authentication, use the token toauthenticate the client.
+ * -- a. Create a cookie that is named <b>gfresttoken</b> the value of which is the token.
+ * Using REST Interfaces to Administer GlassFish Server General Administration 2-29
+ * -- b. Send the cookie with the request.
+ * <p>
+ * 3.
+ * When the token is no longer required, retire the token by using the DELETE method on the resource at http://host:port/management/sessions/{tokenvalue}.
  *
  * @author BT
  */
@@ -73,7 +76,7 @@ public class SessionTokenAcquirer implements Serializable {
      * @param userName      user
      * @param plainPassword kódolatlan jelszó
      *
-     * @return GF session token
+     * @return GF session token -> gfresttoken
      *
      * @throws GfMonException ha hiba van
      */

@@ -17,7 +17,7 @@ import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.network.NetworkUtils;
 import hu.btsoft.gfmon.engine.model.entity.ModifiableEntityBase;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.ConnPool;
+import hu.btsoft.gfmon.engine.model.entity.connpool.ConnPool;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.httpservice.HttpServiceRequest;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.jvm.JvmMemory;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.jvm.ThreadSystem;
@@ -180,7 +180,7 @@ public class Server extends ModifiableEntityBase {
      * - orphanRemoval: izomból törlés lesz
      */
     @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ServerSvrCollDataUnitJoiner> joiners;
+    private List<ServerSvrCollDataUnitJoiner> joiners = new LinkedList<>();
 
     /**
      * A szerveren milyen alkalmazásk vannak?
@@ -208,49 +208,49 @@ public class Server extends ModifiableEntityBase {
      * Szerver statisztika mérési eredméynek, visszairány nem kell
      */
     @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<HttpServiceRequest> httpServiceRequests;
+    private List<HttpServiceRequest> httpServiceRequests = new LinkedList<>();
 
     @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<JvmMemory> jvmMemories;
+    private List<JvmMemory> jvmMemories = new LinkedList<>();
 
     @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ThreadSystem> chreadSystems;
+    private List<ThreadSystem> chreadSystems = new LinkedList<>();
 
     @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ConnectionQueue> connectionQueues;
+    private List<ConnectionQueue> connectionQueues = new LinkedList<>();
 
     @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<HttpListener1ConnectionQueue> httpListener1ConnectionQueues;
+    private List<HttpListener1ConnectionQueue> httpListener1ConnectionQueues = new LinkedList<>();
 
     @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<HttpListener1KeepAlive> httpListener1KeepAlives;
+    private List<HttpListener1KeepAlive> httpListener1KeepAlives = new LinkedList<>();
 
     @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<HttpListener1ThreadPool> httpListener1ThreadPools;
+    private List<HttpListener1ThreadPool> httpListener1ThreadPools = new LinkedList<>();
 
     @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<HttpListener2ConnectionQueue> httpListener2ConnectionQueues;
+    private List<HttpListener2ConnectionQueue> httpListener2ConnectionQueues = new LinkedList<>();
 
     @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<HttpListener2KeepAlive> httpListener2KeepAlives;
+    private List<HttpListener2KeepAlive> httpListener2KeepAlives = new LinkedList<>();
 
     @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<HttpListener2ThreadPool> httpListener2ThreadPools;
+    private List<HttpListener2ThreadPool> httpListener2ThreadPools = new LinkedList<>();
 
     @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TransActionService> transActionServices;
+    private List<TransActionService> transActionServices = new LinkedList<>();
 
     @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Jsp> jsps;
+    private List<Jsp> jsps = new LinkedList<>();
 
     @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Request> requests;
+    private List<Request> requests = new LinkedList<>();
 
     @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Servlet> servlets;
+    private List<Servlet> servlets = new LinkedList<>();
 
     @OneToMany(mappedBy = "server", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Session> sessions;
+    private List<Session> sessions = new LinkedList<>();
 
     /**
      * A kódolatlan jelszó

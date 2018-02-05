@@ -11,9 +11,9 @@
  */
 package hu.btsoft.gfmon.engine.model.service;
 
-import hu.btsoft.gfmon.engine.model.entity.jdbc.ConnPool;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.ConnPoolCollDataUnit;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.ConnPoolConnPoolCollDataUnitJoiner;
+import hu.btsoft.gfmon.engine.model.entity.connpool.ConnPool;
+import hu.btsoft.gfmon.engine.model.entity.connpool.ConnPoolCollDataUnit;
+import hu.btsoft.gfmon.engine.model.entity.connpool.ConnPoolConnPoolCollDataUnitJoiner;
 import java.util.LinkedList;
 import java.util.List;
 import javax.ejb.EJB;
@@ -71,12 +71,41 @@ public class ConnPoolService extends ServiceBase<ConnPool> {
     }
 
     /**
-     * Application <-> Cdu összerendelés
+     * Application <-> Cdu összerendelés csak a memóriában
      *
-     * @param connPool
-     * @param creatorUser
+     * @param connPool    connection pool
+     * @param creatorUser módosító user
      */
     public void assignConnPoolToCdu(ConnPool connPool, String creatorUser) {
+
+        List<ConnPoolCollDataUnit> allCdus = connPoolCollectorDataUnitService.findAll();
+
+        if (allCdus != null && !allCdus.isEmpty()) {
+
+            //Hozzáadjuk az összes DataUnit-et egy Join tábla segítségével, default esetben minden CDU aktív
+            allCdus.forEach((cdu) -> {
+
+                //Létrehozuk a kapcsolótábla entitását
+                ConnPoolConnPoolCollDataUnitJoiner joiner = new ConnPoolConnPoolCollDataUnitJoiner(connPool, cdu, creatorUser, Boolean.TRUE);
+
+                //Behuzalozzuk a szerverbe és le is mentjük
+                connPool.getJoiners().add(joiner);
+
+                //behuzalozzuk a CDU-ba és le is mentjük
+                cdu.getJoiners().add(joiner);
+            });
+
+//            log.trace("A(z) '{}1 szerver '{}' JDBC ConnectionPool CDU összerendelése a memóriában OK", connPool.getServer().getSimpleUrl(), connPool.getPoolName());
+        }
+    }
+
+    /**
+     * Application <-> Cdu összerendelés és adatbázis mentés
+     *
+     * @param connPool    connection pool
+     * @param creatorUser módosító user
+     */
+    public void assignConnPoolToCduIntoDb(ConnPool connPool, String creatorUser) {
 
         List<ConnPoolCollDataUnit> allCdus = connPoolCollectorDataUnitService.findAll();
 
@@ -107,7 +136,7 @@ public class ConnPoolService extends ServiceBase<ConnPool> {
                 em.merge(cdu);
             });
 
-            log.trace("A(z) '{}1 szerver '{}' JDBC ConnectionPool CDU összerendelése OK", connPool.getServer().getSimpleUrl(), connPool.getPoolName());
+//            log.trace("A(z) '{}1 szerver '{}' JDBC ConnectionPool CDU összerendelése és adatbázisba mentése OK", connPool.getServer().getSimpleUrl(), connPool.getPoolName());
         }
     }
 

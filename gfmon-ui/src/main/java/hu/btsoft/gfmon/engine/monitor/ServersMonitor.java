@@ -12,6 +12,7 @@
 package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.time.Elapsed;
+import hu.btsoft.gfmon.engine.config.PropertiesConfig;
 import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.entity.server.SvrCollectorDataUnit;
@@ -41,6 +42,9 @@ import lombok.extern.slf4j.Slf4j;
 public class ServersMonitor extends MonitorsBase {
 
     private static final String DB_MODIFICATOR_USER = "svr-mon-ctrl";
+
+    @Inject
+    private PropertiesConfig propertiesConfig;
 
     @EJB
     private SvrCollectorDataUnitService svrCollectorDataUnitService;
@@ -91,8 +95,10 @@ public class ServersMonitor extends MonitorsBase {
             return;
         }
 
-        //Adatnevek táblájának felépítése
-        this.checkCollectorDataUnits();
+        //Adatnevek táblájának felépítése, ha szükséges
+        if ("runtime".equalsIgnoreCase(propertiesConfig.getConfig().getString(PropertiesConfig.STARTUP_JPA_CDU_BUILD_MODE))) {
+            this.checkCollectorDataUnits();
+        }
     }
 
     /**
@@ -177,9 +183,9 @@ public class ServersMonitor extends MonitorsBase {
                 }).map((server) -> {
             //Az első indításkort még nem tudjuk, hogy a GF példányról milyen path-on milyen adatneveket lehet gyűjteni
             //Emiatt a DefaultConfigCreator-ban létrehozott szervereknél itt kapcsoljuk be a gyűjtendő adatneveket
-            if (server.getJoiners() == null || server.getJoiners().isEmpty()) {
+            if (server.getJoiners().isEmpty()) {
                 //Mindent mérjünk rajta!
-                serverService.assignServerToCdu(server, DB_MODIFICATOR_USER);
+                serverService.assignServerToCduIntoDb(server, DB_MODIFICATOR_USER);
             }
             return server;
         }).forEachOrdered((server) -> {
@@ -238,7 +244,7 @@ public class ServersMonitor extends MonitorsBase {
             serverService.clearAdditionalMessage(server, DB_MODIFICATOR_USER);
 
             if (serverSnapshots == null || serverSnapshots.isEmpty()) {
-                log.warn("Nincsenek menthető szerver pillanatfelvételek!");
+                log.warn("Nincsenek menthető szerver pillanatfelvételek, szerver: {}!", server.getSimpleUrl());
                 return;
             }
 

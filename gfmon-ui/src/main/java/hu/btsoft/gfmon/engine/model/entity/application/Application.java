@@ -16,7 +16,7 @@ import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.engine.model.entity.ModifiableEntityBase;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.app.AppStatistic;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbStat;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnPoolAppStat;
+import hu.btsoft.gfmon.engine.model.entity.connpool.snapshot.ConnPoolAppStat;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import java.util.LinkedList;
 import java.util.List;
@@ -171,7 +171,7 @@ public class Application extends ModifiableEntityBase {
      * - orphanRemoval: izomból törlés lesz
      */
     @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ApplicationAppCollDataUnitJoiner> joiners;
+    private List<ApplicationAppCollDataUnitJoiner> joiners = new LinkedList<>();
 
 //
     /**

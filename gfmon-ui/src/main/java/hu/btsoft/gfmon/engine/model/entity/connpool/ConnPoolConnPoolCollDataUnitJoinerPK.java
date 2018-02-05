@@ -9,7 +9,7 @@
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.model.entity.jdbc;
+package hu.btsoft.gfmon.engine.model.entity.connpool;
 
 import java.io.Serializable;
 import lombok.AllArgsConstructor;

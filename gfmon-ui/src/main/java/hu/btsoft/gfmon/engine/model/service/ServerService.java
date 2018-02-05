@@ -59,12 +59,39 @@ public class ServerService extends ServiceBase<Server> {
     }
 
     /**
-     * Az összes ismert CDU hozzáadása a a szerverhez
+     * Az összes ismert CDU hozzáadása a szerverhez és lementése az adatbázisba
      *
      * @param server      szerver példány
      * @param creatorUser ha nem interaktív user hívott, akkor ezzel az userrel legyen az audit logolás
      */
     public void assignServerToCdu(Server server, String creatorUser) {
+
+        List<SvrCollectorDataUnit> allCdus = svrCollectorDataUnitService.findAll();
+
+        if (allCdus != null && !allCdus.isEmpty()) {
+
+            //Hozzáadjuk az összes DataUnit-et egy Join tábla segítségével, default esetben minden CDU aktív
+            allCdus.forEach((cdu) -> {
+
+                //Létrehozuk a kapcsolótábla entitását
+                ServerSvrCollDataUnitJoiner joiner = new ServerSvrCollDataUnitJoiner(server, cdu, creatorUser, Boolean.TRUE);
+
+                //Behuzalozzuk a szerverbe és le is mentjük
+                server.getJoiners().add(joiner);
+
+                //behuzalozzuk a CDU-ba és le is mentjük
+                cdu.getJoiners().add(joiner);
+            });
+        }
+    }
+
+    /**
+     * Az összes ismert CDU hozzáadása a szerverhez és lementése az adatbázisba
+     *
+     * @param server      szerver példány
+     * @param creatorUser ha nem interaktív user hívott, akkor ezzel az userrel legyen az audit logolás
+     */
+    public void assignServerToCduIntoDb(Server server, String creatorUser) {
 
         List<SvrCollectorDataUnit> allCdus = svrCollectorDataUnitService.findAll();
 

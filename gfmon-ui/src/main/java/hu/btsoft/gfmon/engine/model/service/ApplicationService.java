@@ -88,12 +88,40 @@ public class ApplicationService extends ServiceBase<Application> {
     }
 
     /**
-     * Application <-> Cdu összerendelés
+     * Application <-> CDU összerendelés a memóriában
      *
-     * @param app
-     * @param creatorUser
+     * @param app         alkalmazás
+     * @param creatorUser létrehozó user
      */
     public void assignApplicationToCdu(Application app, String creatorUser) {
+        List<AppCollectorDataUnit> allCdus = applicationCollectorDataUnitService.findAll();
+
+        if (allCdus != null && !allCdus.isEmpty()) {
+
+            //Hozzáadjuk az összes DataUnit-et egy Join tábla segítségével, default esetben minden CDU aktív
+            allCdus.forEach((cdu) -> {
+
+                //Létrehozuk a kapcsolótábla entitását
+                ApplicationAppCollDataUnitJoiner joiner = new ApplicationAppCollDataUnitJoiner(app, cdu, creatorUser, Boolean.TRUE);
+
+                //Behuzalozzuk a szerverbe és le is mentjük
+                app.getJoiners().add(joiner);
+
+                //behuzalozzuk a CDU-ba és le is mentjük
+                cdu.getJoiners().add(joiner);
+            });
+
+//            log.trace("A(z) '{}1 szerver '{}' alkalmazás CDU összerendelése a memóriában OK", app.getServer().getSimpleUrl(), app.getAppRealName());
+        }
+    }
+
+    /**
+     * Application <-> Cdu összerendelés és adatbázisba mentés
+     *
+     * @param app         alkalmazás
+     * @param creatorUser létrehozó user
+     */
+    public void assignApplicationToCduIntoDb(Application app, String creatorUser) {
 
         List<AppCollectorDataUnit> allCdus = applicationCollectorDataUnitService.findAll();
 
@@ -124,7 +152,7 @@ public class ApplicationService extends ServiceBase<Application> {
                 em.merge(cdu);
             });
 
-            log.trace("A(z) '{}1 szerver '{}' alkalmazás CDU összerendelése OK", app.getServer().getSimpleUrl(), app.getAppRealName());
+//            log.trace("A(z) '{}1 szerver '{}' alkalmazás CDU összerendelése és adatbázisba mentése OK", app.getServer().getSimpleUrl(), app.getAppRealName());
         }
     }
 }

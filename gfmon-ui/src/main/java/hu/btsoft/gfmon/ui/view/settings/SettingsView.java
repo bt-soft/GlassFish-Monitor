@@ -16,12 +16,14 @@ import hu.btsoft.gfmon.engine.model.RuntimeSequenceGenerator;
 import hu.btsoft.gfmon.engine.model.entity.Config;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
 import hu.btsoft.gfmon.engine.model.entity.application.ApplicationAppCollDataUnitJoiner;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.ConnPool;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.ConnPoolConnPoolCollDataUnitJoiner;
+import hu.btsoft.gfmon.engine.model.entity.connpool.ConnPool;
+import hu.btsoft.gfmon.engine.model.entity.connpool.ConnPoolConnPoolCollDataUnitJoiner;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.entity.server.ServerSvrCollDataUnitJoiner;
+import hu.btsoft.gfmon.engine.model.service.ApplicationService;
 import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
+import hu.btsoft.gfmon.engine.model.service.ConnPoolService;
 import hu.btsoft.gfmon.engine.model.service.ServerService;
 import hu.btsoft.gfmon.engine.monitor.ApplicationsMonitor;
 import hu.btsoft.gfmon.engine.monitor.ConnPoolMonitor;
@@ -128,6 +130,9 @@ public class SettingsView extends ViewBase {
     //---------------------
     // --- Applications
     @EJB
+    private ApplicationService applicationService;
+
+    @EJB
     private ApplicationsMonitor applicationsMonitor;
 
     /**
@@ -139,6 +144,9 @@ public class SettingsView extends ViewBase {
 
     //--------------------------
     //--- JDBC Connection pool
+    @EJB
+    private ConnPoolService connPoolService;
+
     @EJB
     private ConnPoolMonitor connPoolMonitor;
 
@@ -305,9 +313,9 @@ public class SettingsView extends ViewBase {
                 }
 
                 //Beállítjuk a mérendő adatok listáját
-                if (server.getJoiners() == null || server.getJoiners().isEmpty()) {
+                if (server.getJoiners().isEmpty()) {
                     //Default esetben mindent mérjünk rajta!
-                    serverService.assignServerToCdu(server, currentUser);
+                    serverService.assignServerToCduIntoDb(server, currentUser);
                 }
 
                 //CDU-k mentése
@@ -396,6 +404,10 @@ public class SettingsView extends ViewBase {
 
         //Mentjük a változtatást
         servers.add(editedServer); //Az editált szerver példány megy be helyette
+
+        //Server <-> CDU összerendelése a memóriában
+        serverService.assignServerToCdu(editedServer, currentUser);
+
         selectedServer = editedServer;    //ez lesz kiválasztva
 
         addJsfMessage("growl", FacesMessage.SEVERITY_INFO, underModifyProcess ? "A szerver módosítása OK" : "Az új szerver felvétele OK");
@@ -534,8 +546,12 @@ public class SettingsView extends ViewBase {
                 applicationsList.stream()
                         .filter((app) -> (app.getCreatedBy() == null))
                         .forEachOrdered((app) -> {
-                            //beállítjuk, hogy melyik szerveren fut az alkalmazás
+
+                            //beállítjuk, hogy melyik szerveren van az alkalmazás
                             app.setCreatedBy(currentUser);
+
+                            //Beállítjuk az alkalmazásnak a CDU-jait, de csak a memóriában!
+                            applicationService.assignApplicationToCdu(app, currentUser);
                         });
             }
 
@@ -547,7 +563,8 @@ public class SettingsView extends ViewBase {
         // A kiválasztott szerver az adatbázisban van, így abban kel az alkalmazások karbantartását elvégezni
         //
         //Feltérképezzük a szerver alkalmazásait -> ez beírja az adatbázisba azt, amit épp lát
-        applicationsMonitor.maintenanceServerAplicationInDataBase(selectedServer);
+        //A CDU összerendelést is elvégzi
+        applicationsMonitor.maintenanceAplicationsInDataBase(selectedServer);
 
         //Újra kikeressük az adatbázisból a szervert, hogy az alkalmazások lista frissűljön
         Server refreshedServer = (Server) serverService.find(selectedServer.getId());
@@ -595,9 +612,14 @@ public class SettingsView extends ViewBase {
             //Beállítjuk, hogy ki vette fel őket
             if (connPools != null) {
                 connPools.stream()
-                        .filter((app) -> (app.getCreatedBy() == null))
-                        .forEachOrdered((app) -> {
-                            app.setCreatedBy(currentUser); //beállítjuk, hogy melyik szerveren fut az alkalmazás
+                        .filter((connPool) -> (connPool.getCreatedBy() == null))
+                        .forEachOrdered((connPool) -> {
+
+                            //beállítjuk, hogy melyik szerveren van a Connection Pool
+                            connPool.setCreatedBy(currentUser);
+
+                            //Beállítjuk az alkalmazásnak a CDU-jait, de csak a memóriában!
+                            connPoolService.assignConnPoolToCdu(connPool, currentUser);
                         });
             }
 
@@ -609,7 +631,8 @@ public class SettingsView extends ViewBase {
         // A kiválasztott szerver az adatbázisban van, így abban kel a JDBC ConnectionPool karbantartását elvégezni
         //
         //Feltérképezzük a szerver JDBC COnnectionPool-jait -> ez beírja az adatbázisba azt, amit épp lát
-        connPoolMonitor.maintenanceServerJdbcResourcesInDataBase(selectedServer);
+        //Ez a CDU-kat is rendbe rakja
+        connPoolMonitor.maintenanceConnPoolsInDataBase(selectedServer);
 
         //Újra kikeressük az adatbázisból a szervert, hogy a JDBC lista frissűljön
         Server refreshedServer = (Server) serverService.find(selectedServer.getId());
@@ -711,7 +734,7 @@ public class SettingsView extends ViewBase {
      * @return true -> van
      */
     public boolean warningExisInServerDcus() {
-        if (selectedServer != null) {
+        if (selectedServer != null && selectedServer.getJoiners() != null) {
             if (selectedServer.getJoiners().stream()
                     .anyMatch((joiner) -> (joiner.getAdditionalMessage() != null))) {
                 return true;

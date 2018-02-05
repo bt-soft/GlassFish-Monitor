@@ -85,7 +85,7 @@ public class ApplicationSnapshotProvider {
     /**
      * Gyűjtendő path-ok és az azalatti adatnevek
      */
-    private Map<String/*path*/, Set<String> /*dataNames*/> collectedDatatNamesMap;
+    private Map<String/* path */, Set<String> /* dataNames */> collectedDatatNamesMap;
 
     /**
      * Az adatgyűjtés közben hibára futott path-ek, automatikusan tiltjuk őket
@@ -130,11 +130,11 @@ public class ApplicationSnapshotProvider {
         snapshots.add(appStatistic);
 
         //Miylen Servlet-jei vannak?
-        Map<String, String> servletsMap = GFJsonUtils.getChildResourcesMap(rootJsonObject);
-        if (servletsMap != null && !servletsMap.isEmpty()) {
-            for (String servletName : servletsMap.keySet()) {
+        Map<String, String> servletsHateoasMap = GFJsonUtils.getChildResourcesMap(rootJsonObject);
+        if (servletsHateoasMap != null && !servletsHateoasMap.isEmpty()) {
+            for (String servletName : servletsHateoasMap.keySet()) {
 
-                String serrvletFullUrl = servletsMap.get(servletName);
+                String serrvletFullUrl = servletsHateoasMap.get(servletName);
 
                 rootJsonObject = restDataCollector.getRootJsonObject(serrvletFullUrl, userName, sessionToken, fullUrlErroredPaths);
 
@@ -202,19 +202,19 @@ public class ApplicationSnapshotProvider {
         snapshots.add(ejbStat);
 
         //Milyen más EJB statisztikái vannak?
-        Map<String, String> ejbStatisticsMap = GFJsonUtils.getChildResourcesMap(rootJsonObject);
-        if (ejbStatisticsMap != null && !ejbStatisticsMap.isEmpty()) {
-            for (String ejbStatName : ejbStatisticsMap.keySet()) {
+        Map<String, String> ejbStatisticsHateoasMap = GFJsonUtils.getChildResourcesMap(rootJsonObject);
+        if (ejbStatisticsHateoasMap != null && !ejbStatisticsHateoasMap.isEmpty()) {
+            for (String ejbStatName : ejbStatisticsHateoasMap.keySet()) {
 
-                String ejbStatFullUrl = ejbStatisticsMap.get(ejbStatName);
+                String ejbStatFullUrl = ejbStatisticsHateoasMap.get(ejbStatName);
                 rootJsonObject = restDataCollector.getRootJsonObject(ejbStatFullUrl, userName, sessionToken, fullUrlErroredPaths);
 
                 switch (ejbStatName) {
                     case "bean-methods":
-                        Map<String, String> beanMethodsMap = GFJsonUtils.getChildResourcesMap(rootJsonObject);
-                        if (beanMethodsMap != null && !beanMethodsMap.isEmpty()) {
-                            for (String beanMethodName : beanMethodsMap.keySet()) {
-                                String beanMethodFullUrl = beanMethodsMap.get(beanMethodName);
+                        Map<String, String> beanMethodsHateoasMap = GFJsonUtils.getChildResourcesMap(rootJsonObject);
+                        if (beanMethodsHateoasMap != null && !beanMethodsHateoasMap.isEmpty()) {
+                            for (String beanMethodName : beanMethodsHateoasMap.keySet()) {
+                                String beanMethodFullUrl = beanMethodsHateoasMap.get(beanMethodName);
                                 rootJsonObject = restDataCollector.getRootJsonObject(beanMethodFullUrl, userName, sessionToken, fullUrlErroredPaths);
                                 valuesList = appEjbBeanMethodCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
 
@@ -306,22 +306,22 @@ public class ApplicationSnapshotProvider {
     /**
      * Összegyűjti a childResourcesMap-ban megtalálható full URL alatti statisztikákat
      *
-     * @param childResourcesMap JSOn chil map
-     * @param snapshots         ebbe gyűjtendő pillanatfelvételek
+     * @param hateoasMap JSOn chil map
+     * @param snapshots  ebbe gyűjtendő pillanatfelvételek
      */
-    private void collectSnapShots(Application app, Map<String/* 'server', vagy a bean neve */, String /* full URL */> childResourcesMap, Set<AppSnapshotBase> snapshots) {
+    private void collectSnapShots(Application app, Map<String/* 'server', vagy a bean neve */, String /* full URL */> hateoasMap, Set<AppSnapshotBase> snapshots) {
 
         Server server = app.getServer();
         String userName = server.getUserName();
         String sessionToken = server.getSessionToken();
 
-        childResourcesMap.keySet().stream().map((key) -> {
+        hateoasMap.keySet().stream().map((key) -> {
             Set<AppSnapshotBase> statisticsSnapshot;
 
             if ("server".equals(key)) {
-                statisticsSnapshot = this.collectWebStatistics(app, childResourcesMap.get(key), userName, sessionToken);
+                statisticsSnapshot = this.collectWebStatistics(app, hateoasMap.get(key), userName, sessionToken);
             } else {
-                statisticsSnapshot = this.collectEjbStatistics(app, childResourcesMap.get(key), userName, sessionToken, key);
+                statisticsSnapshot = this.collectEjbStatistics(app, hateoasMap.get(key), userName, sessionToken, key);
             }
             return statisticsSnapshot;
 
@@ -347,14 +347,14 @@ public class ApplicationSnapshotProvider {
         String sessionToken = server.getSessionToken();
 
         JsonObject rootJsonObject = restDataCollector.getRootJsonObject(fullUrl, userName, sessionToken, fullUrlErroredPaths);
-        Map<String/* 'server', vagy a bean neve */, String /* full URL */> childResourcesMap = GFJsonUtils.getChildResourcesMap(rootJsonObject);
-        if (childResourcesMap == null || childResourcesMap.isEmpty()) {
+        Map<String/* 'server', vagy a bean neve */, String /* full URL */> hateoasMap = GFJsonUtils.getChildResourcesMap(rootJsonObject);
+        if (hateoasMap == null || hateoasMap.isEmpty()) {
             return;
         }
 
         //Megnézzük, hogy a childResourcesMap kulcsai ".war" | ".ejb" -re végződnek, azaz egy EAR-al van-e dolgunk?
         //
-        // Egy EAR további modul tartalma sajnos elég változatos, a modul statisztika linkjében a
+        // Egy EAR további modul tartalma sajnos elég változatos, a modul statisztika HATEOAS linkjében a
         // modul nevének verziói hol'.', hol '_' karakterrel vanna jelölve, pl.:
         // * - http://localhost:4848/monitoring/domain/server/applications/TestEar-ear/TestEar-ejb-0_0_3.jar
         // * - http://localhost:4848/monitoring/domain/server/applications/TestEar-ear/TestEar-web-0.0.3.war
@@ -362,19 +362,19 @@ public class ApplicationSnapshotProvider {
         // Ha van, akkor rekurzívan "beléjük megyünk", és csak utána gyűjtjük ki a statisztikákat
         //
         boolean wasRecursiveCall = false;
-        for (String key : childResourcesMap.keySet()) {
+        for (String key : hateoasMap.keySet()) {
             if (key.endsWith(".jar") || key.endsWith(".war")) {
-                String subFullUrl = childResourcesMap.get(key);
+                String hateoasLink = hateoasMap.get(key);
                 //Rekurzív hívás!!
                 wasRecursiveCall = true;
-                this.start(app, subFullUrl, snapshots);
+                this.start(app, hateoasLink, snapshots);
             }
         }
 
         //Ha nem rekurzív hívásból jöttünk, akkor indulhat a statisztikák kigyűjtése
         //Magát a ".war"|".jar" végződésre elemzett oldalt nem érdemes átnézni, mert nem tartalmaz statisztikát, csak linkeket
         if (!wasRecursiveCall) {
-            this.collectSnapShots(app, childResourcesMap, snapshots);
+            this.collectSnapShots(app, hateoasMap, snapshots);
         }
     }
 
@@ -385,10 +385,10 @@ public class ApplicationSnapshotProvider {
      *
      * @return Map, key: monitorozando Path, value: gyűjtendő adatnevek Set-je
      */
-    private Map<String/*path*/, Set<String> /*dataNames*/> createCollectedDatatNamesMap(Application app) {
+    private Map<String/* path */, Set<String> /* dataNames */> createCollectedDatatNamesMap(Application app) {
 
         //Az egyes Path-ok alatti gyűjtendő adatnevek halmaza, ezzel az adott kollektor munkáját tudjuk szűkíteni
-        Map<String/*path*/, Set<String> /*dataNames*/> map = new HashMap<>();
+        Map<String/* path */, Set<String> /* dataNames */> map = new HashMap<>();
 
         app.getJoiners().stream()
                 .filter((joiner) -> (joiner.isActive()))

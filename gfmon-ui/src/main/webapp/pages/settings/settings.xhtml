@@ -8,7 +8,8 @@
                  xmlns:f="http://xmlns.jcp.org/jsf/core"
                  xmlns:bt="http://bt-soft.hu/jsf/ui"
                  template="./../../templates/pageTemplate.xhtml"
-                 >
+
+                 xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
 
     <ui:define name="title">
         #{GFMonUIConstants.SHORT_APP_NAME} - Beállítások
@@ -184,7 +185,7 @@
                             <h:outputText value="#{rowNdx + 1}" />
                         </p:column>
 
-                        <!--
+
                         <p:column headerText="DB id"
                                   rendered="#{isDeveloperMode}"
                                   styleClass="alignCenter"
@@ -199,7 +200,7 @@
                                   >
                             <h:outputText value="#{server.optLockVersion}"/>
                         </p:column>
-                        -->
+
 
                         <p:column headerText="RT Seq"
                                   rendered="#{isDeveloperMode}"
@@ -313,30 +314,43 @@
                                 style="border: none; padding: 0; margin: 0"
                                 >
 
+
                     <!-- Szerver CDU komponensek -->
                     <p:panel id="serverComponentsPanel"
                              rendered="#{not empty settingsView.selectedServer and 0 eq settingsView.childCategoriesTabViewIndex}"
                              style="background: transparent; border: none;">
 
-                        <p:commandButton value="Összes aktív"
-                                         icon="fa fa-check-square-o"
-                                         title="Minden gyűjtendő adatnév aktív"
-                                         actionListener="#{settingsView.toggleAllServerDcuActiveFlag(true)}"
-                                         disabled="#{empty settingsView.selectedServer or empty settingsView.selectedServer.joiners}"
-                                         onstart="PF('blockUI').block();"
-                                         oncomplete="PF('blockUI').unblock();"
-                                         update="serverCdusTable :growl"
-                                         />
+                        <c:choose>
+                            <c:when test="#{empty settingsView.selectedServer or empty settingsView.selectedServer.joiners}">
+                                <h:outputText value="Nem található szerver CDU!"/>
+                            </c:when>
+                            <c:otherwise>
+                                <h:outputText value="Szerver CDU"/>
+                            </c:otherwise>
+                        </c:choose>
+                        <br/>
 
-                        <p:commandButton value="Összes inaktív"
-                                         icon="fa fa-square-o"
-                                         title="Minden gyűjtendő adatnév inaktív"
-                                         actionListener="#{settingsView.toggleAllServerDcuActiveFlag(false)}"
-                                         disabled="#{empty settingsView.selectedServer or empty settingsView.selectedServer.joiners}"
-                                         onstart="PF('blockUI').block();"
-                                         oncomplete="PF('blockUI').unblock();"
-                                         update="serverCdusTable :growl"
-                                         />
+                        <h:panelGroup>
+                            <p:commandButton value="Összes aktív"
+                                             icon="fa fa-check-square-o"
+                                             title="Minden gyűjtendő adatnév aktív"
+                                             actionListener="#{settingsView.toggleAllServerDcuActiveFlag(true)}"
+                                             disabled="#{empty settingsView.selectedServer or empty settingsView.selectedServer.joiners}"
+                                             onstart="PF('blockUI').block();"
+                                             oncomplete="PF('blockUI').unblock();"
+                                             update="serverCdusTable :growl"
+                                             />
+
+                            <p:commandButton value="Összes inaktív"
+                                             icon="fa fa-square-o"
+                                             title="Minden gyűjtendő adatnév inaktív"
+                                             actionListener="#{settingsView.toggleAllServerDcuActiveFlag(false)}"
+                                             disabled="#{empty settingsView.selectedServer or empty settingsView.selectedServer.joiners}"
+                                             onstart="PF('blockUI').block();"
+                                             oncomplete="PF('blockUI').unblock();"
+                                             update="serverCdusTable :growl"
+                                             />
+                        </h:panelGroup>
 
                         <p:dataTable id="serverCdusTable"
                                      widgetVar="serverCdusTable"
@@ -410,19 +424,18 @@
 
 
 
-                            <!--
+
                             <p:column headerText="srvId"
                                       style="width: 4em"
                                       rendered="#{isDeveloperMode}">
                                 <h:outputText value="#{joiner.serverId}" />
                             </p:column>
-
-                            <p:column headerText="dcuId"
+                            <p:column headerText="cduId"
                                       style="width: 4em"
                                       rendered="#{isDeveloperMode}">
                                 <h:outputText value="#{joiner.svrCollectorDataUnitId}" />
                             </p:column>
-                            -->
+
 
                             <p:column headerText="restPath"
                                       style="width: 20em"
@@ -538,7 +551,7 @@
                                 <h:outputText value="#{rowNdx + 1}" />
                             </p:column>
 
-                            <!--
+
                             <p:column headerText="id"
                                       style="width: 4em"
                                       rendered="#{isDeveloperMode}">
@@ -549,7 +562,7 @@
                                       rendered="#{isDeveloperMode}">
                                 <h:outputText value="#{app.server.id}" />
                             </p:column>
-                            -->
+
 
                             <p:column headerText="Monable"
                                       styleClass="alignCenter"
@@ -650,8 +663,15 @@
                         <!-- p:outputPannel -> a p:panel-t nem lehet AJAX update-val megjeleníteni ... :( -->
                         <p:outputPanel id="applicationCduPanel" style="margin-top: 1em">
 
-                            <h:outputText value="Nem található alkalmazás CDU!"
-                                          rendered="#{not empty settingsView.selectedApplication and empty settingsView.selectedApplication.joiners}"/>
+                            <c:choose>
+                                <c:when test="#{empty settingsView.selectedApplication or empty settingsView.selectedApplication.joiners}">
+                                    <h:outputText value="Nem található alkalmazás CDU!"/>
+                                </c:when>
+                                <c:otherwise>
+                                    <h:outputText value="Alkalmazás CDU"/>
+                                </c:otherwise>
+                            </c:choose>
+
 
                             <p:panel rendered="#{not empty settingsView.selectedApplication}"
                                      style="background: transparent; border: none;">
@@ -711,6 +731,19 @@
                                                     listener="#{settingsView.applicationJoinerActiveChanged(joiner.appCollectorDataUnitId)}"/>
                                         </p:selectBooleanCheckbox>
                                     </p:column>
+
+
+                                    <p:column headerText="appId"
+                                              style="width: 4em"
+                                              rendered="#{isDeveloperMode}">
+                                        <h:outputText value="#{joiner.applicationId}" />
+                                    </p:column>
+                                    <p:column headerText="cduId"
+                                              style="width: 4em"
+                                              rendered="#{isDeveloperMode}">
+                                        <h:outputText value="#{joiner.appCollectorDataUnitId}" />
+                                    </p:column>
+
 
 
                                     <p:column headerText="!!"
@@ -856,8 +889,9 @@
                                       style="width: 1.5em">
                                 <h:outputText value="#{rowNdx + 1}" />
                             </p:column>
-                            <!--
-                            <p:column headerText="id"
+
+
+                            <p:column headerText="cpId"
                                       style="width: 4em"
                                       rendered="#{isDeveloperMode}">
                                 <h:outputText value="#{connPool.id}" />
@@ -867,7 +901,7 @@
                                       rendered="#{isDeveloperMode}">
                                 <h:outputText value="#{connPool.server.id}" />
                             </p:column>
-                            -->
+
 
                             <p:column headerText="Monable"
                                       styleClass="alignCenter"
@@ -928,11 +962,18 @@
                         <!-- p:outputPannel -> a p:panel-t nem lehet AJAX update-val megjeleníteni ... :( -->
                         <p:outputPanel id="connectionPoolCduPanel" style="margin-top: 1em">
 
-                            <h:outputText value="Nem található ConnectionPool CDU!"
-                                          rendered="#{not empty settingsView.selectedConnPool and empty settingsView.selectedConnPool.joiners}"/>
+                            <c:choose>
+                                <c:when test="#{empty settingsView.selectedConnPool or empty settingsView.selectedConnPool.joiners}">
+                                    <h:outputText value="Nem található ConnectionPool CDU!"/>
+                                </c:when>
+                                <c:otherwise>
+                                    <h:outputText value="ConnectionPool CDU"/>
+                                </c:otherwise>
+                            </c:choose>
 
                             <p:panel rendered="#{not empty settingsView.selectedConnPool}"
                                      style="background: transparent; border: none;">
+
                                 <p:commandButton value="Összes aktív"
                                                  icon="fa fa-check-square-o"
                                                  title="Minden gyűjtendő adatnév aktív"
@@ -987,6 +1028,18 @@
                                                     update="connPoolCdusTable"
                                                     listener="#{settingsView.connPoolJoinerActiveChanged(joiner.connPoolCollectorDataUnitId)}"/>
                                         </p:selectBooleanCheckbox>
+                                    </p:column>
+
+
+                                    <p:column headerText="cpId"
+                                              style="width: 4em"
+                                              rendered="#{isDeveloperMode}">
+                                        <h:outputText value="#{joiner.connPoolId}" />
+                                    </p:column>
+                                    <p:column headerText="cduId"
+                                              style="width: 4em"
+                                              rendered="#{isDeveloperMode}">
+                                        <h:outputText value="#{joiner.connPoolCollectorDataUnitId}" />
                                     </p:column>
 
 

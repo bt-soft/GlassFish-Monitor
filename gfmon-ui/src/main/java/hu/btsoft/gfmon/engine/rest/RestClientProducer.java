@@ -14,6 +14,7 @@ package hu.btsoft.gfmon.engine.rest;
 import java.io.Serializable;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.InjectionPoint;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -35,9 +36,9 @@ public class RestClientProducer implements Serializable {
      */
     @Produces
     @GFMonitorRestClient
-    public Client newClient(/*InjectionPoint injectionPoint*/) {
+    public Client newClient(InjectionPoint injectionPoint) {
         Client client = ClientBuilder.newClient();
-        //log.trace("REST kliens létrehozás: {}, osztály: {}", client, injectionPoint.getMember().getDeclaringClass().getName());
+        log.trace("REST kliens létrehozás: {}, osztály: {}", client, injectionPoint.getMember().getDeclaringClass().getName());
         return client;
     }
 
@@ -47,7 +48,7 @@ public class RestClientProducer implements Serializable {
      * @param client REST kliens példány
      */
     public void closeClient(@Disposes @GFMonitorRestClient Client client) {
-        //log.trace("REST kliens lecsukása: {}", client);
+        log.trace("REST kliens lecsukása: {}", client);
         client.close();
     }
 

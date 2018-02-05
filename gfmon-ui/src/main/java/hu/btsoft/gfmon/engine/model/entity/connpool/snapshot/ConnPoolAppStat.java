@@ -9,13 +9,13 @@
  *
  *  ------------------------------------------------------------------------------------
  */
-package hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot;
+package hu.btsoft.gfmon.engine.model.entity.connpool.snapshot;
 
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcResourceSnapshotBase;
+import hu.btsoft.gfmon.engine.model.entity.connpool.JdbcResourceSnapshotBase;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;

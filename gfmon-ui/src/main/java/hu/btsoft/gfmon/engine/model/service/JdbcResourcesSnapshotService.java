@@ -11,7 +11,7 @@
  */
 package hu.btsoft.gfmon.engine.model.service;
 
-import hu.btsoft.gfmon.engine.model.entity.jdbc.JdbcResourceSnapshotBase;
+import hu.btsoft.gfmon.engine.model.entity.connpool.JdbcResourceSnapshotBase;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;

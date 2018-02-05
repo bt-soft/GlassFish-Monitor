@@ -12,9 +12,10 @@
 package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.time.Elapsed;
+import hu.btsoft.gfmon.engine.config.PropertiesConfig;
 import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.ConnPool;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnPoolStat;
+import hu.btsoft.gfmon.engine.model.entity.connpool.ConnPool;
+import hu.btsoft.gfmon.engine.model.entity.connpool.snapshot.ConnPoolStat;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
 import hu.btsoft.gfmon.engine.model.service.ConnPoolCollectorDataUnitService;
@@ -45,6 +46,9 @@ public class ConnPoolMonitor extends MonitorsBase {
     private static final String DB_MODIFICATOR_USER = "connpool-mon-ctrl";
 
     @Inject
+    private PropertiesConfig propertiesConfig;
+
+    @Inject
     private ConnPoolDiscoverer connPoolDiscoverer;
 
     @EJB
@@ -72,7 +76,7 @@ public class ConnPoolMonitor extends MonitorsBase {
     @Override
     public void beforeStartTimer() {
         //Alkalmazások lekérdezése és felépítése
-        this.manageAllActiverServerJdbcResources();
+        this.manageAllActiverServerConnPools();
     }
 
     /**
@@ -82,7 +86,7 @@ public class ConnPoolMonitor extends MonitorsBase {
      *
      * @param server vizsgálandó szerver
      */
-    public void maintenanceServerJdbcResourcesInDataBase(Server server) {
+    public void maintenanceConnPoolsInDataBase(Server server) {
 
         //A szerver aktuális alkalmazás listája
         List<ConnPool> runtimeConnPools = this.getConnPools(server);
@@ -146,6 +150,9 @@ public class ConnPoolMonitor extends MonitorsBase {
                 runtimeConnPool.setActive(existDbConnPoolActiveStatus); //beállítjuk a korábbi monitoring státuszt
                 connPoolService.save(runtimeConnPool, DB_MODIFICATOR_USER);
                 log.info("Server: {} -> a(z) '{}' új JDBC ConnectionPool felvétele az adatbázisba", server.getSimpleUrl(), runtimeConnPool.getPoolName());
+
+                //CDU összerendelést is elvégezzük
+                connPoolService.assignConnPoolToCduIntoDb(runtimeConnPool, DB_MODIFICATOR_USER);
             }
         });
     }
@@ -153,13 +160,13 @@ public class ConnPoolMonitor extends MonitorsBase {
     /**
      * Alkalmazások listájának felépítése, ha szükséges
      */
-    public void manageAllActiverServerJdbcResources() {
+    public void manageAllActiverServerConnPools() {
 
         //Végigmegyünk az összes szerveren
         serverService.findAllActiveServer().stream()
                 .filter((server) -> super.acquireSessionToken(server)) // ha nem sikerült bejelentkezni -> letiltjuk és jöhet a következő szerver
                 .forEachOrdered((server) -> {
-                    this.maintenanceServerJdbcResourcesInDataBase(server);
+                    this.maintenanceConnPoolsInDataBase(server);
                 });
     }
 
@@ -186,9 +193,12 @@ public class ConnPoolMonitor extends MonitorsBase {
      */
     private boolean wantCollectCDU() {
 
-        if (connPoolCollectorDataUnitService.count() < 1) {
-            log.info("A JDBC ConnectionPool 'adatnevek' táblájának felépítése szükséges!");
-            return true;
+        //Adatnevek táblájának felépítése, ha szükséges
+        if ("runtime".equalsIgnoreCase(propertiesConfig.getConfig().getString(PropertiesConfig.STARTUP_JPA_CDU_BUILD_MODE))) {
+            if (connPoolCollectorDataUnitService.count() < 1) {
+                log.info("A JDBC ConnectionPool 'adatnevek' táblájának feltöltése az első mérése alatt szükséges!");
+                return true;
+            }
         }
         return false;
     }
@@ -225,7 +235,7 @@ public class ConnPoolMonitor extends MonitorsBase {
 
                 //ConnPool <-> Cdu összerendelés
                 server.getConnPools().forEach((connPool) -> {
-                    connPoolService.assignConnPoolToCdu(connPool, DB_MODIFICATOR_USER);
+                    connPoolService.assignConnPoolToCduIntoDb(connPool, DB_MODIFICATOR_USER);
                 });
             }
 
@@ -245,11 +255,12 @@ public class ConnPoolMonitor extends MonitorsBase {
                                 .filter((joiner) -> (Objects.equals(joiner.getConnPoolCollDataUnit().getRestPathMask(), erroredPath)))
                                 .map((joiner) -> {
                                     joiner.setActive(false);
+                                    joiner.setAdditionalMessage("A path nem érhető el, az adatgyűjtés letiltva");
                                     return joiner;
                                 }).forEachOrdered((joiner) -> {
-                            joiner.setAdditionalMessage("A path nem érhető el, az adatgyűjtés letiltva");
+                            connPoolService.save(connPool, DB_MODIFICATOR_USER);
                         });
-                        connPoolService.save(connPool, DB_MODIFICATOR_USER);
+
                     }
                 }
             }
@@ -288,7 +299,7 @@ public class ConnPoolMonitor extends MonitorsBase {
         long start = Elapsed.nowNano();
 
         //JDBC erőforrások lekérdezése és felépítése
-        this.manageAllActiverServerJdbcResources();
+        this.manageAllActiverServerConnPools();
         log.info("JDBC erőforrások automatikus karbantartása OK, elapsed: {}", Elapsed.getElapsedNanoStr(start));
 
         //Megőrzendő napok száma

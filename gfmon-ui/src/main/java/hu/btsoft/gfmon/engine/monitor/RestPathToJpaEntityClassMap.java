@@ -19,8 +19,8 @@ import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbBeanMetho
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbBeanPoolStat;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbStat;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb.EjbTimerStat;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnPoolAppStat;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.snapshot.ConnPoolStat;
+import hu.btsoft.gfmon.engine.model.entity.connpool.snapshot.ConnPoolAppStat;
+import hu.btsoft.gfmon.engine.model.entity.connpool.snapshot.ConnPoolStat;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.httpservice.HttpServiceRequest;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.jvm.JvmMemory;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.jvm.ThreadSystem;

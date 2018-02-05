@@ -13,7 +13,7 @@ package hu.btsoft.gfmon.engine.model.service;
 
 import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
-import hu.btsoft.gfmon.engine.model.entity.jdbc.ConnPoolCollDataUnit;
+import hu.btsoft.gfmon.engine.model.entity.connpool.ConnPoolCollDataUnit;
 import java.util.List;
 import java.util.Set;
 import javax.ejb.Stateless;

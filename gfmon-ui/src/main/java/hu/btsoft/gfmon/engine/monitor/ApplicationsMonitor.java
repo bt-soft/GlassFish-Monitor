@@ -12,6 +12,7 @@
 package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.time.Elapsed;
+import hu.btsoft.gfmon.engine.config.PropertiesConfig;
 import hu.btsoft.gfmon.engine.model.dto.DataUnitDto;
 import hu.btsoft.gfmon.engine.model.entity.application.Application;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
@@ -48,6 +49,9 @@ import lombok.extern.slf4j.Slf4j;
 public class ApplicationsMonitor extends MonitorsBase {
 
     private static final String DB_MODIFICATOR_USER = "app-mon-ctrl";
+
+    @Inject
+    private PropertiesConfig propertiesConfig;
 
     @EJB
     private ApplicationService applicationService;
@@ -121,7 +125,7 @@ public class ApplicationsMonitor extends MonitorsBase {
      *
      * @param server vizsgálandó szerver
      */
-    public void maintenanceServerAplicationInDataBase(Server server) {
+    public void maintenanceAplicationsInDataBase(Server server) {
         //A szerver aktuális alkalmazás listája
         List<Application> runtimeApplications = this.getApplicationsList(server);
 
@@ -185,6 +189,9 @@ public class ApplicationsMonitor extends MonitorsBase {
                 runtimeApplication.setActive(existDbAppActiveStatus); //beállítjuk a korábbi monitoring státuszt
                 applicationService.save(runtimeApplication, DB_MODIFICATOR_USER);
                 log.info("Server: {} -> a(z) '{} - {}' új alkalmazás felvétele az adatbázisba", server.getSimpleUrl(), runtimeApplication.getAppRealName(), runtimeApplication.getModuleRealName());
+
+                //CDU összerendelést is elvégezzük
+                applicationService.assignApplicationToCduIntoDb(runtimeApplication, DB_MODIFICATOR_USER);
             }
         });
     }
@@ -198,7 +205,7 @@ public class ApplicationsMonitor extends MonitorsBase {
         serverService.findAllActiveServer().stream()
                 .filter((server) -> super.acquireSessionToken(server)) // ha nem sikerült bejelentkezni -> letiltjuk és jöhet a következő szerver
                 .forEachOrdered((server) -> {
-                    this.maintenanceServerAplicationInDataBase(server);
+                    this.maintenanceAplicationsInDataBase(server);
                 });
     }
 
@@ -209,9 +216,13 @@ public class ApplicationsMonitor extends MonitorsBase {
      */
     private boolean wantCollectCDU() {
 
-        if (applicationCollectorDataUnitService.count() < 1) {
-            log.info("Az alkalmazás 'adatnevek' táblájának felépítése szükséges!");
-            return true;
+        //Adatnevek táblájának felépítése, ha szükséges
+        if ("runtime".equalsIgnoreCase(propertiesConfig.getConfig().getString(PropertiesConfig.STARTUP_JPA_CDU_BUILD_MODE))) {
+
+            if (applicationCollectorDataUnitService.count() < 1) {
+                log.info("Az alkalmazás 'adatnevek' táblájának feltöltése az első mérés alatt szükséges!");
+                return true;
+            }
         }
         return false;
     }
@@ -244,10 +255,12 @@ public class ApplicationsMonitor extends MonitorsBase {
                 //Elmentjük a CDU-kat az adatbázisba
                 applicationCollectorDataUnitService.saveCollectedDataUnits(dataUnits, DB_MODIFICATOR_USER);
 
-                //Alkalmazás <-> Cdu összerendelés
-                server.getApplications().forEach((app) -> {
-                    applicationService.assignApplicationToCdu(app, DB_MODIFICATOR_USER);
-                });
+                //Alkalmazás <-> Cdu összerendelés, ha az alkalmazásnak még nincs CDU-ja
+                for (Application app : server.getApplications()) {
+                    if (app.getJoiners().isEmpty()) {
+                        applicationService.assignApplicationToCduIntoDb(app, DB_MODIFICATOR_USER);
+                    }
+                }
             }
 
             //Letiltjuk az alkalmazás gyűjtendő adat path-ját, ha nem sikerült elérni
@@ -265,11 +278,12 @@ public class ApplicationsMonitor extends MonitorsBase {
                                 .filter((joiner) -> (Objects.equals(joiner.getAppCollectorDataUnit().getRestPathMask(), erroredPath)))
                                 .map((joiner) -> {
                                     joiner.setActive(false);
+                                    joiner.setAdditionalMessage("A path nem érhető el, az adatgyűjtés letiltva");
                                     return joiner;
                                 }).forEachOrdered((joiner) -> {
-                            joiner.setAdditionalMessage("A path nem érhető el, az adatgyűjtés letiltva");
+                            applicationService.save(app, DB_MODIFICATOR_USER);
                         });
-                        applicationService.save(app, DB_MODIFICATOR_USER);
+
                     }
                 }
             }

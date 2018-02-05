@@ -15,6 +15,7 @@ import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
 import hu.btsoft.gfmon.engine.model.entity.EntityBase;
+import java.util.LinkedList;
 import java.util.List;
 import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
@@ -100,7 +101,7 @@ public class AppCollectorDataUnit extends EntityBase {
      * A visszairány az alkalmazáshoz a kapcsolótáblán keresztül
      */
     @OneToMany(mappedBy = "appCollectorDataUnit", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ApplicationAppCollDataUnitJoiner> joiners;
+    private List<ApplicationAppCollDataUnitJoiner> joiners = new LinkedList<>();
 
     /**
      * Kontruktor

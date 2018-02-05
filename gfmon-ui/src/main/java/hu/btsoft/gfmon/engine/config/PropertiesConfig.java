@@ -23,4 +23,6 @@ import javax.inject.Singleton;
 public class PropertiesConfig extends PropertiesConfigBase {
 
     public final static String STARTUP_JPA_DROPANDCREATE_KEY = "startup.jpa.drop.and.create";
+    public final static String STARTUP_JPA_CDU_BUILD_MODE = "startup.jpa.cdu.build.mode";
+    public final static String DEFAULT_DATA_RETENTION_IN_DAYS = "default.data.retention.in.days";
 }
