@@ -88,12 +88,23 @@ public class DefaultConfigCreator {
         log.trace("Default beállítások létrehozása");
 
         {//autostart
-            Config config = new Config(ConfigKeyNames.CLASS_NAME, ConfigKeyNames.AUTOSTART, ConfigValueType.B, "false");
-            configService.save(config, DB_MODIFICATOR_USER);
+            if (configService.getBoolean(ConfigKeyNames.AUTOSTART) == null) {
+                Config config = new Config(ConfigKeyNames.CLASS_NAME, ConfigKeyNames.AUTOSTART, ConfigValueType.B, "false");
+                configService.save(config, DB_MODIFICATOR_USER);
+            }
         }
         {//sampleInterval
-            Config config = new Config(ConfigKeyNames.CLASS_NAME, ConfigKeyNames.SAMPLE_INTERVAL, ConfigValueType.I, "60");
-            configService.save(config, DB_MODIFICATOR_USER);
+            if (configService.getInteger(ConfigKeyNames.SAMPLE_INTERVAL) == null) {
+                Config config = new Config(ConfigKeyNames.CLASS_NAME, ConfigKeyNames.SAMPLE_INTERVAL, ConfigValueType.I, "60");
+                configService.save(config, DB_MODIFICATOR_USER);
+            }
+        }
+
+        {//Clearing limit days
+            if (configService.getInteger(ConfigKeyNames.SAMPLE_DATA_KEEP_DAYS) == null) {
+                Config config = new Config(ConfigKeyNames.CLASS_NAME, ConfigKeyNames.SAMPLE_DATA_KEEP_DAYS, ConfigValueType.I, propertiesConfig.getConfig().getString(PropertiesConfig.DEFAULT_DATA_RETENTION_IN_DAYS, "90"));
+                configService.save(config, DB_MODIFICATOR_USER);
+            }
         }
 
         {//Server 1
@@ -101,19 +112,14 @@ public class DefaultConfigCreator {
             // Az itt megadott szervereknél a gyűjtendő adatok listáját ( List<CollectorDataUnit> ) a GFMonitorController az első mérés során állítja be
             // Alapesetben minden Entitás-t összegyűjt, amit a UI felületen a szerver mért adatainak beállításánál lehet testre szabni
             //
-            Server server = new Server("localhost", 4848, "Lokális GlassFish Admin", null /* user */, null /* passwd */, ".*" /* regExpFilter */, true /* enabled */);
-            serverService.save(server, DB_MODIFICATOR_USER); //lementjük a szervert és a CDU összerendelést is
-            if ("static".equalsIgnoreCase(propertiesConfig.getConfig().getString(PropertiesConfig.STARTUP_JPA_CDU_BUILD_MODE))) {
-                serverService.assignServerToCduIntoDb(server, DB_MODIFICATOR_USER); //Összerendeljük a szerver <-> CDU-kat az adatbázisban is
+            if (serverService.findByMandatoryProperties("localhost", "127.0.0.1", 4848) == null) {
+                Server server = new Server("localhost", 4848, "Lokális GlassFish Admin", null /* user */, null /* passwd */, ".*" /* regExpFilter */, true /* enabled */);
+                serverService.save(server, DB_MODIFICATOR_USER); //lementjük a szervert és a CDU összerendelést is
+                if ("static".equalsIgnoreCase(propertiesConfig.getConfig().getString(PropertiesConfig.STARTUP_JPA_CDU_BUILD_MODE))) {
+                    serverService.assignServerToCduIntoDb(server, DB_MODIFICATOR_USER); //Összerendeljük a szerver <-> CDU-kat az adatbázisban is
+                }
             }
-
         }
-
-        {//Clearing limit days
-            Config config = new Config(ConfigKeyNames.CLASS_NAME, ConfigKeyNames.SAMPLE_DATA_KEEP_DAYS, ConfigValueType.I, propertiesConfig.getConfig().getString(PropertiesConfig.DEFAULT_DATA_RETENTION_IN_DAYS, "90"));
-            configService.save(config, DB_MODIFICATOR_USER);
-        }
-
     }
 
     /**
