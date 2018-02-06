@@ -147,8 +147,7 @@ public class ApplicationsMonitor extends MonitorsBase {
         }
 
         //Végigmegyünk a runtime Alkalmazások listáján
-        runtimeApplications.forEach((runtimeApplication) -> {
-
+        runtimeApplications.forEach((Application runtimeApplication) -> {
             boolean needPersistNewEntity = true; //Kell új entitást felvenni?
             boolean existDbAppActiveStatus = false;
 
@@ -161,7 +160,7 @@ public class ApplicationsMonitor extends MonitorsBase {
 
                         //Ha tételesen már NEM egyezik a két objektum, akkor az adatbázisbelit töröljük, de az 'active' státuszát megőrizzük!
                         //A monitoring státusz nem része az @EquaslAndhashCode()-nak!
-                        if (Objects.equals(dbApplication, runtimeApplication)) {
+                        if (!Objects.equals(dbApplication, runtimeApplication)) {
 
                             //Elmentjük a státuszt
                             existDbAppActiveStatus = dbApplication.getActive();
@@ -186,12 +185,16 @@ public class ApplicationsMonitor extends MonitorsBase {
 
             if (needPersistNewEntity) {
                 //Új JDBC erőforrás felvétele
+
                 runtimeApplication.setActive(existDbAppActiveStatus); //beállítjuk a korábbi monitoring státuszt
+
+                //CDU összerendelést is elvégezzük, egyelőre a memóriában
+                applicationService.assignApplicationToCdu(runtimeApplication, DB_MODIFICATOR_USER);
+
+                //Mindenestűl lementjük
                 applicationService.save(runtimeApplication, DB_MODIFICATOR_USER);
                 log.info("Server: {} -> a(z) '{} - {}' új alkalmazás felvétele az adatbázisba", server.getSimpleUrl(), runtimeApplication.getAppRealName(), runtimeApplication.getModuleRealName());
 
-                //CDU összerendelést is elvégezzük
-                applicationService.assignApplicationToCduIntoDb(runtimeApplication, DB_MODIFICATOR_USER);
             }
         });
     }

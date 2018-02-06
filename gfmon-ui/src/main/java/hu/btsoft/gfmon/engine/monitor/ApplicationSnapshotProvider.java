@@ -126,7 +126,6 @@ public class ApplicationSnapshotProvider {
         }
 
         appStatistic.setApplication(app);
-        app.getAppStatistics().add(appStatistic);
         snapshots.add(appStatistic);
 
         //Miylen Servlet-jei vannak?
@@ -192,13 +191,13 @@ public class ApplicationSnapshotProvider {
 
         EjbStat ejbStat = (EjbStat) jSonEntityToSnapshotEntityMapper.map(valuesList);
         if (ejbStat == null) {
-            log.warn("Null az '{}' alkalmazás '{}' ejbStatisztikája!", app, fullUrl);
+            //Közben törölhették az alkalamzást, nem rm érdekes, hogy nincs róla infó
+            //log.warn("Null az '{}' alkalmazás '{}' ejbStatisztikája!", app, fullUrl);
             return null;
         }
 
         ejbStat.setEjbName(beanName);
         ejbStat.setApplication(app);
-        app.getEjbStats().add(ejbStat);
         snapshots.add(ejbStat);
 
         //Milyen más EJB statisztikái vannak?
@@ -422,7 +421,7 @@ public class ApplicationSnapshotProvider {
 
         Set<AppSnapshotBase> snapshots = new LinkedHashSet<>();
 
-        //Véégigmegyünk a szerver alkalmazásain
+        //Végigmegyünk a szerver alkalmazásain
         server.getApplications().stream()
                 .filter((app) -> !(app.getActive() == null || Objects.equals(app.getActive(), Boolean.FALSE)))
                 .map((app) -> {

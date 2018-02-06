@@ -83,10 +83,10 @@ public class ServerSnapshotProvider {
      *
      * @return Map, key: monitorozando Path, value: gyűjtendő adatnevek Set-je
      */
-    private Map<String/*path*/, Set<String> /*dataNames*/> createCollectedDatatNamesMap(Server server) {
+    private Map<String/* path */, Set<String> /* dataNames */> createCollectedDatatNamesMap(Server server) {
 
         //Az egyes Path-ok alatti gyűjtendő adatnevek halmaza, ezzel az adott kollektor munkáját tudjuk szűkíteni
-        Map<String/*path*/, Set<String> /*dataNames*/> collectedDatatNamesMap = new HashMap<>();
+        Map<String/* path */, Set<String> /* dataNames */> collectedDatatNamesMap = new HashMap<>();
 
         if (server.getJoiners() != null) {
 
@@ -120,7 +120,7 @@ public class ServerSnapshotProvider {
 
         Set<SnapshotBase> snapshots = null;
 
-        Map<String/*path*/, Set<String> /*dataNames*/> collectedDatatNamesMap = createCollectedDatatNamesMap(server);
+        Map<String/* path */, Set<String> /* dataNames */> collectedDatatNamesMap = createCollectedDatatNamesMap(server);
 
         //Végigmegyünk az összes adatgyűjtőn
         for (IServerCollector collector : serverCollectors) {
@@ -157,7 +157,7 @@ public class ServerSnapshotProvider {
             }
         }
 
-        log.info("Szerver adatok kigyűjtése elapsed: {}", Elapsed.getElapsedNanoStr(start));
+        log.info("Szerver Stat kigyűjtése elapsed: {}", Elapsed.getElapsedNanoStr(start));
 
         return snapshots;
     }

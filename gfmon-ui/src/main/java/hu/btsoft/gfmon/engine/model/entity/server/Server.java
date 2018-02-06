@@ -77,6 +77,7 @@ import org.apache.commons.lang3.StringUtils;
 @NamedQueries({
     @NamedQuery(name = "Server.findAll", query = "SELECT s FROM Server s ORDER BY s.hostName, s.portNumber"), //
     @NamedQuery(name = "Server.findAllActive", query = "SELECT s FROM Server s WHERE s.active = true ORDER BY s.hostName, s.portNumber"), //
+    @NamedQuery(name = "Server.findByMandatoryProperties", query = "SELECT s FROM Server s WHERE s.hostName = :hostName AND s.ipAddress = :ipAddress AND s.portNumber = :portNumber"), //
 })
 @Data
 @ToString(callSuper = true, of = {"hostName", "ipAddress", "portNumber", "active"})

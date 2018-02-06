@@ -226,13 +226,6 @@ public class ConnPoolSnapshotProvider {
                     server.getApplications().stream()
                             .filter((app) -> (Objects.equals(app.getAppRealName(), conAppStat.getAppName()))) //Kikeressük a  névre azonosságot
                             .map((app) -> {
-//
-// FIXME: Ezt nem szabad beállítani, mert nem lehet menteni a ConnectionPool CDU-kat, ha beállítjuk:  app.getConnPoolAppStats().add(conAppStat)
-//
-//                                    if (app.getConnPoolAppStats() == null) {
-//                                        app.setConnPoolAppStats(new LinkedList<>());
-//                                    }
-//                                    app.getConnPoolAppStats().add(conAppStat);   //beállítjuk az alkalmazásnak, hogy van ConnectionPool statisztikája
                                 return app;
                             }).forEachOrdered((app) -> {
                         conAppStat.setApplication(app);                                 //beállítjuk a COnnectionPoolApplStatnak is az allamazást

@@ -14,6 +14,7 @@ package hu.btsoft.gfmon.engine.model.service;
 import hu.btsoft.gfmon.engine.model.entity.Config;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import lombok.extern.slf4j.Slf4j;
@@ -72,9 +73,15 @@ public class ConfigService extends ServiceBase<Config> {
         query.setParameter("keyClassName", ConfigKeyNames.CLASS_NAME);
         query.setParameter("keyName", keyName);
 
-        Config config = (Config) query.getSingleResult();
+        try {
+            Config config = (Config) query.getSingleResult();
+            return config;
+        } catch (NoResultException e) {
+            //nincs ilyen bejegyzése
+        }
 
-        return config;
+        return null;
+
     }
 
     /**
@@ -84,7 +91,7 @@ public class ConfigService extends ServiceBase<Config> {
      *
      * @return boolean érték, vagy null, ha nincs ilyen kulcs
      */
-    public boolean getBoolean(String keyName) {
+    public Boolean getBoolean(String keyName) {
         Config config = getConfig(keyName);
         return config == null ? null : Boolean.parseBoolean(config.getKeyValue());
     }

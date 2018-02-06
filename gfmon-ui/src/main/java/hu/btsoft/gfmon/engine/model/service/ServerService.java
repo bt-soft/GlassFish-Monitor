@@ -21,6 +21,7 @@ import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +57,57 @@ public class ServerService extends ServiceBase<Server> {
     @Override
     protected EntityManager getEntityManager() {
         return em;
+    }
+
+    /**
+     * Szerver kikeresése a kötelező paraméterek alapján
+     *
+     * @param hostName   host neve
+     * @param ipAddress  IP cím
+     * @param portNumber port szám
+     *
+     * @return Szerver entitás példány vagy null
+     */
+    public Server findByMandatoryProperties(String hostName, String ipAddress, Integer portNumber) {
+
+        Query query = em.createNamedQuery("Server.findByMandatoryProperties");
+        query.setParameter("hostName", hostName);
+        query.setParameter("ipAddress", ipAddress);
+        query.setParameter("portNumber", portNumber);
+
+        try {
+            return (Server) query.getSingleResult();
+        } catch (NoResultException e) {
+            // ninncs ilyen szerver
+        }
+
+        return null;
+    }
+
+    /**
+     * Összes szerver lekérdezése
+     * A rendezés miatt nem az ös findAll() metódusát használjuk
+     *
+     * @return az összes szerver listája
+     */
+    @Override
+    public List<Server> findAll() {
+        Query query = em.createNamedQuery("Server.findAll");
+        List<Server> resultList = query.getResultList();
+
+        return resultList;
+    }
+
+    /**
+     * Összes aktív szerver lekérdezése
+     *
+     * @return aktív szerverek listája
+     */
+    public List<Server> findAllActiveServer() {
+        Query query = em.createNamedQuery("Server.findAllActive");
+        List<Server> resultList = query.getResultList();
+
+        return resultList;
     }
 
     /**
@@ -122,32 +174,6 @@ public class ServerService extends ServiceBase<Server> {
                 em.merge(cdu);
             });
         }
-    }
-
-    /**
-     * Összes szerver lekérdezése
-     * A rendezés miatt nem az ös findAll() metódusát használjuk
-     *
-     * @return az összes szerver listája
-     */
-    @Override
-    public List<Server> findAll() {
-        Query query = em.createNamedQuery("Server.findAll");
-        List<Server> resultList = query.getResultList();
-
-        return resultList;
-    }
-
-    /**
-     * Összes aktív szerver lekérdezése
-     *
-     * @return aktív szerverek listája
-     */
-    public List<Server> findAllActiveServer() {
-        Query query = em.createNamedQuery("Server.findAllActive");
-        List<Server> resultList = query.getResultList();
-
-        return resultList;
     }
 
     /**

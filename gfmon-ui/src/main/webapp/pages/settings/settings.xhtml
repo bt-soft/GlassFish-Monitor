@@ -186,7 +186,7 @@
                         </p:column>
 
 
-                        <p:column headerText="DB id"
+                        <p:column headerText="id"
                                   rendered="#{isDeveloperMode}"
                                   styleClass="alignCenter"
                                   style="width: 3em"
@@ -376,6 +376,18 @@
                                 <h:outputText value="#{rowNdx + 1}" />
                             </p:column>
 
+                            <p:column headerText="cduId"
+                                      style="width: 4em"
+                                      rendered="#{isDeveloperMode}">
+                                <h:outputText value="#{joiner.svrCollectorDataUnitId}" />
+                            </p:column>
+                            <p:column headerText="srvId"
+                                      style="width: 4em"
+                                      rendered="#{isDeveloperMode}">
+                                <h:outputText value="#{joiner.serverId}" />
+                            </p:column>
+
+
                             <p:column headerText="active"
                                       styleClass="alignCenter"
                                       sortBy="{joiner.active}"
@@ -421,21 +433,6 @@
                                 </p:outputLabel>
 
                             </p:column>
-
-
-
-
-                            <p:column headerText="srvId"
-                                      style="width: 4em"
-                                      rendered="#{isDeveloperMode}">
-                                <h:outputText value="#{joiner.serverId}" />
-                            </p:column>
-                            <p:column headerText="cduId"
-                                      style="width: 4em"
-                                      rendered="#{isDeveloperMode}">
-                                <h:outputText value="#{joiner.svrCollectorDataUnitId}" />
-                            </p:column>
-
 
                             <p:column headerText="restPath"
                                       style="width: 20em"
@@ -556,6 +553,13 @@
                                       style="width: 4em"
                                       rendered="#{isDeveloperMode}">
                                 <h:outputText value="#{app.id}" />
+                            </p:column>
+                            <p:column headerText="DB ver"
+                                      rendered="#{isDeveloperMode}"
+                                      styleClass="alignCenter"
+                                      style="width: 3em"
+                                      >
+                                <h:outputText value="#{app.optLockVersion}"/>
                             </p:column>
                             <p:column headerText="srvId"
                                       style="width: 4em"
@@ -891,10 +895,18 @@
                             </p:column>
 
 
-                            <p:column headerText="cpId"
+                            <p:column headerText="id"
                                       style="width: 4em"
+                                      styleClass="alignCenter"
                                       rendered="#{isDeveloperMode}">
                                 <h:outputText value="#{connPool.id}" />
+                            </p:column>
+                            <p:column headerText="DB ver"
+                                      rendered="#{isDeveloperMode}"
+                                      styleClass="alignCenter"
+                                      style="width: 3em"
+                                      >
+                                <h:outputText value="#{connPool.optLockVersion}"/>
                             </p:column>
                             <p:column headerText="srvId"
                                       style="width: 4em"

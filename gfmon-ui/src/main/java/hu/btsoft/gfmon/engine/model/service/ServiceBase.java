@@ -100,11 +100,11 @@ public abstract class ServiceBase<T extends EntityBase> {
      * @throws PersistenceException         JPA hiba
      * @throws DatabaseException            DB hiba
      */
-    public void save(T entity, String user) throws RuntimeException {
+    public T save(T entity, String user) throws RuntimeException {
 
         if (entity == null) {
             log.warn("null az entitás!");
-            return;
+            return null;
         }
 
         //Átadjuk az usert az Audit Listener-nek
@@ -112,6 +112,8 @@ public abstract class ServiceBase<T extends EntityBase> {
 
         //Mehet a mentés, vagy a módosítás
         this.save(entity);
+
+        return entity;
     }
 
     /**
@@ -123,11 +125,11 @@ public abstract class ServiceBase<T extends EntityBase> {
      * @throws PersistenceException         JPA hiba
      * @throws DatabaseException            DB hiba
      */
-    private void save(T entity) throws RuntimeException {
+    private T save(T entity) throws RuntimeException {
 
         if (entity == null) {
             log.warn("null az entitás!");
-            return;
+            return null;
         }
 
         try {
@@ -137,6 +139,8 @@ public abstract class ServiceBase<T extends EntityBase> {
             } else {
                 getEntityManager().merge(entity);
             }
+
+            return entity;
         } catch (ConstraintViolationException e) {
             log.error("Entitás validációs hiba: ");
             e.getConstraintViolations().forEach(err -> log.error("errStr: {}", err));

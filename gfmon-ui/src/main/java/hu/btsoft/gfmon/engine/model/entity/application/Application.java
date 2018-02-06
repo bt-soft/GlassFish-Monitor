@@ -63,7 +63,7 @@ import lombok.extern.slf4j.Slf4j;
 })
 @Data
 @ToString(callSuper = true, exclude = {"server", "moduleEngines", "joiners", "appStatistics", "ejbStats", "connPoolAppStats"})
-@EqualsAndHashCode(callSuper = true, of = {"appShortName", "appRealName", "moduleShortName", "moduleRealName", "enabled", "contextRoot", "description", "active"})
+@EqualsAndHashCode(callSuper = false, of = {"appShortName", "appRealName", "moduleShortName", "moduleRealName", "contextRoot", "description"}) //nincs ős hívás és az 'active' és az 'enabled' sem része !!!!
 @NoArgsConstructor
 @Slf4j
 public class Application extends ModifiableEntityBase {
