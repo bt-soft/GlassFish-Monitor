@@ -101,6 +101,7 @@ public abstract class MonitorsBase {
     /**
      * Monitorozás indul
      */
+    @Asynchronous
     public abstract void startMonitoring();
 
     /**

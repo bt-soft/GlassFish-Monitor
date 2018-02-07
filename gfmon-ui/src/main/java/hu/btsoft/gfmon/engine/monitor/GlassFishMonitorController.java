@@ -12,7 +12,6 @@
 package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.cdi.CdiUtils;
-import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
 import javax.annotation.PostConstruct;
@@ -164,12 +163,11 @@ public class GlassFishMonitorController {
     @Timeout
     protected void timeOut() {
 
-        long start = Elapsed.nowNano();
+        //long start = Elapsed.nowNano();
         log.trace("----- Monitoring start --------------------------------------------------------------------------------");
 
         //A singleton vezérlés miatt inkább mindig lookup-olunk, mert csak így lesz StateLess a monitor vezérlő
-        Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class
-        );
+        Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class);
         if (monitors != null) {
             monitors.forEach((monitor) -> {
                 try {
@@ -180,7 +178,7 @@ public class GlassFishMonitorController {
             });
         }
 
-        log.trace("----- Monitoring End, elapsed: {} ---------------------------", Elapsed.getElapsedNanoStr(start));
+        //log.trace("----- Monitoring End, elapsed: {} ---------------------------", Elapsed.getElapsedNanoStr(start));
     }
 
     /**

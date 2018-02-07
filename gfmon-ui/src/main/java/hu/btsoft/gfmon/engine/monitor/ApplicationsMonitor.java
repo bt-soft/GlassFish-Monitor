@@ -27,6 +27,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -233,6 +234,7 @@ public class ApplicationsMonitor extends MonitorsBase {
     /**
      * Mérés
      */
+    @Asynchronous
     @Override
     public void startMonitoring() {
         long start = Elapsed.nowNano();
@@ -259,11 +261,11 @@ public class ApplicationsMonitor extends MonitorsBase {
                 applicationCollectorDataUnitService.saveCollectedDataUnits(dataUnits, DB_MODIFICATOR_USER);
 
                 //Alkalmazás <-> Cdu összerendelés, ha az alkalmazásnak még nincs CDU-ja
-                for (Application app : server.getApplications()) {
-                    if (app.getJoiners().isEmpty()) {
-                        applicationService.assignApplicationToCduIntoDb(app, DB_MODIFICATOR_USER);
-                    }
-                }
+                server.getApplications().stream()
+                        .filter((app) -> (app.getJoiners().isEmpty()))
+                        .forEachOrdered((app) -> {
+                            applicationService.assignApplicationToCduIntoDb(app, DB_MODIFICATOR_USER);
+                        });
             }
 
             //Letiltjuk az alkalmazás gyűjtendő adat path-ját, ha nem sikerült elérni
@@ -315,6 +317,8 @@ public class ApplicationsMonitor extends MonitorsBase {
         }
 
         log.trace("Application Stat összesen: szerver: {}db, elapsed: {}", measuredServerCnt, Elapsed.getElapsedNanoStr(start));
+
+        return;
     }
 
     /**

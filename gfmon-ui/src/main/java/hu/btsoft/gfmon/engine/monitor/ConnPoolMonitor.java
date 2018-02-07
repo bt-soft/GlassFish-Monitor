@@ -27,6 +27,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -204,8 +205,9 @@ public class ConnPoolMonitor extends MonitorsBase {
     }
 
     /**
-     * JDBC erőforrások monitorozása
+     * Mérés
      */
+    @Asynchronous
     @Override
     public void startMonitoring() {
 

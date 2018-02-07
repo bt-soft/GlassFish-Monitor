@@ -24,6 +24,7 @@ import hu.btsoft.gfmon.engine.monitor.management.ServerMonitoringServiceStatus;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -195,8 +196,9 @@ public class ServersMonitor extends MonitorsBase {
     }
 
     /**
-     * A monitorozási mintavétel indítása
+     * Mérés
      */
+    @Asynchronous
     @Override
     public void startMonitoring() {
 

@@ -85,7 +85,6 @@ public class DefaultConfigCreator {
      * Default beállítások létrehozása az adatbázisban
      */
     private void createDefaultConfig() {
-        log.trace("Default beállítások létrehozása");
 
         {//autostart
             if (configService.getBoolean(ConfigKeyNames.AUTOSTART) == null) {
