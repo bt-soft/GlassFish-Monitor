@@ -14,7 +14,7 @@ package hu.btsoft.gfmon.engine.model.entity.connpool;
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
-import hu.btsoft.gfmon.engine.model.entity.ModifiableEntityBase;
+import hu.btsoft.gfmon.engine.model.entity.EntityBase;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -54,7 +54,7 @@ import org.eclipse.persistence.annotations.Customizer;
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
 @Slf4j
-public class JdbcResource extends ModifiableEntityBase {
+public class JdbcResource extends EntityBase {
 
     /**
      * A JDBC resource melyik connectio Pool-t használja?

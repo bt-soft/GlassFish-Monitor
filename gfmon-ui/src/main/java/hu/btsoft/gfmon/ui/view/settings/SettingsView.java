@@ -525,7 +525,8 @@ public class SettingsView extends ViewBase {
         }
 
         //Ha még zsír új a szerver, akkor nem turkálunk az adatbázisban
-        if (StringUtils.isEmpty(selectedServer.getSessionToken())) {
+        // Ha nincs még tkenje ÉS nem üres az username, akkor szerzünk egy sessionToken-t
+        if (StringUtils.isEmpty(selectedServer.getSessionToken()) && !StringUtils.isEmpty(selectedServer.getUserName())) {
 
             //Ha még nincs SessionToken, akkor csinálunk egyet
             try {
@@ -594,7 +595,7 @@ public class SettingsView extends ViewBase {
         }
 
         //Ha még zsír új a szerver, akkor nem turkálunk az adatbázisban
-        if (StringUtils.isEmpty(selectedServer.getSessionToken())) {
+        if (StringUtils.isEmpty(selectedServer.getSessionToken()) && !StringUtils.isEmpty(selectedServer.getUserName())) {
 
             //Ha még nincs SessionToken, akkor csinálunk egyet
             try {

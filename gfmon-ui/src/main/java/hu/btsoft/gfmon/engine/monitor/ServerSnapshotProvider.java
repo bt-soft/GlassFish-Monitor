@@ -20,6 +20,7 @@ import hu.btsoft.gfmon.engine.monitor.collector.RestDataCollector;
 import hu.btsoft.gfmon.engine.monitor.collector.server.IServerCollector;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -107,7 +108,7 @@ public class ServerSnapshotProvider {
     }
 
     /**
-     * Az összes szerver kollentor adatait összegyűjti, majd egy új szerver Snapshot entitásba rakja az eredményeket
+     * Az összes szerver kollektor adatait összegyűjti, majd egy új szerver Snapshot entitásba rakja az eredményeket
      *
      * @param server       a monitorozandó Server entitása
      * @param erroredPaths hibára futott mérési oldalak (pl.: törölték a listenert)
@@ -151,14 +152,13 @@ public class ServerSnapshotProvider {
             SnapshotBase jpaEntity = (SnapshotBase) jSonEntityToServerSnapshotEntityMapper.map(valuesList);
             if (jpaEntity != null) {
                 if (snapshots == null) {
-                    snapshots = new HashSet<>();
+                    snapshots = new LinkedHashSet<>();
                 }
                 snapshots.add(jpaEntity);
             }
         }
 
-        log.info("Szerver Stat kigyűjtése elapsed: {}", Elapsed.getElapsedNanoStr(start));
-
+//        log.info("Szerver Stat kigyűjtése elapsed: {}", Elapsed.getElapsedNanoStr(start));
         return snapshots;
     }
 }

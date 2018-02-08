@@ -14,10 +14,9 @@ package hu.btsoft.gfmon.engine.monitor;
 import hu.btsoft.gfmon.corelib.exception.GfMonException;
 import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
-import hu.btsoft.gfmon.engine.model.service.ServerService;
 import hu.btsoft.gfmon.engine.security.SessionTokenAcquirer;
+import java.util.concurrent.Future;
 import javax.ejb.Asynchronous;
-import javax.ejb.EJB;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -33,10 +32,7 @@ public abstract class MonitorsBase {
     @Inject
     private SessionTokenAcquirer sessionTokenAcquirer;
 
-    @EJB
-    protected ServerService serverService;
-
-    @EJB
+    @Inject
     protected ConfigService configService;
 
     /**
@@ -83,6 +79,11 @@ public abstract class MonitorsBase {
         String userName = server.getUserName();
         String plainPassword = server.getPlainPassword();
 
+        //Ha nincs userName, akkor nem is kell sessionToken!
+        if (StringUtils.isEmpty(userName)) {
+            return true;
+        }
+
         //Ha még nincs SessionToken, akkor csinálunk egyet
         try {
             String sessionToken = sessionTokenAcquirer.getSessionToken(url, userName, plainPassword);
@@ -91,8 +92,11 @@ public abstract class MonitorsBase {
 
         } catch (GfMonException e) {
 
-            //Beírjuk a hibaüzenetet üzenetet az adatbázisba is
-            serverService.updateAdditionalMessage(server, getDbModificationUser(), e.getMessage());
+            //Beírjuk a hibaüzenetet a szerver példányba
+            server.setAdditionalInformation(e.getMessage());
+
+            //Töröljük a tokent is
+            server.setSessionToken(null);
         }
 
         return false;
@@ -101,8 +105,7 @@ public abstract class MonitorsBase {
     /**
      * Monitorozás indul
      */
-    @Asynchronous
-    public abstract void startMonitoring();
+    public abstract Future<Void> startMonitoring();
 
     /**
      * Rendszeres napi karbantartás az adatbázisban

@@ -14,7 +14,7 @@ package hu.btsoft.gfmon.engine.model.entity.application.snapshot.ejb;
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
-import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
+import hu.btsoft.gfmon.engine.model.entity.EntityBase;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -40,7 +40,7 @@ import org.eclipse.persistence.annotations.Customizer;
 @EqualsAndHashCode(callSuper = true, exclude = {"ejbStat"})
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
-public class EjbBeanMethodStat extends AppSnapshotBase {
+public class EjbBeanMethodStat extends EntityBase {
 
     /**
      * Az EJB metódus statisztika melyik EJB-hez tartozik?

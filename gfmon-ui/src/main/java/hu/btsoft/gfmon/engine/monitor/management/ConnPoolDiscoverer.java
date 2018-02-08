@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
  * A) ConnectionPool:
  * 1) Lekérjük a JDBC ConnectionPool listáját: http://localhost:4848/management/domain/resources/jdbc-connection-pool - child resources
  * 2) Lekérjük a ConnectionPool tulajdonságait: http://localhost:4848/management/domain/resources/jdbc-connection-pool/{poolName} - extraproperties/properties
- *
+ * <p>
  * B)
  * 1) Lekérjük a JDBC ConnectionPool listáját: http://localhost:4848/management/domain/resources/jdbc-resource - child resources
  * 2) Lekérjük a ConnectionPool tulajdonságait:http://localhost:4848/management/domain/resources/jdbc-resource/{resourcename}
@@ -65,6 +65,7 @@ public class ConnPoolDiscoverer extends RestClientBase {
         description = "null".equals(description) ? null : description;
         res.setDescription(description);
         res.setEnabled(Boolean.parseBoolean(StrUtils.deQuote(entities.get("enabled").toString())));
+        res.setPoolName(StrUtils.deQuote(entities.get("poolName").toString()));
 
         return res;
 
@@ -156,9 +157,6 @@ public class ConnPoolDiscoverer extends RestClientBase {
                             jdbcResource.setConnPool(cp); //beállítjuk a resource-nak, a connectionpool-t
                             return cp;
                         }).map((cp) -> {
-                    if (cp.getJdbcResources() == null) {
-                        cp.setJdbcResources(new LinkedList<>());
-                    }
                     return cp;
                 }).forEachOrdered((cp) -> {
                     cp.getJdbcResources().add(jdbcResource);  //hozzáadjuk a connectionPool-hoz a resources-t

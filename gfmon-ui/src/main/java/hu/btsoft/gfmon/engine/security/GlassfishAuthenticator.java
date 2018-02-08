@@ -22,7 +22,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.client.Client;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  *
@@ -81,7 +80,7 @@ public class GlassfishAuthenticator {
     public void addAuthenticator(Client client, String userName, String plainPassword) {
 
         //ha van userName de még nincs regisztrálva a kliens
-        if (!StringUtils.isEmpty(userName) && !client.getConfiguration().isRegistered(BasicAuthenticatorFilter.class)) {
+        if (/* !StringUtils.isEmpty(userName) && */!client.getConfiguration().isRegistered(BasicAuthenticatorFilter.class)) {
             //Regisztrálás!
             client.register(new BasicAuthenticatorFilter(userName, plainPassword));
         } else {

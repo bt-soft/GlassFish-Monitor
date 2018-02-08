@@ -18,12 +18,15 @@ import hu.btsoft.gfmon.engine.model.entity.server.Server;
 import hu.btsoft.gfmon.engine.model.entity.server.SvrCollectorDataUnit;
 import hu.btsoft.gfmon.engine.model.entity.server.snapshot.SnapshotBase;
 import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
+import hu.btsoft.gfmon.engine.model.service.ServerService;
 import hu.btsoft.gfmon.engine.model.service.SvrCollectorDataUnitService;
 import hu.btsoft.gfmon.engine.model.service.SvrSnapshotService;
 import hu.btsoft.gfmon.engine.monitor.management.ServerMonitoringServiceStatus;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Future;
+import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -46,6 +49,9 @@ public class ServersMonitor extends MonitorsBase {
 
     @Inject
     private PropertiesConfig propertiesConfig;
+
+    @EJB
+    private ServerService serverService;
 
     @EJB
     private SvrCollectorDataUnitService svrCollectorDataUnitService;
@@ -80,14 +86,91 @@ public class ServersMonitor extends MonitorsBase {
     }
 
     /**
+     * Szerver runtime adatok (sessiontoken, monabla, stb) törlése
+     */
+    public void clearAllServersRuntimeValues() {
+
+        //Van egyáltalán monitorozható szerver?
+        List<Server> allServers = serverService.findAll();
+        if (allServers == null || allServers.isEmpty()) {
+            return;
+        }
+
+        allServers.stream()
+                .forEach((server) -> {
+                    //Runtime értékek törlése az adatbázisból
+                    log.trace("Szerver : {} runtime adatok törlése", server.getSimpleUrl());
+                    server.setSessionToken(null);
+                    server.setMonitoringServiceReady(null);
+                    server.setRuntimeSeqId(null);
+                    serverService.save(server, DB_MODIFICATOR_USER);
+                });
+    }
+
+    /**
+     * Végigmegy az összes szerveren és megnézi, hogy:
+     * - be lehet-e jelentkezni?
+     * - - Ha nem akkor letiltja
+     * - Be van-e kapcsolva a module-monitoring-levels szolgáltatása?
+     * - - Ha nem, akkor letiltja
+     * - Ha nincs a szerverhez rendel CDU, akkor most megteszi
+     */
+    public void checkAndPrepareServers() {
+
+        List<Server> allActiveServers = serverService.findAllActiveServer();
+        if (allActiveServers == null || allActiveServers.isEmpty()) {
+            return;
+        }
+
+        allActiveServers.stream()
+                .filter((server) -> !(!super.acquireSessionToken(server))) // Ha nem sikerül bejelentkezni, akkor letiltjuk és jöhet a következő szerver
+                .filter((server) -> (server.getMonitoringServiceReady() == null || !server.getMonitoringServiceReady())) //Csak az aktív szerevekkel foglalkozunk
+                .map((server) -> {
+
+                    // A monitorozandó GF példányok MonitoringService (module-monitoring-levels) ellenőrzése
+                    Set<String> monitorableModules = serverMonitoringServiceStatus.checkMonitorStatus(server.getSimpleUrl(), server.getUserName(), server.getSessionToken());
+
+                    // Amely szervernek nincs engedélyezve egyetlen monitorozható modulja sem, azt jól inaktívvá tesszük
+                    if (monitorableModules == null) {
+
+                        //letiltjuk
+                        server.setActive(false);
+
+                        //Beírjuk a letiltó üzenetet a szerver példányba
+                        String kiegInfo = "A szerver MonitoringService szolgáltatása nincs engedélyezve, emiatt a monitorozása le lett tiltva!";
+                        server.setAdditionalInformation(kiegInfo);
+
+                        //logot is írunk
+                        log.warn("{}: {}", server.getUrl(), kiegInfo);
+
+                    } else {
+                        //Megjegyezzük, hogy a szerver moitorozható
+                        server.setMonitoringServiceReady(true);
+                        log.trace("A(z) {} szerver monitorozható moduljai: {}", server.getUrl(), monitorableModules);
+                    }
+
+                    return server;
+                }).map((server) -> {
+            //Az első indításkort még nem tudjuk, hogy a GF példányról milyen path-on milyen adatneveket lehet gyűjteni
+            //Emiatt a DefaultConfigCreator-ban létrehozott szervereknél itt kapcsoljuk be a gyűjtendő adatneveket
+            if (server.getJoiners().isEmpty()) {
+                serverService.assignServerToCdu(server, DB_MODIFICATOR_USER);
+            }
+            return server;
+        }).forEachOrdered((server) -> {
+            //lementjük az adatbázisba a szerver megváltozott állapotát
+            serverService.save(server, DB_MODIFICATOR_USER);
+        });
+
+        //Le is mentjük a változást az adatbázisba
+        serverService.flush();
+    }
+
+    /**
      * Timer indítása előtti lépések
      */
     @Override
     public void beforeStartTimer() {
-
-        //Runtime értékek törlése az adatbázisból
-        log.trace("Szerver runtime adatok törlése");
-        serverService.clearRuntimeValuesAndSave(DB_MODIFICATOR_USER);
 
         //Van egyáltalán monitorizható szerver?
         List<Server> allServers = serverService.findAll();
@@ -145,67 +228,15 @@ public class ServersMonitor extends MonitorsBase {
     }
 
     /**
-     * Végigmegy az összes szerveren és megnézi, hogy:
-     * - be lehet-e jelentkezni?
-     * - - Ha nem akkor letiltja
-     * - Be van-e kapcsolva a module-monitoring-levels szolgáltatása?
-     * - - Ha nem, akkor letiltja
-     * - Ha nincs a szerverhez rendel CDU, akkor most megteszi
+     * Szerver adatok monitorozása
+     *
+     * @return - csak az aszinkron hívás miatt
      */
-    private void checkAndPrepareServers() {
-
-        serverService.findAllActiveServer().stream()
-                .filter((server) -> !(!super.acquireSessionToken(server))) // Ha nem sikerül bejelentkezni, akkor letiltjuk és jöhet a következő szerver
-                .filter((server) -> (server.getMonitoringServiceReady() == null || !server.getMonitoringServiceReady())) //Csak az aktív szerevekkel foglalkozunk
-                .map((server) -> {
-
-                    // A monitorozandó GF példányok MonitoringService (module-monitoring-levels) ellenőrzése
-                    Set<String> monitorableModules = serverMonitoringServiceStatus.checkMonitorStatus(server.getSimpleUrl(), server.getUserName(), server.getSessionToken());
-
-                    // Amely szervernek nincs engedélyezve egyetlen monitorozható modulja sem, azt jól inaktívvá tesszük
-                    if (monitorableModules == null) {
-
-                        //letiltjuk
-                        server.setActive(false);
-
-                        //Beírjuk az üzenetet az adatbázisba is
-                        String kieginfo = "A szerver MonitoringService szolgáltatása nincs engedélyezve, emiatt a monitorozása le lett tiltva!";
-                        serverService.updateAdditionalMessage(server, DB_MODIFICATOR_USER, kieginfo);
-
-                        //logot is írunk
-                        log.warn("{}: {}", server.getUrl(), kieginfo);
-
-                    } else {
-                        //Megjegyezzük, hogy a szerver moitorozható
-                        server.setMonitoringServiceReady(true);
-                        log.trace("A(z) {} szerver monitorozható moduljai: {}", server.getUrl(), monitorableModules);
-                    }
-                    return server;
-                }).map((server) -> {
-            //Az első indításkort még nem tudjuk, hogy a GF példányról milyen path-on milyen adatneveket lehet gyűjteni
-            //Emiatt a DefaultConfigCreator-ban létrehozott szervereknél itt kapcsoljuk be a gyűjtendő adatneveket
-            if (server.getJoiners().isEmpty()) {
-                //Mindent mérjünk rajta!
-                serverService.assignServerToCduIntoDb(server, DB_MODIFICATOR_USER);
-            }
-            return server;
-        }).forEachOrdered((server) -> {
-            //lementjük az adatbázisba a szerver megváltozott állapotát
-            serverService.save(server, DB_MODIFICATOR_USER);
-        });
-    }
-
-    /**
-     * Mérés
-     */
-    @Asynchronous
     @Override
-    public void startMonitoring() {
+    @Asynchronous
+    public Future<Void> startMonitoring() {
 
         long start = Elapsed.nowNano();
-
-        //Szerverek ellenőrzése
-        this.checkAndPrepareServers();
 
         //Hibára futott mérési oldalak, automatikusan tiltjuk őket
         Set<String> erroredPaths = new HashSet<>();
@@ -215,9 +246,11 @@ public class ServersMonitor extends MonitorsBase {
 
             //Ha nincs mit monitorozini rajta, akkor már nem foglalkozunk vele tovább,
             // majd visszabillenthető a státusza a UI felületről
-            if (!server.getMonitoringServiceReady()) {
+            if (server.getMonitoringServiceReady() != null && !server.getMonitoringServiceReady()) {
                 continue;
             }
+
+            long svrStart = Elapsed.nowNano();
 
             erroredPaths.clear();
             Set<SnapshotBase> serverSnapshots = serverSnapshotProvider.fetchSnapshot(server, erroredPaths);
@@ -246,8 +279,8 @@ public class ServersMonitor extends MonitorsBase {
             serverService.clearAdditionalMessage(server, DB_MODIFICATOR_USER);
 
             if (serverSnapshots == null || serverSnapshots.isEmpty()) {
-                log.warn("Nincsenek menthető szerver pillanatfelvételek, szerver: {}!", server.getSimpleUrl());
-                return;
+                log.warn("Szerver Stat: Nincsenek menthető szerver pillanatfelvételek, szerver: {}!", server.getSimpleUrl());
+                return new AsyncResult<>(null);
             }
 
             //JPA mentés
@@ -267,12 +300,12 @@ public class ServersMonitor extends MonitorsBase {
             });
 
             //Kiíratjuk a változásokat az adatbázisba
-            svrSnapshotService.flush();
-
-            log.trace("Szerver Stat: szerver url: {}, Server snapshots: {}, elapsed: {}", server.getUrl(), serverSnapshots.size(), Elapsed.getElapsedNanoStr(start));
+//            svrSnapshotService.flush();
+            log.trace("Szerver Stat: szerver url: {}, snapshots: {}, elapsed: {}", server.getUrl(), serverSnapshots.size(), Elapsed.getElapsedNanoStr(svrStart));
         }
 
         log.trace("Szerver Stat összesen: szerver: {}db, elapsed: {}", measuredServerCnt, Elapsed.getElapsedNanoStr(start));
+        return new AsyncResult<>(null);
     }
 
     /**
@@ -284,9 +317,9 @@ public class ServersMonitor extends MonitorsBase {
 
         //Megőrzendő napok száma
         Integer keepDays = configService.getInteger(ConfigKeyNames.SAMPLE_DATA_KEEP_DAYS);
-        log.info("Szerver mérési adatok pucolása indul, keepDays: {}", keepDays);
+        log.info("Szerver Stat: Szerver mérési adatok pucolása indul, keepDays: {}", keepDays);
         //Összes régi rekord törlése
         int deletedRecords = svrSnapshotService.deleteOldRecords(keepDays);
-        log.info("Szerver mérési adatok pucolása OK, törölt rekord: {}, elapsed: {}", deletedRecords, Elapsed.getElapsedNanoStr(start));
+        log.info("Szerver Stat: Szerver mérési adatok pucolása OK, törölt rekord: {}, elapsed: {}", deletedRecords, Elapsed.getElapsedNanoStr(start));
     }
 }

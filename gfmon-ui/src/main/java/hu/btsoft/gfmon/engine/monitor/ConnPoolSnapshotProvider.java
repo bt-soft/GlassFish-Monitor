@@ -216,19 +216,19 @@ public class ConnPoolSnapshotProvider {
                 continue;
             }
 
-            //Beállítjuk, hog ymelyik conectionPool-hoz tartozik a mérés
+            //Beállítjuk, hogy melyik conectionPool-hoz tartozik a mérés
             connPoolStat.setConnPool(connPool);
 
             //Ha a connectionPool->ConnPoolAppStat nem null, akkor megkeresük, és beállítjuk az Application <-> ConnPoolAppStat relációkat is
             if (connPoolStat.getConnPoolAppStats() != null && !connPoolStat.getConnPoolAppStats().isEmpty()) {
-                for (ConnPoolAppStat conAppStat : connPoolStat.getConnPoolAppStats()) {
 
+                for (ConnPoolAppStat conAppStat : connPoolStat.getConnPoolAppStats()) {
                     server.getApplications().stream()
                             .filter((app) -> (Objects.equals(app.getAppRealName(), conAppStat.getAppName()))) //Kikeressük a  névre azonosságot
                             .map((app) -> {
                                 return app;
                             }).forEachOrdered((app) -> {
-                        conAppStat.setApplication(app);                                 //beállítjuk a COnnectionPoolApplStatnak is az allamazást
+                        conAppStat.setApplication(app);                                 //beállítjuk a COnnectionPoolApplStatnak is az alkalmazást
                     });
                 }
             }
@@ -240,7 +240,7 @@ public class ConnPoolSnapshotProvider {
 
         }
 
-        log.info("JDBC ConnectionPool statisztika kigyűjtése elapsed: {}", Elapsed.getElapsedNanoStr(start));
+        //log.info("Connection Pool Stat elapsed: {}", Elapsed.getElapsedNanoStr(start));
         return snapshots;
     }
 

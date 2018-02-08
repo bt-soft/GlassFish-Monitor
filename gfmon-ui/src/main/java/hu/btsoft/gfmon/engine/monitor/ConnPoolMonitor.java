@@ -21,12 +21,15 @@ import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
 import hu.btsoft.gfmon.engine.model.service.ConnPoolCollectorDataUnitService;
 import hu.btsoft.gfmon.engine.model.service.ConnPoolService;
 import hu.btsoft.gfmon.engine.model.service.JdbcResourcesSnapshotService;
+import hu.btsoft.gfmon.engine.model.service.ServerService;
 import hu.btsoft.gfmon.engine.monitor.management.ConnPoolDiscoverer;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Future;
+import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -48,6 +51,9 @@ public class ConnPoolMonitor extends MonitorsBase {
 
     @Inject
     private PropertiesConfig propertiesConfig;
+
+    @EJB
+    private ServerService serverService;
 
     @Inject
     private ConnPoolDiscoverer connPoolDiscoverer;
@@ -205,11 +211,13 @@ public class ConnPoolMonitor extends MonitorsBase {
     }
 
     /**
-     * Mérés
+     * JDBC erőforrások monitorozása
+     *
+     * @return - csak az aszinkron hívás miatt
      */
-    @Asynchronous
     @Override
-    public void startMonitoring() {
+    @Asynchronous
+    public Future<Void> startMonitoring() {
 
         long start = Elapsed.nowNano();
 
@@ -219,6 +227,8 @@ public class ConnPoolMonitor extends MonitorsBase {
 
         int measuredServerCnt = 0;
         for (Server server : serverService.findAllActiveServer()) {
+
+            long connPoolStart = Elapsed.nowNano();
 
             fullUrlErroredPaths.clear();
 
@@ -269,28 +279,20 @@ public class ConnPoolMonitor extends MonitorsBase {
 
             measuredServerCnt++;
             if (connPoolStats == null || connPoolStats.isEmpty()) {
-                log.warn("Szerver: {} -> Nincsenek menthető JDBC erőforrás pillanatfelvételek!", server.getSimpleUrl());
-                return;
+                log.warn("Connection Pool Stat: Nincsenek menthető JDBC erőforrás pillanatfelvételek, Szerver: {}", server.getSimpleUrl());
+                return new AsyncResult<>(null);
             }
 
             //JPA mentés
-            connPoolStats.stream()
-                    //.parallel()  nem jó ötlet a paralel -> lock hiba lesz tőle
-                    .map((snapshot) -> {
-                        //lementjük az adatbázisba
-                        jdbcResourcesSnapshotService.save(snapshot, DB_MODIFICATOR_USER);
-                        return snapshot;
-                    }).forEachOrdered((snapshot) -> {
-                //log.trace("Application Snapshot: {}", snapshot);
+            connPoolStats.forEach((snapshot) -> {
+                jdbcResourcesSnapshotService.save(snapshot, DB_MODIFICATOR_USER);
             });
 
-            //Kiíratjuk a változásokat az adatbázisba
-            jdbcResourcesSnapshotService.flush();
-            log.trace("Connection Pool Stat: server url: {}, JDBC Connection Pool snapshots: {}, elapsed: {}", server.getUrl(), connPoolStats.size(), Elapsed.getElapsedNanoStr(start));
+            log.trace("Connection Pool Stat: server url: {}, snapshots: {}, elapsed: {}", server.getUrl(), connPoolStats.size(), Elapsed.getElapsedNanoStr(connPoolStart));
         }
 
         log.trace("Connection Pool Stat összesen: szerver: {}db, elapsed: {}", measuredServerCnt, Elapsed.getElapsedNanoStr(start));
-
+        return new AsyncResult<>(null);
     }
 
     /**
@@ -302,16 +304,16 @@ public class ConnPoolMonitor extends MonitorsBase {
 
         //JDBC erőforrások lekérdezése és felépítése
         this.manageAllActiverServerConnPools();
-        log.info("JDBC erőforrások automatikus karbantartása OK, elapsed: {}", Elapsed.getElapsedNanoStr(start));
+        log.info("Connection Pool Stat: JDBC erőforrások automatikus karbantartása OK, elapsed: {}", Elapsed.getElapsedNanoStr(start));
 
         //Megőrzendő napok száma
         start = Elapsed.nowNano();
         Integer keepDays = configService.getInteger(ConfigKeyNames.SAMPLE_DATA_KEEP_DAYS);
-        log.info("JDBC erőforrások mérési adatok pucolása indul, keepDays: {}", keepDays);
+        log.info("Connection Pool Stat: JDBC erőforrások mérési adatok pucolása indul, keepDays: {}", keepDays);
 
         //Összes régi rekord törlése
         int deletedRecords = jdbcResourcesSnapshotService.deleteOldRecords(keepDays);
-        log.info("JDBC erőforrások mérési adatok pucolása OK, törölt rekord: {}, elapsed: {}", deletedRecords, Elapsed.getElapsedNanoStr(start));
+        log.info("Connection Pool Stat: JDBC erőforrások mérési adatok pucolása OK, törölt rekord: {}, elapsed: {}", deletedRecords, Elapsed.getElapsedNanoStr(start));
     }
 
 }

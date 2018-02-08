@@ -14,7 +14,6 @@ package hu.btsoft.gfmon.engine.model.entity.application.snapshot.app;
 import hu.btsoft.gfmon.corelib.IGFMonCoreLibConstants;
 import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
-import hu.btsoft.gfmon.engine.model.entity.application.Application;
 import hu.btsoft.gfmon.engine.model.entity.application.snapshot.AppSnapshotBase;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,8 +21,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Data;
@@ -48,15 +45,6 @@ import org.eclipse.persistence.annotations.Customizer;
 @NoArgsConstructor
 @Customizer(EntityColumnPositionCustomizer.class)
 public class AppStatistic extends AppSnapshotBase {
-
-    /**
-     * A mérés melyik alkalmazáshoz tartozik?
-     * (automatikusan index képződik rá)
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "APPLICATION_ID", referencedColumnName = "ID", nullable = false)
-    @ColumnPosition(position = 20)
-    private Application application;
 
     /**
      * • maxtime

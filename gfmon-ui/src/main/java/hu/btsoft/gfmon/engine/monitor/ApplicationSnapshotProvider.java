@@ -104,7 +104,7 @@ public class ApplicationSnapshotProvider {
      * @return Web statisztika entitások vagy null
      */
     private Set<AppSnapshotBase> collectWebStatistics(Application app, String fullUrl, String userName, String sessionToken) {
-        Set<AppSnapshotBase> snapshots = new HashSet<>();
+        Set<AppSnapshotBase> snapshots = new LinkedHashSet<>();
 
         JsonObject rootJsonObject = restDataCollector.getRootJsonObject(fullUrl, userName, sessionToken, fullUrlErroredPaths);
 
@@ -155,8 +155,6 @@ public class ApplicationSnapshotProvider {
                 if (appServletStatistic != null) {
                     appServletStatistic.setServletName(servletName); //A szervlet neve
                     appServletStatistic.setAppStatistic(appStatistic); //melyik alkalmazás statisztikához tartozik
-                    appStatistic.getAppServletStatistics().add(appServletStatistic);
-                    snapshots.add(appServletStatistic);
                 }
             }
         }
@@ -176,7 +174,7 @@ public class ApplicationSnapshotProvider {
      * @return EJB statisztika entitások vagy null
      */
     private Set<AppSnapshotBase> collectEjbStatistics(Application app, String fullUrl, String userName, String sessionToken, String beanName) {
-        Set<AppSnapshotBase> snapshots = new HashSet<>();
+        Set<AppSnapshotBase> snapshots = new LinkedHashSet<>();
 
         JsonObject rootJsonObject = restDataCollector.getRootJsonObject(fullUrl, userName, sessionToken, fullUrlErroredPaths);
         List<CollectedValueDto> valuesList = appEjbCollector.fetchValues(GFJsonUtils.getEntities(rootJsonObject), null);
@@ -230,7 +228,6 @@ public class ApplicationSnapshotProvider {
                                     ejbBeanMethodStat.setMethodName(beanMethodName);
                                     ejbBeanMethodStat.setEjbStat(ejbStat);
                                     ejbStat.getEjbBeanMethodStats().add(ejbBeanMethodStat);
-                                    snapshots.add(ejbBeanMethodStat);
                                 }
                             }
                             break;
@@ -251,7 +248,6 @@ public class ApplicationSnapshotProvider {
                         if (ejbBeanPoolStat != null) {
                             ejbBeanPoolStat.setEjbStat(ejbStat);
                             ejbStat.getEjbBeanPoolStats().add(ejbBeanPoolStat);
-                            snapshots.add(ejbBeanPoolStat);
                         }
                         break;
 
@@ -270,7 +266,6 @@ public class ApplicationSnapshotProvider {
                         if (ejbTimersStat != null) {
                             ejbTimersStat.setEjbStat(ejbStat);
                             ejbStat.getEjbTimersStats().add(ejbTimersStat);
-                            snapshots.add(ejbTimersStat);
                         }
                         break;
 
@@ -289,7 +284,6 @@ public class ApplicationSnapshotProvider {
                         if (ejbBeanCacheStat != null) {
                             ejbBeanCacheStat.setEjbStat(ejbStat);
                             ejbStat.getEjbBeanCacheStat().add(ejbBeanCacheStat);
-                            snapshots.add(ejbBeanCacheStat);
                         }
                         break;
 
@@ -305,7 +299,7 @@ public class ApplicationSnapshotProvider {
     /**
      * Összegyűjti a childResourcesMap-ban megtalálható full URL alatti statisztikákat
      *
-     * @param hateoasMap JSOn chil map
+     * @param hateoasMap JSon chil map
      * @param snapshots  ebbe gyűjtendő pillanatfelvételek
      */
     private void collectSnapShots(Application app, Map<String/* 'server', vagy a bean neve */, String /* full URL */> hateoasMap, Set<AppSnapshotBase> snapshots) {
@@ -435,8 +429,6 @@ public class ApplicationSnapshotProvider {
             String fullUrl = server.getProtocol() + server.getSimpleUrl() + resourceUri;
             this.start(app, fullUrl, snapshots);
         });
-
-        log.info("Alkalmazások statisztika kigyűjtése elapsed: {}", Elapsed.getElapsedNanoStr(start));
 
         return snapshots.isEmpty() ? null : snapshots;
     }

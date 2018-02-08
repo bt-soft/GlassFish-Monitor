@@ -11,14 +11,16 @@
  */
 package hu.btsoft.gfmon.engine.model.entity.application.snapshot;
 
-import hu.btsoft.gfmon.corelib.model.colpos.EntityColumnPositionCustomizer;
+import hu.btsoft.gfmon.corelib.model.colpos.ColumnPosition;
 import hu.btsoft.gfmon.engine.model.entity.EntityBase;
+import hu.btsoft.gfmon.engine.model.entity.application.Application;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.eclipse.persistence.annotations.Customizer;
 
 /**
  * Alklamazás statisztika entitások ős osztálya
@@ -29,11 +31,14 @@ import org.eclipse.persistence.annotations.Customizer;
 @Data
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
-@Customizer(EntityColumnPositionCustomizer.class)
 public abstract class AppSnapshotBase extends EntityBase {
 
-    // Üres osztály, csak amiatt, hogy a napi takarításokat el tudjuk végezni
-    // A takartító (ApplicationSnapshotService.deleteOldRecords()) csak az AppSnapshotBase leszármazottait kezeli
-    // Ha igen, akkor pucolhatja a régi entitás bejegyzéseket az adatbázisból
+    /**
+     * A mérés melyik alkalmazáshoz tartozik?
+     * (automatikusan index képződik rá)
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "APPLICATION_ID", referencedColumnName = "ID", nullable = false)
+    @ColumnPosition(position = 20)
+    private Application application;
 }

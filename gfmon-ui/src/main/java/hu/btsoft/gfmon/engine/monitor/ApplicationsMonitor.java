@@ -21,12 +21,15 @@ import hu.btsoft.gfmon.engine.model.service.ApplicationCollectorDataUnitService;
 import hu.btsoft.gfmon.engine.model.service.ApplicationService;
 import hu.btsoft.gfmon.engine.model.service.ApplicationSnapshotService;
 import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
+import hu.btsoft.gfmon.engine.model.service.ServerService;
 import hu.btsoft.gfmon.engine.monitor.management.ApplicationsDiscoverer;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Future;
+import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -53,6 +56,9 @@ public class ApplicationsMonitor extends MonitorsBase {
 
     @Inject
     private PropertiesConfig propertiesConfig;
+
+    @EJB
+    private ServerService serverService;
 
     @EJB
     private ApplicationService applicationService;
@@ -232,11 +238,14 @@ public class ApplicationsMonitor extends MonitorsBase {
     }
 
     /**
-     * Mérés
+     * Alkalmazások Mérése
+     *
+     * @return - csak az aszinkron hívás miatt
      */
-    @Asynchronous
     @Override
-    public void startMonitoring() {
+    @Asynchronous
+    public Future<Void> startMonitoring() {
+
         long start = Elapsed.nowNano();
 
         //Hibára futott mérési oldalak, automatikusan tiltjuk őket
@@ -245,6 +254,8 @@ public class ApplicationsMonitor extends MonitorsBase {
 
         int measuredServerCnt = 0;
         for (Server server : serverService.findAllActiveServer()) {
+
+            long appStart = Elapsed.nowNano();
 
             fullUrlErroredPaths.clear();
 
@@ -261,11 +272,11 @@ public class ApplicationsMonitor extends MonitorsBase {
                 applicationCollectorDataUnitService.saveCollectedDataUnits(dataUnits, DB_MODIFICATOR_USER);
 
                 //Alkalmazás <-> Cdu összerendelés, ha az alkalmazásnak még nincs CDU-ja
-                server.getApplications().stream()
-                        .filter((app) -> (app.getJoiners().isEmpty()))
-                        .forEachOrdered((app) -> {
-                            applicationService.assignApplicationToCduIntoDb(app, DB_MODIFICATOR_USER);
-                        });
+                for (Application app : server.getApplications()) {
+                    if (app.getJoiners().isEmpty()) {
+                        applicationService.assignApplicationToCduIntoDb(app, DB_MODIFICATOR_USER);
+                    }
+                }
             }
 
             //Letiltjuk az alkalmazás gyűjtendő adat path-ját, ha nem sikerült elérni
@@ -295,30 +306,21 @@ public class ApplicationsMonitor extends MonitorsBase {
 
             measuredServerCnt++;
             if (applicationSnapshots == null || applicationSnapshots.isEmpty()) {
-                log.warn("Szerver: {} -> Nincsenek menthető alkalmazás pillanatfelvételek!", server.getSimpleUrl());
-                return;
+                log.warn("Application Stat: Nincsenek menthető alkalmazás pillanatfelvételek, Szerver: {}", server.getSimpleUrl());
+                return new AsyncResult<>(null);
             }
 
             //JPA mentés
-            applicationSnapshots.stream()
-                    //.parallel()  nem jó ötlet a paralel -> lock hiba lesz tőle
-                    .map((snapshot) -> {
-                        //lementjük az adatbázisba
-                        applicationSnapshotService.save(snapshot, DB_MODIFICATOR_USER);
-                        return snapshot;
-                    }).forEachOrdered((snapshot) -> {
-                //log.trace("Application Snapshot: {}", snapshot);
+            applicationSnapshots.forEach((snapshot) -> {
+                applicationSnapshotService.save(snapshot, DB_MODIFICATOR_USER);
             });
 
-            //Kiíratjuk a változásokat az adatbázisba
-            applicationSnapshotService.flush();
-
-            log.trace("Application Stat: server url: {}, Aplication snapshots: {}, elapsed: {}", server.getUrl(), applicationSnapshots.size(), Elapsed.getElapsedNanoStr(start));
+            log.trace("Application Stat: server url: {}, snapshots: {}, elapsed: {}", server.getUrl(), applicationSnapshots.size(), Elapsed.getElapsedNanoStr(appStart));
         }
 
         log.trace("Application Stat összesen: szerver: {}db, elapsed: {}", measuredServerCnt, Elapsed.getElapsedNanoStr(start));
 
-        return;
+        return new AsyncResult<>(null);
     }
 
     /**
@@ -330,15 +332,15 @@ public class ApplicationsMonitor extends MonitorsBase {
 
         //Alkalmazások lekérdezése és felépítése
         this.manageAllActiverServerApplications();
-        log.info("Alkalmazások automatikus karbantartása OK, elapsed: {}", Elapsed.getElapsedNanoStr(start));
+        log.info("Application Stat: Alkalmazások automatikus karbantartása OK, elapsed: {}", Elapsed.getElapsedNanoStr(start));
 
         //Megőrzendő napok száma
         start = Elapsed.nowNano();
         Integer keepDays = configService.getInteger(ConfigKeyNames.SAMPLE_DATA_KEEP_DAYS);
-        log.info("Alkalmazás mérési adatok pucolása indul, keepDays: {}", keepDays);
+        log.info("Application Stat: Alkalmazás mérési adatok pucolása indul, keepDays: {}", keepDays);
         //Összes régi rekord törlése
         int deletedRecords = applicationSnapshotService.deleteOldRecords(keepDays);
-        log.info("Alkalmazás mérési adatok pucolása OK, törölt rekord: {}, elapsed: {}", deletedRecords, Elapsed.getElapsedNanoStr(start));
+        log.info("Application Stat: Alkalmazás mérési adatok pucolása OK, törölt rekord: {}, elapsed: {}", deletedRecords, Elapsed.getElapsedNanoStr(start));
     }
 
 }

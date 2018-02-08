@@ -25,6 +25,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * GF Session token megszerzése
@@ -82,6 +83,10 @@ public class SessionTokenAcquirer implements Serializable {
      */
     public String getSessionToken(String url, String userName, String plainPassword) throws GfMonException {
 
+        if (StringUtils.isEmpty(userName)) {
+            return null;
+        }
+
         try {
             glassfishAuthenticator.addAuthenticator(client, userName, plainPassword);
 
@@ -111,7 +116,7 @@ public class SessionTokenAcquirer implements Serializable {
                 msg = String.format("A(z) '%s' szerver bejelentkezése során hiba lépett fel: %s", url, e.getCause().getMessage());
             }
 
-            log.error(msg, e);
+            log.error(msg);
 
             throw new GfMonException(msg, e);
         }

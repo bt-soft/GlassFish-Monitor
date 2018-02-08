@@ -92,6 +92,7 @@ public class ServerService extends ServiceBase<Server> {
      */
     @Override
     public List<Server> findAll() {
+        em.getEntityManagerFactory().getCache().evict(Server.class); //hagyja már békén a cache-!!!!
         Query query = em.createNamedQuery("Server.findAll");
         List<Server> resultList = query.getResultList();
 
@@ -104,6 +105,7 @@ public class ServerService extends ServiceBase<Server> {
      * @return aktív szerverek listája
      */
     public List<Server> findAllActiveServer() {
+        em.getEntityManagerFactory().getCache().evict(Server.class); //hagyja már békén a cache-!!!!
         Query query = em.createNamedQuery("Server.findAllActive");
         List<Server> resultList = query.getResultList();
 
@@ -177,27 +179,6 @@ public class ServerService extends ServiceBase<Server> {
     }
 
     /**
-     * A futási idejű Entitás értékekek törlése
-     * - Lekéri az összes entitást az adatbázisból
-     * - Törli a runtime értékeket
-     * - majd visszamenti az adatbázisba
-     * <p>
-     * (pl.: sessionToken, readyForMonitoring, stb..)
-     *
-     * @param modifierUser módosító user
-     */
-    public void clearRuntimeValuesAndSave(String modifierUser) {
-
-        for (Server server : (List<Server>) super.findAll()) {
-            server.setSessionToken(null);
-            server.setMonitoringServiceReady(null);
-            server.setRuntimeSeqId(null);
-            super.save(server, modifierUser);
-        }
-
-    }
-
-    /**
      * Lekéri az adatbázisból az összes rekordot, és a runtimeSeqId feltölti értékekkel
      *
      * @return a runtimeSeqId-vel feltöltött adatbázisrekordok listája
@@ -212,26 +193,25 @@ public class ServerService extends ServiceBase<Server> {
         return servers;
     }
 
-    /**
-     * Kieginfó módosítása
-     *
-     * @param entity            Server entitás
-     * @param modifierUser      módosító user
-     * @param additionalMessage az adatbázisba írandó kieginfo
-     */
-    public void updateAdditionalMessage(Server entity, String modifierUser, String additionalMessage) {
-
-        //Kieginfo
-        entity.setAdditionalInformation(additionalMessage);
-
-        //Az esetleges optimisticLocking elkerülése végett a Version-t átmásoljuk az adatbzisból imént felolvasott értékre
-        Server lastVersion = (Server) super.find(entity.getId());
-        entity.setOptLockVersion(lastVersion.getOptLockVersion());
-
-        //Le is mentjük az adatbázisba az állapotot
-        super.save(entity, modifierUser);
-    }
-
+//    /**
+//     * Kieginfó módosítása
+//     *
+//     * @param entity            Server entitás
+//     * @param modifierUser      módosító user
+//     * @param additionalMessage az adatbázisba írandó kieginfo
+//     */
+//    public void updateAdditionalMessage(Server entity, String modifierUser, String additionalMessage) {
+//
+//        //Kieginfo
+//        entity.setAdditionalInformation(additionalMessage);
+//
+//        //Az esetleges optimisticLocking elkerülése végett a Version-t átmásoljuk az adatbzisból imént felolvasott értékre
+//        Server lastVersion = (Server) super.find(entity.getId());
+//        entity.setOptLockVersion(lastVersion.getOptLockVersion());
+//
+//        //Le is mentjük az adatbázisba az állapotot
+//        super.save(entity, modifierUser);
+//    }
     /**
      * Kieginfo törlése
      *

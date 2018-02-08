@@ -12,8 +12,13 @@
 package hu.btsoft.gfmon.engine.monitor;
 
 import hu.btsoft.gfmon.corelib.cdi.CdiUtils;
+import hu.btsoft.gfmon.corelib.time.Elapsed;
 import hu.btsoft.gfmon.engine.model.service.ConfigKeyNames;
 import hu.btsoft.gfmon.engine.model.service.ConfigService;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
@@ -56,11 +61,6 @@ public class GlassFishMonitorController {
 
     protected Timer timer;
 
-    //  A singleton miatt nem célszerű itt injektálni,
-    // mert nem érvényesül a StateLess, inkább singleton lesz az is ...
-//    @Inject
-//    private Instance<MonitorsBase> monitors;
-//
     /**
      * GFMon engine indítása
      */
@@ -84,12 +84,16 @@ public class GlassFishMonitorController {
         if (isRunningTimer()) {
             log.warn("A Timer már fut!", timer);
             return;
-
         }
 
+        //Kikeressük a szerver monitort és minden szervert átnézünk a mérés előtt
+        CdiUtils.lookupOne(ServersMonitor.class).clearAllServersRuntimeValues();
+
+        //Kikeressük a szerver monitort és minden szervert átnézünk a mérés előtt
+        CdiUtils.lookupOne(ServersMonitor.class).checkAndPrepareServers();
+
         //A singleton vezérlés miatt inkább mindig lookup-olunk, mert csak így lesz StateLess a monitor vezérlő
-        Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class
-        );
+        Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class);
         if (monitors != null) {
             monitors.forEach((monitor) -> {
                 monitor.beforeStartTimer();
@@ -163,22 +167,39 @@ public class GlassFishMonitorController {
     @Timeout
     protected void timeOut() {
 
-        //long start = Elapsed.nowNano();
+        long start = Elapsed.nowNano();
         log.trace("----- Monitoring start --------------------------------------------------------------------------------");
+
+        //Kikeressük a szerver monitort és minden szervert átnézünk a mérés előtt
+        CdiUtils.lookupOne(ServersMonitor.class).checkAndPrepareServers();
+
+        Set<Future<Void>> results = new HashSet<>();
 
         //A singleton vezérlés miatt inkább mindig lookup-olunk, mert csak így lesz StateLess a monitor vezérlő
         Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class);
         if (monitors != null) {
             monitors.forEach((monitor) -> {
                 try {
-                    monitor.startMonitoring();
+                    results.add(monitor.startMonitoring());
                 } catch (Exception e) {
                     log.error(String.format("%s -> Hiba a monitorozott adatok begyűjtése közben", monitor.getControllerName()), e);
                 }
             });
+
+            //Megvárjuk a háttérfolyamatok végét
+            results.stream()
+                    .parallel()
+                    .forEach((result) -> {
+                        try {
+                            result.get();
+                        } catch (InterruptedException | ExecutionException e) {
+                            log.error("Végrehajtási hiba", e);
+                        }
+                    });
         }
 
-        //log.trace("----- Monitoring End, elapsed: {} ---------------------------", Elapsed.getElapsedNanoStr(start));
+        log.trace("----- Monitoring end, elapsed :{} ----------", Elapsed.getElapsedNanoStr(start));
+
     }
 
     /**
@@ -188,8 +209,7 @@ public class GlassFishMonitorController {
     protected void doDailyPeriodicCleanup() {
 
         //A singleton vezérlés miatt inkább mindig lookup-olunk, mert csak így lesz StateLess a monitor vezérlő
-        Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class
-        );
+        Instance<MonitorsBase> monitors = CdiUtils.lookupAll(MonitorsBase.class);
         if (monitors != null) {
             monitors.forEach((monitor) -> {
                 try {
